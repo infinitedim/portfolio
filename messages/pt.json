@@ -1,0 +1,50 @@
+{
+  "site": {
+    "title": "Portfólio - Dimas",
+    "description": "Portfólio pessoal mostrando meu trabalho e habilidades"
+  },
+  "nav": {
+    "home": "Início",
+    "works": "Trabalhos",
+    "about": "Sobre",
+    "contact": "Contato",
+    "blog": "Blog",
+    "projetos": "Projetos"
+  },
+  "hero": {
+    "greeting": "Olá, eu sou",
+    "name": "Dimas Saputra",
+    "title": "Desenvolvedor Criativo",
+    "description": "Eu construo experiências digitais bonitas e funcionais com foco em design minimalista e experiência de usuário intuitiva.",
+    "cta": "Ver meu trabalho"
+  },
+  "about": {
+    "title": "Sobre Mim",
+    "bio": "Sou um desenvolvedor full-stack apaixonado por criar aplicativos interativos e experiências na web.",
+    "skills": "Habilidades",
+    "experience": "Experiência"
+  },
+  "works": {
+    "title": "Meus Trabalhos",
+    "viewProject": "Ver projeto",
+    "allProjects": "Todos os projetos"
+  },
+  "contact": {
+    "title": "Entre em Contato",
+    "name": "Nome",
+    "email": "Email",
+    "message": "Mensagem",
+    "send": "Enviar mensagem",
+    "success": "Sua mensagem foi enviada com sucesso!",
+    "error": "Ocorreu um erro ao enviar sua mensagem. Por favor, tente novamente."
+  },
+  "footer": {
+    "rights": "Todos os direitos reservados.",
+    "madeWith": "Feito com"
+  },
+  "language": {
+    "en": "Inglês",
+    "id": "Indonésio",
+    "pt": "Português"
+  }
+}

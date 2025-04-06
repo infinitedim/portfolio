@@ -1,0 +1,50 @@
+{
+  "site": {
+    "title": "Portfolio - Dimas",
+    "description": "Portfolio pribadi yang menampilkan karya dan keterampilan saya"
+  },
+  "nav": {
+    "home": "Beranda",
+    "works": "Karya",
+    "about": "Tentang",
+    "contact": "Kontak",
+    "blog": "Blog",
+    "projects": "Proyek"
+  },
+  "hero": {
+    "greeting": "Halo, Saya",
+    "name": "Dimas Saputra",
+    "title": "Developer Kreatif",
+    "description": "Saya membangun pengalaman digital yang indah dan fungsional dengan fokus pada desain minimalis dan pengalaman pengguna yang intuitif.",
+    "cta": "Lihat karya saya"
+  },
+  "about": {
+    "title": "Tentang Saya",
+    "bio": "Saya adalah seorang pengembang full-stack yang bersemangat tentang menciptakan aplikasi interaktif dan pengalaman di web.",
+    "skills": "Keterampilan",
+    "experience": "Pengalaman"
+  },
+  "works": {
+    "title": "Karya Saya",
+    "viewProject": "Lihat proyek",
+    "allProjects": "Semua proyek"
+  },
+  "contact": {
+    "title": "Hubungi Saya",
+    "name": "Nama",
+    "email": "Email",
+    "message": "Pesan",
+    "send": "Kirim pesan",
+    "success": "Pesan Anda berhasil dikirim!",
+    "error": "Terjadi kesalahan saat mengirim pesan Anda. Silakan coba lagi."
+  },
+  "footer": {
+    "rights": "Semua hak dilindungi.",
+    "madeWith": "Dibuat dengan"
+  },
+  "language": {
+    "en": "Bahasa Inggris",
+    "id": "Bahasa Indonesia",
+    "pt": "Bahasa Portugis"
+  }
+}

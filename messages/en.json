@@ -1,0 +1,50 @@
+{
+  "site": {
+    "title": "Portfolio - Dimas",
+    "description": "Personal portfolio showcasing my work and skills"
+  },
+  "nav": {
+    "home": "Home",
+    "works": "Works",
+    "about": "About",
+    "contact": "Contact",
+    "blog": "Blog",
+    "projects": "Projects"
+  },
+  "hero": {
+    "greeting": "Hello, I'm",
+    "name": "Dimas Saputra",
+    "title": "Creative Developer",
+    "description": "I build beautiful and functional digital experiences with a focus on minimalist design and intuitive user experience.",
+    "cta": "View my work"
+  },
+  "about": {
+    "title": "About Me",
+    "bio": "I'm a full-stack developer passionate about creating interactive applications and experiences on the web.",
+    "skills": "Skills",
+    "experience": "Experience"
+  },
+  "works": {
+    "title": "My Works",
+    "viewProject": "View project",
+    "allProjects": "All projects"
+  },
+  "contact": {
+    "title": "Get in Touch",
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send message",
+    "success": "Your message was sent successfully!",
+    "error": "There was an error sending your message. Please try again."
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "madeWith": "Made with"
+  },
+  "language": {
+    "en": "English",
+    "id": "Indonesian",
+    "pt": "Portuguese"
+  }
+}
