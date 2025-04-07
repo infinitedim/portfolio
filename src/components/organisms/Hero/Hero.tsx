@@ -15,36 +15,43 @@ const Hero = () => {
   const cta = locale("cta");
   const name = locale("name");
   const title = locale("title");
-  const greeting = locale("greeting");
   const description = locale("description");
 
-  // Effect untuk animasi mengetik
   useEffect(() => {
+    // Reset state at the beginning of effect
     setTypedText("");
     setIsTypingComplete(false);
 
+    // Guard clause - exit early if description isn't available
+    if (!description || typeof description !== "string") return;
+
     const typingSpeed = 30;
     const completionDelay = 300;
-
     let currentIndex = 0;
+    let typingTimeout: ReturnType<typeof setTimeout>;
+    let completionTimeout: NodeJS.Timeout;
+    let cursorInterval: NodeJS.Timeout;
 
     const typeNextCharacter = () => {
       if (currentIndex < description.length) {
-        // Tambahkan karakter berikutnya
-        setTypedText((prev) => prev + description[currentIndex]);
+        // Safely extract the substring
+        const textToShow = description.substring(0, currentIndex + 1);
+        setTypedText(textToShow);
         currentIndex++;
-        // Jadwalkan karakter berikutnya
-        setTimeout(typeNextCharacter, typingSpeed);
+        // Schedule next character
+        typingTimeout = setTimeout(typeNextCharacter, typingSpeed);
       } else {
-        // Selesai mengetik
-        setTimeout(() => {
+        // Typing complete - make sure we use the full description without any extras
+        setTypedText(description);
+
+        completionTimeout = setTimeout(() => {
           setIsTypingComplete(true);
-          // Buat cursor berkedip 5 kali sebelum menghilang
+          // Blink cursor 5 times before disappearing
           let blinkCount = 0;
-          const cursorInterval = setInterval(() => {
+          cursorInterval = setInterval(() => {
             blinkCount++;
             if (blinkCount >= 10) {
-              // 5 siklus on/off
+              // 5 cycles on/off
               clearInterval(cursorInterval);
             }
           }, 400);
@@ -52,15 +59,20 @@ const Hero = () => {
       }
     };
 
-    // Tunggu sebentar sebelum mulai mengetik
-    setTimeout(typeNextCharacter, 800);
+    // Wait before starting to type
+    const initialDelay = setTimeout(typeNextCharacter, 800);
 
-    // Cleanup function
+    // Cleanup function to clear all timers
     return () => {
-      setTypedText("");
-      setIsTypingComplete(false);
+      clearTimeout(initialDelay);
+      clearTimeout(typingTimeout);
+      clearTimeout(completionTimeout);
+      if (cursorInterval) clearInterval(cursorInterval);
+
+      // Important: set the final value on cleanup to avoid stale state
+      if (description) setTypedText(description);
     };
-  }, [description]);
+  }, [description]); // Only re-run when description changes
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -103,20 +115,13 @@ const Hero = () => {
   };
 
   return (
-    <section className="min-h-screen flex flex-col justify-center px-8 md:px-16 py-16 relative overflow-hidden">
+    <section className="min-h-fit flex flex-col justify-center px-8 md:px-16 py-16 relative overflow-hidden bg-woodsmoke-50 dark:bg-woodsmoke-950">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="z-10"
       >
-        <motion.h2
-          variants={itemVariants}
-          className="text-lg md:text-xl text-gray-500 mb-2"
-        >
-          {greeting}
-        </motion.h2>
-
         <motion.h1
           variants={itemVariants}
           className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight max-w-4xl mb-3"
@@ -126,7 +131,7 @@ const Hero = () => {
 
         <motion.h2
           variants={itemVariants}
-          className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-gray-700 max-w-4xl mb-6"
+          className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-woodsmoke-700 dark:text-woodsmoke-100 max-w-4xl mb-6"
         >
           {title}
         </motion.h2>
@@ -135,9 +140,9 @@ const Hero = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.9, duration: 0.5 }}
-          className="text-lg md:text-xl text-gray-600 max-w-2xl mb-10 leading-relaxed relative"
+          className="text-lg md:text-xl text-woodsmoke-600 dark:text-woodsmoke-200 max-w-2xl mb-10 leading-relaxed relative"
         >
-          {typedText.replaceAll("undefined", "")}
+          {typedText}
         </motion.div>
 
         <motion.div
@@ -153,7 +158,7 @@ const Hero = () => {
             className="group"
           >
             <a
-              href="#projects"
+              href="/#/projects"
               className="flex items-center -ml-6"
             >
               {cta}

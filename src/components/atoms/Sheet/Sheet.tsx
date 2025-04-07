@@ -12,9 +12,7 @@ import type { ComponentProps, JSX, ReactNode } from "react";
  * @param {ComponentProps<typeof SheetPrimitive.Root>} props - The props for the Sheet component.
  * @returns {Element} The rendered Sheet component.
  */
-function Sheet({
-  ...props
-}: ComponentProps<typeof SheetPrimitive.Root>): JSX.Element {
+function Sheet({ ...props }: ComponentProps<typeof SheetPrimitive.Root>) {
   return (
     <SheetPrimitive.Root
       data-slot="sheet"
@@ -30,7 +28,7 @@ function Sheet({
  */
 function SheetTrigger({
   ...props
-}: ComponentProps<typeof SheetPrimitive.Trigger>): JSX.Element {
+}: ComponentProps<typeof SheetPrimitive.Trigger>) {
   return (
     <SheetPrimitive.Trigger
       data-slot="sheet-trigger"
@@ -44,9 +42,7 @@ function SheetTrigger({
  * @param {ComponentProps<typeof SheetPrimitive.Close>} props - The props for the SheetClose component.
  * @returns {JSX.Element} The rendered SheetClose component.
  */
-function SheetClose({
-  ...props
-}: ComponentProps<typeof SheetPrimitive.Close>): JSX.Element {
+function SheetClose({ ...props }: ComponentProps<typeof SheetPrimitive.Close>) {
   return (
     <SheetPrimitive.Close
       data-slot="sheet-close"
@@ -62,7 +58,7 @@ function SheetClose({
  */
 function SheetPortal({
   ...props
-}: ComponentProps<typeof SheetPrimitive.Portal>): JSX.Element {
+}: ComponentProps<typeof SheetPrimitive.Portal>) {
   return (
     <SheetPrimitive.Portal
       data-slot="sheet-portal"
@@ -108,7 +104,7 @@ function SheetContent({
   ...props
 }: ComponentProps<typeof SheetPrimitive.Content> & {
   side?: "top" | "right" | "bottom" | "left";
-}): JSX.Element {
+}) {
   return (
     <SheetPortal>
       <SheetOverlay />
@@ -117,13 +113,13 @@ function SheetContent({
         className={cn(
           "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
           side === "right" &&
-          "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm",
+            "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm",
           side === "left" &&
-          "data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm",
+            "data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm",
           side === "top" &&
-          "data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top inset-x-0 top-0 h-auto border-b",
+            "data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top inset-x-0 top-0 h-auto border-b",
           side === "bottom" &&
-          "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto border-t",
+            "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto border-t",
           className,
         )}
         {...props}
@@ -144,10 +140,7 @@ function SheetContent({
  * @param {string} root0.className - Additional class names for styling.
  * @returns {JSX.Element} The rendered SheetHeader component.
  */
-function SheetHeader({
-  className,
-  ...props
-}: ComponentProps<"div">): JSX.Element {
+function SheetHeader({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="sheet-header"

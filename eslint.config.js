@@ -103,6 +103,7 @@ export default defineConfig([
       "@/semi": ["error", "always"],
       "@/strict-boolean-expressions": "off",
       "@/explicit-function-return-type": "off",
+      "@typescript-eslint/no-require-imports": "error",
     },
   },
   {

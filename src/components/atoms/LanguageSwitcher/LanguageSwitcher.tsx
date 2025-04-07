@@ -42,8 +42,8 @@ export const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
           className={cn("mr-10 rounded-full", className)}
         >
           {/* <GlobeAltIcon className="h-[1.2rem] w-[1.2rem]" /> */}
-          <div className="bg-white/95 backdrop-blur shadow-md rounded-full py-2 px-4 flex items-center gap-2">
-            <GlobeAltIcon className="size-5 text-gray-600" />
+          <div className="bg-white dark:bg-woodsmoke-950 backdrop-blur shadow-md rounded-full py-2 px-4 flex items-center gap-2">
+            <GlobeAltIcon className="size-5 text-woodsmoke-950 dark:text-white" />
             <span className="sr-only">Switch language</span>
             <span className="text-sm font-medium">Language</span>
           </div>

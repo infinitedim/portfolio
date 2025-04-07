@@ -48,12 +48,12 @@ const NavigationMenu = () => {
 
   const navItems = [
     { href: "/", label: t("home"), id: "home", isSection: true },
-    { href: "/#works", label: t("works"), id: "works", isSection: true },
-    { href: "/#about", label: t("about"), id: "about", isSection: true },
-    { href: "/#contact", label: t("contact"), id: "contact", isSection: true },
+    { href: "/#/works", label: t("works"), id: "works", isSection: true },
+    { href: "/#/about", label: t("about"), id: "about", isSection: true },
+    { href: "/#/contact", label: t("contact"), id: "contact", isSection: true },
     { href: "/blog", label: t("blog"), id: "blog", isSection: false },
     {
-      href: "/projects",
+      href: "/project/list",
       label: t("projects"),
       id: "projects",
       isSection: false,
@@ -100,7 +100,7 @@ const NavigationMenu = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="size-10 p-0"
+              className="size-10 p-0 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               <Bars3Icon className="size-5" />
               <span className="sr-only">Open menu</span>
@@ -108,7 +108,7 @@ const NavigationMenu = () => {
           </SheetTrigger>
           <SheetContent
             side="left"
-            className="bg-white/95 backdrop-blur"
+            className="bg-white/95 dark:bg-gray-900/95 backdrop-blur border-r dark:border-gray-800"
           >
             <nav className="mt-16">
               <ul className="flex flex-col space-y-5">
@@ -128,9 +128,9 @@ const NavigationMenu = () => {
                       onClick={
                         item.isSection
                           ? () => {
-                              scrollToSection(item.id);
-                              setSheetOpen(false);
-                            }
+                            scrollToSection(item.id);
+                            setSheetOpen(false);
+                          }
                           : () => setSheetOpen(false)
                       }
                       delay={0.1 * i}

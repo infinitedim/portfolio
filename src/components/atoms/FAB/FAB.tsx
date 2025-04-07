@@ -2,10 +2,7 @@
 
 import { memo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Cog6ToothIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { Cog6ToothIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { cn } from "@/utils";
 import { Button, LanguageSwitcher, ThemeSwitcher } from "@/components/atoms";
 
@@ -21,11 +18,11 @@ const SettingsFAB = ({ className }: SettingsFABProps) => {
   };
 
   return (
-    <div className={cn("fixed bottom-6 right-6 z-50", className)}>
+    <div className={cn("fixed bottom-6 right-6 z-50 rounded-full", className)}>
       <Button
         onClick={toggleFAB}
         size="icon"
-        className="size-14 rounded-full shadow-lg bg-primary hover:bg-primary/90"
+        className="size-14 rounded-full shadow-lg dark:bg-woodsmoke-950 bg-white hover:bg-primary/90"
       >
         <AnimatePresence
           mode="wait"
@@ -39,9 +36,9 @@ const SettingsFAB = ({ className }: SettingsFABProps) => {
             transition={{ duration: 0.2 }}
           >
             {isOpen ? (
-              <XMarkIcon className="size-10 text-black" />
+              <XMarkIcon className="size-6 text-woodsmoke-950 dark:text-white" />
             ) : (
-              <Cog6ToothIcon className="size-10 text-black" />
+              <Cog6ToothIcon className="size-6 text-woodsmoke-950 dark:text-white" />
             )}
           </motion.div>
         </AnimatePresence>

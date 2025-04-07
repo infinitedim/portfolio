@@ -52,7 +52,7 @@ const NavigationLink = ({
         onClick={handleClick}
         className={cn(
           "relative block w-full py-1 text-left transition-colors duration-300",
-          isActive ? "text-black" : "text-gray-500 hover:text-black",
+          isActive ? "text-black" : "text-gray-500 hover:text-black dark:text-gray-200 dark:hover:text-white",
         )}
         whileHover={{
           x: 8,
@@ -60,7 +60,7 @@ const NavigationLink = ({
         }}
       >
         <motion.span
-          className="block"
+          className="block text-black dark:text-white"
           whileHover={{
             scale: 1.05,
             originX: 0,
@@ -71,7 +71,7 @@ const NavigationLink = ({
 
         {isActive && (
           <motion.span
-            className="absolute bottom-0 left-0 h-px w-full bg-black"
+            className="absolute bottom-0 left-0 h-px w-full bg-black dark:bg-white"
             layoutId="underline"
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           />

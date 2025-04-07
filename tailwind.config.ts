@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -74,6 +76,7 @@ const config: Config = {
   },
   darkMode: "class",
   plugins: [
+    require("@tailwindcss/aspect-ratio"),
     require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),
     require("@tailwindcss/postcss"),

@@ -1,35 +1,49 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useState, useEffect } from "react";
+import type { JSX, ReactNode } from "react";
 import { Inter } from "next/font/google";
 import "@/styles/globals.css";
-import { NextFontWithVariable } from "next/dist/compiled/@next/font";
-import React, { type JSX } from "react";
+import { LoadingScreen } from "@/components/templates";
+import Provider from "./provider";
+import { PageTransition } from "@/components/molecules";
 
-const inter: NextFontWithVariable = Inter({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-  variable: "--font-inter",
-});
-
-export const metadata: Metadata = {
-  title: "Portfolio",
-  description: "Your portfolio description",
-};
+const inter = Inter({ subsets: ["latin"] });
 
 /**
  * Root layout component for the application.
  * @param {object} root0 - The props object.
- * @param {React.ReactNode} root0.children - The child components to render inside the layout.
+ * @param {ReactNode} root0.children - The child components to render inside the layout.
  * @returns {JSX.Element} The rendered layout component.
  */
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
-}>) {
+  children: ReactNode;
+}>): JSX.Element {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Remove loading state after animations complete
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 3500); // Set slightly longer than your loading animation
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans`}>{children}</body>
-    </html >
+      <body className={`${inter.className} ${isLoading ? "freeze-animations" : ""}`}>
+        <LoadingScreen />
+        <div className={isLoading ? "opacity-0" : "opacity-100 transition-opacity duration-500"}>
+          <PageTransition>
+            <Provider>
+              {children}
+            </Provider>
+          </PageTransition>
+        </div>
+      </body>
+    </html>
   );
 }

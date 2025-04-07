@@ -28,7 +28,10 @@ function Card({ className, ...props }: ComponentProps<"div">): JSX.Element {
  * @param {string} [root0.className] - Additional class names for styling.
  * @returns {JSX.Element} The rendered CardHeader component.
  */
-function CardHeader({ className, ...props }: ComponentProps<"div">): JSX.Element {
+function CardHeader({
+  className,
+  ...props
+}: ComponentProps<"div">): JSX.Element {
   return (
     <div
       data-slot="card-header"
@@ -47,7 +50,10 @@ function CardHeader({ className, ...props }: ComponentProps<"div">): JSX.Element
  * @param {string} [root0.className] - Additional class names for styling.
  * @returns {JSX.Element} The rendered CardTitle component.
  */
-function CardTitle({ className, ...props }: ComponentProps<"div">): JSX.Element {
+function CardTitle({
+  className,
+  ...props
+}: ComponentProps<"div">): JSX.Element {
   return (
     <div
       data-slot="card-title"
@@ -63,7 +69,10 @@ function CardTitle({ className, ...props }: ComponentProps<"div">): JSX.Element 
  * @param {string} [root0.className] - Additional class names for styling.
  * @returns {JSX.Element} The rendered CardDescription component.
  */
-function CardDescription({ className, ...props }: ComponentProps<"div">): JSX.Element {
+function CardDescription({
+  className,
+  ...props
+}: ComponentProps<"div">): JSX.Element {
   return (
     <div
       data-slot="card-description"
@@ -79,7 +88,10 @@ function CardDescription({ className, ...props }: ComponentProps<"div">): JSX.El
  * @param {string} [root0.className] - Additional class names for styling.
  * @returns {JSX.Element} The rendered CardAction component.
  */
-function CardAction({ className, ...props }: ComponentProps<"div">): JSX.Element {
+function CardAction({
+  className,
+  ...props
+}: ComponentProps<"div">): JSX.Element {
   return (
     <div
       data-slot="card-action"
@@ -98,7 +110,10 @@ function CardAction({ className, ...props }: ComponentProps<"div">): JSX.Element
  * @param {string} [root0.className] - Additional class names for styling.
  * @returns {JSX.Element} The rendered CardContent component.
  */
-function CardContent({ className, ...props }: ComponentProps<"div">): JSX.Element {
+function CardContent({
+  className,
+  ...props
+}: ComponentProps<"div">): JSX.Element {
   return (
     <div
       data-slot="card-content"
@@ -114,7 +129,10 @@ function CardContent({ className, ...props }: ComponentProps<"div">): JSX.Elemen
  * @param {string} [root0.className] - Additional class names for styling.
  * @returns {JSX.Element} The rendered CardFooter component.
  */
-function CardFooter({ className, ...props }: ComponentProps<"div">): JSX.Element {
+function CardFooter({
+  className,
+  ...props
+}: ComponentProps<"div">): JSX.Element {
   return (
     <div
       data-slot="card-footer"
