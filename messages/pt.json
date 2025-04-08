@@ -1,0 +1,50 @@
+{
+  "site": {
+    "title": "Portfólio - Dimas",
+    "description": "Portfólio pessoal mostrando meu trabalho e habilidades"
+  },
+  "nav": {
+    "home": "Início",
+    "works": "Trabalhos",
+    "about": "Sobre",
+    "contact": "Contato",
+    "blog": "Blog",
+    "projetos": "Projetos"
+  },
+  "hero": {
+    "greeting": "Olá👋, eu sou",
+    "name": "Dimas Saputra",
+    "title": "Desenvolvedor Flutter",
+    "description": "Eu construo experiências digitais bonitas e funcionais com foco em design minimalista e experiência de usuário intuitiva.",
+    "cta": "Ver meu trabalho"
+  },
+  "about": {
+    "title": "Sobre Mim",
+    "bio": "Sou um desenvolvedor com dois anos de experiência. Embora eu tenha habilidades básicas em tecnologias de front-end, como HTML, CSS, JavaScript e React, minha experiência e paixão estão principalmente no desenvolvimento do Flutter. Tenho vindo a construir aplicações móveis escaláveis e de alta qualidade com Flutter, proporcionando consistentemente experiências de utilizador excepcionais e colaborando eficazmente com equipas multifuncionais. Estou sempre ansioso por melhorar as minhas competências e enfrentar novos desafios no mundo do desenvolvimento de software.",
+    "skills": "Habilidades",
+    "experience": "Experiência"
+  },
+  "works": {
+    "title": "Meus Trabalhos",
+    "viewProject": "Ver projeto",
+    "allProjects": "Todos os projetos"
+  },
+  "contact": {
+    "title": "Entre em Contato",
+    "name": "Nome",
+    "email": "Email",
+    "message": "Mensagem",
+    "send": "Enviar mensagem",
+    "success": "Sua mensagem foi enviada com sucesso!",
+    "error": "Ocorreu um erro ao enviar sua mensagem. Por favor, tente novamente."
+  },
+  "footer": {
+    "rights": "Todos os direitos reservados.",
+    "madeWith": "Feito com"
+  },
+  "language": {
+    "en": "Inglês",
+    "id": "Indonésio",
+    "pt": "Português"
+  }
+}
