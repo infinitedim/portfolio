@@ -12,15 +12,15 @@
     "projects": "Proyek"
   },
   "hero": {
-    "greeting": "Halo, Saya",
+    "greeting": "Halo👋, Saya",
     "name": "Dimas Saputra",
-    "title": "React Developer",
+    "title": "Saya Hanya Seorang Flutter Developer",
     "description": "Saya membangun pengalaman digital yang indah dan fungsional dengan fokus pada desain minimalis dan pengalaman pengguna yang intuitif.",
     "cta": "Lihat karya saya"
   },
   "about": {
     "title": "Tentang Saya",
-    "bio": "Saya adalah seorang pengembang full-stack yang bersemangat tentang menciptakan aplikasi interaktif dan pengalaman di web.",
+    "bio": "Saya adalah seorang developer dengan pengalaman dua tahun. Meskipun saya memiliki keterampilan dasar dalam teknologi frontend seperti HTML, CSS, JavaScript, dan React, keahlian dan minat saya terutama terletak pada pengembangan Flutter. Saya telah membangun aplikasi seluler berkualitas tinggi dan dapat diskalakan dengan Flutter, secara konsisten memberikan pengalaman pengguna yang luar biasa dan berkolaborasi secara efektif dengan tim lintas fungsi. Saya selalu bersemangat untuk meningkatkan keterampilan saya dan mengatasi tantangan baru dalam dunia pengembangan perangkat lunak.",
     "skills": "Keterampilan",
     "experience": "Pengalaman"
   },

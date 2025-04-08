@@ -12,15 +12,15 @@
     "projetos": "Projetos"
   },
   "hero": {
-    "greeting": "Olá, eu sou",
+    "greeting": "Olá👋, eu sou",
     "name": "Dimas Saputra",
-    "title": "Desenvolvedor React",
+    "title": "Desenvolvedor Flutter",
     "description": "Eu construo experiências digitais bonitas e funcionais com foco em design minimalista e experiência de usuário intuitiva.",
     "cta": "Ver meu trabalho"
   },
   "about": {
     "title": "Sobre Mim",
-    "bio": "Sou um desenvolvedor full-stack apaixonado por criar aplicativos interativos e experiências na web.",
+    "bio": "Sou um desenvolvedor com dois anos de experiência. Embora eu tenha habilidades básicas em tecnologias de front-end, como HTML, CSS, JavaScript e React, minha experiência e paixão estão principalmente no desenvolvimento do Flutter. Tenho vindo a construir aplicações móveis escaláveis e de alta qualidade com Flutter, proporcionando consistentemente experiências de utilizador excepcionais e colaborando eficazmente com equipas multifuncionais. Estou sempre ansioso por melhorar as minhas competências e enfrentar novos desafios no mundo do desenvolvimento de software.",
     "skills": "Habilidades",
     "experience": "Experiência"
   },

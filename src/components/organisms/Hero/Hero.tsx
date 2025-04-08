@@ -14,6 +14,7 @@ const Hero = () => {
 
   const cta = locale("cta");
   const name = locale("name");
+  const greeting = locale("greeting");
   const title = locale("title");
   const description = locale("description");
 
@@ -115,23 +116,23 @@ const Hero = () => {
   };
 
   return (
-    <section className="min-h-fit flex flex-col justify-center px-8 md:px-16 py-16 relative overflow-hidden bg-woodsmoke-50 dark:bg-woodsmoke-950">
+    <section className="min-h-fit flex flex-col justify-center px-8 md:px-16 py-16 relative items-center overflow-hidden bg-woodsmoke-50 dark:bg-woodsmoke-950">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="z-10"
       >
-        <motion.h1
+        <motion.h4
           variants={itemVariants}
-          className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight max-w-4xl mb-3"
+          className="text-lg md:text-xl leading-tight max-w-4xl mb-3 text-center text-woodsmoke-800 dark:text-white"
         >
-          {name}
-        </motion.h1>
+          {greeting} {name}
+        </motion.h4>
 
         <motion.h2
           variants={itemVariants}
-          className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-woodsmoke-700 dark:text-woodsmoke-100 max-w-4xl mb-6"
+          className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-woodsmoke-950 dark:text-woodsmoke-100 max-w-4xl mb-6 text-center"
         >
           {title}
         </motion.h2>

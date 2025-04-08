@@ -110,7 +110,7 @@ const LoadingScreen = (): JSX.Element => {
 
           {/* Persentase loading di kanan bawah */}
           <motion.div
-            className="absolute right-6 bottom-6 dark:text-white text-woodsmoke-950 font-['Inter'] font-bold text-4xl md:text-5xl"
+            className="absolute right-6 bottom-6 dark:text-white text-woodsmoke-950 font-['Inter'] font-bold text-4xl md:text-7xl"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{
               opacity: 1,
