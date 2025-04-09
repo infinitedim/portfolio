@@ -20,28 +20,28 @@ function PageTransition({ children }: { children: ReactNode }): JSX.Element {
           scaleY: 0,
           transition: {
             duration: 0.8,
-            ease: [0.76, 0, 0.24, 1]
-          }
+            ease: [0.76, 0, 0.24, 1],
+          },
         }}
         exit={{
           scaleY: 1,
           transition: {
             duration: 0.8,
-            ease: [0.76, 0, 0.24, 1]
-          }
+            ease: [0.76, 0, 0.24, 1],
+          },
         }}
         style={{ originY: "0%" }}
       />
       <motion.div
-        className="fixed inset-0 dark:bg-woodsmoke bg-white z-40"
+        className="fixed inset-0 dark:bg-woodsmoke-950 bg-white z-40"
         initial={{ scaleY: 1 }}
         animate={{
           scaleY: 0,
           transition: {
             duration: 0.8,
             ease: [0.76, 0, 0.24, 1],
-            delay: 0.2
-          }
+            delay: 0.2,
+          },
         }}
         style={{ originY: "100%" }}
       />

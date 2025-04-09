@@ -52,7 +52,9 @@ const NavigationLink = ({
         onClick={handleClick}
         className={cn(
           "relative block w-full py-1 text-left transition-colors duration-300",
-          isActive ? "text-black" : "text-gray-500 hover:text-black dark:text-gray-200 dark:hover:text-white",
+          isActive
+            ? "text-black"
+            : "text-gray-500 hover:text-black dark:text-gray-200 dark:hover:text-white",
         )}
         whileHover={{
           x: 8,

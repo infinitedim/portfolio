@@ -41,14 +41,13 @@ export function useSectionObserver(sections: Section[]): {
     };
 
     const handleIntersect = (entries: IntersectionObserverEntry[]) => {
-      if (isScrolling) return; // Abaikan pembaruan selama scroll terprogram
+      if (isScrolling) return;
 
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           const sectionId = entry.target.id;
           setActiveSection(sectionId);
 
-          // Update URL hanya jika scroll manual (bukan dari navigasi klik)
           if (!isScrolling) {
             const newUrl = sectionId === "home" ? "/" : `/#${sectionId}`;
 
@@ -60,14 +59,12 @@ export function useSectionObserver(sections: Section[]): {
 
     const observer = new IntersectionObserver(handleIntersect, observerOptions);
 
-    // Observe semua section
     sections.forEach((section) => {
       if (section.ref.current) {
         observer.observe(section.ref.current);
       }
     });
 
-    // Cleanup
     return () => {
       sections.forEach((section) => {
         if (section.ref.current) {
@@ -77,30 +74,25 @@ export function useSectionObserver(sections: Section[]): {
     };
   }, [sections, isScrolling, pathname]);
 
-  // Fungsi untuk scroll ke section yang ditentukan
   const scrollToSection = (sectionId: string) => {
     const targetSection = sections.find((section) => section.id === sectionId);
     if (!targetSection?.ref.current) return;
 
     setIsScrolling(true);
 
-    // Update URL
     const newUrl = sectionId === "home" ? "/" : `/#${sectionId}`;
     window.history.pushState({}, "", newUrl);
 
-    // Lakukan scroll
     targetSection.ref.current.scrollIntoView({
       behavior: "smooth",
       block: "start",
     });
 
-    // Set section aktif
     setActiveSection(sectionId);
 
-    // Reset flag isScrolling setelah animasi scroll selesai
     setTimeout(() => {
       setIsScrolling(false);
-    }, 1000); // Perkirakan durasi smooth scroll
+    }, 1000);
   };
 
   return {

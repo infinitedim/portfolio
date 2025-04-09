@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { createNavigation } from "next-intl/navigation"; // Perubahan di sini
+import { createNavigation } from "next-intl/navigation";
 import { GlobeAltIcon } from "@heroicons/react/24/outline";
 import {
   Button,
@@ -51,7 +51,7 @@ export const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="bg-white"
+        className="bg-white dark:bg-woodsmoke-950"
       >
         {locales.map((loc) => (
           <DropdownMenuItem

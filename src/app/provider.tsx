@@ -11,10 +11,10 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   if (!mounted) {
-    return <>{children}</>; // Render children without ThemeProvider during SSR
+    return <>{children}</>;
   }
 
-  return <ThemeProvider attribute="class">{children}</ThemeProvider>; // Wrap children with ThemeProvider after mount
+  return <ThemeProvider attribute="class">{children}</ThemeProvider>;
 };
 
 export default memo(Providers);

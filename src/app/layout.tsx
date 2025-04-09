@@ -24,23 +24,28 @@ export default function RootLayout({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Remove loading state after animations complete
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 3500); // Set slightly longer than your loading animation
+    }, 3500);
 
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <html lang="en">
-      <body className={`${inter.className} ${isLoading ? "freeze-animations" : ""}`}>
+      <body
+        className={`${inter.className} ${isLoading ? "freeze-animations" : ""}`}
+      >
         <LoadingScreen />
-        <div className={isLoading ? "opacity-0" : "opacity-100 transition-opacity duration-500"}>
+        <div
+          className={
+            isLoading
+              ? "opacity-0"
+              : "opacity-100 transition-opacity duration-500"
+          }
+        >
           <PageTransition>
-            <Provider>
-              {children}
-            </Provider>
+            <Provider>{children}</Provider>
           </PageTransition>
         </div>
       </body>

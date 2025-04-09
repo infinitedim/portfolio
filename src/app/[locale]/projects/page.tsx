@@ -1,6 +1,5 @@
 "use client";
 
-// import { useTranslations } from "next-intl";
 import { memo, type JSX } from "react";
 
 /**
@@ -8,8 +7,6 @@ import { memo, type JSX } from "react";
  * @returns {JSX.Element} The rendered ProjectsPage component.
  */
 function ProjectsPage(): JSX.Element {
-  // const t = useTranslations();
-
   return (
     <div className="min-h-screen py-16">
       <h1 className="text-4xl font-bold mb-8">Projects Page</h1>

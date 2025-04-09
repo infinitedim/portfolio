@@ -7,7 +7,7 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   return (
-    <div className="min-h-screen w-screen bg-woodsmoke-50 dark:bg-woodsmoke-950">
+    <div className="min-h-screen w-screen bg-white dark:bg-woodsmoke-950">
       <Header />
       <main className="pt-24 md:ml-[200px] md:pt-28">
         <div className="container mx-auto px-6 md:px-12">{children}</div>

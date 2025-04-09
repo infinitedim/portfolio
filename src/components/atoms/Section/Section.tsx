@@ -19,10 +19,7 @@ export const Section = forwardRef(
       <section
         id={id}
         ref={ref}
-        className={cn(
-          "min-h-screen scroll-mt-20 py-16 md:py-24", // scroll-mt-20 kompensasi untuk header
-          className,
-        )}
+        className={cn("min-h-screen scroll-mt-20 py-16 md:py-24", className)}
       >
         <motion.div
           initial={{ opacity: 0, y: 20 }}

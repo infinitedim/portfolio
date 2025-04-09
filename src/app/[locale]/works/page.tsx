@@ -1,15 +1,12 @@
 "use client";
 
 import type { JSX } from "react";
-// import { useTranslations } from "next-intl";
 
 /**
  * Renders the BlogPage component.
  * @returns {JSX.Element} The rendered BlogPage component.
  */
 export default function BlogPage(): JSX.Element {
-  // const t = useTranslations();
-
   return (
     <div className="min-h-screen py-16">
       <h1 className="text-4xl font-bold mb-8">Blog Page</h1>

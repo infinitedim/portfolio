@@ -16,16 +16,18 @@ const intlMiddleware = createMiddleware({
   localePrefix: "always",
 });
 
+/**
+ * Middleware function to handle locale-based routing.
+ * @param {NextRequest} request - The incoming request object.
+ * @returns {NextResponse} The response object after processing the request.
+ */
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Cek apakah ini adalah path root
   if (pathname === "/") {
-    // Redirect ke path dengan locale default
     return NextResponse.redirect(new URL(`/${defaultLocale}`, request.url));
   }
 
-  // Untuk path lain, gunakan middleware next-intl
   return intlMiddleware(request);
 }
 

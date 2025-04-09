@@ -4,12 +4,11 @@ import { notFound } from "next/navigation";
 import { Layout } from "@/components/templates";
 import { locales } from "@/i18n";
 
-// Setup untuk metadata
 /**
  * Generates static parameters for localization.
  * @returns {Array<{ locale: string }>} An array of objects containing locale information.
  */
-export function generateStaticParams() {
+export function generateStaticParams(): Array<{ locale: string }> {
   return locales.map((locale) => ({ locale }));
 }
 
@@ -26,11 +25,10 @@ export default async function LocaleLayout({
 }: {
   children: ReactNode;
   params: Promise<{ locale: string }>;
-}) {
+}): Promise<JSX.Element> {
   const { locale } = await params;
   if (!locales.includes(locale)) notFound();
 
-  // Impor pesan sesuai dengan locale
   let messages;
   try {
     messages = (await import(`../../../messages/${locale}.json`)).default;

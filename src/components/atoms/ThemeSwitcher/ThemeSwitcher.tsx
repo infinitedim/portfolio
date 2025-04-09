@@ -24,8 +24,6 @@ const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 
-  // Pastikan komponen terpasang sebelum mengakses theme
-  // untuk menghindari ketidakcocokan hydration
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -40,14 +38,11 @@ const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
     setTheme(newTheme);
   };
 
-  // Gunakan current theme dari next-themes
   const currentTheme = theme || "system";
 
-  // Tampilkan ikon berdasarkan tema saat ini
   const CurrentThemeIcon =
     themes.find((t) => t.value === currentTheme)?.icon || SunIcon;
 
-  // Jika belum mounted, kembalikan placeholder untuk menghindari layout shift
   if (!mounted) {
     return (
       <Button
@@ -89,7 +84,7 @@ const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
               onClick={() => changeTheme(themeOption.value)}
               className={cn(
                 "flex cursor-pointer items-center gap-2",
-                currentTheme === themeOption.value && "font-bold"
+                currentTheme === themeOption.value && "font-bold",
               )}
             >
               <ThemeIcon className="size-4" />

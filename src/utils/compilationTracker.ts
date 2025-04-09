@@ -7,15 +7,10 @@ class CompilationTracker extends EventEmitter {
 
   constructor() {
     super();
-    // Initialize the tracker
     this.watchCompilation();
   }
 
   private watchCompilation() {
-    // In a real implementation, this would hook into Next.js webpack hooks
-    // or use the Next.js custom server API to track compilation events
-
-    // For now, we just simulate the process
     console.log("Watching for Next.js compilation events...");
   }
 
@@ -40,5 +35,4 @@ class CompilationTracker extends EventEmitter {
   }
 }
 
-// Singleton instance
 export const compilationTracker = new CompilationTracker();

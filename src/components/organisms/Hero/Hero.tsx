@@ -1,79 +1,26 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Button } from "@/components/atoms";
-import { ArrowRightIcon } from "@radix-ui/react-icons";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 const Hero = () => {
   const locale = useTranslations("hero");
 
-  const [typedText, setTypedText] = useState("");
-  const [isTypingComplete, setIsTypingComplete] = useState(false);
+  const [titleIndex, setTitleIndex] = useState(0);
 
-  const cta = locale("cta");
+  const technologies = ["Flutter", "React", "Web", "Frontend"];
+
   const name = locale("name");
   const greeting = locale("greeting");
-  const title = locale("title");
-  const description = locale("description");
 
   useEffect(() => {
-    // Reset state at the beginning of effect
-    setTypedText("");
-    setIsTypingComplete(false);
+    const interval = setInterval(() => {
+      setTitleIndex((prev) => (prev + 1) % technologies.length);
+    }, 3000);
 
-    // Guard clause - exit early if description isn't available
-    if (!description || typeof description !== "string") return;
-
-    const typingSpeed = 30;
-    const completionDelay = 300;
-    let currentIndex = 0;
-    let typingTimeout: ReturnType<typeof setTimeout>;
-    let completionTimeout: NodeJS.Timeout;
-    let cursorInterval: NodeJS.Timeout;
-
-    const typeNextCharacter = () => {
-      if (currentIndex < description.length) {
-        // Safely extract the substring
-        const textToShow = description.substring(0, currentIndex + 1);
-        setTypedText(textToShow);
-        currentIndex++;
-        // Schedule next character
-        typingTimeout = setTimeout(typeNextCharacter, typingSpeed);
-      } else {
-        // Typing complete - make sure we use the full description without any extras
-        setTypedText(description);
-
-        completionTimeout = setTimeout(() => {
-          setIsTypingComplete(true);
-          // Blink cursor 5 times before disappearing
-          let blinkCount = 0;
-          cursorInterval = setInterval(() => {
-            blinkCount++;
-            if (blinkCount >= 10) {
-              // 5 cycles on/off
-              clearInterval(cursorInterval);
-            }
-          }, 400);
-        }, completionDelay);
-      }
-    };
-
-    // Wait before starting to type
-    const initialDelay = setTimeout(typeNextCharacter, 800);
-
-    // Cleanup function to clear all timers
-    return () => {
-      clearTimeout(initialDelay);
-      clearTimeout(typingTimeout);
-      clearTimeout(completionTimeout);
-      if (cursorInterval) clearInterval(cursorInterval);
-
-      // Important: set the final value on cleanup to avoid stale state
-      if (description) setTypedText(description);
-    };
-  }, [description]); // Only re-run when description changes
+    return () => clearInterval(interval);
+  }, [technologies.length]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -98,25 +45,14 @@ const Hero = () => {
     },
   };
 
-  const buttonVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: 0.6,
-        duration: 0.5,
-        ease: [0.22, 1, 0.36, 1],
-      },
-    },
-    hover: {
-      x: 5,
-      transition: { duration: 0.3 },
-    },
+  const techVariants = {
+    initial: { y: 40, opacity: 0 },
+    animate: { y: 0, opacity: 1 },
+    exit: { y: -40, opacity: 0 },
   };
 
   return (
-    <section className="min-h-fit flex flex-col justify-center px-8 md:px-16 py-16 relative items-center overflow-hidden bg-woodsmoke-50 dark:bg-woodsmoke-950">
+    <section className="min-h-fit flex flex-col justify-center px-8 md:px-16 py-16 relative items-center overflow-hidden bg-white dark:bg-woodsmoke-950">
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -132,50 +68,35 @@ const Hero = () => {
 
         <motion.h2
           variants={itemVariants}
-          className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-woodsmoke-950 dark:text-woodsmoke-100 max-w-4xl mb-6 text-center"
+          className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-woodsmoke-950 dark:text-white max-w-4xl mb-6 text-center flex flex-wrap flex-col justify-center items-center"
         >
-          {title}
-        </motion.h2>
+          <span>{locale("title").split("Flutter")[0]}</span>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.9, duration: 0.5 }}
-          className="text-lg md:text-xl text-woodsmoke-600 dark:text-woodsmoke-200 max-w-2xl mb-10 leading-relaxed relative"
-        >
-          {typedText}
-        </motion.div>
-
-        <motion.div
-          variants={buttonVariants}
-          initial="hidden"
-          animate={isTypingComplete ? "visible" : "hidden"}
-          whileHover="hover"
-          className="inline-block"
-        >
-          <Button
-            asChild
-            size="lg"
-            className="group"
+          <span
+            className="relative inline-block overflow-hidden mx-1 text-woodsmoke-950 dark:text-white"
+            style={{ verticalAlign: "baseline", transform: "translateY(0)" }}
           >
-            <a
-              href="/#/projects"
-              className="flex items-center -ml-6"
-            >
-              {cta}
+            <AnimatePresence mode="wait">
               <motion.span
-                initial={{ x: 0 }}
-                whileHover={{ x: 5 }}
-                transition={{ type: "spring", stiffness: 200 }}
+                key={technologies[titleIndex]}
+                className="inline-block text-woodsmoke-950 dark:text-white"
+                variants={techVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.5, ease: "easeInOut" }}
               >
-                <ArrowRightIcon className="size-4" />
+                {technologies[titleIndex]}
               </motion.span>
-            </a>
-          </Button>
-        </motion.div>
+            </AnimatePresence>
+            <span className="font-bold">
+              {locale("title").split("Flutter")[1]}
+            </span>
+          </span>
+        </motion.h2>
       </motion.div>
     </section>
   );
 };
 
-export default Hero;
+export default memo(Hero);

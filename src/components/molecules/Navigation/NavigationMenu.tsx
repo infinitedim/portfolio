@@ -43,7 +43,6 @@ const NavigationMenu = () => {
     },
   ];
 
-  // Use custom hook to handle section observation
   const { activeSection, scrollToSection } = useSectionObserver(sections);
 
   const navItems = [
@@ -128,9 +127,9 @@ const NavigationMenu = () => {
                       onClick={
                         item.isSection
                           ? () => {
-                            scrollToSection(item.id);
-                            setSheetOpen(false);
-                          }
+                              scrollToSection(item.id);
+                              setSheetOpen(false);
+                            }
                           : () => setSheetOpen(false)
                       }
                       delay={0.1 * i}

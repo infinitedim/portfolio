@@ -26,9 +26,8 @@ const Cursor = () => {
     document.addEventListener("mouseenter", handleMouseEnter);
     document.addEventListener("mouseleave", handleMouseOut);
 
-    // Tambahkan event listener ke elemen interaktif
     const interactiveElements = document.querySelectorAll(
-      "a, button, input, textarea, [role=\"button\"]",
+      'a, button, input, textarea, [role="button"]',
     );
     interactiveElements.forEach((el) => {
       el.addEventListener("mouseover", handleMouseOver);
@@ -54,8 +53,9 @@ const Cursor = () => {
       className={`fixed pointer-events-none z-50 ${isVisible ? "opacity-100" : "opacity-0"}`}
     >
       <div
-        className={`fixed -translate-x-1/2 -translate-y-1/2 rounded-full transition-all${isHovering ? "size-4 bg-blue-600" : "size-2 bg-blue-600"
-          }`}
+        className={`fixed -translate-x-1/2 -translate-y-1/2 rounded-full transition-all${
+          isHovering ? "size-4 bg-blue-600" : "size-2 bg-blue-600"
+        }`}
         style={{
           left: `${position.x}px`,
           top: `${position.y}px`,
@@ -63,10 +63,11 @@ const Cursor = () => {
         }}
       />
       <div
-        className={`fixed -translate-x-1/2 -translate-y-1/2 rounded-full border transition-all${isHovering
-          ? "size-12 border-blue-600/20"
-          : "size-8 border-blue-600/30"
-          }`}
+        className={`fixed -translate-x-1/2 -translate-y-1/2 rounded-full border transition-all${
+          isHovering
+            ? "size-12 border-blue-600/20"
+            : "size-8 border-blue-600/30"
+        }`}
         style={{
           left: `${followerPosition.x}px`,
           top: `${followerPosition.y}px`,
