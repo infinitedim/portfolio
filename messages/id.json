@@ -38,6 +38,17 @@
     "success": "Pesan Anda berhasil dikirim!",
     "error": "Terjadi kesalahan saat mengirim pesan Anda. Silakan coba lagi."
   },
+  "common": {
+    "loading": "Memuat...",
+    "error": "Terjadi kesalahan. Silakan coba lagi.",
+    "notFound": "Halaman tidak ditemukan",
+    "goBack": "Kembali ke beranda",
+    "language": "Bahasa",
+    "darkMode": "Mode gelap",
+    "lightMode": "Mode terang",
+    "development": "Situs ini sedang dalam pengembangan",
+    "comingSoon": "Segera hadir"
+  },
   "footer": {
     "rights": "Semua hak dilindungi.",
     "madeWith": "Dibuat dengan"

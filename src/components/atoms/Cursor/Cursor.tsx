@@ -26,8 +26,10 @@ const Cursor = () => {
     document.addEventListener("mouseenter", handleMouseEnter);
     document.addEventListener("mouseleave", handleMouseOut);
 
+    const role = "[role='button']";
+
     const interactiveElements = document.querySelectorAll(
-      'a, button, input, textarea, [role="button"]',
+      `a, button, input, textarea, ${role}`,
     );
     interactiveElements.forEach((el) => {
       el.addEventListener("mouseover", handleMouseOver);

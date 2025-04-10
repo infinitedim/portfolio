@@ -1,38 +1,38 @@
-"use client";
-
-import { ForwardedRef, forwardRef } from "react";
-import { motion } from "framer-motion";
 import { cn } from "@/utils";
+import { memo } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
-interface SectionProps {
-  id: string;
+interface Section {
+  children: ReactNode;
   className?: string;
-  children: React.ReactNode;
+  isFullScreen?: boolean;
+  isFullWidth?: boolean;
+  hidePaddingX?: boolean;
+  style?: CSSProperties;
 }
 
-export const Section = forwardRef(
-  (
-    { id, className, children }: SectionProps,
-    ref: ForwardedRef<HTMLElement>,
-  ) => {
-    return (
-      <section
-        id={id}
-        ref={ref}
-        className={cn("min-h-screen scroll-mt-20 py-16 md:py-24", className)}
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true, amount: 0.2 }}
-          className="container mx-auto px-4"
-        >
-          {children}
-        </motion.div>
-      </section>
-    );
-  },
-);
+const Section = ({
+  children,
+  className,
+  isFullScreen,
+  style,
+  isFullWidth,
+  hidePaddingX,
+}: Section) => {
+  return (
+    <section
+      style={style}
+      className={cn(
+        isFullScreen ? "min-h-dvh" : "h-auto",
+        isFullWidth
+          ? ""
+          : `px-4 desktop:px-0 desktop:max-w-layout ${hidePaddingX ? "" : "mx-auto"}`,
+        className,
+      )}
+    >
+      {children}
+    </section>
+  );
+};
 
-Section.displayName = "Section";
+export default memo(Section);

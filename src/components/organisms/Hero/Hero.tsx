@@ -1,13 +1,15 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { memo, useEffect, useState } from "react";
 
 const Hero = () => {
   const locale = useTranslations("hero");
+  const controls = useAnimation();
 
   const [titleIndex, setTitleIndex] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const technologies = ["Flutter", "React", "Web", "Frontend"];
 
@@ -15,12 +17,27 @@ const Hero = () => {
   const greeting = locale("greeting");
 
   useEffect(() => {
+    // Mulai animasi gelombang setelah komponen dimuat
+    setIsLoaded(true);
+
+    // Mulai animasi waving
+    controls.start({
+      rotate: [0, 20, -10, 20, -5, 10, 0],
+      transition: {
+        duration: 2,
+        times: [0, 0.15, 0.3, 0.45, 0.6, 0.8, 1],
+        ease: "easeInOut",
+      },
+    });
+
     const interval = setInterval(() => {
       setTitleIndex((prev) => (prev + 1) % technologies.length);
     }, 3000);
 
-    return () => clearInterval(interval);
-  }, [technologies.length]);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [technologies.length, controls]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -63,12 +80,26 @@ const Hero = () => {
           variants={itemVariants}
           className="text-lg md:text-xl leading-tight max-w-4xl mb-3 text-center text-woodsmoke-800 dark:text-white"
         >
-          {greeting} {name}
+          {greeting.split("👋")[0]}
+          {isLoaded && (
+            <motion.span
+              animate={controls}
+              style={{
+                display: "inline-block",
+                transformOrigin: "bottom right",
+                marginLeft: "4px",
+                marginRight: "4px",
+              }}
+            >
+              👋
+            </motion.span>
+          )}
+          {greeting.split("👋")[1]} {name}
         </motion.h4>
 
         <motion.h2
           variants={itemVariants}
-          className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-woodsmoke-950 dark:text-white max-w-4xl mb-6 text-center flex flex-wrap flex-col justify-center items-center"
+          className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-woodsmoke-950 dark:text-white max-w-4xl mb-6 text-center flex flex-wrap flex-col justify-center items-center gap-4"
         >
           <span>{locale("title").split("Flutter")[0]}</span>
 

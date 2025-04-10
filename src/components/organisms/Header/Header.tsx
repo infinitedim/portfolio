@@ -45,6 +45,7 @@ const Header = () => {
         className="fixed left-0 top-0 z-40 flex w-full items-center justify-between border-b border-gray-100 dark:border-gray-800bg-white/80 dark:bg-gray-900/80 px-6 py-5 backdrop-blur md:hidden"
       >
         <NavigationMenu />
+        <SocialLinks />
         <Logo />
         <div className="w-10" />
       </motion.div>

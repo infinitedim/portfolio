@@ -30,6 +30,8 @@ import { LanguageSwitcher } from "./LanguageSwitcher/LanguageSwitcher";
 import Logo from "./Logo/Logo";
 import NavigationLink from "./Navigation/NavigationLink";
 
+import Section from "./Section/Section";
+
 import Sheet, {
   SheetClose,
   SheetContent,
@@ -72,6 +74,7 @@ export {
   LanguageSwitcher,
   Logo,
   NavigationLink,
+  Section,
   Sheet,
   SheetClose,
   SheetContent,

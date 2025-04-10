@@ -47,10 +47,9 @@ const NavigationMenu = () => {
 
   const navItems = [
     { href: "/", label: t("home"), id: "home", isSection: true },
-    { href: "/#/works", label: t("works"), id: "works", isSection: true },
     { href: "/#/about", label: t("about"), id: "about", isSection: true },
     { href: "/#/contact", label: t("contact"), id: "contact", isSection: true },
-    { href: "/blog", label: t("blog"), id: "blog", isSection: false },
+    // { href: "/blog", label: t("blog"), id: "blog", isSection: false },
     {
       href: "/project/list",
       label: t("projects"),

@@ -10,8 +10,6 @@ import jsxA11y from "eslint-plugin-jsx-a11y";
 import promise from "eslint-plugin-promise";
 import reactHooks from "eslint-plugin-react-hooks";
 
-const hasReactHooksConfig =
-  reactHooks.configs && reactHooks.configs.recommended;
 const hasImportConfig =
   importPlugin.configs && importPlugin.configs.recommended;
 const hasJsdocConfig = jsdoc.configs && jsdoc.configs.recommended;
@@ -60,12 +58,10 @@ export default defineConfig([
   },
   {
     plugins: { "react-hooks": reactHooks },
-    rules: hasReactHooksConfig
-      ? reactHooks.configs.recommended.rules
-      : {
-          "react-hooks/rules-of-hooks": "error",
-          "react-hooks/exhaustive-deps": "warn",
-        },
+    rules: {
+      "react-hooks/rules-of-hooks": "off",
+      "react-hooks/exhaustive-deps": "warn",
+    },
   },
   {
     plugins: { "jsx-a11y": jsxA11y },

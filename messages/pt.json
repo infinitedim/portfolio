@@ -38,6 +38,17 @@
     "success": "Sua mensagem foi enviada com sucesso!",
     "error": "Ocorreu um erro ao enviar sua mensagem. Por favor, tente novamente."
   },
+  "common": {
+    "loading": "Carregando...",
+    "error": "Ocorreu um erro. Por favor, tente novamente.",
+    "notFound": "Página não encontrada",
+    "goBack": "Voltar para o início",
+    "language": "Idioma",
+    "darkMode": "Modo escuro",
+    "lightMode": "Modo claro",
+    "development": "Este site está em desenvolvimento",
+    "comingSoon": "Em breve"
+  },
   "footer": {
     "rights": "Todos os direitos reservados.",
     "madeWith": "Feito com"

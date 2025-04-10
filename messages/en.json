@@ -42,6 +42,17 @@
     "rights": "All rights reserved.",
     "madeWith": "Made with"
   },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred. Please try again.",
+    "notFound": "Page not found",
+    "goBack": "Go back to home",
+    "language": "Language",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "development": "This site is under development",
+    "comingSoon": "Coming soon"
+  },
   "language": {
     "en": "English",
     "id": "Indonesian",

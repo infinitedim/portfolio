@@ -1,5 +1,5 @@
 import { PageTransition } from "@/components/molecules";
-import { Hero } from "@/components/organisms";
+import { About, Hero } from "@/components/organisms";
 import type { JSX } from "react";
 
 /**
@@ -8,9 +8,10 @@ import type { JSX } from "react";
  */
 export default function Home(): JSX.Element {
   return (
-    <div className="bg-woodsmoke-50 dark:bg-woodsmoke-900">
+    <div className="bg-woodsmoke-50 dark:bg-woodsmoke-950">
       <PageTransition>
         <Hero />
+        <About />
       </PageTransition>
     </div>
   );

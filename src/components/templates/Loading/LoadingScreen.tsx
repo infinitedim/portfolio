@@ -9,11 +9,13 @@ const LoadingScreen = (): JSX.Element => {
   const [currentResource, setCurrentResource] = useState("");
 
   useEffect(() => {
+    // Failsafe timer to ensure loading screen doesn't get stuck
     const failsafeTimer = setTimeout(() => {
       setLoading(false);
     }, 8000);
 
     if (process.env.NODE_ENV === "development") {
+      // Simplified loading for development
       let progress = 0;
       const interval = setInterval(() => {
         progress += Math.random() * 5;
@@ -32,6 +34,14 @@ const LoadingScreen = (): JSX.Element => {
     }
 
     if (typeof window !== "undefined") {
+      // Skip full resource tracking if document is already complete
+      if (document.readyState === "complete") {
+        setPercentage(100);
+        setTimeout(() => setLoading(false), 300);
+        clearTimeout(failsafeTimer);
+        return () => clearTimeout(failsafeTimer);
+      }
+
       let resourceCount = 0;
       let loadedResources = 0;
       const eventListeners = new Map<
@@ -52,16 +62,18 @@ const LoadingScreen = (): JSX.Element => {
         }
       };
 
+      const link = "link[rel='stylesheet']";
+
       const resourceElements = document.querySelectorAll(
-        'script, link[rel="stylesheet"], img',
+        `script, ${link}, img`,
       );
       resourceCount = resourceElements.length;
 
-      if (resourceCount === 0 || document.readyState === "complete") {
+      if (resourceCount === 0) {
         setPercentage(100);
         setTimeout(() => setLoading(false), 300);
         clearTimeout(failsafeTimer);
-        return;
+        return () => clearTimeout(failsafeTimer);
       }
 
       resourceElements.forEach((element) => {
@@ -94,8 +106,7 @@ const LoadingScreen = (): JSX.Element => {
 
         if (
           (element instanceof HTMLImageElement && element.complete) ||
-          (element instanceof HTMLLinkElement && element.sheet) ||
-          document.readyState === "complete"
+          (element instanceof HTMLLinkElement && element.sheet)
         ) {
           isLoaded();
         } else {

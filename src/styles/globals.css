@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -57,7 +56,8 @@
 
   body {
     /* @apply bg-background text-foreground; */
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
+    overflow-x: hidden;
     @apply antialiased;
   }
 
