@@ -76,7 +76,7 @@ const LoadingScreen = (): JSX.Element => {
 
         const collectResources = () => {
           const stylesheets = document.querySelectorAll(
-            'link[rel="stylesheet"]',
+            "link[rel='stylesheet']",
           );
 
           const scripts = document.querySelectorAll("script[src]");
@@ -84,7 +84,7 @@ const LoadingScreen = (): JSX.Element => {
           const images = document.querySelectorAll("img");
 
           const fonts = document.querySelectorAll(
-            'link[rel="preload"][as="font"]',
+            "link[rel='preload'][as='font']",
           );
 
           const allResources = [
@@ -202,7 +202,7 @@ const LoadingScreen = (): JSX.Element => {
                   }
 
                   const childResources = element.querySelectorAll(
-                    'img, script[src], link[rel="stylesheet"], link[rel="preload"][as="font"]',
+                    "img, script[src], link[rel='stylesheet'], link[rel='preload'][as='font']",
                   );
                   childResources.forEach((el) => newResources.push(el));
                 }
