@@ -20,7 +20,7 @@ const Logo = ({ className = "" }: LogoProps) => {
         href="/"
         className="text-xl font-medium tracking-tight"
       >
-        D<span className="text-gray-400">.</span>
+        Dimas<span className="text-gray-400">.</span>
       </Link>
     </motion.div>
   );

@@ -8,11 +8,9 @@ import type { JSX } from "react";
  */
 export default function Home(): JSX.Element {
   return (
-    <div className="bg-woodsmoke-50 dark:bg-woodsmoke-950">
-      <PageTransition>
-        <Hero />
-        <About />
-      </PageTransition>
-    </div>
+    <PageTransition>
+      <Hero />
+      <About />
+    </PageTransition>
   );
 }

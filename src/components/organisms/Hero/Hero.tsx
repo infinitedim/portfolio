@@ -1,15 +1,20 @@
 "use client";
 
-import { motion, AnimatePresence, useAnimation } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useState, useRef } from "react";
 
 const Hero = () => {
   const locale = useTranslations("hero");
-  const controls = useAnimation();
-
   const [titleIndex, setTitleIndex] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [waveRotation, setWaveRotation] = useState(0);
+
+  // References for animation
+  const animationRef = useRef<number | null>(null);
+  const isMounted = useRef(false);
+  const animationStartTime = useRef<number | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const technologies = ["Flutter", "React", "Web", "Frontend"];
 
@@ -17,27 +22,92 @@ const Hero = () => {
   const greeting = locale("greeting");
 
   useEffect(() => {
-    // Mulai animasi gelombang setelah komponen dimuat
+    // Mark component as mounted
+    isMounted.current = true;
+
+    // Start wave animation after component is mounted
     setIsLoaded(true);
 
-    // Mulai animasi waving
-    controls.start({
-      rotate: [0, 20, -10, 20, -5, 10, 0],
-      transition: {
-        duration: 2,
-        times: [0, 0.15, 0.3, 0.45, 0.6, 0.8, 1],
-        ease: "easeInOut",
-      },
-    });
+    // Wave animation using requestAnimationFrame
+    const animateWave = (timestamp: number) => {
+      if (!isMounted.current) return;
 
-    const interval = setInterval(() => {
-      setTitleIndex((prev) => (prev + 1) % technologies.length);
+      // Initialize start time on first animation frame
+      if (animationStartTime.current === null) {
+        animationStartTime.current = timestamp;
+      }
+
+      // Calculate progress (0 to 1) over 2 seconds duration
+      const elapsed = timestamp - animationStartTime.current;
+      const duration = 2000; // 2 seconds
+      const progress = Math.min(elapsed / duration, 1);
+
+      if (progress < 1) {
+        // Define keyframes for the wave animation
+        // Similar to the original rotate: [0, 20, -10, 20, -5, 10, 0]
+        let rotation = 0;
+
+        if (progress < 0.15) {
+          // 0 to 20 degrees
+          rotation = progress * (20 / 0.15);
+        } else if (progress < 0.3) {
+          // 20 to -10 degrees
+          rotation = 20 - (progress - 0.15) * (30 / 0.15);
+        } else if (progress < 0.45) {
+          // -10 to 20 degrees
+          rotation = -10 + (progress - 0.3) * (30 / 0.15);
+        } else if (progress < 0.6) {
+          // 20 to -5 degrees
+          rotation = 20 - (progress - 0.45) * (25 / 0.15);
+        } else if (progress < 0.8) {
+          // -5 to 10 degrees
+          rotation = -5 + (progress - 0.6) * (15 / 0.2);
+        } else {
+          // 10 to 0 degrees
+          rotation = 10 - (progress - 0.8) * (10 / 0.2);
+        }
+
+        setWaveRotation(rotation);
+        animationRef.current = requestAnimationFrame(animateWave);
+      } else {
+        // Reset for the next animation cycle - after 5 seconds
+        animationStartTime.current = null;
+
+        // Wait 5 seconds before repeating wave animation
+        setTimeout(() => {
+          if (isMounted.current) {
+            animationRef.current = requestAnimationFrame(animateWave);
+          }
+        }, 5000);
+      }
+    };
+
+    // Start the wave animation
+    animationRef.current = requestAnimationFrame(animateWave);
+
+    // Set up interval for technology text change
+    intervalRef.current = setInterval(() => {
+      if (isMounted.current) {
+        setTitleIndex((prev) => (prev + 1) % technologies.length);
+      }
     }, 3000);
 
     return () => {
-      clearInterval(interval);
+      // Clean up animations and intervals when component unmounts
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+
+      // Mark component as unmounted
+      isMounted.current = false;
     };
-  }, [technologies.length, controls]);
+  }, [technologies.length]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -82,17 +152,17 @@ const Hero = () => {
         >
           {greeting.split("👋")[0]}
           {isLoaded && (
-            <motion.span
-              animate={controls}
+            <span
               style={{
                 display: "inline-block",
+                transform: `rotate(${waveRotation}deg)`,
                 transformOrigin: "bottom right",
                 marginLeft: "4px",
                 marginRight: "4px",
               }}
             >
               👋
-            </motion.span>
+            </span>
           )}
           {greeting.split("👋")[1]} {name}
         </motion.h4>

@@ -24,10 +24,10 @@ const About = () => {
     const position = index / words.length;
 
     // Create a more evenly distributed range for word appearance
-    const appearStart = Math.max(0, position - 0.3);
+    const appearStart = Math.max(0, position - 0.1);
     const appearEnd = Math.max(0, position - 0.05);
     const fadeStart = Math.min(1, position + 0.05);
-    const fadeEnd = Math.min(1, position + 0.15);
+    const fadeEnd = Math.min(1, position + 0.1);
 
     const wordProgress = useTransform(
       scrollYProgress,
@@ -48,7 +48,7 @@ const About = () => {
     <div
       id="about"
       ref={containerRef}
-      className="mt-24 py-20 bg-woodsmoke-950 overflow-x-hidden"
+      className="mt-24 py-20 dark:bg-woodsmoke-950 bg-white overflow-x-hidden"
     >
       <Section className="mx-auto flex flex-row flex-wrap gap-2 justify-center max-w-4xl px-4">
         {words.map((word, index) => {
@@ -57,7 +57,7 @@ const About = () => {
           return (
             <motion.div
               key={`${word}-${index}`}
-              className="text-3xl md:text-5xl text-white inline-block mr-2 mb-2"
+              className="text-3xl md:text-5xl dark:text-white text-woodsmoke-950 inline-block mr-2 mb-2"
               style={{
                 opacity: wordProgress,
                 y: wordY,

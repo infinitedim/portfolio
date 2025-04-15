@@ -1,4 +1,6 @@
-import { type ReactNode, memo } from "react";
+"use client";
+
+import { type ReactNode, memo, useEffect, useState } from "react";
 import { Header } from "@/components/organisms";
 import { useTranslations } from "next-intl";
 
@@ -8,15 +10,36 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const locale = useTranslations("common");
+  const [scrolled, setScrolled] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+
+    handleScroll(); // Check initial position
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen w-screen justify-center bg-white dark:bg-woodsmoke-950">
-      {/* Development notification banner */}
-      <div className="bg-yellow-500 md:ml-[200px] text-center py-2 px-4 text-black font-medium">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-woodsmoke-950 text-woodsmoke-950 dark:text-white">
+      <div
+        className={`sticky top-[60px] py-2 z-30 text-center px-4 dark:text-white text-woodsmoke-950 font-medium left-0 flex w-full justify-center items-center backdrop-blur-md transition-all duration-300 ${
+          scrolled
+            ? "bg-white/80 dark:bg-woodsmoke-950/80 shadow-sm"
+            : "bg-transparent"
+        }`}
+      >
         <p>🚧 {locale("development")} 🚧</p>
       </div>
       <Header />
-      <main className="pt-24 md:ml-[200px] md:pt-28">
-        <div className="container mx-auto px-6 md:px-12">{children}</div>
+
+      <main className="pt-32">
+        <div className="container mx-auto">{children}</div>
       </main>
     </div>
   );

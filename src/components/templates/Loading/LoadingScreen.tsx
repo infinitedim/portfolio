@@ -7,25 +7,27 @@ const LoadingScreen = (): JSX.Element => {
   const [loading, setLoading] = useState(true);
   const [percentage, setPercentage] = useState(0);
   const [currentResource, setCurrentResource] = useState("");
+  const [resourcesReady, setResourcesReady] = useState(false);
 
   useEffect(() => {
-    // Failsafe timer to ensure loading screen doesn't get stuck
     const failsafeTimer = setTimeout(() => {
       setLoading(false);
-    }, 8000);
+    }, 15000);
 
     if (process.env.NODE_ENV === "development") {
-      // Simplified loading for development
       let progress = 0;
       const interval = setInterval(() => {
-        progress += Math.random() * 5;
+        progress += Math.random() * 3;
         if (progress >= 100) {
           progress = 100;
           clearInterval(interval);
-          setTimeout(() => setLoading(false), 500);
+          setTimeout(() => {
+            setResourcesReady(true);
+            setTimeout(() => setLoading(false), 500);
+          }, 800);
         }
         setPercentage(Math.floor(progress));
-      }, 100);
+      }, 150); // Slower interval
 
       return () => {
         clearInterval(interval);
@@ -34,111 +36,230 @@ const LoadingScreen = (): JSX.Element => {
     }
 
     if (typeof window !== "undefined") {
-      // Skip full resource tracking if document is already complete
-      if (document.readyState === "complete") {
-        setPercentage(100);
-        setTimeout(() => setLoading(false), 300);
-        clearTimeout(failsafeTimer);
-        return () => clearTimeout(failsafeTimer);
-      }
-
-      let resourceCount = 0;
-      let loadedResources = 0;
-      const eventListeners = new Map<
-        Element,
-        { loadHandler: () => void; errorHandler: () => void }
-      >();
-
-      const updatePercentage = () => {
-        if (resourceCount === 0) return;
-        const newPercentage = Math.min(
-          Math.floor((loadedResources / resourceCount) * 100),
-          100,
-        );
-        setPercentage(newPercentage);
-
-        if (newPercentage >= 100) {
-          setTimeout(() => setLoading(false), 500);
+      const documentReadyCheck = () => {
+        if (
+          document.readyState === "interactive" ||
+          document.readyState === "complete"
+        ) {
+          startResourceTracking();
+        } else {
+          document.addEventListener("DOMContentLoaded", startResourceTracking);
         }
       };
 
-      const link = "link[rel='stylesheet']";
+      const startResourceTracking = () => {
+        document.removeEventListener("DOMContentLoaded", startResourceTracking);
 
-      const resourceElements = document.querySelectorAll(
-        `script, ${link}, img`,
-      );
-      resourceCount = resourceElements.length;
+        let resourceCount = 0;
+        let loadedResources = 0;
+        const eventListeners = new Map<ResourceElement, EventListeners>();
+        const resourcesTracked = new Set();
 
-      if (resourceCount === 0) {
-        setPercentage(100);
-        setTimeout(() => setLoading(false), 300);
-        clearTimeout(failsafeTimer);
-        return () => clearTimeout(failsafeTimer);
-      }
+        const updatePercentage = () => {
+          if (resourceCount === 0) return;
 
-      resourceElements.forEach((element) => {
-        const isLoaded = () => {
-          if (eventListeners.has(element)) {
-            const { loadHandler, errorHandler } = eventListeners.get(
-              element,
-            ) as { loadHandler: () => void; errorHandler: () => void };
-            element.removeEventListener("load", loadHandler);
-            element.removeEventListener("error", errorHandler);
-            eventListeners.delete(element);
+          const newPercentage = Math.min(
+            Math.floor((loadedResources / resourceCount) * 100),
+            99, // Cap at 99% until everything is confirmed loaded
+          );
+
+          setPercentage(newPercentage);
+
+          // Only set as ready when all resources are loaded
+          if (loadedResources >= resourceCount) {
+            setPercentage(100);
+            setResourcesReady(true);
+            // Add a small delay for visual effect
+            setTimeout(() => setLoading(false), 800);
           }
-
-          loadedResources++;
-          const src =
-            element instanceof HTMLImageElement
-              ? element.src
-              : element instanceof HTMLScriptElement
-                ? element.src
-                : element instanceof HTMLLinkElement
-                  ? element.href
-                  : "";
-
-          setCurrentResource(src.split("/").pop() || "");
-          updatePercentage();
         };
 
-        const loadHandler = isLoaded;
-        const errorHandler = isLoaded;
+        const collectResources = () => {
+          const stylesheets = document.querySelectorAll(
+            'link[rel="stylesheet"]',
+          );
 
-        if (
-          (element instanceof HTMLImageElement && element.complete) ||
-          (element instanceof HTMLLinkElement && element.sheet)
-        ) {
-          isLoaded();
-        } else {
-          element.addEventListener("load", loadHandler);
-          element.addEventListener("error", errorHandler);
-          eventListeners.set(element, { loadHandler, errorHandler });
+          const scripts = document.querySelectorAll("script[src]");
+
+          const images = document.querySelectorAll("img");
+
+          const fonts = document.querySelectorAll(
+            'link[rel="preload"][as="font"]',
+          );
+
+          const allResources = [
+            ...stylesheets,
+            ...scripts,
+            ...images,
+            ...fonts,
+          ];
+
+          return allResources.filter((el) => {
+            const src =
+              el instanceof HTMLImageElement
+                ? el.src
+                : el instanceof HTMLScriptElement
+                  ? el.src
+                  : el instanceof HTMLLinkElement
+                    ? el.href
+                    : "";
+
+            if (!src || resourcesTracked.has(src)) return false;
+
+            resourcesTracked.add(src);
+            return true;
+          });
+        };
+
+        // Function to handle resource loading
+        interface EventListeners {
+          loadHandler: () => void;
+          errorHandler: () => void;
         }
-      });
 
-      const handleWindowLoad = () => {
-        eventListeners.forEach(
-          ({ loadHandler, errorHandler }, element: Element) => {
+        type ResourceElement =
+          | HTMLImageElement
+          | HTMLScriptElement
+          | HTMLLinkElement;
+
+        const trackResourceLoad = (element: ResourceElement): void => {
+          const isLoaded = (): void => {
+            if (eventListeners.has(element)) {
+              const { loadHandler, errorHandler } = eventListeners.get(
+                element,
+              ) as EventListeners;
+              element.removeEventListener("load", loadHandler);
+              element.removeEventListener("error", errorHandler);
+              eventListeners.delete(element);
+            }
+
+            loadedResources++;
+            const src =
+              element instanceof HTMLImageElement
+                ? element.src
+                : element instanceof HTMLScriptElement
+                  ? element.src
+                  : element instanceof HTMLLinkElement
+                    ? element.href
+                    : "";
+
+            setCurrentResource(src.split("/").pop() || "");
+            updatePercentage();
+          };
+
+          const loadHandler = isLoaded;
+          const errorHandler = isLoaded;
+
+          if (
+            (element instanceof HTMLImageElement && element.complete) ||
+            (element instanceof HTMLLinkElement && element.sheet) ||
+            (element instanceof HTMLScriptElement && element.onload)
+          ) {
+            isLoaded();
+          } else {
+            element.addEventListener("load", loadHandler);
+            element.addEventListener("error", errorHandler);
+            eventListeners.set(element, { loadHandler, errorHandler });
+          }
+        };
+
+        const resources = collectResources();
+        resourceCount = resources.length;
+
+        setPercentage(5);
+
+        if (resourceCount === 0) {
+          setPercentage(100);
+          setResourcesReady(true);
+          setTimeout(() => setLoading(false), 800);
+          clearTimeout(failsafeTimer);
+          return;
+        }
+
+        resources.forEach((element) =>
+          trackResourceLoad(element as ResourceElement),
+        );
+
+        const observer = new MutationObserver((mutations) => {
+          const newResources: Element[] = [];
+
+          mutations.forEach((mutation) => {
+            if (mutation.type === "childList") {
+              mutation.addedNodes.forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                  const element = node as Element;
+
+                  if (
+                    element.tagName === "IMG" ||
+                    (element.tagName === "SCRIPT" &&
+                      element.hasAttribute("src")) ||
+                    (element.tagName === "LINK" &&
+                      (element.getAttribute("rel") === "stylesheet" ||
+                        (element.getAttribute("rel") === "preload" &&
+                          element.getAttribute("as") === "font")))
+                  ) {
+                    newResources.push(element);
+                  }
+
+                  const childResources = element.querySelectorAll(
+                    'img, script[src], link[rel="stylesheet"], link[rel="preload"][as="font"]',
+                  );
+                  childResources.forEach((el) => newResources.push(el));
+                }
+              });
+            }
+          });
+
+          const filteredNewResources = newResources.filter((el) => {
+            const src =
+              el instanceof HTMLImageElement
+                ? el.src
+                : el instanceof HTMLScriptElement
+                  ? el.src
+                  : el instanceof HTMLLinkElement
+                    ? el.href
+                    : "";
+
+            if (!src || resourcesTracked.has(src)) return false;
+
+            resourcesTracked.add(src);
+            return true;
+          });
+
+          if (filteredNewResources.length > 0) {
+            resourceCount += filteredNewResources.length;
+            filteredNewResources.forEach((element) =>
+              trackResourceLoad(element as ResourceElement),
+            );
+          }
+        });
+
+        observer.observe(document.documentElement, {
+          childList: true,
+          subtree: true,
+        });
+
+        window.addEventListener("load", () => {
+          setTimeout(() => {
+            setPercentage(100);
+            setResourcesReady(true);
+            setTimeout(() => setLoading(false), 500);
+            observer.disconnect();
+          }, 1000);
+        });
+
+        return () => {
+          eventListeners.forEach((handlers, element) => {
+            const { loadHandler, errorHandler } = handlers;
             element.removeEventListener("load", loadHandler);
             element.removeEventListener("error", errorHandler);
-          },
-        );
-        eventListeners.clear();
-
-        setPercentage(100);
-        setTimeout(() => setLoading(false), 300);
+          });
+          observer.disconnect();
+          clearTimeout(failsafeTimer);
+        };
       };
 
-      window.addEventListener("load", handleWindowLoad);
-
-      return () => {
-        eventListeners.forEach(({ loadHandler, errorHandler }, element) => {
-          element.removeEventListener("load", loadHandler);
-          element.removeEventListener("error", errorHandler);
-        });
-        window.removeEventListener("load", handleWindowLoad);
-        clearTimeout(failsafeTimer);
-      };
+      documentReadyCheck();
     }
 
     return () => clearTimeout(failsafeTimer);
@@ -181,6 +302,16 @@ const LoadingScreen = (): JSX.Element => {
           >
             {percentage}%
           </motion.div>
+
+          {/* Additional message when resources are ready */}
+          {resourcesReady && (
+            <motion.div
+              className="absolute top-6 text-center w-full text-woodsmoke-950 dark:text-white text-xl"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            ></motion.div>
+          )}
         </motion.div>
       )}
     </AnimatePresence>
