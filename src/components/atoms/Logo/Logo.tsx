@@ -1,6 +1,4 @@
-"use client";
-
-import Link from "next/link";
+import { createNavigation } from "next-intl/navigation";
 import { motion } from "framer-motion";
 import { memo } from "react";
 
@@ -9,20 +7,21 @@ interface LogoProps {
 }
 
 const Logo = ({ className = "" }: LogoProps) => {
+  const { Link } = createNavigation();
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className={className}
+    <Link
+      href="/"
+      className={`inline-block ${className}`}
     >
-      <Link
-        href="/"
-        className="text-xl font-medium tracking-tight"
+      <motion.span
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="text-xl font-medium tracking-tight block"
       >
         Dimas<span className="text-gray-400">.</span>
-      </Link>
-    </motion.div>
+      </motion.span>
+    </Link>
   );
 };
 

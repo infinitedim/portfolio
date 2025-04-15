@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo, SettingsFAB, SocialLinks } from "@/components/atoms";
 import { memo, useEffect, useState } from "react";
@@ -56,12 +55,7 @@ const Header = () => {
       >
         <div className="container mx-auto flex items-center justify-between px-6 md:px-12 lg:px-16 py-4">
           <div className="flex items-center space-x-6">
-            <Link
-              href="/"
-              className="font-bold text-xl text-gray-900 dark:text-white"
-            >
-              <Logo />
-            </Link>
+            <Logo />
           </div>
 
           {/* Desktop navigation */}

@@ -1,37 +1,57 @@
 "use client";
 
-import { JSX, memo, useEffect, useState } from "react";
+import { JSX, memo, useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const LoadingScreen = (): JSX.Element => {
   const [loading, setLoading] = useState(true);
   const [percentage, setPercentage] = useState(0);
-  const [currentResource, setCurrentResource] = useState("");
   const [resourcesReady, setResourcesReady] = useState(false);
+  const isMounted = useRef(false);
 
   useEffect(() => {
+    // Mark component as mounted
+    isMounted.current = true;
+
     const failsafeTimer = setTimeout(() => {
-      setLoading(false);
+      if (isMounted.current) {
+        setLoading(false);
+      }
     }, 15000);
 
     if (process.env.NODE_ENV === "development") {
       let progress = 0;
       const interval = setInterval(() => {
+        if (!isMounted.current) {
+          clearInterval(interval);
+          return;
+        }
+
         progress += Math.random() * 3;
         if (progress >= 100) {
           progress = 100;
           clearInterval(interval);
           setTimeout(() => {
-            setResourcesReady(true);
-            setTimeout(() => setLoading(false), 500);
+            if (isMounted.current) {
+              setResourcesReady(true);
+              setTimeout(() => {
+                if (isMounted.current) {
+                  setLoading(false);
+                }
+              }, 500);
+            }
           }, 800);
         }
-        setPercentage(Math.floor(progress));
+
+        if (isMounted.current) {
+          setPercentage(Math.floor(progress));
+        }
       }, 150); // Slower interval
 
       return () => {
         clearInterval(interval);
         clearTimeout(failsafeTimer);
+        isMounted.current = false;
       };
     }
 
@@ -48,6 +68,8 @@ const LoadingScreen = (): JSX.Element => {
       };
 
       const startResourceTracking = () => {
+        if (!isMounted.current) return;
+
         document.removeEventListener("DOMContentLoaded", startResourceTracking);
 
         let resourceCount = 0;
@@ -56,7 +78,7 @@ const LoadingScreen = (): JSX.Element => {
         const resourcesTracked = new Set();
 
         const updatePercentage = () => {
-          if (resourceCount === 0) return;
+          if (resourceCount === 0 || !isMounted.current) return;
 
           const newPercentage = Math.min(
             Math.floor((loadedResources / resourceCount) * 100),
@@ -70,7 +92,11 @@ const LoadingScreen = (): JSX.Element => {
             setPercentage(100);
             setResourcesReady(true);
             // Add a small delay for visual effect
-            setTimeout(() => setLoading(false), 800);
+            setTimeout(() => {
+              if (isMounted.current) {
+                setLoading(false);
+              }
+            }, 800);
           }
         };
 
@@ -134,16 +160,7 @@ const LoadingScreen = (): JSX.Element => {
             }
 
             loadedResources++;
-            const src =
-              element instanceof HTMLImageElement
-                ? element.src
-                : element instanceof HTMLScriptElement
-                  ? element.src
-                  : element instanceof HTMLLinkElement
-                    ? element.href
-                    : "";
 
-            setCurrentResource(src.split("/").pop() || "");
             updatePercentage();
           };
 
@@ -166,12 +183,20 @@ const LoadingScreen = (): JSX.Element => {
         const resources = collectResources();
         resourceCount = resources.length;
 
-        setPercentage(5);
+        if (isMounted.current) {
+          setPercentage(5);
+        }
 
         if (resourceCount === 0) {
-          setPercentage(100);
-          setResourcesReady(true);
-          setTimeout(() => setLoading(false), 800);
+          if (isMounted.current) {
+            setPercentage(100);
+            setResourcesReady(true);
+            setTimeout(() => {
+              if (isMounted.current) {
+                setLoading(false);
+              }
+            }, 800);
+          }
           clearTimeout(failsafeTimer);
           return;
         }
@@ -181,6 +206,11 @@ const LoadingScreen = (): JSX.Element => {
         );
 
         const observer = new MutationObserver((mutations) => {
+          if (!isMounted.current) {
+            observer.disconnect();
+            return;
+          }
+
           const newResources: Element[] = [];
 
           mutations.forEach((mutation) => {
@@ -239,30 +269,44 @@ const LoadingScreen = (): JSX.Element => {
           subtree: true,
         });
 
-        window.addEventListener("load", () => {
+        const windowLoadHandler = () => {
           setTimeout(() => {
-            setPercentage(100);
-            setResourcesReady(true);
-            setTimeout(() => setLoading(false), 500);
+            if (isMounted.current) {
+              setPercentage(100);
+              setResourcesReady(true);
+              setTimeout(() => {
+                if (isMounted.current) {
+                  setLoading(false);
+                }
+              }, 500);
+            }
             observer.disconnect();
           }, 1000);
-        });
+        };
+
+        window.addEventListener("load", windowLoadHandler);
 
         return () => {
-          eventListeners.forEach((handlers, element) => {
-            const { loadHandler, errorHandler } = handlers;
-            element.removeEventListener("load", loadHandler);
-            element.removeEventListener("error", errorHandler);
-          });
-          observer.disconnect();
-          clearTimeout(failsafeTimer);
+          if (isMounted.current) {
+            eventListeners.forEach((handlers, element) => {
+              const { loadHandler, errorHandler } = handlers;
+              element.removeEventListener("load", loadHandler);
+              element.removeEventListener("error", errorHandler);
+            });
+            window.removeEventListener("load", windowLoadHandler);
+            observer.disconnect();
+            clearTimeout(failsafeTimer);
+          }
         };
       };
 
       documentReadyCheck();
     }
 
-    return () => clearTimeout(failsafeTimer);
+    return () => {
+      clearTimeout(failsafeTimer);
+      isMounted.current = false;
+    };
   }, []);
 
   return (
@@ -275,22 +319,6 @@ const LoadingScreen = (): JSX.Element => {
             transition: { duration: 0.8, ease: "easeInOut" },
           }}
         >
-          {/* Informasi sumber daya yang sedang dimuat */}
-          <div className="absolute left-6 bottom-6 text-woodsmoke-950 dark:text-white text-sm max-w-[60%] overflow-hidden">
-            {currentResource && (
-              <motion.div
-                key={currentResource}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-              >
-                Loading: {currentResource}
-              </motion.div>
-            )}
-          </div>
-
-          {/* Persentase loading di kanan bawah */}
           <motion.div
             className="absolute right-6 bottom-6 dark:text-white text-woodsmoke-950 font-['Inter'] font-bold text-4xl md:text-9xl"
             initial={{ opacity: 0, scale: 0.8 }}
@@ -302,8 +330,6 @@ const LoadingScreen = (): JSX.Element => {
           >
             {percentage}%
           </motion.div>
-
-          {/* Additional message when resources are ready */}
           {resourcesReady && (
             <motion.div
               className="absolute top-6 text-center w-full text-woodsmoke-950 dark:text-white text-xl"
