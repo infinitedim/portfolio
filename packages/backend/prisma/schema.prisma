@@ -1,0 +1,222 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Admin User with enhanced profile and security features
+model AdminUser {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  firstName     String?
+  lastName      String?
+  avatar        String?
+  role          AdminRole @default(ADMIN)
+  isActive      Boolean   @default(true)
+  lastLoginAt   DateTime?
+  lastLoginIp   String?
+  loginAttempts Int       @default(0)
+  lockedUntil   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  profile    AdminProfile?
+  allowedIps AllowedIp[]
+  sessions   AdminSession[]
+  auditLogs  AuditLog[]
+  blogPosts  BlogPost[]
+
+  @@index([email])
+  @@index([isActive])
+  @@index([role])
+  @@map("admin_users")
+}
+
+// Admin Profile for additional information
+model AdminProfile {
+  id          String   @id @default(cuid())
+  adminUserId String   @unique
+  bio         String?
+  phone       String?
+  timezone    String   @default("UTC")
+  language    String   @default("en")
+  preferences Json? // Store UI preferences, theme, etc.
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@map("admin_profiles")
+}
+
+// IP Allowlist for admin access
+model AllowedIp {
+  id          String    @id @default(cuid())
+  adminUserId String
+  ipAddress   String
+  description String?
+  isActive    Boolean   @default(true)
+  lastUsedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@unique([adminUserId, ipAddress])
+  @@index([ipAddress])
+  @@index([isActive])
+  @@index([adminUserId])
+  @@map("allowed_ips")
+}
+
+// Admin Sessions for better security
+model AdminSession {
+  id          String   @id @default(cuid())
+  adminUserId String
+  token       String   @unique
+  ipAddress   String
+  userAgent   String?
+  expiresAt   DateTime
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([expiresAt])
+  @@index([isActive])
+  @@index([adminUserId])
+  @@map("admin_sessions")
+}
+
+// Audit Log for security tracking
+model AuditLog {
+  id          String   @id @default(cuid())
+  adminUserId String?
+  action      String
+  resource    String
+  resourceId  String?
+  details     Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  url         String?
+  method      String?
+  statusCode  Int?
+  sessionId   String?
+  metadata    Json?
+
+  // Relations
+  adminUser AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
+
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+  @@index([adminUserId])
+  @@map("audit_logs")
+}
+
+// Enhanced Blog Post with better performance
+model BlogPost {
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  summary         String?
+  contentMd       String?
+  contentHtml     String?
+  published       Boolean   @default(false)
+  publishedAt     DateTime?
+  authorId        String?
+  tags            String[]
+  metaTitle       String?
+  metaDescription String?
+  featuredImage   String?
+  readTime        Int? // Estimated reading time in minutes
+  viewCount       Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  author AdminUser? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([slug])
+  @@index([published])
+  @@index([publishedAt(sort: Desc)])
+  @@index([authorId])
+  @@index([tags])
+  @@index([createdAt(sort: Desc)])
+  @@index([viewCount(sort: Desc)])
+  @@index([published, publishedAt(sort: Desc)])
+  @@index([published, viewCount(sort: Desc)])
+  @@map("blog_posts")
+}
+
+// Enhanced Project with better structure
+model Project {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  description String?
+  content     String? // Rich content/description
+  tech        String[]
+  featured    Boolean       @default(false)
+  status      ProjectStatus @default(ACTIVE)
+  url         String?
+  githubUrl   String?
+  demoUrl     String?
+  imageUrl    String?
+  sortOrder   Int           @default(0)
+  viewCount   Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([slug])
+  @@index([featured])
+  @@index([status])
+  @@index([sortOrder])
+  @@index([createdAt(sort: Desc)])
+  @@index([viewCount(sort: Desc)])
+  @@index([featured, status])
+  @@index([featured, sortOrder])
+  @@index([status, createdAt(sort: Desc)])
+  @@map("projects")
+}
+
+// Settings table for global configuration
+model Setting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([key])
+  @@index([isPublic])
+  @@map("settings")
+}
+
+// Enums
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum ProjectStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+  DRAFT
+}

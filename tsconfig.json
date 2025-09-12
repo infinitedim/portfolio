@@ -1,0 +1,60 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es6"
+    ],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "noImplicitAny": false,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@portfolio/frontend/*": [
+        "./packages/frontend/src/*"
+      ],
+      "@portfolio/backend/*": [
+        "./packages/backend/src/*"
+      ],
+      "@portfolio/scripts/*": [
+        "./scripts/*"
+      ],
+      "@portfolio/public/*": [
+        "./packages/frontend/public/*"
+      ],
+      "@portfolio/trpc/*": [
+        "./tools/trpc/src/*"
+      ],
+      "@portfolio/logger/*": [
+        "./tools/logger/src/*"
+      ]
+    },
+    "incremental": true
+  },
+  "extends": "@total-typescript/tsconfig/bundler/dom/app",
+  "include": [
+    "next-env.d.ts",
+    "ts-reset.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "tailwind.config.ts"
+  ],
+  "exclude": [
+    "node_modules/**/*"
+  ]
+}

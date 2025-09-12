@@ -1,0 +1,184 @@
+import { Controller, Get, HttpCode, HttpStatus } from "@nestjs/common";
+import { HealthService } from "./health.service";
+
+@Controller("health")
+export class HealthController {
+  constructor(private readonly healthService: HealthService) {}
+
+  /**
+   * Basic health check endpoint
+   * @returns {Promise<HealthCheckResult>} - The health check result
+   */
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  async health() {
+    const result = await this.healthService.checkHealth();
+    return {
+      status: result.status,
+      timestamp: result.timestamp,
+      uptime: result.uptime,
+      version: result.version,
+      environment: result.environment,
+    };
+  }
+
+  /**
+   * Detailed health check endpoint
+   * @returns {Promise<HealthCheckResult>} - The detailed health check result
+   */
+  @Get("detailed")
+  @HttpCode(HttpStatus.OK)
+  async detailedHealth() {
+    return this.healthService.getDetailedHealth();
+  }
+
+  /**
+   * Simple ping endpoint
+   * @returns {Promise<{ message: string; timestamp: string }>} - The ping result
+   */
+  @Get("ping")
+  @HttpCode(HttpStatus.OK)
+  async ping() {
+    return this.healthService.ping();
+  }
+
+  /**
+   * Database health check endpoint
+   * @returns {Promise<HealthCheckResult>} - The database health check result
+   */
+  @Get("database")
+  @HttpCode(HttpStatus.OK)
+  async databaseHealth() {
+    const result = await this.healthService.checkHealth();
+    return {
+      status: result.checks.database.status,
+      timestamp: result.timestamp,
+      responseTime: result.checks.database.responseTime,
+      details: result.checks.database.details,
+      error: result.checks.database.error,
+    };
+  }
+
+  /**
+   * Redis health check endpoint
+   * @returns {Promise<HealthCheckResult>} - The Redis health check result
+   */
+  @Get("redis")
+  @HttpCode(HttpStatus.OK)
+  async redisHealth() {
+    const result = await this.healthService.checkHealth();
+    return {
+      status: result.checks.redis.status,
+      timestamp: result.timestamp,
+      responseTime: result.checks.redis.responseTime,
+      details: result.checks.redis.details,
+      error: result.checks.redis.error,
+    };
+  }
+
+  /**
+   * Memory health check endpoint
+   * @returns {Promise<HealthCheckResult>} - The memory health check result
+   */
+  @Get("memory")
+  @HttpCode(HttpStatus.OK)
+  async memoryHealth() {
+    const result = await this.healthService.checkHealth();
+    return {
+      status: result.checks.memory.status,
+      timestamp: result.timestamp,
+      responseTime: result.checks.memory.responseTime,
+      details: result.checks.memory.details,
+      error: result.checks.memory.error,
+    };
+  }
+
+  /**
+   * System health check endpoint
+   * @returns {Promise<HealthCheckResult>} - The system health check result
+   */
+  @Get("system")
+  @HttpCode(HttpStatus.OK)
+  async systemHealth() {
+    const result = await this.healthService.checkHealth();
+    return {
+      status: result.checks.system.status,
+      timestamp: result.timestamp,
+      responseTime: result.checks.system.responseTime,
+      details: result.checks.system.details,
+      error: result.checks.system.error,
+    };
+  }
+
+  /**
+   * Readiness probe endpoint
+   * @returns {Promise<HealthCheckResult>} - The readiness probe result
+   */
+  @Get("ready")
+  @HttpCode(HttpStatus.OK)
+  async readiness() {
+    const result = await this.healthService.checkHealth();
+
+    // Service is ready if database and Redis are healthy
+    const isReady =
+      result.checks.database.status === "healthy" &&
+      result.checks.redis.status === "healthy";
+
+    if (!isReady) {
+      return {
+        status: "unhealthy",
+        timestamp: result.timestamp,
+        error: "Database or Redis is not healthy",
+        checks: {
+          database: result.checks.database.status,
+          redis: result.checks.redis.status,
+        },
+      };
+    }
+
+    return {
+      status: "healthy",
+      timestamp: result.timestamp,
+      uptime: result.uptime,
+    };
+  }
+
+  /**
+   * Liveness probe endpoint
+   * @returns {Promise<HealthCheckResult>} - The liveness probe result
+   */
+  @Get("live")
+  @HttpCode(HttpStatus.OK)
+  async liveness() {
+    const result = await this.healthService.checkHealth();
+
+    // Service is alive if it can respond and basic checks pass
+    const isAlive = result.status !== "unhealthy";
+
+    if (!isAlive) {
+      return {
+        status: "unhealthy",
+        timestamp: result.timestamp,
+        error: "Service is unhealthy",
+        overallStatus: result.status,
+      };
+    }
+
+    return {
+      status: "healthy",
+      timestamp: result.timestamp,
+      uptime: result.uptime,
+      overallStatus: result.status,
+    };
+  }
+
+  /**
+   * Database connection pool status endpoint
+   * @returns {Promise<object>} - The database connection pool status
+   */
+  @Get("database/pool")
+  @HttpCode(HttpStatus.OK)
+  async databasePoolHealth() {
+    return this.healthService.getDatabasePoolStatus();
+  }
+}

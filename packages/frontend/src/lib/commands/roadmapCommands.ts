@@ -1,0 +1,498 @@
+import type { Command } from "@portfolio/frontend/src/types/terminal";
+import { generateId } from "@portfolio/frontend/src/lib/utils/utils";
+import type { RoadmapSkill } from "@portfolio/frontend/src/types/roadmap";
+
+// Lazy load the roadmap service to avoid SSR issues
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let roadmapService: any = null;
+let roadmapServicePromise: Promise<unknown> | null = null;
+
+const getRoadmapService = async () => {
+  if (typeof window === "undefined") {
+    return null; // Return null during SSR
+  }
+
+  if (roadmapService) {
+    return roadmapService;
+  }
+
+  if (roadmapServicePromise) {
+    return await roadmapServicePromise;
+  }
+
+  roadmapServicePromise = (async () => {
+    try {
+      // Use dynamic import instead of require
+      const { RoadmapService } = await import(
+        "@portfolio/frontend/src/lib/services/roadmapService"
+      );
+      roadmapService = RoadmapService.getInstance();
+      return roadmapService;
+    } catch (error) {
+      console.error("Failed to load RoadmapService:", error);
+      return null;
+    }
+  })();
+
+  return await roadmapServicePromise;
+};
+
+// Helper function to get service with error handling
+const getServiceOrError = async () => {
+  try {
+    const service = await getRoadmapService();
+    if (!service) {
+      return {
+        error: true,
+        message:
+          "Roadmap service is not available during server-side rendering",
+      };
+    }
+
+    // MODIFICATION: Validate service has required methods
+    if (typeof service.getUserProgress !== "function") {
+      return {
+        error: true,
+        message: "Service method getUserProgress not available",
+      };
+    }
+
+    if (typeof service.getCategoryProgress !== "function") {
+      return {
+        error: true,
+        message: "Service method getCategoryProgress not available",
+      };
+    }
+
+    if (typeof service.updateSkillProgress !== "function") {
+      return {
+        error: true,
+        message: "Service method updateSkillProgress not available",
+      };
+    }
+
+    if (typeof service.getSkillsByStatus !== "function") {
+      return {
+        error: true,
+        message: "Service method getSkillsByStatus not available",
+      };
+    }
+
+    if (typeof service.refreshData !== "function") {
+      return {
+        error: true,
+        message: "Service method refreshData not available",
+      };
+    }
+
+    return { service, error: false };
+  } catch (error) {
+    return {
+      error: true,
+      message: `Failed to load roadmap service: ${error instanceof Error ? error.message : "Unknown error"}`,
+    };
+  }
+};
+
+export const roadmapCommand: Command = {
+  name: "roadmap",
+  category: "skills",
+  description: "View roadmap progress and manage skills",
+  usage: "roadmap [overview|skills|update|search] [args...]",
+  async execute(args) {
+    const subcommand = args[0]?.toLowerCase();
+
+    if (!subcommand || subcommand === "overview") {
+      const { service, error, message } = await getServiceOrError();
+      if (error) {
+        return {
+          type: "error",
+          content: message || "An unknown error occurred",
+          timestamp: new Date(),
+          id: generateId(),
+        };
+      }
+      const data = await service.getUserProgress();
+
+      const overviewText = [
+        "🗺️ Roadmap Progress Overview",
+        "═".repeat(50),
+        "",
+        `👤 Profile: ${data.username}`,
+        `📊 Overall Progress: ${Math.round(data.totalProgress)}%`,
+        `✅ Completed Skills: ${data.completedSkills}/${data.totalSkills}`,
+        `📅 Last Updated: ${data.lastUpdated.toLocaleDateString()}`,
+        "",
+        "📋 Categories:",
+        ...data.categories.map((cat) => {
+          const completed = cat.skills.filter(
+            (s) => s.status === "completed",
+          ).length;
+          const total = cat.skills.length;
+          const progressBar =
+            "▓".repeat(Math.floor(cat.progress / 10)) +
+            "░".repeat(10 - Math.floor(cat.progress / 10));
+          return `  ${cat.name.padEnd(20)} [${progressBar}] ${Math.round(cat.progress)}% (${completed}/${total})`;
+        }),
+        "",
+        "💡 Available commands:",
+        "  roadmap skills [category]     - List skills by category",
+        "  roadmap update <skill> <status> - Update skill status",
+        "  roadmap search <query>        - Search skills",
+        "  roadmap completed             - Show completed skills",
+        "  roadmap progress              - Show in-progress skills",
+      ].join("\n");
+
+      return {
+        type: "success",
+        content: overviewText,
+        timestamp: new Date(),
+        id: generateId(),
+      };
+    }
+
+    if (subcommand === "skills") {
+      const { service, error, message } = await getServiceOrError();
+      if (error) {
+        return {
+          type: "error",
+          content: message || "An unknown error occurred",
+          timestamp: new Date(),
+          id: generateId(),
+        };
+      }
+      const category = args[1]?.toLowerCase();
+      const data = await service.getUserProgress();
+
+      if (category) {
+        const categoryData = await service.getCategoryProgress(category);
+        if (!categoryData) {
+          return {
+            type: "error",
+            content: `Category "${category}" not found. Available: ${data.categories.map((c) => c.id).join(", ")}`,
+            timestamp: new Date(),
+            id: generateId(),
+          };
+        }
+
+        const skillsText = [
+          `🛠️ ${categoryData.name.toUpperCase()} Skills`,
+          "═".repeat(40),
+          "",
+          ...categoryData.skills.map((skill) => {
+            const statusIcon =
+              skill.status === "completed"
+                ? "✅"
+                : skill.status === "in-progress"
+                  ? "🔄"
+                  : "⭕";
+            const progressBar =
+              "▓".repeat(Math.floor(skill.progress / 10)) +
+              "░".repeat(10 - Math.floor(skill.progress / 10));
+            return `  ${statusIcon} ${skill.name.padEnd(15)} [${progressBar}] ${skill.progress}%`;
+          }),
+        ].join("\n");
+
+        return {
+          type: "success",
+          content: skillsText,
+          timestamp: new Date(),
+          id: generateId(),
+        };
+      } else {
+        const skillsText = [
+          "🛠️ All Skills by Category",
+          "═".repeat(40),
+          "",
+          ...data.categories.flatMap((cat) => [
+            `📁 ${cat.name}:`,
+            ...cat.skills.map((skill) => {
+              const statusIcon =
+                skill.status === "completed"
+                  ? "✅"
+                  : skill.status === "in-progress"
+                    ? "🔄"
+                    : "⭕";
+              return `  ${statusIcon} ${skill.name} (${skill.progress}%)`;
+            }),
+            "",
+          ]),
+        ].join("\n");
+
+        return {
+          type: "success",
+          content: skillsText,
+          timestamp: new Date(),
+          id: generateId(),
+        };
+      }
+    }
+
+    if (subcommand === "update") {
+      const { service, error, message } = await getServiceOrError();
+      if (error) {
+        return {
+          type: "error",
+          content: message || "An unknown error occurred",
+          timestamp: new Date(),
+          id: generateId(),
+        };
+      }
+
+      const skillName = args[1];
+      const status = args[2] as RoadmapSkill["status"];
+
+      if (!skillName || !status) {
+        return {
+          type: "error",
+          content: [
+            "Usage: roadmap update <skill> <status>",
+            "",
+            "Status options: not-started, in-progress, completed",
+            "Example: roadmap update react completed",
+          ].join("\n"),
+          timestamp: new Date(),
+          id: generateId(),
+        };
+      }
+
+      const validStatuses = ["not-started", "in-progress", "completed"];
+      if (!validStatuses.includes(status)) {
+        return {
+          type: "error",
+          content: `Invalid status "${status}". Valid options: ${validStatuses.join(", ")}`,
+          timestamp: new Date(),
+          id: generateId(),
+        };
+      }
+
+      const success = await service.updateSkillProgress(
+        skillName.toLowerCase(),
+        {
+          skillId: skillName.toLowerCase(),
+          status,
+          progress:
+            status === "completed" ? 100 : status === "in-progress" ? 50 : 0,
+        },
+      );
+
+      if (success) {
+        return {
+          type: "success",
+          content: [
+            `✅ Updated ${skillName} status to "${status}"`,
+            "",
+            "💾 Progress saved automatically",
+            "📊 Use 'roadmap overview' to see updated progress",
+          ].join("\n"),
+          timestamp: new Date(),
+          id: generateId(),
+        };
+      } else {
+        return {
+          type: "error",
+          content: `Skill "${skillName}" not found. Use 'roadmap skills' to see available skills.`,
+          timestamp: new Date(),
+          id: generateId(),
+        };
+      }
+    }
+
+    if (subcommand === "search") {
+      const { service, error, message } = await getServiceOrError();
+      if (error) {
+        return {
+          type: "error",
+          content: message || "An unknown error occurred",
+          timestamp: new Date(),
+          id: generateId(),
+        };
+      }
+
+      const query = args.slice(1).join(" ");
+      if (!query) {
+        return {
+          type: "error",
+          content:
+            "Usage: roadmap search <query>\nExample: roadmap search react",
+          timestamp: new Date(),
+          id: generateId(),
+        };
+      }
+
+      // Simple search implementation
+      const data = await service.getUserProgress();
+      const results: RoadmapSkill[] = [];
+
+      data.categories.forEach((category) => {
+        category.skills.forEach((skill) => {
+          if (
+            skill.name.toLowerCase().includes(query.toLowerCase()) ||
+            skill.description.toLowerCase().includes(query.toLowerCase())
+          ) {
+            results.push(skill);
+          }
+        });
+      });
+
+      if (results.length === 0) {
+        return {
+          type: "info",
+          content: `No skills found matching "${query}"`,
+          timestamp: new Date(),
+          id: generateId(),
+        };
+      }
+
+      const searchText = [
+        `🔍 Search Results for "${query}"`,
+        "═".repeat(40),
+        "",
+        ...results.map((skill) => {
+          const statusIcon =
+            skill.status === "completed"
+              ? "✅"
+              : skill.status === "in-progress"
+                ? "🔄"
+                : "⭕";
+          return `  ${statusIcon} ${skill.name} (${skill.category}) - ${skill.progress}%`;
+        }),
+      ].join("\n");
+
+      return {
+        type: "success",
+        content: searchText,
+        timestamp: new Date(),
+        id: generateId(),
+      };
+    }
+
+    if (subcommand === "completed") {
+      const { service, error, message } = await getServiceOrError();
+      if (error) {
+        return {
+          type: "error",
+          content: message || "An unknown error occurred",
+          timestamp: new Date(),
+          id: generateId(),
+        };
+      }
+      const completedSkills = await service.getSkillsByStatus("completed");
+
+      const completedText = [
+        "✅ Completed Skills",
+        "═".repeat(30),
+        "",
+        ...completedSkills.map(
+          (skill) =>
+            `  ✅ ${skill.name} (${skill.category}) - Recently completed`,
+        ),
+        "",
+        `Total: ${completedSkills.length} skills completed`,
+      ].join("\n");
+
+      return {
+        type: "success",
+        content: completedText,
+        timestamp: new Date(),
+        id: generateId(),
+      };
+    }
+
+    if (subcommand === "progress" || subcommand === "in-progress") {
+      const { service, error, message } = await getServiceOrError();
+      if (error) {
+        return {
+          type: "error",
+          content: message || "An unknown error occurred",
+          timestamp: new Date(),
+          id: generateId(),
+        };
+      }
+      const inProgressSkills = await service.getSkillsByStatus("in-progress");
+
+      const progressText = [
+        "🔄 Skills In Progress",
+        "═".repeat(30),
+        "",
+        ...inProgressSkills.map((skill) => {
+          const progressBar =
+            "▓".repeat(Math.floor(skill.progress / 10)) +
+            "░".repeat(10 - Math.floor(skill.progress / 10));
+          return `  🔄 ${skill.name.padEnd(15)} [${progressBar}] ${skill.progress}%`;
+        }),
+        "",
+        `Total: ${inProgressSkills.length} skills in progress`,
+      ].join("\n");
+
+      return {
+        type: "success",
+        content: progressText,
+        timestamp: new Date(),
+        id: generateId(),
+      };
+    }
+
+    return {
+      type: "error",
+      content: [
+        `Unknown subcommand: ${subcommand}`,
+        "",
+        "Available subcommands:",
+        "  overview  - Show progress overview",
+        "  skills    - List skills by category",
+        "  update    - Update skill status",
+        "  search    - Search skills",
+        "  completed - Show completed skills",
+        "  progress  - Show in-progress skills",
+      ].join("\n"),
+      timestamp: new Date(),
+      id: generateId(),
+    };
+  },
+};
+
+export const progressCommand: Command = {
+  name: "progress",
+  description: "Quick view of current progress",
+  aliases: ["prog"],
+  category: "skills",
+  async execute() {
+    const { service, error, message } = await getServiceOrError();
+    if (error) {
+      return {
+        type: "error",
+        content: message || "An unknown error occurred",
+        timestamp: new Date(),
+        id: generateId(),
+      };
+    }
+    const data = await service.getUserProgress();
+    const inProgress = await service.getSkillsByStatus("in-progress");
+    const completed = await service.getSkillsByStatus("completed");
+
+    const progressText = [
+      "📊 Quick Progress Summary",
+      "═".repeat(35),
+      "",
+      `🎯 Overall Progress: ${Math.round(data.totalProgress)}%`,
+      `✅ Completed: ${completed.length} skills`,
+      `🔄 In Progress: ${inProgress.length} skills`,
+      `⭕ Not Started: ${data.totalSkills - completed.length - inProgress.length} skills`,
+      "",
+      "🔥 Recent Activity:",
+      ...completed
+        .slice(-3)
+        .map((skill) => `  ✅ ${skill.name} - Recently completed`),
+      "",
+      "💡 Use 'roadmap overview' for detailed view",
+    ].join("\n");
+
+    return {
+      type: "success",
+      content: progressText,
+      timestamp: new Date(),
+      id: generateId(),
+    };
+  },
+};
