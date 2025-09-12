@@ -1,11 +1,11 @@
 import { Module } from "@nestjs/common";
 import { WinstonModule } from "nest-winston";
-// import {
-//   PortfolioLoggerModule,
-//   PortfolioLoggerService,
-//   createNestWinstonConfig,
-//   type LogLevel
-// } from "@portfolio/logger";
+import {
+  PortfolioLoggerModule,
+  PortfolioLoggerService,
+  createNestWinstonConfig,
+  type LogLevel,
+} from "@portfolio/logger";
 import { LoggingService } from "./logging.service";
 
 /**

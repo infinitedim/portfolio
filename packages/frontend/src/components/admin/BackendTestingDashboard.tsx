@@ -3,13 +3,13 @@
 
 import { useState, useEffect, JSX } from "react";
 import type { ThemeConfig } from "@portfolio/frontend/src/types/theme";
-import { ServiceSelector } from "./testing/ServiceSelector";
-import { MethodSelector } from "./testing/MethodSelector";
-import { ParameterInput } from "./testing/ParameterInput";
-import { RequestResponsePanel } from "./testing/RequestResponsePanel";
-import { GrpcClient } from "./testing/GrpcClient";
-import { ErrorHandler } from "./testing/ErrorHandler";
-import { ValidationUtils } from "./testing/ValidationUtils";
+import { ServiceSelector } from "./test/ServiceSelector";
+import { MethodSelector } from "./test/MethodSelector";
+import { ParameterInput } from "./test/ParameterInput";
+import { RequestResponsePanel } from "./test/RequestResponsePanel";
+import { GrpcClient } from "./test/GrpcClient";
+import { ErrorHandler } from "./test/ErrorHandler";
+import { ValidationUtils } from "./test/ValidationUtils";
 
 interface BackendTestingDashboardProps {
   themeConfig: ThemeConfig;
@@ -602,11 +602,10 @@ export function BackendTestingDashboard({
               <button
                 onClick={executeRequest}
                 disabled={isLoading}
-                className={`w-full p-3 rounded font-mono text-sm transition-all duration-200 ${
-                  isLoading
+                className={`w-full p-3 rounded font-mono text-sm transition-all duration-200 ${isLoading
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:scale-105"
-                }`}
+                  }`}
                 style={{
                   backgroundColor: themeConfig.colors.accent,
                   color: themeConfig.colors.bg,

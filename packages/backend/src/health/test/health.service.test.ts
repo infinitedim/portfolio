@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { HealthService } from "../health.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { RedisService } from "../../redis/redis.service";
+import { DatabaseConnectionManager } from "../../prisma/database-connection-manager.service";
 
 // Mock the services
 const mockPrismaService = {
@@ -27,6 +28,9 @@ describe("HealthService", () => {
   let redisService: RedisService;
 
   beforeEach(async () => {
+    // Ensure mocks are cleared before creating the testing module
+    vi.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HealthService,
@@ -37,6 +41,12 @@ describe("HealthService", () => {
         {
           provide: RedisService,
           useValue: mockRedisService,
+        },
+        {
+          provide: DatabaseConnectionManager,
+          useValue: {
+            // minimal stub: methods used by service (if any) can be added later
+          },
         },
       ],
     }).compile();

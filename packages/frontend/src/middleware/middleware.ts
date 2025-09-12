@@ -1,12 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
-import {
-  generateNonce,
-  getSecurityHeaders,
-  getCORSHeaders,
-} from "@portfolio/backend/src/security/csp";
-// Note: Use server-side logger for middleware
-import { logger } from "@portfolio/backend/src/logging/logger";
+// Minimal, frontend-friendly implementations of CSP/CORS helpers.
+function generateNonce() {
+  return crypto.randomUUID();
+}
+
+function getSecurityHeaders(nonce: string, _isDev: boolean) {
+  return {
+    "Content-Security-Policy": `default-src 'self'; script-src 'self' 'nonce-${nonce}';`,
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
+  } as Record<string, string>;
+}
+
+function getCORSHeaders(origin: string, allowed: string[]) {
+  return allowed.includes(origin)
+    ? { "Access-Control-Allow-Origin": origin }
+    : {};
+}
+
+// Lightweight logger fallback for middleware environment
+const logger = {
+  warn: (...args: unknown[]) => console.warn(...args),
+  info: (...args: unknown[]) => console.info(...args),
+  error: (...args: unknown[]) => console.error(...args),
+};
 
 /**
  * Enhanced middleware for the application with improved security

@@ -2,16 +2,26 @@
 
 import { useState, useEffect } from "react";
 import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { ThemeConfig } from "../../types/theme";
+
+type TerminalHeaderProps = {
+  onLogout?: () => void;
+  themeConfig?: ThemeConfig;
+};
 
 /**
  *
  */
-export function TerminalHeader() {
+export function TerminalHeader({
+  onLogout: _onLogout,
+  themeConfig: themeProp,
+}: TerminalHeaderProps) {
   const { themeConfig } = useTheme();
+  const resolvedTheme = themeProp ?? themeConfig;
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [systemMetrics, setSystemMetrics] = useState({
-    uptime: 0,
+    uptime: "",
     cpuLoad: [0, 0, 0],
     memoryUsage: 0,
     networkSpeed: 0,
@@ -104,9 +114,9 @@ export function TerminalHeader() {
     <div
       className="border-b px-4 py-2 flex items-center justify-between text-xs font-mono"
       style={{
-        borderColor: themeConfig.colors.border,
-        backgroundColor: themeConfig.colors.bg,
-        color: themeConfig.colors.text,
+        borderColor: resolvedTheme.colors.border,
+        backgroundColor: resolvedTheme.colors.bg,
+        color: resolvedTheme.colors.text,
       }}
     >
       {/* Left side - System info */}
@@ -117,8 +127,8 @@ export function TerminalHeader() {
             style={{
               backgroundColor:
                 systemMetrics.systemStatus === "online"
-                  ? themeConfig.colors.success || "#00ff00"
-                  : themeConfig.colors.error || "#ff0000",
+                  ? resolvedTheme.colors.success || "#00ff00"
+                  : resolvedTheme.colors.error || "#ff0000",
             }}
           />
           <span className="opacity-70">System:</span>
@@ -136,7 +146,7 @@ export function TerminalHeader() {
 
         <div className="flex items-center space-x-2">
           <span className="opacity-70">Uptime:</span>
-          <span style={{ color: themeConfig.colors.accent }}>
+          <span style={{ color: resolvedTheme.colors.accent }}>
             {systemMetrics.uptime}
           </span>
         </div>
@@ -157,7 +167,7 @@ export function TerminalHeader() {
 
         <div className="flex items-center space-x-2">
           <span className="opacity-70">Processes:</span>
-          <span style={{ color: themeConfig.colors.accent }}>
+          <span style={{ color: resolvedTheme.colors.accent }}>
             {systemMetrics.processCount}
           </span>
         </div>
@@ -167,7 +177,7 @@ export function TerminalHeader() {
       <div className="flex items-center space-x-2">
         <span
           className="font-bold"
-          style={{ color: themeConfig.colors.accent }}
+          style={{ color: resolvedTheme.colors.accent }}
         >
           PORTFOLIO ADMIN TERMINAL
         </span>
@@ -220,7 +230,7 @@ export function TerminalHeader() {
 
         <div className="flex items-center space-x-2">
           <span className="opacity-70">NET:</span>
-          <span style={{ color: themeConfig.colors.accent }}>
+          <span style={{ color: resolvedTheme.colors.accent }}>
             {systemMetrics.networkSpeed}MB/s
           </span>
         </div>

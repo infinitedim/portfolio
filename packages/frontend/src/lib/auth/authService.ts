@@ -1,4 +1,4 @@
-import { trpc } from "../trpc";
+import { getTRPCClient } from "../trpc";
 
 export interface AuthUser {
   userId: string;
@@ -63,8 +63,19 @@ class AuthService {
         };
       }
 
-      // Use the tRPC mutation directly
-      const result = await trpc.auth.login.mutate({ email, password });
+      // Use the tRPC client directly (guarded for SSR and missing client)
+      let trpcClient;
+      try {
+        trpcClient = getTRPCClient();
+      } catch {
+        trpcClient = null;
+      }
+
+      if (!trpcClient?.auth?.login?.mutate) {
+        return { success: false, error: "tRPC client unavailable" };
+      }
+
+      const result = await trpcClient.auth.login.mutate({ email, password });
 
       if (result.success && result.accessToken && result.user) {
         this.accessToken = result.accessToken;
@@ -120,7 +131,18 @@ class AuthService {
     }
 
     try {
-      const result = await trpc.auth.refresh.mutate({
+      let trpcClient;
+      try {
+        trpcClient = getTRPCClient();
+      } catch {
+        trpcClient = null;
+      }
+
+      if (!trpcClient?.auth?.refresh?.mutate) {
+        return { success: false, error: "tRPC client unavailable" };
+      }
+
+      const result = await trpcClient.auth.refresh.mutate({
         refreshToken: this.refreshToken,
       });
 
@@ -166,7 +188,18 @@ class AuthService {
   async logout(): Promise<boolean> {
     if (this.accessToken && typeof window !== "undefined") {
       try {
-        await trpc.auth.logout.mutate({ accessToken: this.accessToken });
+        let trpcClient;
+        try {
+          trpcClient = getTRPCClient();
+        } catch {
+          trpcClient = null;
+        }
+
+        if (trpcClient?.auth?.logout?.mutate) {
+          await trpcClient.auth.logout.mutate({
+            accessToken: this.accessToken,
+          });
+        }
       } catch {
         // Ignore logout errors
       }
@@ -196,7 +229,18 @@ class AuthService {
     }
 
     try {
-      const result = await trpc.auth.validate.mutate({
+      let trpcClient;
+      try {
+        trpcClient = getTRPCClient();
+      } catch {
+        trpcClient = null;
+      }
+
+      if (!trpcClient?.auth?.validate?.mutate) {
+        return { success: false, error: "tRPC client unavailable" };
+      }
+
+      const result = await trpcClient.auth.validate.mutate({
         accessToken: this.accessToken,
       });
 
