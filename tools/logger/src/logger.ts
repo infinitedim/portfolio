@@ -73,17 +73,23 @@ function maskValue(value: unknown): unknown {
  * @param {Record<string, unknown>} meta - The metadata to mask
  * @returns {Record<string, unknown>} The masked metadata
  */
-function maskSensitiveData(meta: Record<string, unknown>): Record<string, unknown> {
+function maskSensitiveData(
+  meta: Record<string, unknown>,
+): Record<string, unknown> {
   const out: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(meta)) {
     const isSensitive = SENSITIVE_KEYS.some((sensitive) =>
-      key.toLowerCase().includes(sensitive.toLowerCase())
+      key.toLowerCase().includes(sensitive.toLowerCase()),
     );
 
     if (isSensitive) {
       out[key] = maskValue(value);
-    } else if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+    } else if (
+      typeof value === "object" &&
+      value !== null &&
+      !Array.isArray(value)
+    ) {
       out[key] = maskSensitiveData(value as Record<string, unknown>);
     } else {
       out[key] = value;
@@ -122,11 +128,12 @@ function createWinstonConfig(config: LoggerConfig): LoggerOptions {
           winston.format.colorize({ all: true }),
           winston.format.printf((info) => {
             const { timestamp, level, message, stack, ...meta } = info;
-            const metaStr = Object.keys(meta).length > 0 ? JSON.stringify(meta, null, 2) : "";
+            const metaStr =
+              Object.keys(meta).length > 0 ? JSON.stringify(meta, null, 2) : "";
             return `${timestamp} ${level}: ${message}${stack ? `\n${stack}` : ""}${metaStr ? `\n${metaStr}` : ""}`;
-          })
+          }),
         ),
-      })
+      }),
     );
   }
 
@@ -140,9 +147,9 @@ function createWinstonConfig(config: LoggerConfig): LoggerOptions {
         format: winston.format.combine(
           winston.format.timestamp(),
           winston.format.errors({ stack: true }),
-          winston.format.json()
+          winston.format.json(),
         ),
-      })
+      }),
     );
 
     // Combined log file
@@ -152,9 +159,9 @@ function createWinstonConfig(config: LoggerConfig): LoggerOptions {
         format: winston.format.combine(
           winston.format.timestamp(),
           winston.format.errors({ stack: true }),
-          winston.format.json()
+          winston.format.json(),
         ),
-      })
+      }),
     );
 
     // HTTP log file
@@ -164,9 +171,9 @@ function createWinstonConfig(config: LoggerConfig): LoggerOptions {
         level: "http",
         format: winston.format.combine(
           winston.format.timestamp(),
-          winston.format.json()
+          winston.format.json(),
         ),
-      })
+      }),
     );
   }
 
@@ -177,7 +184,9 @@ function createWinstonConfig(config: LoggerConfig): LoggerOptions {
       winston.format.timestamp(),
       winston.format.errors({ stack: true }),
       winston.format.json(),
-      winston.format.metadata({ fillExcept: ["message", "level", "timestamp"] })
+      winston.format.metadata({
+        fillExcept: ["message", "level", "timestamp"],
+      }),
     ),
     defaultMeta: {
       service,
@@ -218,11 +227,15 @@ class Logger {
     // Handle uncaught exceptions and unhandled rejections in production
     if (this.config.environment === "production") {
       this.winstonLogger.exceptions.handle(
-        new winston.transports.File({ filename: `${this.config.logDir}/exceptions.log` })
+        new winston.transports.File({
+          filename: `${this.config.logDir}/exceptions.log`,
+        }),
       );
 
       this.winstonLogger.rejections.handle(
-        new winston.transports.File({ filename: `${this.config.logDir}/rejections.log` })
+        new winston.transports.File({
+          filename: `${this.config.logDir}/rejections.log`,
+        }),
       );
     }
   }
@@ -233,11 +246,14 @@ class Logger {
    * @param {string} message - The message to log
    * @param {Record<string, unknown>} meta - Optional metadata
    */
-  private log(level: LogLevel, message: string, meta?: Record<string, unknown>): void {
+  private log(
+    level: LogLevel,
+    message: string,
+    meta?: Record<string, unknown>,
+  ): void {
     // Process metadata
-    const processedMeta = meta && this.config.maskSensitiveData
-      ? maskSensitiveData(meta)
-      : meta;
+    const processedMeta =
+      meta && this.config.maskSensitiveData ? maskSensitiveData(meta) : meta;
 
     // Add to buffer
     const entry: LogEntry = {

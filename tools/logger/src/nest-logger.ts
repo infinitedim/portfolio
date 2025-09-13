@@ -30,7 +30,7 @@ import type { LoggerConfig } from "./logger";
   ],
   exports: ["LOGGER"],
 })
-export class PortfolioLoggerModule { }
+export class PortfolioLoggerModule {}
 
 /**
  * Factory function to create a Winston logger configuration for NestJS
