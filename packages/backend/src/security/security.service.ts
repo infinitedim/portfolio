@@ -660,18 +660,32 @@ export class SecurityService {
   async cleanupExpiredKeys(): Promise<number> {
     try {
       const keys = await this.redisService.keys("rate_limit:*");
-      let cleaned = 0;
-
-      for (const key of keys) {
-        const ttl = await this.redisService.ttl(key);
-        if (ttl === -1) {
-          // No expiry set
-          await this.redisService.del(key);
-          cleaned++;
-        }
+      if (keys.length === 0) {
+        return 0;
       }
 
-      return cleaned;
+      // Batch operation to get all TTLs at once (more efficient than individual calls)
+      const pipeline = Array.isArray(keys) ? keys : [];
+      const ttlPromises = pipeline.map((key) => this.redisService.ttl(key));
+      const ttls = await Promise.all(ttlPromises);
+
+      // Identify keys that need to be deleted (TTL = -1 means no expiry set)
+      const keysToDelete: string[] = [];
+      ttls.forEach((ttl, index) => {
+        if (ttl === -1 && keys[index]) {
+          keysToDelete.push(keys[index]);
+        }
+      });
+
+      // Batch delete operations for better performance
+      if (keysToDelete.length > 0) {
+        const deletePromises = keysToDelete.map((key) =>
+          this.redisService.del(key),
+        );
+        await Promise.all(deletePromises);
+      }
+
+      return keysToDelete.length;
     } catch (error) {
       console.error("Cleanup expired keys failed:", error);
       return 0;
@@ -898,34 +912,54 @@ export class SecurityService {
     }
   }
 
-  hashData(data: string, salt?: string): string {
+  async hashData(data: string, salt?: string): Promise<string> {
     const saltBuffer = salt ? Buffer.from(salt, "hex") : crypto.randomBytes(16);
-    const hash = crypto.pbkdf2Sync(data, saltBuffer, 100000, 64, "sha512");
-    return `${saltBuffer.toString("hex")}:${hash.toString("hex")}`;
+
+    return new Promise((resolve, reject) => {
+      crypto.pbkdf2(data, saltBuffer, 100000, 64, "sha512", (err, hash) => {
+        if (err) {
+          reject(new Error(`Hashing failed: ${err.message}`));
+        } else {
+          resolve(`${saltBuffer.toString("hex")}:${hash.toString("hex")}`);
+        }
+      });
+    });
   }
 
-  verifyHash(data: string, hashedData: string): boolean {
+  async verifyHash(data: string, hashedData: string): Promise<boolean> {
     try {
       const [salt, originalHash] = hashedData.split(":");
       if (!salt || !originalHash) {
         throw new Error("Invalid hashed data format");
       }
 
-      const newHash = crypto.pbkdf2Sync(
-        data,
-        Buffer.from(salt, "hex"),
-        100000,
-        64,
-        "sha512",
-      );
+      return new Promise((resolve, reject) => {
+        crypto.pbkdf2(
+          data,
+          Buffer.from(salt, "hex"),
+          100000,
+          64,
+          "sha512",
+          (err, newHash) => {
+            if (err) {
+              reject(new Error(`Hash verification failed: ${err.message}`));
+            } else {
+              const originalHashBuffer = Buffer.from(originalHash, "hex");
 
-      const originalHashBuffer = Buffer.from(originalHash, "hex");
+              if (originalHashBuffer.length !== newHash.length) {
+                resolve(false);
+                return;
+              }
 
-      if (originalHashBuffer.length !== newHash.length) {
-        return false;
-      }
-
-      return crypto.timingSafeEqual(originalHashBuffer, newHash);
+              const isValid = crypto.timingSafeEqual(
+                originalHashBuffer,
+                newHash,
+              );
+              resolve(isValid);
+            }
+          },
+        );
+      });
     } catch (error) {
       console.error("Error verifying hash:", error);
       return false;

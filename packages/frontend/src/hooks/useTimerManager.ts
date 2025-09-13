@@ -1,8 +1,10 @@
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect, useState } from "react";
+import { EnhancedError, ErrorUtils } from "../lib/errors/error-types";
 
 /**
- * Enhanced timer management utility with automatic cleanup
+ * Enhanced timer management utility with automatic cleanup and error handling
  * Prevents memory leaks by tracking and cleaning up all timers
+ * Provides comprehensive error handling for timer operations
  */
 
 interface TimerManager {
@@ -13,15 +15,20 @@ interface TimerManager {
   clearAll: () => void;
   clearAllTimeouts: () => void;
   clearAllIntervals: () => void;
+  // Error handling additions
+  getErrors: () => EnhancedError[];
+  clearErrors: () => void;
+  hasErrors: boolean;
 }
 
 /**
- *
+ * Enhanced timer manager with error handling
  */
 export function useTimerManager(): TimerManager {
   const timeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const intervalsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const idCounterRef = useRef(0);
+  const [errors, setErrors] = useState<Map<string, EnhancedError>>(new Map());
 
   const generateId = useCallback((): string => {
     idCounterRef.current += 1;
@@ -38,10 +45,24 @@ export function useTimerManager(): TimerManager {
         clearTimeout(existingTimeout);
       }
 
-      const timeout = global.setTimeout(() => {
-        callback();
-        timeoutsRef.current.delete(timerId);
-      }, delay);
+      const safeCallback = () => {
+        try {
+          callback();
+          // Clear any previous errors for this timer
+          setErrors((prev) => {
+            const next = new Map(prev);
+            next.delete(timerId);
+            return next;
+          });
+        } catch (error) {
+          const enhancedError = ErrorUtils.enhance(error as Error);
+          setErrors((prev) => new Map(prev).set(timerId, enhancedError));
+        } finally {
+          timeoutsRef.current.delete(timerId);
+        }
+      };
+
+      const timeout = global.setTimeout(safeCallback, delay);
 
       timeoutsRef.current.set(timerId, timeout);
       return timerId;
@@ -59,7 +80,31 @@ export function useTimerManager(): TimerManager {
         clearInterval(existingInterval);
       }
 
-      const interval = global.setInterval(callback, delay);
+      const safeCallback = () => {
+        try {
+          callback();
+          // Clear any previous errors for this timer
+          setErrors((prev) => {
+            const next = new Map(prev);
+            next.delete(timerId);
+            return next;
+          });
+        } catch (error) {
+          const enhancedError = ErrorUtils.enhance(error as Error);
+          setErrors((prev) => new Map(prev).set(timerId, enhancedError));
+
+          // Optionally stop interval on critical error
+          if (enhancedError.severity === "CRITICAL") {
+            const intervalToStop = intervalsRef.current.get(timerId);
+            if (intervalToStop) {
+              global.clearInterval(intervalToStop);
+              intervalsRef.current.delete(timerId);
+            }
+          }
+        }
+      };
+
+      const interval = global.setInterval(safeCallback, delay);
       intervalsRef.current.set(timerId, interval);
       return timerId;
     },
@@ -99,14 +144,67 @@ export function useTimerManager(): TimerManager {
   const clearAll = useCallback((): void => {
     clearAllTimeouts();
     clearAllIntervals();
+    setErrors(new Map()); // Clear all errors too
   }, [clearAllTimeouts, clearAllIntervals]);
 
-  // Cleanup all timers on unmount
+  // Error handling methods
+  const getErrors = useCallback((): EnhancedError[] => {
+    return Array.from(errors.values());
+  }, [errors]);
+
+  const clearErrors = useCallback((): void => {
+    setErrors(new Map());
+  }, []);
+
+  const hasErrors = errors.size > 0;
+
+  // Enhanced cleanup with memory leak prevention
   useEffect(() => {
-    return () => {
-      clearAll();
+    // Store current refs for cleanup
+    const currentTimeouts = timeoutsRef.current;
+    const currentIntervals = intervalsRef.current;
+
+    // Handle page visibility changes to clear timers when hidden
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Clear all timers when page becomes hidden to save resources
+        currentTimeouts.forEach((timeout) => global.clearTimeout(timeout));
+        currentIntervals.forEach((interval) => global.clearInterval(interval));
+      }
     };
-  }, [clearAll]);
+
+    // Handle page unload to ensure cleanup
+    const handleBeforeUnload = () => {
+      currentTimeouts.forEach((timeout) => global.clearTimeout(timeout));
+      currentIntervals.forEach((interval) => global.clearInterval(interval));
+      currentTimeouts.clear();
+      currentIntervals.clear();
+    };
+
+    // Add event listeners for comprehensive cleanup
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    }
+
+    // Cleanup all timers on unmount
+    return () => {
+      // Clear all timers
+      currentTimeouts.forEach((timeout) => global.clearTimeout(timeout));
+      currentIntervals.forEach((interval) => global.clearInterval(interval));
+      currentTimeouts.clear();
+      currentIntervals.clear();
+
+      // Remove event listeners
+      if (typeof document !== "undefined") {
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange,
+        );
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+      }
+    };
+  }, []);
 
   return {
     setTimeout,
@@ -116,6 +214,9 @@ export function useTimerManager(): TimerManager {
     clearAll,
     clearAllTimeouts,
     clearAllIntervals,
+    getErrors,
+    clearErrors,
+    hasErrors,
   };
 }
 

@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+  memo,
+} from "react";
 import type { ThemeConfig } from "@portfolio/frontend/src/types/theme";
 
 interface PerformanceData {
@@ -16,31 +23,64 @@ interface PerformanceMonitorProps {
 }
 
 /**
- *
+ * Performance Monitor Component - Optimized with memoization
  * @param root0
  * @param root0.themeConfig
  */
-export function PerformanceMonitor({ themeConfig }: PerformanceMonitorProps) {
+function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
   const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
   const [isPaused, setIsPaused] = useState(false);
   const [refreshRate, setRefreshRate] = useState(1000);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | null>(null);
 
-  // Generate mock performance data
-  const generateMockData = (): PerformanceData => ({
-    timestamp: Date.now(),
-    cpu: Math.random() * 100,
-    memory: 30 + Math.random() * 40,
-    network: Math.random() * 10,
-    disk: 10 + Math.random() * 20,
-  });
+  // Memoized data generation function for better performance
+  const generateMockData = useCallback(
+    (): PerformanceData => ({
+      timestamp: Date.now(),
+      cpu: Math.random() * 100,
+      memory: 30 + Math.random() * 40,
+      network: Math.random() * 10,
+      disk: 10 + Math.random() * 20,
+    }),
+    [],
+  );
+
+  // Memoized statistics calculations to avoid re-computation
+  const performanceStats = useMemo(() => {
+    if (performanceData.length === 0) {
+      return {
+        maxCpu: 0,
+        maxMemory: 0,
+        maxNetwork: 0,
+        maxDisk: 0,
+        avgCpu: 0,
+        avgMemory: 0,
+        avgNetwork: 0,
+        avgDisk: 0,
+      };
+    }
+
+    const totalCount = performanceData.length;
+    return {
+      maxCpu: Math.max(...performanceData.map((d) => d.cpu)),
+      maxMemory: Math.max(...performanceData.map((d) => d.memory)),
+      maxNetwork: Math.max(...performanceData.map((d) => d.network)),
+      maxDisk: Math.max(...performanceData.map((d) => d.disk)),
+      avgCpu: performanceData.reduce((sum, d) => sum + d.cpu, 0) / totalCount,
+      avgMemory:
+        performanceData.reduce((sum, d) => sum + d.memory, 0) / totalCount,
+      avgNetwork:
+        performanceData.reduce((sum, d) => sum + d.network, 0) / totalCount,
+      avgDisk: performanceData.reduce((sum, d) => sum + d.disk, 0) / totalCount,
+    };
+  }, [performanceData]);
 
   // Initialize performance data
   useEffect(() => {
     const initialData = Array.from({ length: 60 }, () => generateMockData());
     setPerformanceData(initialData);
-  }, []);
+  }, [generateMockData]);
 
   // Update performance data
   useEffect(() => {
@@ -60,14 +100,23 @@ export function PerformanceMonitor({ themeConfig }: PerformanceMonitorProps) {
 
     // Cleanup function to prevent memory leaks
     return () => clearInterval(interval);
-  }, [isPaused, refreshRate]);
+  }, [isPaused, refreshRate, generateMockData]);
 
-  // Animation frame cleanup
+  // Enhanced animation frame cleanup with better tracking
   useEffect(() => {
-    const animationId = animationRef.current;
+    const currentAnimationId = animationRef.current;
+
+    // Cleanup function with comprehensive resource management
     return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId);
+      // Cancel current animation frame if it exists
+      if (currentAnimationId) {
+        cancelAnimationFrame(currentAnimationId);
+      }
+
+      // Also cancel any animation frame stored in ref during execution
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
       }
     };
   }, []);
@@ -319,19 +368,19 @@ export function PerformanceMonitor({ themeConfig }: PerformanceMonitorProps) {
             <div className="flex justify-between">
               <span className="opacity-70">CPU Peak:</span>
               <span style={{ color: themeConfig.colors.success }}>
-                {Math.max(...performanceData.map((d) => d.cpu)).toFixed(1)}%
+                {performanceStats.maxCpu.toFixed(1)}%
               </span>
             </div>
             <div className="flex justify-between">
               <span className="opacity-70">Memory Peak:</span>
               <span style={{ color: themeConfig.colors.warning }}>
-                {Math.max(...performanceData.map((d) => d.memory)).toFixed(1)}%
+                {performanceStats.maxMemory.toFixed(1)}%
               </span>
             </div>
             <div className="flex justify-between">
               <span className="opacity-70">Network Peak:</span>
               <span style={{ color: themeConfig.colors.info }}>
-                {Math.max(...performanceData.map((d) => d.network)).toFixed(1)}
+                {performanceStats.maxNetwork.toFixed(1)}
                 MB/s
               </span>
             </div>
@@ -355,30 +404,19 @@ export function PerformanceMonitor({ themeConfig }: PerformanceMonitorProps) {
             <div className="flex justify-between">
               <span className="opacity-70">CPU Avg:</span>
               <span style={{ color: themeConfig.colors.success }}>
-                {(
-                  performanceData.reduce((sum, d) => sum + d.cpu, 0) /
-                  performanceData.length
-                ).toFixed(1)}
-                %
+                {performanceStats.avgCpu.toFixed(1)}%
               </span>
             </div>
             <div className="flex justify-between">
               <span className="opacity-70">Memory Avg:</span>
               <span style={{ color: themeConfig.colors.warning }}>
-                {(
-                  performanceData.reduce((sum, d) => sum + d.memory, 0) /
-                  performanceData.length
-                ).toFixed(1)}
-                %
+                {performanceStats.avgMemory.toFixed(1)}%
               </span>
             </div>
             <div className="flex justify-between">
               <span className="opacity-70">Network Avg:</span>
               <span style={{ color: themeConfig.colors.info }}>
-                {(
-                  performanceData.reduce((sum, d) => sum + d.network, 0) /
-                  performanceData.length
-                ).toFixed(1)}
+                {performanceStats.avgNetwork.toFixed(1)}
                 MB/s
               </span>
             </div>
@@ -388,3 +426,6 @@ export function PerformanceMonitor({ themeConfig }: PerformanceMonitorProps) {
     </div>
   );
 }
+
+// Export memoized component for better performance
+export const PerformanceMonitor = memo(PerformanceMonitorComponent);

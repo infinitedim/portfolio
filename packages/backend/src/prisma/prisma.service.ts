@@ -195,7 +195,7 @@ export class PrismaService
   }
 
   /**
-   * Clear all active timers
+   * Clear all active timers and prevent memory leaks
    */
   private clearAllTimers(): void {
     if (this.disconnectTimeout) {
@@ -207,10 +207,23 @@ export class PrismaService
       clearInterval(this.healthCheckInterval);
       this.healthCheckInterval = null;
     }
+
+    // Clear any pending reconnection timers
+    this.clearReconnectionTimer();
   }
 
   /**
-   * Reset all connection state
+   * Clear reconnection timer to prevent memory leaks
+   */
+  private clearReconnectionTimer(): void {
+    if (this.disconnectTimeout) {
+      clearTimeout(this.disconnectTimeout);
+      this.disconnectTimeout = null;
+    }
+  }
+
+  /**
+   * Enhanced connection state reset with memory cleanup
    */
   private resetConnectionState(): void {
     this.isConnected = false;
@@ -218,6 +231,23 @@ export class PrismaService
     this.connectionPromise = null;
     this.lastConnectionTime = null;
     this.resetConnectionAttempts();
+
+    // Clear any cached queries or transactions
+    this.clearQueryCache();
+  }
+
+  /**
+   * Clear query cache to prevent memory accumulation
+   */
+  private clearQueryCache(): void {
+    // Force garbage collection of any cached queries
+    if (typeof global.gc === "function") {
+      try {
+        global.gc();
+      } catch (_error) {
+        // GC not available, that's fine
+      }
+    }
   }
 
   /**

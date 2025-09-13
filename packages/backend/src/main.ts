@@ -118,14 +118,29 @@ export async function createExpressApp(): Promise<import("express").Express> {
       prismaService &&
       typeof prismaService.enableShutdownHooks === "function"
     ) {
-      prismaService.enableShutdownHooks(app).catch((_err: any) => {
+      prismaService.enableShutdownHooks(app).catch((err: unknown) => {
         // Don't block startup for hook registration failures - log and continue
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        console.error("Failed to enable Prisma shutdown hooks:", errorMessage);
 
-        console.error("Failed to enable Prisma shutdown hooks:", _err);
+        // Log to structured logger if available
+        if (typeof console.warn === "function") {
+          console.warn(
+            "Application may not shut down gracefully without Prisma hooks",
+          );
+        }
       });
     }
-  } catch (_err) {
-    // If PrismaService isn't available in some contexts, ignore
+  } catch (err: unknown) {
+    // If PrismaService isn't available in some contexts, log the reason
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.warn(
+      "PrismaService not available for shutdown hooks:",
+      errorMessage,
+    );
+    console.info(
+      "This is expected in some deployment contexts (e.g., serverless)",
+    );
   }
 
   // Graceful shutdown helper

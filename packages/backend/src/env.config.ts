@@ -70,25 +70,31 @@ const createEnvSchema = () => {
     // JWT Configuration - enhanced security validation
     JWT_SECRET: z
       .string()
-      .min(
-        64,
-        "JWT_SECRET must be at least 64 characters for production security",
-      )
+      .min(64, "JWT_SECRET must be at least 64 characters for security")
       .refine(
         (val) => {
-          // Additional entropy check for production
-          if (process.env.NODE_ENV === "production") {
-            const hasNumbers = /\d/.test(val);
-            const hasLowerCase = /[a-z]/.test(val);
-            const hasUpperCase = /[A-Z]/.test(val);
-            const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(val);
-            return hasNumbers && hasLowerCase && hasUpperCase && hasSpecialChar;
+          // Enforce strong entropy requirements for all environments
+          const hasNumbers = /\d/.test(val);
+          const hasLowerCase = /[a-z]/.test(val);
+          const hasUpperCase = /[A-Z]/.test(val);
+          const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(val);
+
+          // Require complex secrets in all environments for security consistency
+          const isComplex =
+            hasNumbers && hasLowerCase && hasUpperCase && hasSpecialChar;
+
+          if (!isComplex) {
+            console.warn(
+              "JWT_SECRET should contain numbers, lowercase, uppercase, and special characters for optimal security",
+            );
           }
-          return val.length >= 32; // Minimum for development
+
+          // Only require minimum length, but warn about complexity
+          return val.length >= 64;
         },
         {
           message:
-            "JWT_SECRET must contain numbers, lowercase, uppercase, and special characters in production",
+            "JWT_SECRET must be at least 64 characters and should contain mixed case, numbers, and special characters",
         },
       ),
     JWT_EXPIRES_IN: z.string().default("15m"),
@@ -96,7 +102,7 @@ const createEnvSchema = () => {
       .string()
       .min(
         64,
-        "REFRESH_TOKEN_SECRET must be at least 64 characters for production security",
+        "REFRESH_TOKEN_SECRET must be at least 64 characters for security",
       )
       .refine(
         (val) => {

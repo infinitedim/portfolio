@@ -251,6 +251,9 @@ function useToast() {
   React.useEffect(() => {
     if (!isMountedRef.current) return;
 
+    // Capture the current state for cleanup
+    const isMounted = isMountedRef.current;
+
     // Subscribe to toast manager updates
     const unsubscribe = manager.subscribe((newState) => {
       if (isMountedRef.current) {
@@ -261,8 +264,52 @@ function useToast() {
     // Set initial state
     setState(manager.getState());
 
-    return unsubscribe;
+    // Enhanced cleanup for component unmount
+    return () => {
+      unsubscribe();
+      // If this component was mounted, cleanup manager if no toasts remain
+      if (!isMounted) {
+        // Small delay to allow other components to re-subscribe if needed
+        setTimeout(() => {
+          if (manager.getState().toasts.length === 0) {
+            manager.cleanup();
+          }
+        }, 100);
+      }
+    };
   }, [manager, isMountedRef]);
+
+  // Cleanup on page/app unload to prevent memory leaks
+  React.useEffect(() => {
+    const handleBeforeUnload = () => {
+      manager.cleanup();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Clear pending timeouts when page becomes hidden
+        const currentToasts = manager.getState().toasts;
+        if (currentToasts.length === 0) {
+          manager.cleanup();
+        }
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("beforeunload", handleBeforeUnload);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+
+      return () => {
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange,
+        );
+      };
+    }
+
+    return undefined;
+  }, [manager]);
 
   // Memoized return object to prevent unnecessary re-renders
   return React.useMemo(
