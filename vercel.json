@@ -1,9 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "packages/frontend/next.config.js", "use": "@vercel/next" },
-    { "src": "packages/backend/api/**/*.ts", "use": "@vercel/node" }
-  ],
   "functions": {
     "packages/backend/api/**/*.ts": {
       "runtime": "nodejs22.x",
