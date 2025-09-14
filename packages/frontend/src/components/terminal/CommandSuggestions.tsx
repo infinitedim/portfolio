@@ -1,11 +1,14 @@
+/* eslint-disable prettier/prettier */
 "use client";
 
-import { useState, useEffect, useMemo, useRef, type JSX } from "react";
+import { useState, useEffect, useRef, type JSX } from "react";
 import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import { TypoTolerance } from "@portfolio/frontend/src/lib/commands/typoTolerance";
-import { useDebouncedValue } from "@portfolio/frontend/src/hooks/useDebouncedValue";
+import {
+  useCommandSuggestions,
+  type SuggestionItem,
+} from "@portfolio/frontend/src/hooks/useCommandSuggestions";
 
-interface CommandSuggestionsProps {
+interface EnhancedCommandSuggestionsProps {
   /** Current input value */
   input: string;
   /** Available commands to suggest from */
@@ -14,235 +17,107 @@ interface CommandSuggestionsProps {
   visible: boolean;
   /** Callback when a suggestion is selected */
   onSelect: (suggestion: string) => void;
+  /** Callback when command is used (for learning) */
+  onCommandUsed?: (command: string) => void;
   /** Maximum number of suggestions to show */
   maxSuggestions?: number;
   /** Whether to show suggestions for empty input */
   showOnEmpty?: boolean;
   /** Whether to show command descriptions */
   showDescriptions?: boolean;
+  /** Whether to enable intelligent caching */
+  enableCache?: boolean;
+  /** Whether to enable user behavior learning */
+  enableLearning?: boolean;
+  /** Minimum query length before showing suggestions */
+  minQueryLength?: number;
+  /** Custom debounce delay in milliseconds */
+  debounceMs?: number;
 }
-
-interface SuggestionItem {
-  command: string;
-  score: number;
-  type: "exact" | "prefix" | "fuzzy" | "typo" | "popular" | "recent";
-  description?: string;
-  usage?: string;
-  category?: string;
-}
-
-// Command descriptions for better UX
-const COMMAND_DESCRIPTIONS: Record<
-  string,
-  { description: string; category: string; usage?: string }
-> = {
-  help: { description: "Show available commands and help", category: "system" },
-  clear: { description: "Clear terminal history", category: "system" },
-  about: { description: "Show information about me", category: "info" },
-  skills: {
-    description: "Display technical skills and expertise",
-    category: "info",
-  },
-  projects: { description: "Show portfolio projects", category: "info" },
-  contact: { description: "Display contact information", category: "info" },
-  experience: { description: "Show work experience", category: "info" },
-  education: {
-    description: "Display educational background",
-    category: "info",
-  },
-  roadmap: { description: "Show learning roadmap progress", category: "info" },
-  theme: {
-    description: "Change terminal theme",
-    category: "customization",
-    usage: "theme [name]",
-  },
-  fonts: {
-    description: "Change terminal font",
-    category: "customization",
-    usage: "fonts [name]",
-  },
-  customize: {
-    description: "Open customization panel",
-    category: "customization",
-  },
-  status: { description: "Show system status", category: "system" },
-  alias: {
-    description: "Manage command aliases",
-    category: "system",
-    usage: "alias [command] [alias]",
-  },
-};
 
 /**
- * Displays a live list of command suggestions as the user types,
- * with typo tolerance, fuzzy matching, and enhanced UX features.
- * @param root0
- * @param root0.input
- * @param root0.availableCommands
- * @param root0.visible
- * @param root0.onSelect
- * @param root0.maxSuggestions
- * @param root0.showOnEmpty
- * @param root0.showDescriptions
+ * Enhanced command suggestions component with real-time fuzzy matching,
+ * intelligent caching, user behavior learning, and optimized performance.
+ *
+ * Features:
+ * - Advanced fuzzy matching with contextual scoring
+ * - Real-time suggestions with optimized debouncing
+ * - User behavior learning and personalization
+ * - Intelligent caching for performance
+ * - Keyboard navigation with smooth scrolling
+ * - Visual feedback and loading states
+ * - Accessibility support
  */
-export function CommandSuggestions({
+export function EnhancedCommandSuggestions({
   input,
   availableCommands,
   visible,
   onSelect,
+  onCommandUsed,
   maxSuggestions = 8,
-  showOnEmpty = false,
+  showOnEmpty = true,
   showDescriptions = true,
-}: CommandSuggestionsProps): JSX.Element | null {
+  enableCache = true,
+  enableLearning = true,
+  minQueryLength = 0,
+  debounceMs = 50,
+}: EnhancedCommandSuggestionsProps): JSX.Element | null {
   const { themeConfig, theme } = useTheme();
-  const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const selectedItemRef = useRef<HTMLButtonElement>(null);
 
-  // Debounce input for better performance with reduced delay
-  const debouncedInput = useDebouncedValue(input, 100);
+  // Use the enhanced suggestions hook
+  const {
+    suggestions,
+    isLoading,
+    updateCommandUsage,
+    clearCache,
+    getUserContext,
+  } = useCommandSuggestions(input, availableCommands, {
+    maxSuggestions,
+    debounceMs,
+    showOnEmpty,
+    enableCache,
+    enableLearning,
+    minQueryLength,
+  });
 
-  // Smooth visibility transitions
+  // Smooth visibility transitions with proper timing
   useEffect(() => {
     if (visible && suggestions.length > 0) {
-      setIsVisible(true);
-    } else {
-      const timer = setTimeout(() => setIsVisible(false), 150);
+      // Small delay for smoother appearance
+      const timer = setTimeout(() => setIsVisible(true), 10);
       return () => clearTimeout(timer);
+    } else {
+      // Longer delay for graceful disappearance
+      setIsVisible(false);
     }
   }, [visible, suggestions.length]);
 
-  // Memoize suggestions generation for performance
-  const generatedSuggestions = useMemo(() => {
-    if (!input.trim() && !showOnEmpty) {
-      return [];
-    }
-
-    const currentCommand = input.split(" ")[0].toLowerCase();
-    if (!currentCommand && !showOnEmpty) {
-      return [];
-    }
-
-    const newSuggestions: SuggestionItem[] = [];
-
-    // Get unique commands (remove aliases duplicates)
-    const uniqueCommands = Array.from(new Set(availableCommands));
-
-    for (const command of uniqueCommands) {
-      const lowerCommand = command.toLowerCase();
-      const lowerInput = currentCommand.toLowerCase();
-      const commandInfo = COMMAND_DESCRIPTIONS[command];
-
-      let suggestionItem: SuggestionItem | null = null;
-
-      // 1. Exact match (highest priority)
-      if (lowerCommand === lowerInput && debouncedInput.trim()) {
-        suggestionItem = {
-          command,
-          score: 100,
-          type: "exact",
-          description: commandInfo?.description,
-          category: commandInfo?.category,
-          usage: commandInfo?.usage,
-        };
-      }
-      // 2. Prefix match (high priority)
-      else if (lowerCommand.startsWith(lowerInput) && debouncedInput.trim()) {
-        suggestionItem = {
-          command,
-          score: 85 + (lowerInput.length / lowerCommand.length) * 10,
-          type: "prefix",
-          description: commandInfo?.description,
-          category: commandInfo?.category,
-          usage: commandInfo?.usage,
-        };
-      }
-      // 3. Fuzzy match (medium priority)
-      else if (lowerCommand.includes(lowerInput) && debouncedInput.trim()) {
-        const position = lowerCommand.indexOf(lowerInput);
-        const score =
-          65 - position * 2 + (lowerInput.length / lowerCommand.length) * 10;
-        suggestionItem = {
-          command,
-          score: Math.max(score, 35),
-          type: "fuzzy",
-          description: commandInfo?.description,
-          category: commandInfo?.category,
-          usage: commandInfo?.usage,
-        };
-      }
-      // 4. Typo tolerance (lower priority)
-      else if (debouncedInput.trim()) {
-        const distance = TypoTolerance.levenshteinDistance(
-          lowerInput,
-          lowerCommand,
-        );
-        const maxDistance = Math.max(2, Math.floor(lowerCommand.length * 0.4));
-
-        if (distance <= maxDistance && distance > 0) {
-          const score = Math.max(55 - distance * 8, 15);
-          suggestionItem = {
-            command,
-            score,
-            type: "typo",
-            description: commandInfo?.description,
-            category: commandInfo?.category,
-            usage: commandInfo?.usage,
-          };
-        }
-      }
-      // 5. Show popular commands when empty (if enabled)
-      else if (!debouncedInput.trim() && showOnEmpty) {
-        const isPopular = [
-          "help",
-          "about",
-          "skills",
-          "projects",
-          "contact",
-        ].includes(command);
-        suggestionItem = {
-          command,
-          score: isPopular ? 70 : 50,
-          type: isPopular ? "popular" : "recent",
-          description: commandInfo?.description,
-          category: commandInfo?.category,
-          usage: commandInfo?.usage,
-        };
-      }
-
-      if (suggestionItem) {
-        newSuggestions.push(suggestionItem);
-      }
-    }
-
-    // Sort by score (highest first) and limit results
-    return newSuggestions
-      .sort((a, b) => b.score - a.score)
-      .slice(0, maxSuggestions);
-  }, [input, showOnEmpty, availableCommands, maxSuggestions, debouncedInput]);
-
-  // Update suggestions when generated suggestions change
+  // Reset selection when suggestions change
   useEffect(() => {
-    setSuggestions(generatedSuggestions);
     setSelectedIndex(0);
-  }, [generatedSuggestions]);
+  }, [suggestions]);
 
-  // Auto-scroll selected item into view
+  // Auto-scroll selected item into view with smooth behavior
   useEffect(() => {
-    if (selectedItemRef.current) {
+    if (selectedItemRef.current && isVisible) {
       selectedItemRef.current.scrollIntoView({
         behavior: "smooth",
         block: "nearest",
+        inline: "nearest",
       });
     }
-  }, [selectedIndex]);
+  }, [selectedIndex, isVisible]);
 
-  // Handle keyboard navigation with improved UX
+  // Enhanced keyboard navigation
   useEffect(() => {
+    if (!visible || !isVisible) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!visible || suggestions.length === 0) return;
+      if (suggestions.length === 0) return;
 
       switch (e.key) {
         case "ArrowDown":
@@ -261,20 +136,44 @@ export function CommandSuggestions({
         case "Tab":
           if (suggestions[selectedIndex]) {
             e.preventDefault();
-            onSelect(suggestions[selectedIndex].command);
+            const selectedCommand = suggestions[selectedIndex].command;
+            onSelect(selectedCommand);
+
+            // Track command usage for learning
+            if (enableLearning) {
+              updateCommandUsage(selectedCommand);
+              onCommandUsed?.(selectedCommand);
+            }
           }
           break;
         case "Escape":
           e.preventDefault();
-          setSuggestions([]);
+          setIsVisible(false);
+          break;
+        case "c":
+          if (e.ctrlKey) {
+            e.preventDefault();
+            clearCache();
+          }
           break;
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [visible, suggestions, selectedIndex, onSelect]);
+  }, [
+    visible,
+    isVisible,
+    suggestions,
+    selectedIndex,
+    onSelect,
+    updateCommandUsage,
+    onCommandUsed,
+    enableLearning,
+    clearCache,
+  ]);
 
+  // Don't render if not visible or no suggestions
   if (!isVisible || suggestions.length === 0 || !themeConfig?.colors) {
     return null;
   }
@@ -287,12 +186,12 @@ export function CommandSuggestions({
         return "🔍";
       case "fuzzy":
         return "📝";
-      case "typo":
-        return "🔧";
-      case "popular":
-        return "⭐";
+      case "contextual":
+        return "🧠";
       case "recent":
         return "🕒";
+      case "popular":
+        return "⭐";
       default:
         return "💡";
     }
@@ -306,12 +205,12 @@ export function CommandSuggestions({
         return themeConfig.colors.accent;
       case "fuzzy":
         return themeConfig.colors.warning || themeConfig.colors.text;
-      case "typo":
-        return themeConfig.colors.error || themeConfig.colors.muted;
-      case "popular":
-        return themeConfig.colors.success || themeConfig.colors.accent;
+      case "contextual":
+        return themeConfig.colors.info || themeConfig.colors.accent;
       case "recent":
         return themeConfig.colors.info || themeConfig.colors.muted;
+      case "popular":
+        return themeConfig.colors.success || themeConfig.colors.accent;
       default:
         return themeConfig.colors.text;
     }
@@ -330,93 +229,126 @@ export function CommandSuggestions({
     }
   };
 
+  const handleSuggestionClick = (suggestion: SuggestionItem, index: number) => {
+    setSelectedIndex(index);
+    onSelect(suggestion.command);
+
+    // Track command usage for learning
+    if (enableLearning) {
+      updateCommandUsage(suggestion.command);
+      onCommandUsed?.(suggestion.command);
+    }
+  };
+
+  const userContext = getUserContext();
+
   return (
     <div
       ref={containerRef}
-      key={`command-suggestions-${theme}`}
-      className={`absolute top-full left-0 right-0 z-50 mt-1 rounded border shadow-lg overflow-hidden transition-all duration-200 ease-out ${
-        isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
-      }`}
+      key={`enhanced-suggestions-${theme}`}
+      className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-lg border shadow-xl overflow-hidden transition-all duration-300 ease-out transform-gpu ${isVisible
+        ? "opacity-100 scale-100 translate-y-0"
+        : "opacity-0 scale-95 -translate-y-2"
+        }`}
       style={{
         backgroundColor: themeConfig.colors.bg,
         borderColor: themeConfig.colors.border,
-        boxShadow: `0 8px 25px -5px ${themeConfig.colors.accent}30, 0 4px 10px -2px ${themeConfig.colors.accent}20`,
+        boxShadow: `0 10px 30px -8px ${themeConfig.colors.accent}25, 0 4px 12px -4px ${themeConfig.colors.accent}15`,
+        backdropFilter: "blur(8px)",
       }}
     >
-      {/* Enhanced Header */}
+      {/* Enhanced Header with Context Info */}
       <div
-        className="px-3 py-2 text-xs font-mono border-b flex items-center justify-between"
+        className="px-4 py-3 text-xs font-mono border-b flex items-center justify-between"
         style={{
-          backgroundColor: `${themeConfig.colors.accent}10`,
+          backgroundColor: `${themeConfig.colors.accent}08`,
           borderColor: themeConfig.colors.border,
           color: themeConfig.colors.muted,
         }}
       >
-        <div className="flex items-center gap-2">
-          <span>
-            💡 {suggestions.length} suggestion
-            {suggestions.length !== 1 ? "s" : ""}
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1">
+            💡{" "}
+            <span className="font-medium">
+              {suggestions.length} suggestion
+              {suggestions.length !== 1 ? "s" : ""}
+            </span>
           </span>
+          {isLoading && (
+            <span className="flex items-center gap-1 text-xs opacity-75">
+              <span className="animate-spin">⟳</span>
+              Loading...
+            </span>
+          )}
           {suggestions[selectedIndex] && (
-            <span className="opacity-60">
+            <span className="opacity-70 text-xs">
               • {suggestions[selectedIndex].type}
             </span>
           )}
+          {enableLearning && userContext.totalCommands > 0 && (
+            <span className="opacity-60 text-xs">
+              • {userContext.totalCommands} commands used
+            </span>
+          )}
         </div>
-        <div className="flex items-center gap-1 text-xs opacity-60">
-          <span>↑↓</span>
-          <span>Enter/Tab</span>
-          <span>Esc</span>
+        <div className="flex items-center gap-2 text-xs opacity-60">
+          <span>↑↓ Navigate</span>
+          <span>•</span>
+          <span>Enter/Tab Select</span>
+          <span>•</span>
+          <span>Esc Close</span>
         </div>
       </div>
 
-      {/* Enhanced Suggestions list */}
-      <div className="max-h-64 overflow-y-auto scrollbar-thin">
+      {/* Enhanced Suggestions List */}
+      <div className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-current scrollbar-thumb-opacity-20">
         {suggestions.map((suggestion, index) => (
           <button
-            key={`${suggestion.command}-${index}`}
+            key={`${suggestion.command}-${index}-${suggestion.type}`}
             ref={index === selectedIndex ? selectedItemRef : null}
             type="button"
             role="option"
             aria-selected={index === selectedIndex}
             tabIndex={0}
-            className={`w-full text-left px-3 py-3 cursor-pointer transition-all duration-150 focus:outline-none group ${
-              index === selectedIndex
-                ? "opacity-100"
-                : "opacity-80 hover:opacity-100"
-            }`}
+            className={`w-full text-left px-4 py-3 cursor-pointer transition-all duration-200 ease-out focus:outline-none group relative ${index === selectedIndex
+              ? "opacity-100 transform scale-[1.02]"
+              : "opacity-85 hover:opacity-100 hover:transform hover:scale-[1.01]"
+              }`}
             style={{
               backgroundColor:
                 index === selectedIndex
-                  ? `${themeConfig.colors.accent}15`
+                  ? `${themeConfig.colors.accent}12`
                   : "transparent",
               borderLeft:
                 index === selectedIndex
                   ? `3px solid ${themeConfig.colors.accent}`
                   : "3px solid transparent",
             }}
-            onClick={() => onSelect(suggestion.command)}
+            onClick={() => handleSuggestionClick(suggestion, index)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " " || e.key === "Tab") {
+              if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                onSelect(suggestion.command);
+                handleSuggestionClick(suggestion, index);
               }
             }}
             onMouseEnter={() => setSelectedIndex(index)}
           >
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between min-w-0">
               <div className="flex items-center gap-3 flex-1 min-w-0">
+                {/* Type Icon */}
                 <span
-                  className="flex-shrink-0"
+                  className="flex-shrink-0 text-sm transition-transform duration-200 group-hover:scale-110"
                   style={{ color: getTypeColor(suggestion.type) }}
+                  title={`Match type: ${suggestion.type}`}
                 >
                   {getTypeIcon(suggestion.type)}
                 </span>
 
+                {/* Command Info */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mb-1">
                     <span
-                      className="font-mono font-medium truncate"
+                      className="font-mono font-semibold truncate text-base"
                       style={{
                         color:
                           index === selectedIndex
@@ -427,31 +359,50 @@ export function CommandSuggestions({
                       {suggestion.command}
                     </span>
 
+                    {/* Category Badge */}
                     {suggestion.category && (
                       <span
-                        className="text-xs px-1.5 py-0.5 rounded-full flex-shrink-0"
+                        className="text-xs px-2 py-0.5 rounded-full flex-shrink-0 font-medium"
                         style={{
-                          backgroundColor: `${getCategoryColor(suggestion.category)}20`,
+                          backgroundColor: `${getCategoryColor(suggestion.category)}15`,
                           color: getCategoryColor(suggestion.category),
                         }}
                       >
                         {suggestion.category}
                       </span>
                     )}
+
+                    {/* Frequency Badge */}
+                    {enableLearning &&
+                      suggestion.frequency &&
+                      suggestion.frequency > 0 && (
+                        <span
+                          className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
+                          style={{
+                            backgroundColor: `${themeConfig.colors.success}15`,
+                            color: themeConfig.colors.success,
+                          }}
+                          title={`Used ${suggestion.frequency} times`}
+                        >
+                          {suggestion.frequency}x
+                        </span>
+                      )}
                   </div>
 
+                  {/* Description */}
                   {showDescriptions && suggestion.description && (
                     <div
-                      className="text-xs mt-1 truncate opacity-70"
+                      className="text-sm mb-1 opacity-75 leading-relaxed"
                       style={{ color: themeConfig.colors.muted }}
                     >
                       {suggestion.description}
                     </div>
                   )}
 
+                  {/* Usage */}
                   {suggestion.usage && (
                     <div
-                      className="text-xs mt-1 font-mono opacity-60"
+                      className="text-xs font-mono opacity-60 bg-black bg-opacity-10 px-2 py-1 rounded"
                       style={{ color: themeConfig.colors.muted }}
                     >
                       Usage: {suggestion.usage}
@@ -460,47 +411,63 @@ export function CommandSuggestions({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {suggestion.type === "typo" && (
+              {/* Score and Additional Info */}
+              <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                {/* Last Used */}
+                {suggestion.lastUsed && (
                   <span
-                    className="text-xs px-2 py-1 rounded-full"
+                    className="text-xs px-2 py-1 rounded-full opacity-60"
                     style={{
-                      backgroundColor: `${themeConfig.colors.warning || themeConfig.colors.accent}20`,
-                      color:
-                        themeConfig.colors.warning || themeConfig.colors.accent,
+                      backgroundColor: `${themeConfig.colors.info}10`,
+                      color: themeConfig.colors.info,
                     }}
+                    title={`Last used: ${suggestion.lastUsed.toLocaleString()}`}
                   >
-                    fix
+                    Recent
                   </span>
                 )}
+
+                {/* Score */}
                 <span
-                  className="text-xs px-2 py-1 rounded-full"
+                  className="text-xs px-2 py-1 rounded-full font-medium"
                   style={{
                     backgroundColor: `${themeConfig.colors.accent}15`,
                     color: themeConfig.colors.accent,
                   }}
+                  title="Match confidence score"
                 >
                   {Math.round(suggestion.score)}%
                 </span>
               </div>
             </div>
+
+            {/* Hover Effect */}
+            {index === selectedIndex && (
+              <div
+                className="absolute inset-0 pointer-events-none opacity-5"
+                style={{ backgroundColor: themeConfig.colors.accent }}
+              />
+            )}
           </button>
         ))}
       </div>
 
-      {/* Enhanced Footer */}
+      {/* Enhanced Footer with Tips */}
       <div
-        className="px-3 py-2 text-xs text-center border-t"
+        className="px-4 py-3 text-xs border-t"
         style={{
-          backgroundColor: `${themeConfig.colors.muted}05`,
+          backgroundColor: `${themeConfig.colors.muted}03`,
           borderColor: themeConfig.colors.border,
           color: themeConfig.colors.muted,
         }}
       >
-        <div className="flex items-center justify-center gap-4">
-          <span>💡 Type 'help' for all commands</span>
-          <span>•</span>
-          <span>🔧 Smart suggestions enabled</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <span>💡 Smart suggestions enabled</span>
+            {enableLearning && <span>🧠 Learning from your usage</span>}
+            {enableCache && <span>⚡ Intelligent caching</span>}
+          </div>
+          <div className="text-xs opacity-60">Ctrl+C to clear cache</div>
         </div>
       </div>
     </div>

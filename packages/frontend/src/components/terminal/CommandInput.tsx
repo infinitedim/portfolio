@@ -11,7 +11,7 @@ import {
 // Correctly use your custom theme hook
 import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
 import { TabCompletion } from "./TabCompletion";
-import { CommandSuggestions } from "./CommandSuggestions";
+import { EnhancedCommandSuggestions } from "./CommandSuggestions";
 import { useSecurity } from "@portfolio/frontend/src/hooks/useSecurity";
 
 interface CommandInputProps {
@@ -459,15 +459,24 @@ export function CommandInput({
         />
       )}
 
-      {/* Command Suggestions */}
+      {/* Enhanced Command Suggestions */}
       {showSuggestions && (
-        <CommandSuggestions
+        <EnhancedCommandSuggestions
           input={value}
           availableCommands={availableCommands}
           onSelect={handleSuggestionSelect}
+          onCommandUsed={(command) => {
+            // Track command usage for analytics if needed
+            console.debug("Command used:", command);
+          }}
           visible={showSuggestions}
           showOnEmpty={true}
           showDescriptions={true}
+          enableCache={true}
+          enableLearning={true}
+          maxSuggestions={8}
+          debounceMs={50}
+          minQueryLength={0}
         />
       )}
 
