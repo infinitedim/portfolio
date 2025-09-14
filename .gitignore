@@ -44,6 +44,7 @@ yarn-error.log*
 
 # local env files
 .env
+.env.vercel
 packages/backend/.env
 
 # vercel
@@ -234,4 +235,4 @@ localhost.crt
 
 .cursorignore
 
-# End of https://www.toptal.com/developers/gitignore/api/nextjs,visualstudiocode,git,turbo,vercel,node,react  
+# End of https://www.toptal.com/developers/gitignore/api/nextjs,visualstudiocode,git,turbo,vercel,node,react

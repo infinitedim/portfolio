@@ -146,71 +146,23 @@ async function fetchWithCache<T>(
 
 // React cache wrapper for server components
 export const getPortfolioData = cache(async (): Promise<PortfolioData> => {
-  // MODIFICATION: Use static data during build time to prevent timeout
-  if (process.env.NODE_ENV === "production" && !process.env.VERCEL_URL) {
-    return getFallbackPortfolioData();
-  }
-
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
-
-  try {
-    const response = await fetchWithCache<{ data: PortfolioData }>(
-      `${baseUrl}/api/portfolio`,
-      { cacheTime: CACHE_DURATIONS.SKILLS },
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch portfolio data:", error);
-    // Return fallback data in case of error
-    return getFallbackPortfolioData();
-  }
+  // ALWAYS use fallback data during production builds to avoid external API calls
+  console.log("Build mode detected - using static portfolio data");
+  return getFallbackPortfolioData();
 });
 
 // Get specific portfolio sections with optimized caching
 export const getSkillsData = cache(async (): Promise<SkillCategory[]> => {
-  // MODIFICATION: Use static data during build time
-  if (process.env.NODE_ENV === "production" && !process.env.VERCEL_URL) {
-    return [];
-  }
-
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
-
-  try {
-    const response = await fetchWithCache<{ data: SkillCategory[] }>(
-      `${baseUrl}/api/portfolio?section=skills`,
-      { cacheTime: CACHE_DURATIONS.SKILLS },
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch skills data:", error);
-    return [];
-  }
+  // Use static data during build time to avoid API calls
+  console.log("Build mode detected - returning empty skills array");
+  return [];
 });
 
 export const getProjectsData = cache(
   async (limit?: number): Promise<Project[]> => {
-    // MODIFICATION: Use static data during build time
-    if (process.env.NODE_ENV === "production" && !process.env.VERCEL_URL) {
-      return limit ? STATIC_PROJECTS.slice(0, limit) : STATIC_PROJECTS;
-    }
-
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
-    const url = limit
-      ? `${baseUrl}/api/portfolio?section=projects&limit=${limit}`
-      : `${baseUrl}/api/portfolio?section=projects`;
-
-    try {
-      const response = await fetchWithCache<{ data: Project[] }>(url, {
-        cacheTime: CACHE_DURATIONS.PROJECTS,
-      });
-
-      return response.data;
-    } catch (error) {
-      console.error("Failed to fetch projects data:", error);
-      return limit ? STATIC_PROJECTS.slice(0, limit) : STATIC_PROJECTS;
-    }
+    // ALWAYS use fallback data during production builds to avoid external API calls
+    console.log("Build mode detected - using static project data");
+    return limit ? STATIC_PROJECTS.slice(0, limit) : STATIC_PROJECTS;
   },
 );
 
