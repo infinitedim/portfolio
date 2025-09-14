@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useAdvancedCommandHistory } from "./useAdvancedCommandHistory";
+import { useAdvancedCommandHistory } from "./useCommandHistory";
 import type { KeyboardShortcut } from "../components/terminal/KeyboardShortcuts";
 
 interface UseTerminalShortcutsOptions {

@@ -11,7 +11,7 @@ import {
 // Correctly use your custom theme hook
 import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
 import { TabCompletion } from "./TabCompletion";
-import { EnhancedCommandSuggestions } from "./CommandSuggestions";
+import { CommandSuggestions } from "./CommandSuggestions";
 import { useSecurity } from "@portfolio/frontend/src/hooks/useSecurity";
 
 interface CommandInputProps {
@@ -25,6 +25,8 @@ interface CommandInputProps {
   inputRef?: React.RefObject<HTMLInputElement | null>;
   onClearError?: () => void;
   showOnEmpty?: boolean;
+  getCommandSuggestions?: (input: string, limit?: number) => string[];
+  getFrequentCommands?: () => string[];
 }
 
 /**
@@ -44,6 +46,8 @@ export function CommandInput({
   inputRef: externalInputRef,
   onClearError,
   showOnEmpty = false,
+  getCommandSuggestions,
+  getFrequentCommands,
 }: CommandInputProps): JSX.Element {
   // MODIFICATION: Correctly destructure the theme hook.
   // Removed `appliedTheme` and `subscribeToThemeChanges` as they are not provided by the hook.
@@ -139,16 +143,35 @@ export function CommandInput({
     }
   }, [threatAlerts]);
 
-  // Tab completion logic
+  // Tab completion logic with enhanced suggestions
   const getTabCompletions = (input: string) => {
     const parts = input.split(" ");
     const lastPart = parts[parts.length - 1].toLowerCase();
 
     if (lastPart === "") return [];
 
-    return availableCommands.filter((cmd) =>
+    // Try smart suggestions first if available
+    if (getCommandSuggestions && input.trim()) {
+      const smartSuggestions = getCommandSuggestions(input, 10);
+      if (smartSuggestions.length > 0) {
+        return smartSuggestions.filter((cmd) =>
+          cmd.toLowerCase().startsWith(lastPart),
+        );
+      }
+    }
+
+    // Fallback to basic command matching
+    const basicMatches = availableCommands.filter((cmd) =>
       cmd.toLowerCase().startsWith(lastPart),
     );
+
+    // Add frequent commands if available and no input yet
+    if (!input.trim() && getFrequentCommands) {
+      const frequentCommands = getFrequentCommands().slice(0, 5);
+      return [...new Set([...frequentCommands, ...basicMatches])];
+    }
+
+    return basicMatches;
   };
 
   const handleTabCompletion = () => {
@@ -273,6 +296,18 @@ export function CommandInput({
           e.preventDefault();
           onClearError?.();
           onSubmit("clear");
+        }
+        break;
+
+      case "r":
+        if (e.ctrlKey) {
+          e.preventDefault();
+          // Show command history search (can be implemented later)
+          setShowSuggestions(true);
+          // If we have frequent commands, show them
+          if (getFrequentCommands && !value.trim()) {
+            setSuggestionTrigger((prev) => !prev);
+          }
         }
         break;
 
@@ -461,9 +496,15 @@ export function CommandInput({
 
       {/* Enhanced Command Suggestions */}
       {showSuggestions && (
-        <EnhancedCommandSuggestions
+        <CommandSuggestions
           input={value}
-          availableCommands={availableCommands}
+          availableCommands={
+            getCommandSuggestions && value.trim()
+              ? getCommandSuggestions(value, 8)
+              : !value.trim() && getFrequentCommands
+                ? [...getFrequentCommands().slice(0, 5), ...availableCommands]
+                : availableCommands
+          }
           onSelect={handleSuggestionSelect}
           onCommandUsed={(command) => {
             // Track command usage for analytics if needed

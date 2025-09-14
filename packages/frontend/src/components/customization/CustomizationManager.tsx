@@ -218,9 +218,7 @@ export function CustomizationManager({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-3 text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                activeTab === tab.id ? "border-b-2" : "hover:opacity-80"
-              }`}
+              className={`px-4 py-3 text-sm font-medium transition-all duration-200 whitespace-nowrap ${activeTab === tab.id ? "border-b-2" : "hover:opacity-80"}`}
               style={{
                 color:
                   activeTab === tab.id
@@ -289,6 +287,7 @@ export function CustomizationManager({
                 <FontManager
                   fonts={customFonts}
                   onUpdate={handleFontUpdate}
+                  onClose={onClose}
                 />
               )}
               {activeTab === "settings" && <SettingsManager />}

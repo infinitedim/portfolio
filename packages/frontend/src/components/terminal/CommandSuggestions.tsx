@@ -8,7 +8,7 @@ import {
   type SuggestionItem,
 } from "@portfolio/frontend/src/hooks/useCommandSuggestions";
 
-interface EnhancedCommandSuggestionsProps {
+interface CommandSuggestionsProps {
   /** Current input value */
   input: string;
   /** Available commands to suggest from */
@@ -36,7 +36,7 @@ interface EnhancedCommandSuggestionsProps {
 }
 
 /**
- * Enhanced command suggestions component with real-time fuzzy matching,
+ *  command suggestions component with real-time fuzzy matching,
  * intelligent caching, user behavior learning, and optimized performance.
  *
  * Features:
@@ -48,7 +48,7 @@ interface EnhancedCommandSuggestionsProps {
  * - Visual feedback and loading states
  * - Accessibility support
  */
-export function EnhancedCommandSuggestions({
+export function CommandSuggestions({
   input,
   availableCommands,
   visible,
@@ -61,14 +61,14 @@ export function EnhancedCommandSuggestions({
   enableLearning = true,
   minQueryLength = 0,
   debounceMs = 50,
-}: EnhancedCommandSuggestionsProps): JSX.Element | null {
+}: CommandSuggestionsProps): JSX.Element | null {
   const { themeConfig, theme } = useTheme();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const selectedItemRef = useRef<HTMLButtonElement>(null);
 
-  // Use the enhanced suggestions hook
+  // Use the  suggestions hook
   const {
     suggestions,
     isLoading,
@@ -112,7 +112,7 @@ export function EnhancedCommandSuggestions({
     }
   }, [selectedIndex, isVisible]);
 
-  // Enhanced keyboard navigation
+  //  keyboard navigation
   useEffect(() => {
     if (!visible || !isVisible) return;
 
@@ -245,7 +245,7 @@ export function EnhancedCommandSuggestions({
   return (
     <div
       ref={containerRef}
-      key={`enhanced-suggestions-${theme}`}
+      key={`-suggestions-${theme}`}
       className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-lg border shadow-xl overflow-hidden transition-all duration-300 ease-out transform-gpu ${isVisible
         ? "opacity-100 scale-100 translate-y-0"
         : "opacity-0 scale-95 -translate-y-2"
@@ -257,7 +257,7 @@ export function EnhancedCommandSuggestions({
         backdropFilter: "blur(8px)",
       }}
     >
-      {/* Enhanced Header with Context Info */}
+      {/*  Header with Context Info */}
       <div
         className="px-4 py-3 text-xs font-mono border-b flex items-center justify-between"
         style={{
@@ -300,7 +300,7 @@ export function EnhancedCommandSuggestions({
         </div>
       </div>
 
-      {/* Enhanced Suggestions List */}
+      {/*  Suggestions List */}
       <div className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-current scrollbar-thumb-opacity-20">
         {suggestions.map((suggestion, index) => (
           <button
@@ -452,7 +452,7 @@ export function EnhancedCommandSuggestions({
         ))}
       </div>
 
-      {/* Enhanced Footer with Tips */}
+      {/*  Footer with Tips */}
       <div
         className="px-4 py-3 text-xs border-t"
         style={{

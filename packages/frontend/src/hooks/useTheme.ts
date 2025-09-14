@@ -17,6 +17,7 @@ import {
   useLocalStorage,
   useMountRef,
 } from "./utils/hookUtils";
+import { PerformanceMonitor } from "@portfolio/frontend/src/lib/performance/PerformanceMonitor";
 
 // Constants
 const STORAGE_KEY = "terminal-theme" as const;
@@ -41,6 +42,22 @@ interface UseThemeReturn {
   getThemeInfo: (themeName?: ThemeName) => ThemeConfig;
   isThemeActive: (themeName: ThemeName) => boolean;
   validateTheme: typeof validateTheme;
+  // Performance metrics for dashboard
+  themeMetrics: {
+    switchCount: number;
+    averageSwitchTime: number;
+    lastSwitchTime: number;
+    popularThemes: { theme: ThemeName; count: number }[];
+    renderTime: number;
+  };
+  getPerformanceReport: () => {
+    totalSwitches: number;
+    averageTime: number;
+    fastestSwitch: number;
+    slowestSwitch: number;
+    themeUsage: Record<ThemeName, number>;
+  };
+  resetPerformanceMetrics: () => void;
 }
 
 // Utility functions (pure functions moved outside component)
@@ -127,6 +144,21 @@ export function useTheme(): UseThemeReturn {
   // Cache for applied theme to prevent redundant DOM operations
   const appliedThemeRef = useRef<ThemeName | null>(null);
 
+  // Performance tracking state
+  const performanceMonitor = useMemo(
+    () => PerformanceMonitor.getInstance(),
+    [],
+  );
+  const switchTimesRef = useRef<number[]>([]);
+  const themeUsageRef = useRef<Map<ThemeName, number>>(new Map());
+  const [themeMetrics, setThemeMetrics] = useState({
+    switchCount: 0,
+    averageSwitchTime: 0,
+    lastSwitchTime: 0,
+    popularThemes: [] as { theme: ThemeName; count: number }[],
+    renderTime: 0,
+  });
+
   // Initialize state with SSR-safe values
   const [state, setState] = useState<ThemeState>({
     theme: defaultTheme,
@@ -154,6 +186,10 @@ export function useTheme(): UseThemeReturn {
         return;
       }
 
+      // Start performance measurement
+      const startTime = performance.now();
+      performanceMonitor.startTiming("theme-application", "theme");
+
       safeDOMManipulation(() => {
         try {
           const root = document.documentElement;
@@ -177,15 +213,35 @@ export function useTheme(): UseThemeReturn {
           });
 
           appliedThemeRef.current = themeName;
+
+          // Record performance metrics
+          const renderTime = performanceMonitor.endTiming(
+            "theme-application",
+            "theme",
+            { theme: themeName },
+          );
+
+          // Update local metrics
+          setThemeMetrics((prev) => ({
+            ...prev,
+            renderTime,
+            lastSwitchTime: renderTime,
+          }));
         } catch (error) {
           console.warn("Failed to apply theme:", error);
+          performanceMonitor.recordMetric(
+            "theme-application-error",
+            performance.now() - startTime,
+            "theme",
+            { error: String(error), theme: themeName },
+          );
           if (isMountedRef.current) {
             setState((prev) => ({ ...prev, error: "Failed to apply theme" }));
           }
         }
       });
     },
-    [isMountedRef], // Stable dependencies
+    [isMountedRef, performanceMonitor, setThemeMetrics], // Updated dependencies
   );
 
   // Theme change handler with improved validation and localStorage integration
@@ -205,6 +261,13 @@ export function useTheme(): UseThemeReturn {
 
       if (state.theme === newTheme) return true;
 
+      // Start performance tracking for theme switch
+      performanceMonitor.startTiming("theme-switch", "theme");
+
+      // Update theme usage statistics
+      const currentCount = themeUsageRef.current.get(newTheme) || 0;
+      themeUsageRef.current.set(newTheme, currentCount + 1);
+
       // Update state
       setState((prev) => ({ ...prev, theme: newTheme, error: null }));
 
@@ -214,9 +277,47 @@ export function useTheme(): UseThemeReturn {
         // Don't set error state for localStorage failures as theme still works
       }
 
+      // Record theme switch performance
+      const switchTime = performanceMonitor.endTiming("theme-switch", "theme", {
+        fromTheme: state.theme,
+        toTheme: newTheme,
+      });
+
+      // Update performance metrics
+      switchTimesRef.current.push(switchTime);
+      if (switchTimesRef.current.length > 100) {
+        switchTimesRef.current = switchTimesRef.current.slice(-100);
+      }
+
+      const averageTime =
+        switchTimesRef.current.reduce((sum, time) => sum + time, 0) /
+        switchTimesRef.current.length;
+
+      // Update popular themes
+      const themeEntries = Array.from(themeUsageRef.current.entries()).map(
+        ([theme, count]) => ({ theme, count }),
+      );
+      themeEntries.sort((a, b) => b.count - a.count);
+
+      setThemeMetrics((prev) => ({
+        ...prev,
+        switchCount: prev.switchCount + 1,
+        averageSwitchTime: averageTime,
+        lastSwitchTime: switchTime,
+        popularThemes: themeEntries.slice(0, 5),
+      }));
+
       return true;
     },
-    [isMountedRef, state.theme, setValue], // Include setValue dependency
+    [
+      isMountedRef,
+      state.theme,
+      setValue,
+      performanceMonitor,
+      themeUsageRef,
+      switchTimesRef,
+      setThemeMetrics,
+    ],
   );
 
   // Initialize theme and handle mounting
@@ -271,6 +372,40 @@ export function useTheme(): UseThemeReturn {
     }
   }, [isMountedRef]);
 
+  // Performance report generator
+  const getPerformanceReport = useCallback(() => {
+    const times = switchTimesRef.current;
+    const usage = Array.from(themeUsageRef.current.entries()).reduce(
+      (acc, [theme, count]) => {
+        acc[theme] = count;
+        return acc;
+      },
+      {} as Record<ThemeName, number>,
+    );
+
+    return {
+      totalSwitches: times.length,
+      averageTime:
+        times.length > 0 ? times.reduce((a, b) => a + b, 0) / times.length : 0,
+      fastestSwitch: times.length > 0 ? Math.min(...times) : 0,
+      slowestSwitch: times.length > 0 ? Math.max(...times) : 0,
+      themeUsage: usage,
+    };
+  }, [switchTimesRef, themeUsageRef]);
+
+  // Reset performance metrics
+  const resetPerformanceMetrics = useCallback(() => {
+    switchTimesRef.current = [];
+    themeUsageRef.current.clear();
+    setThemeMetrics({
+      switchCount: 0,
+      averageSwitchTime: 0,
+      lastSwitchTime: 0,
+      popularThemes: [],
+      renderTime: 0,
+    });
+  }, [setThemeMetrics]);
+
   // Memoize return object to prevent unnecessary re-renders
   return useMemo(
     () => ({
@@ -285,6 +420,9 @@ export function useTheme(): UseThemeReturn {
       getThemeInfo,
       isThemeActive,
       validateTheme,
+      themeMetrics,
+      getPerformanceReport,
+      resetPerformanceMetrics,
     }),
     [
       state.theme,
@@ -296,6 +434,9 @@ export function useTheme(): UseThemeReturn {
       availableThemes,
       getThemeInfo,
       isThemeActive,
+      themeMetrics,
+      getPerformanceReport,
+      resetPerformanceMetrics,
     ],
   );
 }

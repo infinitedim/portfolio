@@ -1,12 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useEnhancedHistory } from "../useEnhancedHistory";
+import { useHistory } from "../useHistory";
 
 describe("useEnhancedHistory", () => {
   it("adds, toggles favorite and provides suggestions", () => {
-    const { result } = renderHook(() =>
-      useEnhancedHistory({ maxHistorySize: 10 }),
-    );
+    const { result } = renderHook(() => useHistory({ maxHistorySize: 10 }));
 
     act(() => result.current.addToHistory("build project"));
     act(() => result.current.addToHistory("deploy"));

@@ -12,6 +12,7 @@ import type { CustomFont } from "@portfolio/frontend/src/types/customization";
 interface FontManagerProps {
   fonts: CustomFont[];
   onUpdate: () => void;
+  onClose?: () => void;
 }
 
 /**
@@ -25,6 +26,7 @@ interface FontManagerProps {
 export function FontManager({
   fonts,
   onUpdate,
+  onClose,
 }: FontManagerProps): JSX.Element {
   const { themeConfig } = useTheme();
   const { changeFont } = useFont();
@@ -93,6 +95,14 @@ export function FontManager({
   const handleApplyFont = (font: CustomFont) => {
     if (font.source === "system") {
       changeFont(font.id as any);
+
+      // Save to localStorage directly to ensure persistence
+      if (typeof window !== "undefined") {
+        localStorage.setItem("terminal-font", font.id);
+      }
+
+      // Close the customization manager to show the font change
+      onClose?.();
     } else {
       // Apply custom font
       const root = document.documentElement;
@@ -105,6 +115,9 @@ export function FontManager({
 
       // Save to settings
       customizationService.saveSettings({ currentFont: font.id });
+
+      // Close the customization manager to show the font change
+      onClose?.();
     }
   };
 
@@ -192,9 +205,7 @@ export function FontManager({
             {filteredFonts.map((font) => (
               <div
                 key={font.id}
-                className={`p-3 rounded border cursor-pointer transition-all ${
-                  selectedFont?.id === font.id ? "ring-2" : ""
-                }`}
+                className={`p-3 rounded border cursor-pointer transition-all ${selectedFont?.id === font.id ? "ring-2" : ""}`}
                 style={{
                   borderColor: themeConfig.colors.border,
                   backgroundColor:
@@ -335,12 +346,7 @@ export function FontManager({
                   >
                     {selectedFont.name}
                   </h3>
-                  <p
-                    className="text-sm opacity-75 font-mono"
-                    // Add role and tabIndex for non-native interactive elements if needed
-                    // For a <p> tag, it's usually not interactive, but if it were,
-                    // you'd add role="text" or similar, and handle focus/click events.
-                  >
+                  <p className="text-sm opacity-75 font-mono">
                     {selectedFont.family}
                   </p>
                 </div>

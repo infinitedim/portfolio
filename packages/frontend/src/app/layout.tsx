@@ -1,10 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import {
+  Inter,
+  JetBrains_Mono,
+  Fira_Code,
+  Source_Code_Pro,
+  Inconsolata,
+  Ubuntu_Mono,
+  Roboto_Mono,
+} from "next/font/google";
 import "./globals.css";
 import { AccessibilityProvider } from "@portfolio/frontend/src/components/accessibility/AccessibilityProvider";
 import { ScreenReaderAnnouncer } from "@portfolio/frontend/src/components/accessibility/ScreenReaderAnnouncer";
 import { TRPCProvider } from "@portfolio/frontend/src/lib/trpc-provider";
 import { AuthProvider } from "@portfolio/frontend/src/lib/auth/AuthContext";
+import { PWARegistration } from "@portfolio/frontend/src/components/pwa/PWARegistration";
 import type { JSX, ReactNode } from "react";
 
 const inter = Inter({
@@ -17,6 +26,37 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-jetbrains-mono",
+});
+
+const firaCode = Fira_Code({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-fira-code",
+});
+
+const sourceCodePro = Source_Code_Pro({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-source-code-pro",
+});
+
+const inconsolata = Inconsolata({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inconsolata",
+});
+
+const ubuntuMono = Ubuntu_Mono({
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  variable: "--font-ubuntu-mono",
+});
+
+const robotoMono = Roboto_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-roboto-mono",
 });
 
 export const viewport: Viewport = {
@@ -161,7 +201,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${inter.variable} ${jetbrainsMono.variable} ${firaCode.variable} ${sourceCodePro.variable} ${inconsolata.variable} ${ubuntuMono.variable} ${robotoMono.variable}`}
     >
       <head>
         {/* Preconnect to external domains for performance */}
@@ -245,6 +285,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} antialiased`}>
+        <PWARegistration />
         <TRPCProvider>
           <AuthProvider>
             <AccessibilityProvider>

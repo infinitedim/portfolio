@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useRef, useEffect, type JSX } from "react";
+import { useState, useRef, useEffect, useMemo, type JSX } from "react";
 // Correctly use your custom theme hook
 import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
 import { useTerminal } from "@portfolio/frontend/src/hooks/useTerminal";
@@ -44,6 +44,17 @@ export function Terminal({
   const themeHookResult = useTheme();
   const fontHookResult = useFont();
   const { announceMessage, isReducedMotion } = useAccessibility();
+
+  // Create theme performance interface for useTerminal
+  const themePerformance = useMemo(
+    () => ({
+      getPerformanceReport: themeHookResult.getPerformanceReport,
+      themeMetrics: themeHookResult.themeMetrics,
+      resetMetrics: themeHookResult.resetPerformanceMetrics,
+    }),
+    [themeHookResult],
+  );
+
   const {
     history,
     currentInput,
@@ -53,10 +64,15 @@ export function Terminal({
     addToHistory,
     navigateHistory,
     clearHistory,
+    getCommandSuggestions,
+    getFrequentCommands,
+    commandAnalytics,
+    favoriteCommands,
   } = useTerminal(
     undefined, // onOpenDemo
     () => setShowNowPlaying(true), // onOpenNowPlaying
     () => setShowSpotifyAuth(true), // onOpenAuth
+    themePerformance, // theme performance metrics
   );
   const [showCustomizationManager, setShowCustomizationManager] =
     useState(false);
@@ -328,7 +344,18 @@ export function Terminal({
         const customThemes = customizationService.getCustomThemes().length;
         const customFonts = customizationService.getCustomFonts().length;
 
-        // MODIFICATION: Removed references to `applicationStatus`
+        // Enhanced status with command analytics and performance metrics
+        const analytics = commandAnalytics || {
+          totalCommands: 0,
+          uniqueCommands: 0,
+          successRate: 100,
+          topCommands: [],
+        };
+
+        // Get performance metrics
+        const performanceReport = themeHookResult.getPerformanceReport();
+        const currentMetrics = themeHookResult.themeMetrics;
+
         const statusInfo = [
           "🖥️  Terminal Portfolio System Status",
           "═".repeat(60),
@@ -339,10 +366,22 @@ export function Terminal({
           `⏰ Session Started: ${uptime}`,
           `💻 Platform: ${mounted && typeof window !== "undefined" ? window.navigator.platform : "Server"}`,
           "",
+          "📈 Command Analytics:",
+          `   • Total commands executed: ${analytics.totalCommands}`,
+          `   • Unique commands used: ${analytics.uniqueCommands}`,
+          `   • Success rate: ${analytics.successRate.toFixed(1)}%`,
+          `   • Most used: ${analytics.topCommands[0]?.command || "N/A"}`,
+          "",
+          "⚡ Performance Metrics:",
+          `   • Theme switches: ${performanceReport.totalSwitches}`,
+          `   • Average switch time: ${performanceReport.averageTime.toFixed(1)}ms`,
+          `   • Current theme render: ${currentMetrics.renderTime.toFixed(1)}ms`,
+          `   • Fastest switch: ${performanceReport.fastestSwitch.toFixed(1)}ms`,
+          `   • Most used theme: ${currentMetrics.popularThemes[0]?.theme || theme}`,
+          "",
           "🎨 Theme System:",
           `   • ${availableThemes?.length || 0} built-in themes available`,
           `   • ${customThemes} custom themes created`,
-          // Removed `isApplying` and `lastApplied` as they don't exist in the hook
           "   • Use 'theme -l' to list all themes",
           "",
           "🔤 Font System:",
@@ -350,8 +389,19 @@ export function Terminal({
           `   • ${customFonts} custom fonts uploaded`,
           "   • Use 'font -l' to list all fonts",
           "",
+          "⌨️  Enhanced Features:",
+          "   • Smart command suggestions (↑/↓ or Ctrl+R)",
+          "   • Command analytics and favorites",
+          "   • Tab completion with history",
+          "   • Real-time performance monitoring",
+          "",
           "🎯 Development Progress:",
           "   ▓▓▓▓▓▓▓▓▓░ 95% Complete",
+          "",
+          "💡 Performance Commands:",
+          "   • 'perf' - Quick performance overview",
+          "   • 'perf --detailed' - Detailed metrics",
+          "   • 'perf --reset' - Reset all metrics",
         ].join("\n");
 
         addToHistory(command, {
@@ -457,6 +507,8 @@ export function Terminal({
                   "font",
                 ]}
                 inputRef={commandInputRef}
+                getCommandSuggestions={getCommandSuggestions}
+                getFrequentCommands={getFrequentCommands}
               />
             </div>
 

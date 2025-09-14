@@ -2,9 +2,9 @@
 
 import { useState, type JSX } from "react";
 import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import { useAdvancedCommandHistory } from "@portfolio/frontend/src/hooks/useAdvancedCommandHistory";
+import { useCommandHistory } from "../../hooks/useCommandHistory";
 import { useTerminalShortcuts } from "@portfolio/frontend/src/hooks/useTerminalShortcuts";
-import { AdvancedHistorySearchPanel } from "./AdvancedHistorySearchPanel";
+import { HistorySearchPanel } from "./HistorySearchPanel";
 import { KeyboardShortcut } from "./KeyboardShortcuts";
 
 interface AdvancedTerminalFeaturesIntegrationProps {
@@ -52,7 +52,7 @@ export function AdvancedTerminalFeaturesIntegration({
     clearHistory: _clearHistory,
     exportHistory,
     totalCommands,
-  } = useAdvancedCommandHistory();
+  } = useCommandHistory();
 
   const { shortcuts, updateShortcutKeys, exportShortcuts, resetToDefaults } =
     useTerminalShortcuts({
@@ -551,7 +551,7 @@ export function AdvancedTerminalFeaturesIntegration({
       </div>
 
       {/* Panels */}
-      <AdvancedHistorySearchPanel
+      <HistorySearchPanel
         isOpen={showHistoryPanel}
         onClose={() => setShowHistoryPanel(false)}
         onSelectCommand={handleCommandExecuted}

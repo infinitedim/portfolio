@@ -13,7 +13,7 @@ export interface HistoryItem {
   executionTime?: number;
 }
 
-interface UseEnhancedHistoryOptions {
+interface UseHistoryOptions {
   maxHistorySize?: number;
   persistKey?: string;
   categorizeCommands?: boolean;
@@ -29,18 +29,18 @@ interface SerializedHistoryItem {
 }
 
 /**
- * Enhanced command history hook with search, favorites, and categorization
- * @param {UseEnhancedHistoryOptions} options - The options for the hook
+ *  command history hook with search, favorites, and categorization
+ * @param {UseHistoryOptions} options - The options for the hook
  * @param {number} options.maxHistorySize - The maximum number of history items to store
  * @param {string} options.persistKey - The key to use for localStorage
  * @param {boolean} options.categorizeCommands - Whether to categorize commands
- * @returns {object} The enhanced history hook
+ * @returns {object} The  history hook
  */
-export function useEnhancedHistory({
+export function useHistory({
   maxHistorySize = 200,
-  persistKey = "enhanced-terminal-history",
+  persistKey = "-terminal-history",
   categorizeCommands = true,
-}: UseEnhancedHistoryOptions = {}) {
+}: UseHistoryOptions = {}) {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
