@@ -1,22 +1,11 @@
 {
   "version": 2,
   "functions": {
-    "packages/backend/api/**/*.ts": {
+    "packages/frontend/src/app/api/**/*.ts": {
       "runtime": "nodejs22.x",
-      "maxDuration": 10,
-      "memory": 1536
+      "maxDuration": 30
     }
   },
-  "rewrites": [
-    {
-      "source": "/api/backend",
-      "destination": "/packages/backend/api/index.ts"
-    },
-    {
-      "source": "/api/backend/(.*)",
-      "destination": "/packages/backend/api/index.ts"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -42,6 +31,23 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/health",
+      "destination": "/api/portfolio/health"
+    },
+    {
+      "source": "/healthz",
+      "destination": "/api/portfolio/health"
+    }
+  ],
+  "relatedProjects": [
+    "packages/frontend",
+    "packages/backend",
+    "packages/ui",
+    "tools/logger",
+    "tools/trpc"
   ],
   "cleanUrls": true,
   "trailingSlash": false

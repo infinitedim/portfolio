@@ -4,6 +4,34 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "env": [
+        "NODE_ENV",
+        "ANALYZE",
+        "SECRET_KEY",
+        "CUSTOM_KEY",
+        "JWT_SECRET",
+        "JWT_EXPIRES_IN",
+        "REFRESH_TOKEN",
+        "REFRESH_TOKEN_EXPIRES_IN",
+        "ADMIN_EMAIL",
+        "NEXT_PUBLIC_ANALYTICS_ENABLED",
+        "NEXT_PUBLIC_BASE_URL",
+        "NEXT_PUBLIC_ROADMAP_AUTH_TOKEN",
+        "NEXT_PUBLIC_ROADMAP_USER_ID",
+        "NPM_PACKAGE_VERSION",
+        "FIREBASE_PROJECT_ID",
+        "GITHUB_TOKEN",
+        "GITHUB_USERNAME",
+        "VERCEL_URL",
+        "ROADMAP_AUTH_TOKEN",
+        "ROADMAP_USER_ID",
+        "SPOTIFY_CLIENT_SECRET",
+        "SPOTIFY_CLIENT_ID",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "PORTFOLIO_AI_KEY",
+        "OPENAI_API_KEY"
+      ],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "dev": {
