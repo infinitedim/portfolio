@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useDebouncedValue } from "./useDebouncedValue";
 
-// Enhanced suggestion types with better context
 export interface SuggestionItem {
   command: string;
   score: number;
@@ -154,12 +153,10 @@ class FuzzyMatcher {
     const lowerQuery = query.toLowerCase();
     const lowerTarget = target.toLowerCase();
 
-    // Exact match
     if (lowerQuery === lowerTarget) {
       return this.WEIGHTS.EXACT_MATCH;
     }
 
-    // Prefix match
     if (lowerTarget.startsWith(lowerQuery)) {
       const lengthRatio = lowerQuery.length / lowerTarget.length;
       return (
@@ -167,7 +164,6 @@ class FuzzyMatcher {
       );
     }
 
-    // Word boundary match
     const words = lowerTarget.split(/[-_\s]+/);
     for (const word of words) {
       if (word.startsWith(lowerQuery)) {

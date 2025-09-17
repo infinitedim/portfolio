@@ -87,28 +87,45 @@ export default function HomePage(): JSX.Element {
         id="main-content"
         className="relative"
       >
-        {/* Terminal Header */}
-        <HomeTerminalHeader />
-
-        {/* Static content that can be server-rendered */}
-        <StaticContent />
-
-        {/* Interactive terminal with suspense boundary */}
-        <Suspense
-          fallback={
-            <div
-              className="min-h-screen w-full flex items-center justify-center"
-              style={{
-                backgroundColor: "#000000",
-                color: "#ffffff",
-              }}
-            >
-              <TerminalLoadingProgress />
-            </div>
-          }
+        {/* Decorative letter glitch background (non-interactive) */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 z-0 pointer-events-none"
         >
-          <Terminal />
-        </Suspense>
+          <div className="letter-glitch-bg">
+            <span
+              className="glitch"
+              data-text="TERMINAL PORTFOLIO"
+            >
+              TERMINAL PORTFOLIO
+            </span>
+          </div>
+        </div>
+
+        <div className="relative z-10">
+          {/* Terminal Header */}
+          <HomeTerminalHeader />
+
+          {/* Static content that can be server-rendered */}
+          <StaticContent />
+
+          {/* Interactive terminal with suspense boundary */}
+          <Suspense
+            fallback={
+              <div
+                className="min-h-screen w-full flex items-center justify-center"
+                style={{
+                  backgroundColor: "#000000",
+                  color: "#ffffff",
+                }}
+              >
+                <TerminalLoadingProgress />
+              </div>
+            }
+          >
+            <Terminal />
+          </Suspense>
+        </div>
       </main>
 
       {/* Structured data for the homepage */}

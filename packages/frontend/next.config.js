@@ -5,61 +5,17 @@ import bundleAnalyzer from "@next/bundle-analyzer";
 const nextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ["@prisma/client"],
+  // Temporarily disable experimental flags while diagnosing module factory error
   experimental: {
-    optimizePackageImports: ["@/components", "@/hooks", "@/lib"],
-    webpackBuildWorker: true,
-    // optimizeCss: true,
-    serverActions: {
-      bodySizeLimit: "2mb",
-    },
+    // optimizePackageImports: ["@/components", "@/hooks", "@/lib"],
+    // webpackBuildWorker: true,
+    serverActions: { bodySizeLimit: "2mb" },
   },
 
   // Webpack optimizations for production
   webpack: (config, { dev, isServer, webpack }) => {
     // Performance optimizations
-    if (!dev && !isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: "all",
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // Vendor chunk for node_modules
-            vendor: {
-              name: "vendor",
-              chunks: "all",
-              test: /node_modules/,
-              priority: 20,
-            },
-            // Common chunk for shared code
-            common: {
-              name: "common",
-              chunks: "all",
-              minChunks: 2,
-              priority: 10,
-              reuseExistingChunk: true,
-              enforce: true,
-            },
-            // Terminal specific chunks
-            terminal: {
-              name: "terminal",
-              chunks: "all",
-              test: /[\\/]src[\\/]components[\\/]terminal[\\/]/,
-              priority: 30,
-            },
-            // Theme system chunks
-            themes: {
-              name: "themes",
-              chunks: "all",
-              test: /[\\/]src[\\/](lib|components)[\\/](themes|customization)[\\/]/,
-              priority: 25,
-            },
-          },
-        },
-        // Bundle analyzer is handled by withBundleAnalyzer
-      };
-    }
+    // Removed custom splitChunks for stability during debugging of undefined factory errors.
 
     // Add webpack plugins for development
     if (dev) {

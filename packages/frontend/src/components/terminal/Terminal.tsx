@@ -3,7 +3,6 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo, type JSX } from "react";
-// Correctly use your custom theme hook
 import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
 import { useTerminal } from "@portfolio/frontend/src/hooks/useTerminal";
 import { useAccessibility } from "@portfolio/frontend/src/components/accessibility/AccessibilityProvider";
@@ -44,6 +43,9 @@ export function Terminal({
   const themeHookResult = useTheme();
   const fontHookResult = useFont();
   const { announceMessage, isReducedMotion } = useAccessibility();
+
+  // Add minimum loading time to ensure progress bar animation runs
+  const [hasMinimumLoadingTime, setHasMinimumLoadingTime] = useState(false);
 
   // Create theme performance interface for useTerminal
   const themePerformance = useMemo(
@@ -94,6 +96,15 @@ export function Terminal({
     customizationService.loadAllCustomFonts();
     announceMessage("Terminal portfolio loaded", "polite");
   }, [announceMessage, customizationService]);
+
+  // Ensure minimum loading time for progress bar animation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setHasMinimumLoadingTime(true);
+    }, 2000); // 2 second minimum loading time
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Auto-scroll to bottom when new content is added
   useEffect(() => {
@@ -417,11 +428,25 @@ export function Terminal({
     setCurrentInput("");
   };
 
-  // MODIFICATION: Use mounted state to prevent hydration issues
-  if (!mounted || !themeConfig || !fontConfig) {
+  // MODIFICATION: Use mounted state to prevent hydration issues and ensure minimum loading time
+  if (!mounted || !themeConfig || !fontConfig || !hasMinimumLoadingTime) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-black text-white">
-        <TerminalLoadingProgress />
+        <TerminalLoadingProgress
+          duration={2500}
+          files={[
+            "src/components/terminal/Terminal.tsx",
+            "src/hooks/useTheme.ts",
+            "src/hooks/useFont.ts",
+            "src/lib/themes/themeConfig.ts",
+            "src/lib/fonts/fontConfig.ts",
+            "src/components/ui/TerminalLoadingProgress.tsx",
+            "package.json",
+            "next.config.js",
+          ]}
+          completionText="🚀 Terminal ready!"
+          autoStart={true}
+        />
       </div>
     );
   }

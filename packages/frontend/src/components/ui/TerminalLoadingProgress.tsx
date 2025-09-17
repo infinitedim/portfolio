@@ -4,15 +4,10 @@ import { useState, useEffect, type JSX } from "react";
 import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
 
 interface TerminalLoadingProgressProps {
-  /** Total duration of the loading simulation in milliseconds */
   duration?: number;
-  /** Custom list of files to show as loading */
   files?: string[];
-  /** Text to show when loading is complete */
   completionText?: string;
-  /** Callback when loading is complete */
   onComplete?: () => void;
-  /** Whether to auto-start the loading animation */
   autoStart?: boolean;
 }
 
@@ -86,7 +81,6 @@ export function TerminalLoadingProgress({
     }
   }, [files, autoStart]);
 
-  // Handle loading animation
   useEffect(() => {
     if (!startTime || isComplete) return;
 
@@ -101,7 +95,6 @@ export function TerminalLoadingProgress({
         return;
       }
 
-      // Start loading current file
       setCurrentFileIndex(currentIndex);
       setLoadingFiles((prev) =>
         prev.map((file, index) => {
@@ -112,7 +105,6 @@ export function TerminalLoadingProgress({
         }),
       );
 
-      // Complete current file after a short delay
       setTimeout(() => {
         setLoadingFiles((prev) =>
           prev.map((file, index) => {
@@ -130,7 +122,6 @@ export function TerminalLoadingProgress({
     return () => clearInterval(interval);
   }, [startTime, duration, files.length, isComplete, onComplete]);
 
-  // Remove unused isCurrentFile parameter to fix lint error
   const getStatusIcon = (status: LoadingFile["status"]) => {
     switch (status) {
       case "pending":
@@ -160,7 +151,6 @@ export function TerminalLoadingProgress({
   };
 
   const getFileDisplayName = (path: string) => {
-    // Show only filename for long paths to keep it clean
     if (path.length > 40) {
       const parts = path.split("/");
       return `.../${parts[parts.length - 1]}`;
@@ -179,9 +169,7 @@ export function TerminalLoadingProgress({
       role="status"
       aria-label="Loading files"
     >
-      {/* Header */}
       <div
-        // className="text-center"
         className="text-center border-b pb-2 mb-3"
         style={{
           borderColor: themeConfig.colors.border,
@@ -193,21 +181,20 @@ export function TerminalLoadingProgress({
           <span>Loading application files...</span>
         </div>
       </div>
-
-      {/* File list */}
       <div className="space-y-1">
         {loadingFiles.map((file, index) => {
           const isCurrentFile = index === currentFileIndex;
-          const shouldShow = index <= currentFileIndex + 2; // Show current + next 2 files
+          const shouldShow = index <= currentFileIndex + 2;
 
           if (!shouldShow && file.status === "pending") return null;
 
           return (
             <div
               key={file.path}
-              className={`flex items-center gap-3 py-1 px-2 rounded transition-all duration-200 ${
-                isCurrentFile ? "bg-opacity-20" : ""
-              }`}
+              // eslint-disable-next-line prettier/prettier
+              className={`flex items-center gap-3 py-1 px-2 rounded transition-all duration-200 ${isCurrentFile ? "bg-opacity-20" : ""
+                // eslint-disable-next-line prettier/prettier
+                }`}
               style={{
                 backgroundColor: isCurrentFile
                   ? `${themeConfig.colors.accent}20`
@@ -221,7 +208,6 @@ export function TerminalLoadingProgress({
               <div className="w-4 flex justify-center">
                 {getStatusIcon(file.status)}
               </div>
-
               <div className="flex-1">
                 <span
                   className={file.status === "loading" ? "animate-pulse" : ""}
@@ -229,7 +215,6 @@ export function TerminalLoadingProgress({
                   {getFileDisplayName(file.path)}
                 </span>
               </div>
-
               {file.status === "loading" && (
                 <div className="flex gap-1">
                   {[0, 1, 2].map((dot) => (
@@ -248,8 +233,6 @@ export function TerminalLoadingProgress({
           );
         })}
       </div>
-
-      {/* Completion message */}
       {isComplete && (
         <div
           className="mt-4 pt-3 border-t"

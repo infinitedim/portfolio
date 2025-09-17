@@ -63,6 +63,13 @@ import { githubCommand } from "@portfolio/frontend/src/lib/commands/githubComman
 import { techStackCommand } from "@portfolio/frontend/src/lib/commands/techStackCommands";
 import { createNowPlayingCommand } from "@portfolio/frontend/src/lib/commands/nowPlayingCommands";
 import { createLocationCommand } from "@portfolio/frontend/src/lib/commands/locationCommands";
+import {
+  resumeCommand,
+  socialCommand,
+  shortcutsCommand,
+  enhancedContactCommand,
+  easterEggsCommand,
+} from "@portfolio/frontend/src/lib/commands/commands";
 import type {
   CommandOutput,
   TerminalHistory,
@@ -149,26 +156,22 @@ export function useTerminal(
   const parserRef = useRef<CommandParser | null>(null);
   const isMountedRef = useRef(true);
 
-  // Set client flag
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
     };
   }, []);
 
-  // Initialize command parser
   useEffect(() => {
     if (!isMountedRef.current) return;
 
     const initializeParser = async () => {
       const parser = new CommandParser();
 
-      // Register basic commands first
       parser.register(aboutCommand);
       parser.register(projectsCommand);
       parser.register(contactCommand);
@@ -179,7 +182,12 @@ export function useTerminal(
       parser.register(aliasCommand);
       parser.register(pwaCommand);
 
-      // Enhanced history command
+      parser.register(resumeCommand);
+      parser.register(socialCommand);
+      parser.register(shortcutsCommand);
+      parser.register(enhancedContactCommand);
+      parser.register(easterEggsCommand);
+
       parser.register({
         name: "history",
         description: "Show command history and analytics",
@@ -273,7 +281,6 @@ export function useTerminal(
         },
       });
 
-      // Register skills and roadmap commands (lazy loaded to avoid SSR issues)
       const skillsCmd = await getSkillsCommand();
       const { roadmapCommand, progressCommand } = await getRoadmapCommands();
 
@@ -285,12 +292,10 @@ export function useTerminal(
       parser.register(themesCommand);
       parser.register(fontsCommand);
 
-      // Register language commands
       parser.register(languageCommand);
       parser.register(languageListCommand);
       parser.register(languageInfoCommand);
 
-      // Performance dashboard command
       parser.register({
         name: "perf",
         description: "Show performance metrics dashboard",
@@ -300,7 +305,6 @@ export function useTerminal(
           const hasFlag = (flag: string) => args.includes(`--${flag}`);
 
           if (hasFlag("reset")) {
-            // Reset performance metrics
             if (themePerformance?.resetMetrics) {
               themePerformance.resetMetrics();
             }
@@ -313,7 +317,6 @@ export function useTerminal(
             };
           }
 
-          // Get theme performance data
           const themeReport = themePerformance?.getPerformanceReport() || {
             totalSwitches: 0,
             averageTime: 0,
@@ -322,8 +325,8 @@ export function useTerminal(
             themeUsage: {},
           };
 
-          // Import PerformanceMonitor dynamically to avoid SSR issues
-          let monitor;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          let monitor: any;
           try {
             const { PerformanceMonitor } = await import(
               "@portfolio/frontend/src/lib/performance/PerformanceMonitor"
@@ -391,7 +394,6 @@ export function useTerminal(
             };
           }
 
-          // Quick overview
           const currentMetrics = themePerformance?.themeMetrics || {
             renderTime: 0,
           };
@@ -427,7 +429,6 @@ export function useTerminal(
         },
       });
 
-      // Register interactive commands
       setDemoCallback(onOpenDemo || (() => {}));
       parser.register(demoCommand);
       parser.register(githubCommand);
@@ -440,7 +441,6 @@ export function useTerminal(
       );
       parser.register(createLocationCommand());
 
-      // Register help command LAST so it can see all other commands
       parser.register(createHelpCommand(() => parser.getCommands()));
 
       parserRef.current = parser;
@@ -450,7 +450,6 @@ export function useTerminal(
       console.error("Failed to initialize command parser:", error);
     });
 
-    // Cleanup function
     return () => {
       parserRef.current = null;
     };
@@ -464,7 +463,6 @@ export function useTerminal(
     themePerformance,
   ]);
 
-  // Load command history from localStorage
   useEffect(() => {
     if (!isClient || !isMountedRef.current) return;
 
@@ -482,7 +480,6 @@ export function useTerminal(
     }
   }, [isClient]);
 
-  // Save command history to localStorage
   useEffect(() => {
     if (!isClient || !isMountedRef.current) return;
 
@@ -498,7 +495,6 @@ export function useTerminal(
 
   const executeCommand = useCallback(
     async (input: string): Promise<CommandOutput | null> => {
-      // Clear any previous error when executing new command
       setLastError(null);
 
       if (!parserRef.current || !isMountedRef.current) {
@@ -519,16 +515,13 @@ export function useTerminal(
         const output = await parserRef.current.parse(input);
         const executionTime = performance.now() - startTime;
 
-        // Add to both legacy and enhanced command history
         if (input.trim()) {
-          // Enhanced history with analytics
           addToAdvancedHistory(
             input.trim(),
             output.type !== "error",
             executionTime,
           );
 
-          // Legacy history for backward compatibility
           if (
             commandHistory.length === 0 ||
             commandHistory[commandHistory.length - 1] !== input.trim()
@@ -537,14 +530,12 @@ export function useTerminal(
           }
         }
 
-        // Handle special commands
         if (output.content === SPECIAL_COMMANDS.CLEAR) {
           setHistory([]);
           setLastError(null);
           return null;
         }
 
-        // Theme change handling is done in Terminal.tsx, pass through unchanged
         if (
           typeof output.content === "string" &&
           output.content.startsWith(SPECIAL_COMMANDS.THEME_PREFIX)
@@ -563,7 +554,6 @@ export function useTerminal(
           };
         }
 
-        // Store error state if output is an error, otherwise clear it
         if (output.type === "error") {
           const errorMsg =
             typeof output.content === "string"
@@ -580,7 +570,6 @@ export function useTerminal(
         setLastError(errorMsg);
         console.error("Command execution error:", error);
 
-        // Log failed command to enhanced history
         addToAdvancedHistory(
           input.trim(),
           false,
@@ -609,7 +598,6 @@ export function useTerminal(
       const newEntry: TerminalHistory = {
         input,
         output,
-        // Use consistent timestamp for SSR vs client hydration
         timestamp:
           isClient && typeof window !== "undefined" ? new Date() : new Date(0),
       };
@@ -620,7 +608,6 @@ export function useTerminal(
 
   const navigateHistory = useCallback(
     (direction: "up" | "down") => {
-      // Fallback to legacy navigation if advanced history is empty
       if (advancedHistory.length === 0) {
         if (commandHistory.length === 0) return "";
 
@@ -646,7 +633,6 @@ export function useTerminal(
         }
       }
 
-      // Use enhanced history with smart navigation
       const recentCommands = advancedHistory
         .filter((entry) => entry.success)
         .slice(0, 50)
@@ -686,7 +672,6 @@ export function useTerminal(
     setHistoryIndex(-1);
     setLastError(null);
 
-    // Clear enhanced history as well
     clearAdvancedHistory();
 
     // Clear legacy localStorage
@@ -701,7 +686,6 @@ export function useTerminal(
     setLastError(null);
   }, []);
 
-  // Enhanced command suggestions based on current input
   const getCommandSuggestions = useCallback(
     (input: string, limit: number = 8) => {
       if (!input.trim()) return [];
@@ -710,7 +694,6 @@ export function useTerminal(
     [getSuggestions],
   );
 
-  // Get frequently used commands
   const getFrequentCommands = useCallback(() => {
     const frequency = advancedHistory.reduce(
       (acc, entry) => {
@@ -727,7 +710,6 @@ export function useTerminal(
   }, [advancedHistory]);
 
   return {
-    // Core terminal state
     history,
     currentInput,
     setCurrentInput,
@@ -739,8 +721,6 @@ export function useTerminal(
     commandHistory,
     lastError,
     clearError,
-
-    // Enhanced command history features
     getCommandSuggestions,
     getFrequentCommands,
     commandAnalytics: analytics,

@@ -8,6 +8,5 @@ export { AnimatedButton } from "./AnimatedButton";
 export { InteractiveWelcome } from "./InteractiveWelcome";
 export { NotificationToast } from "./NotificationToast";
 export { ProgressIndicator } from "./ProgressIndicator";
-export { TerminalLoadingDemo } from "./TerminalLoadingDemo";
 export { TerminalLoadingProgress } from "./TerminalLoadingProgress";
 export { ThemeSwitcher } from "./ThemeSwitcher";

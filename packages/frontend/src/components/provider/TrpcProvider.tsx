@@ -22,7 +22,7 @@ export function TRPCProvider({ children }: TRPCProviderProps): JSX.Element {
           queries: {
             retry: 1,
             refetchOnWindowFocus: false,
-            staleTime: 5 * 60 * 1000, // 5 minutes
+            staleTime: 5 * 60 * 1000,
           },
           mutations: {
             retry: 1,
@@ -31,7 +31,6 @@ export function TRPCProvider({ children }: TRPCProviderProps): JSX.Element {
       }),
   );
 
-  // Simple, consistent rendering to prevent hydration mismatches
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );

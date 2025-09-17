@@ -9,29 +9,17 @@ import {
 } from "@portfolio/frontend/src/hooks/useCommandSuggestions";
 
 interface CommandSuggestionsProps {
-  /** Current input value */
   input: string;
-  /** Available commands to suggest from */
   availableCommands: string[];
-  /** Whether to show suggestions */
   visible: boolean;
-  /** Callback when a suggestion is selected */
   onSelect: (suggestion: string) => void;
-  /** Callback when command is used (for learning) */
   onCommandUsed?: (command: string) => void;
-  /** Maximum number of suggestions to show */
   maxSuggestions?: number;
-  /** Whether to show suggestions for empty input */
   showOnEmpty?: boolean;
-  /** Whether to show command descriptions */
   showDescriptions?: boolean;
-  /** Whether to enable intelligent caching */
-  enableCache?: boolean;
-  /** Whether to enable user behavior learning */
   enableLearning?: boolean;
-  /** Minimum query length before showing suggestions */
+  enableCache?: boolean;
   minQueryLength?: number;
-  /** Custom debounce delay in milliseconds */
   debounceMs?: number;
 }
 

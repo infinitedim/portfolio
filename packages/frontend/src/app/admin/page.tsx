@@ -1,6 +1,7 @@
+/* eslint-disable prettier/prettier */
 "use client";
 
-import { useState } from "react";
+import { JSX, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@portfolio/frontend/src/components/admin/ProtectedRoute";
 import { TerminalHeader } from "@portfolio/frontend/src/components/admin/TerminalHeader";
@@ -8,9 +9,9 @@ import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
 import { useAuth } from "@portfolio/frontend/src/lib/auth/AuthContext";
 
 /**
- *
+ * @returns {JSX.Element} Admin Dashboard Page
  */
-export default function AdminDashboardPage() {
+export default function AdminDashboardPage(): JSX.Element {
   const { themeConfig } = useTheme();
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -93,9 +94,8 @@ export default function AdminDashboardPage() {
                   onClick={handleLogout}
                   onMouseEnter={() => setIsLogoutHovered(true)}
                   onMouseLeave={() => setIsLogoutHovered(false)}
-                  className={`px-3 py-1 text-xs font-mono rounded transition-all duration-200 ${
-                    isLogoutHovered ? "scale-105" : "scale-100"
-                  }`}
+                  className={`px-3 py-1 text-xs font-mono rounded transition-all duration-200 ${isLogoutHovered ? "scale-105" : "scale-100"
+                    }`}
                   style={{
                     backgroundColor: isLogoutHovered
                       ? themeConfig.colors.error

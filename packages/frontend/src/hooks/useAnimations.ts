@@ -39,7 +39,6 @@ export function useAnimations() {
   const isMountedRef = useMountRef();
   const animationRefs = useRef<Map<string, Animation>>(new Map());
 
-  // Cleanup function for animations
   const cleanupAnimation = useCallback((id: string) => {
     const animation = animationRefs.current.get(id);
     if (animation) {
@@ -52,7 +51,6 @@ export function useAnimations() {
     }
   }, []);
 
-  // Stop all animations if reduced motion is preferred
   useEffect(() => {
     if (isReducedMotion) {
       animationRefs.current.forEach((animation, id) => {
@@ -61,7 +59,6 @@ export function useAnimations() {
     }
   }, [isReducedMotion, cleanupAnimation]);
 
-  // Cleanup all animations on unmount
   useEffect(() => {
     const animations = animationRefs.current;
     return () => {
@@ -127,19 +124,13 @@ export function useAnimations() {
           }
         };
 
-        // Start typing
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         timerId = setTimeout(typeNextChar, fullConfig.speed);
-
-        // Store cleanup function (though this approach with setTimeout is better than setInterval)
       });
     },
     [isReducedMotion, isMountedRef],
   );
 
-  /**
-   * Create glitch effect with improved memory management
-   */
   const createGlitchEffect = useCallback(
     (element: HTMLElement, duration: number = 200): Animation | null => {
       if (isReducedMotion || !isMountedRef.current) return null;
@@ -191,9 +182,6 @@ export function useAnimations() {
     [isReducedMotion, isMountedRef, cleanupAnimation],
   );
 
-  /**
-   * Create matrix rain effect
-   */
   const createMatrixRain = useCallback(
     (
       container: HTMLElement,
@@ -239,7 +227,6 @@ export function useAnimations() {
         container.appendChild(drop);
         dropElements.push(drop);
 
-        // Change character periodically
         const changeChar = setInterval(
           () => {
             drop.textContent =
@@ -248,7 +235,6 @@ export function useAnimations() {
           speed + Math.random() * 200,
         );
 
-        // Store interval for cleanup
         dropIntervals.push(changeChar);
 
         drop.addEventListener("animationiteration", () => {
@@ -256,14 +242,11 @@ export function useAnimations() {
         });
       }
 
-      // Enhanced cleanup function
       return () => {
-        // Clear all intervals
         dropIntervals.forEach((interval) => {
           clearInterval(interval);
         });
 
-        // Remove DOM elements
         dropElements.forEach((drop) => {
           if (drop.parentNode) {
             drop.parentNode.removeChild(drop);
@@ -274,9 +257,6 @@ export function useAnimations() {
     [isReducedMotion],
   );
 
-  /**
-   * Create pulse animation
-   */
   const createPulseAnimation = useCallback(
     (
       element: HTMLElement,
@@ -305,9 +285,6 @@ export function useAnimations() {
     [isReducedMotion],
   );
 
-  /**
-   * Create slide-in animation
-   */
   const createSlideIn = useCallback(
     (
       element: HTMLElement,
@@ -359,9 +336,6 @@ export function useAnimations() {
     [isReducedMotion],
   );
 
-  /**
-   * Create bounce animation
-   */
   const createBounceAnimation = useCallback(
     (
       element: HTMLElement,
@@ -393,9 +367,6 @@ export function useAnimations() {
     [isReducedMotion],
   );
 
-  /**
-   * Create loading dots animation
-   */
   const createLoadingDots = useCallback(
     (container: HTMLElement, dotCount: number = 3): (() => void) => {
       if (isReducedMotion) {
@@ -426,18 +397,12 @@ export function useAnimations() {
     [isReducedMotion],
   );
 
-  /**
-   * Stop all animations with improved error handling
-   */
   const stopAllAnimations = useCallback(() => {
     animationRefs.current.forEach((animation, id) => {
       cleanupAnimation(id);
     });
   }, [cleanupAnimation]);
 
-  /**
-   * Stop specific animation with improved error handling
-   */
   const stopAnimation = useCallback(
     (animationId: string) => {
       cleanupAnimation(animationId);
@@ -459,7 +424,6 @@ export function useAnimations() {
   };
 }
 
-// Specialized hook for terminal animations
 /**
  * Specialized hook for terminal animations
  * @returns {object} - The animation functions and state

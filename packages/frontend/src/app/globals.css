@@ -2,6 +2,7 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
 }
 
 @layer utilities {
@@ -661,4 +662,180 @@ textarea.terminal-input {
 
 .terminal-cursor {
   animation: typingCursor 1s infinite;
+}
+
+/* Letter Glitch Background */
+.letter-glitch-bg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.85));
+  overflow: hidden;
+}
+
+.letter-glitch-bg .glitch {
+  position: relative;
+  font-family: var(--font-jetbrains-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace);
+  font-weight: 700;
+  font-size: clamp(48px, 8vw, 160px);
+  color: rgba(255, 255, 255, 0.06);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transform-origin: center;
+  mix-blend-mode: screen;
+}
+
+.letter-glitch-bg .glitch::before,
+.letter-glitch-bg .glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  overflow: hidden;
+  clip-path: inset(0 0 0 0);
+}
+
+.letter-glitch-bg .glitch::before {
+  color: rgba(255, 0, 80, 0.08);
+  transform: translate3d(-2px, -2px, 0);
+  animation: glitchTop 2.5s infinite linear alternate-reverse;
+  mix-blend-mode: screen;
+}
+
+.letter-glitch-bg .glitch::after {
+  color: rgba(0, 200, 255, 0.06);
+  transform: translate3d(2px, 2px, 0);
+  animation: glitchBottom 3s infinite linear alternate-reverse;
+  mix-blend-mode: screen;
+}
+
+@keyframes glitchTop {
+  0% {
+    clip-path: inset(0 0 80% 0);
+    transform: translate3d(-2px, -2px, 0) skewX(-5deg);
+    opacity: 0.9;
+  }
+
+  10% {
+    clip-path: inset(0 0 60% 0);
+    transform: translate3d(-4px, -6px, 0) skewX(-6deg);
+  }
+
+  20% {
+    clip-path: inset(0 0 40% 0);
+    transform: translate3d(0px, -4px, 0) skewX(-2deg);
+  }
+
+  30% {
+    clip-path: inset(50% 0 0 0);
+    transform: translate3d(-6px, -2px, 0) skewX(-8deg);
+  }
+
+  40% {
+    clip-path: inset(30% 0 30% 0);
+    transform: translate3d(-2px, -2px, 0) skewX(-3deg);
+  }
+
+  50% {
+    clip-path: inset(0 0 70% 0);
+    transform: translate3d(-8px, -8px, 0) skewX(-12deg);
+  }
+
+  60% {
+    clip-path: inset(10% 0 20% 0);
+    transform: translate3d(-1px, -1px, 0) skewX(-1deg);
+  }
+
+  70% {
+    clip-path: inset(40% 0 10% 0);
+    transform: translate3d(-3px, -5px, 0) skewX(-4deg);
+  }
+
+  80% {
+    clip-path: inset(20% 0 50% 0);
+    transform: translate3d(-2px, -2px, 0) skewX(-2deg);
+  }
+
+  90% {
+    clip-path: inset(0 0 60% 0);
+    transform: translate3d(-5px, -7px, 0) skewX(-7deg);
+  }
+
+  100% {
+    clip-path: inset(0 0 80% 0);
+    transform: translate3d(-2px, -2px, 0) skewX(-5deg);
+  }
+}
+
+@keyframes glitchBottom {
+  0% {
+    clip-path: inset(80% 0 0 0);
+    transform: translate3d(2px, 2px, 0) skewX(5deg);
+    opacity: 0.9;
+  }
+
+  10% {
+    clip-path: inset(60% 0 0 0);
+    transform: translate3d(6px, 4px, 0) skewX(6deg);
+  }
+
+  20% {
+    clip-path: inset(40% 0 0 0);
+    transform: translate3d(4px, 2px, 0) skewX(2deg);
+  }
+
+  30% {
+    clip-path: inset(0 0 50% 0);
+    transform: translate3d(8px, 6px, 0) skewX(8deg);
+  }
+
+  40% {
+    clip-path: inset(30% 0 20% 0);
+    transform: translate3d(2px, 2px, 0) skewX(3deg);
+  }
+
+  50% {
+    clip-path: inset(70% 0 0 0);
+    transform: translate3d(10px, 10px, 0) skewX(12deg);
+  }
+
+  60% {
+    clip-path: inset(20% 0 30% 0);
+    transform: translate3d(1px, 1px, 0) skewX(1deg);
+  }
+
+  70% {
+    clip-path: inset(10% 0 40% 0);
+    transform: translate3d(3px, 5px, 0) skewX(4deg);
+  }
+
+  80% {
+    clip-path: inset(50% 0 10% 0);
+    transform: translate3d(2px, 2px, 0) skewX(2deg);
+  }
+
+  90% {
+    clip-path: inset(60% 0 0 0);
+    transform: translate3d(7px, 8px, 0) skewX(7deg);
+  }
+
+  100% {
+    clip-path: inset(80% 0 0 0);
+    transform: translate3d(2px, 2px, 0) skewX(5deg);
+  }
+}
+
+/* Subtle noise layer to add texture */
+.letter-glitch-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 3px 3px;
+  mix-blend-mode: overlay;
+  opacity: 0.35;
+  pointer-events: none;
 }
