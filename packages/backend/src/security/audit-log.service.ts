@@ -3,6 +3,7 @@ import { Injectable } from "@nestjs/common";
 import type { Request } from "express";
 import { PrismaService } from "../prisma/prisma.service";
 import { RedisService } from "../redis/redis.service";
+import { securityLogger } from "../logging/logger";
 
 export enum AuditEventType {
   // Authentication events
@@ -28,6 +29,7 @@ export enum AuditEventType {
   SUSPICIOUS_ACTIVITY = "SUSPICIOUS_ACTIVITY",
   RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED",
   CSRF_VIOLATION = "CSRF_VIOLATION",
+  CSRF_TOKEN_INVALID = "CSRF_TOKEN_INVALID",
   SQL_INJECTION_ATTEMPT = "SQL_INJECTION_ATTEMPT",
   XSS_ATTEMPT = "XSS_ATTEMPT",
   BRUTE_FORCE_ATTEMPT = "BRUTE_FORCE_ATTEMPT",
@@ -109,15 +111,23 @@ export class AuditLogService {
         await this.flushAuditCache();
       }
 
-      // Log to console for development
+      // Log for development and monitoring
       if (process.env.NODE_ENV === "development") {
-        console.log("AUDIT LOG:", {
+        securityLogger.info("Audit log entry", {
           timestamp: new Date().toISOString(),
           ...enhancedEntry,
+          component: "AuditLogService",
+          operation: "logEvent",
         });
       }
     } catch (error) {
-      console.error("Failed to log audit event:", error);
+      securityLogger.error("Failed to log audit event", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        eventType: entry.eventType,
+        component: "AuditLogService",
+        operation: "logEvent",
+      });
       // Don't throw - audit logging should not break the application
     }
   }
@@ -204,7 +214,17 @@ export class AuditLogService {
    */
   async queryAuditLogs(query: AuditLogQuery): Promise<AuditLogEntry[]> {
     try {
-      const where: any = {};
+      interface PrismaWhereClause {
+        adminUserId?: string;
+        action?: string;
+        resource?: string;
+        createdAt?: {
+          gte?: Date;
+          lte?: Date;
+        };
+      }
+
+      const where: PrismaWhereClause = {};
 
       if (query.userId) {
         where.adminUserId = query.userId;
@@ -252,7 +272,13 @@ export class AuditLogService {
         metadata: log.metadata as Record<string, unknown>,
       }));
     } catch (error) {
-      console.error("Failed to query audit logs:", error);
+      securityLogger.error("Failed to query audit logs", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        query,
+        component: "AuditLogService",
+        operation: "queryAuditLogs",
+      });
       return [];
     }
   }
@@ -286,7 +312,12 @@ export class AuditLogService {
 
       return stats;
     } catch (error) {
-      console.error("Failed to get audit stats:", error);
+      securityLogger.error("Failed to get audit stats", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: "AuditLogService",
+        operation: "getAuditStats",
+      });
       return {};
     }
   }
@@ -311,7 +342,13 @@ export class AuditLogService {
 
       return result.count;
     } catch (error) {
-      console.error("Failed to cleanup old audit logs:", error);
+      securityLogger.error("Failed to cleanup old audit logs", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        daysToKeep,
+        component: "AuditLogService",
+        operation: "cleanupOldLogs",
+      });
       return 0;
     }
   }
@@ -336,7 +373,14 @@ export class AuditLogService {
 
       return JSON.stringify(logs, null, 2);
     } catch (error) {
-      console.error("Failed to export audit logs:", error);
+      securityLogger.error("Failed to export audit logs", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        component: "AuditLogService",
+        operation: "exportAuditLogs",
+      });
       return "[]";
     }
   }
@@ -394,7 +438,12 @@ export class AuditLogService {
         await this.batchInsertAuditLogs(entries);
       }
     } catch (error) {
-      console.error("Failed to flush audit cache:", error);
+      securityLogger.error("Failed to flush audit cache", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: "AuditLogService",
+        operation: "flushAuditCache",
+      });
     }
   }
 
@@ -444,7 +493,13 @@ export class AuditLogService {
 
       await this.prisma.auditLog.createMany({ data: prismaAuditLogs });
     } catch (error) {
-      console.error("Failed to batch insert audit logs:", error);
+      securityLogger.error("Failed to batch insert audit logs", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        entryCount: entries.length,
+        component: "AuditLogService",
+        operation: "batchInsertAuditLogs",
+      });
     }
   }
 

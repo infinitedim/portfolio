@@ -1,0 +1,8 @@
+TypeError: Cannot read properties of undefined (reading 'call')
+    at options.factory (http://127.0.0.1:3000/_next/static/chunks/webpack.js?v=1758375770179:700:31)
+    at __webpack_require__ (http://127.0.0.1:3000/_next/static/chunks/webpack.js?v=1758375770179:37:33)
+    at fn (http://127.0.0.1:3000/_next/static/chunks/webpack.js?v=1758375770179:357:21)
+    at requireModule (webpack-internal:///(app-pages-browser)/../../node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:121:27)
+    at initializeModuleChunk (webpack-internal:///(app-pages-browser)/../../node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:1078:21)
+    at readChunk (webpack-internal:///(app-pages-browser)/../../node_modules/next/dist/compiled/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js:952:11)
+    at RootLayout (rsc://React/Server/webpack-internal:///(rsc)/./src/app/layout.tsx?8:280:102)

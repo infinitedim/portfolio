@@ -1,15 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import "reflect-metadata";
 import { NestFactory } from "@nestjs/core";
 import helmet from "helmet";
 import { ValidationPipe } from "@nestjs/common";
 import { AppModule } from "./app.module";
 import { mountTrpc } from "./trpc/router";
-import type { NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { GlobalExceptionFilter } from "./common/global-exception.filter";
 import { GlobalErrorHandler } from "./common/error-handler";
 import { PrismaService } from "./prisma/prisma.service";
 import { RedisService } from "./redis/redis.service";
+import { securityLogger } from "./logging/logger";
 
 /**
  * @description Bootstrap the NestJS application
@@ -27,9 +27,10 @@ export async function createExpressApp(): Promise<import("express").Express> {
     .map((s) => s.trim())
     .filter(Boolean);
   if (allowed.length > 0) {
-    app.use((req: any, res: any, next: NextFunction) => {
+    app.use((req: Request, res: Response, next: NextFunction) => {
       const xf = (req.headers["x-forwarded-for"] as string) || "";
-      const ip = (xf.split(",")[0] || req.ip || "").trim();
+      const clientIp = req.ip || req.socket.remoteAddress || "";
+      const ip = (xf.split(",")[0] || clientIp).trim();
       if (!ip) return res.status(403).json({ error: "Forbidden" });
       // Simple exact match; for CIDR, use a library like ip-cidr in future
       if (!allowed.includes(ip))
@@ -121,40 +122,53 @@ export async function createExpressApp(): Promise<import("express").Express> {
       prismaService.enableShutdownHooks(app).catch((err: unknown) => {
         // Don't block startup for hook registration failures - log and continue
         const errorMessage = err instanceof Error ? err.message : String(err);
-        console.error("Failed to enable Prisma shutdown hooks:", errorMessage);
+        securityLogger.error("Failed to enable Prisma shutdown hooks", {
+          error: errorMessage,
+          stack: err instanceof Error ? err.stack : undefined,
+          component: "ApplicationLifecycle",
+          operation: "enablePrismaShutdownHooks",
+        });
 
-        // Log to structured logger if available
-        if (typeof console.warn === "function") {
-          console.warn(
-            "Application may not shut down gracefully without Prisma hooks",
-          );
-        }
+        securityLogger.warn(
+          "Application may not shut down gracefully without Prisma hooks",
+          {
+            component: "ApplicationLifecycle",
+            operation: "enablePrismaShutdownHooks",
+          },
+        );
       });
     }
   } catch (err: unknown) {
     // If PrismaService isn't available in some contexts, log the reason
     const errorMessage = err instanceof Error ? err.message : String(err);
-    console.warn(
-      "PrismaService not available for shutdown hooks:",
-      errorMessage,
-    );
-    console.info(
-      "This is expected in some deployment contexts (e.g., serverless)",
-    );
+    securityLogger.warn("PrismaService not available for shutdown hooks", {
+      error: errorMessage,
+      note: "This is expected in some deployment contexts (e.g., serverless)",
+      component: "ApplicationLifecycle",
+      operation: "enablePrismaShutdownHooks",
+    });
   }
 
   // Graceful shutdown helper
-  const gracefulShutdown = async (reason?: string, error?: any) => {
-    console.error(`Shutdown initiated${reason ? `: ${reason}` : ""}`);
-    if (error) {
-      console.error(error instanceof Error ? (error.stack ?? error) : error);
-    }
+  const gracefulShutdown = async (reason?: string, error?: unknown) => {
+    securityLogger.error("Application shutdown initiated", {
+      reason: reason || "Unknown",
+      error: error instanceof Error ? error.message : String(error || ""),
+      stack: error instanceof Error ? error.stack : undefined,
+      component: "ApplicationLifecycle",
+      operation: "gracefulShutdown",
+    });
 
     try {
       // attempt to close the Nest application
       await app.close();
     } catch (e) {
-      console.error("Error while closing Nest app:", e);
+      securityLogger.error("Failed to close Nest application", {
+        error: e instanceof Error ? e.message : String(e),
+        stack: e instanceof Error ? e.stack : undefined,
+        component: "ApplicationLifecycle",
+        operation: "gracefulShutdown",
+      });
     }
 
     try {
@@ -163,7 +177,12 @@ export async function createExpressApp(): Promise<import("express").Express> {
         await prismaService.$disconnect();
       }
     } catch (e) {
-      console.error("Error while disconnecting Prisma:", e);
+      securityLogger.error("Failed to disconnect Prisma", {
+        error: e instanceof Error ? e.message : String(e),
+        stack: e instanceof Error ? e.stack : undefined,
+        component: "ApplicationLifecycle",
+        operation: "gracefulShutdown",
+      });
     }
 
     try {
@@ -177,7 +196,12 @@ export async function createExpressApp(): Promise<import("express").Express> {
         }
       }
     } catch (e) {
-      console.error("Error while handling Redis during shutdown:", e);
+      securityLogger.error("Failed to handle Redis during shutdown", {
+        error: e instanceof Error ? e.message : String(e),
+        stack: e instanceof Error ? e.stack : undefined,
+        component: "ApplicationLifecycle",
+        operation: "gracefulShutdown",
+      });
     }
 
     // give process a moment to flush logs, then exit
@@ -200,7 +224,13 @@ export async function createExpressApp(): Promise<import("express").Express> {
     const port = process.env.PORT || 4000;
     await app.listen(port);
 
-    console.log(`🚀 Server running on http://localhost:${port}`);
+    securityLogger.info("Server started successfully", {
+      port,
+      url: `http://localhost:${port}`,
+      environment: "development",
+      component: "ApplicationLifecycle",
+      operation: "startServer",
+    });
   }
 
   return expressApp;

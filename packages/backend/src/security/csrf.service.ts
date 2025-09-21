@@ -3,6 +3,7 @@ import { Injectable } from "@nestjs/common";
 import type { Request, Response } from "express";
 import crypto from "crypto";
 import { RedisService } from "../redis/redis.service";
+import { securityLogger } from "../logging/logger";
 
 export interface CSRFToken {
   token: string;
@@ -84,7 +85,12 @@ export class CSRFTokenService {
 
       return { isValid: true };
     } catch (error) {
-      console.error("CSRF token validation error:", error);
+      securityLogger.error("CSRF token validation failed", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: "CSRFTokenService",
+        operation: "validateToken",
+      });
       return {
         isValid: false,
         error: "CSRF validation failed",
@@ -202,7 +208,12 @@ export class CSRFTokenService {
 
       return cleaned;
     } catch (error) {
-      console.error("CSRF cleanup error:", error);
+      securityLogger.error("CSRF cleanup failed", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: "CSRFTokenService",
+        operation: "cleanupExpiredTokens",
+      });
       return 0;
     }
   }
@@ -228,7 +239,12 @@ export class CSRFTokenService {
         expired,
       };
     } catch (error) {
-      console.error("CSRF stats error:", error);
+      securityLogger.error("Failed to get CSRF token stats", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: "CSRFTokenService",
+        operation: "getTokenStats",
+      });
       return { total: 0, expired: 0 };
     }
   }

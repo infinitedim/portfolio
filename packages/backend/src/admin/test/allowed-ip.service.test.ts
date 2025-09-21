@@ -111,7 +111,7 @@ describe("AllowedIpService", () => {
         "192.168.1.1",
         "10.0.0.1",
         "172.16.0.1",
-        "127.0.0.1",
+        "8.8.8.8", // Public DNS
         "255.255.255.255",
       ];
 
@@ -129,7 +129,11 @@ describe("AllowedIpService", () => {
 
     it("should validate IPv6 addresses correctly", async () => {
       const adminUserId = "user-123";
-      const validIps = ["2001:0db8:85a3:0000:0000:8a2e:0370:7334"];
+      const validIps = [
+        "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+        "2001:db8::1",
+        "fd00::1", // Unique local address
+      ];
 
       for (const ip of validIps) {
         const mockData = { ipAddress: ip, description: "Test IP" };
@@ -461,36 +465,120 @@ describe("AllowedIpService", () => {
   });
 
   describe("IP validation", () => {
-    it("should validate various IP formats", () => {
-      const validIps = [
+    describe("Valid IPv4 addresses", () => {
+      const validIPv4Addresses = [
         "192.168.1.1",
         "10.0.0.1",
         "172.16.0.1",
-        "127.0.0.1",
+        "8.8.8.8",
+        "1.1.1.1",
+        "203.0.113.1",
+        "198.51.100.1",
         "255.255.255.255",
-        "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+        "1.0.0.1",
       ];
 
-      const invalidIps = [
-        "invalid-ip",
+      validIPv4Addresses.forEach((ip) => {
+        it(`should accept valid IPv4 address: ${ip}`, () => {
+          expect(service["isValidIpAddress"](ip)).toBe(true);
+        });
+      });
+    });
+
+    describe("Valid IPv6 addresses", () => {
+      const validIPv6Addresses = [
+        "2001:db8::1",
+        "2001:db8:85a3::8a2e:370:7334",
+        "2001:db8:85a3:0:0:8a2e:370:7334",
+        "::ffff:192.0.2.1", // IPv4-mapped IPv6
+        "2001:db8::8a2e:370:7334",
+        "fd00::1", // Unique local address
+      ];
+
+      validIPv6Addresses.forEach((ip) => {
+        it(`should accept valid IPv6 address: ${ip}`, () => {
+          expect(service["isValidIpAddress"](ip)).toBe(true);
+        });
+      });
+    });
+
+    describe("Invalid IP addresses", () => {
+      const invalidIpAddresses = [
+        // Invalid IPv4
+        "256.256.256.256",
         "192.168.1.256",
         "192.168.1",
         "192.168.1.1.1",
-        "192.168.1.1:8080",
-        "http://192.168.1.1",
-        "192.168.1.1/24",
+        "192.168.-1.1",
+        "192.168.1.01", // Leading zeros
+        "",
+        " ",
+        "not.an.ip.address",
+        "192.168.1.1:8080", // Port included
+        "http://192.168.1.1", // URL format
+        "192.168.1.1/24", // CIDR notation
         "localhost",
         "example.com",
-        "::1",
-        "fe80::1",
+
+        // Invalid IPv6
+        "2001:db8::1::1", // Double ::
+        "2001:db8:85a3::8a2e::7334", // Multiple ::
+        "2001:db8:85a3:0:0:8a2e:370:7334:extra", // Too many groups
+        "gggg::1", // Invalid hex
+        "2001:db8:85a3:0:0:8a2e:370", // Too few groups
       ];
 
-      validIps.forEach((ip) => {
-        expect(service["isValidIpAddress"](ip)).toBe(true);
+      invalidIpAddresses.forEach((ip) => {
+        it(`should reject invalid IP address: ${JSON.stringify(ip)}`, () => {
+          expect(service["isValidIpAddress"](ip)).toBe(false);
+        });
+      });
+    });
+
+    describe("Restricted IP addresses", () => {
+      const restrictedIpAddresses = [
+        // IPv4 restricted ranges
+        "127.0.0.1", // Localhost
+        "127.1.1.1", // Localhost range
+        "0.0.0.0", // This network
+        "169.254.1.1", // Link-local
+        "224.0.0.1", // Multicast
+        "240.0.0.1", // Reserved
+
+        // IPv6 restricted addresses
+        "::1", // Loopback
+        "::", // Unspecified
+        "fe80::1", // Link-local
+        "ff00::1", // Multicast
+      ];
+
+      restrictedIpAddresses.forEach((ip) => {
+        it(`should reject restricted IP address: ${ip}`, () => {
+          expect(service["isValidIpAddress"](ip)).toBe(false);
+        });
+      });
+    });
+
+    describe("Edge cases", () => {
+      it("should handle null and undefined", () => {
+        expect(service["isValidIpAddress"](null as any)).toBe(false);
+        expect(service["isValidIpAddress"](undefined as any)).toBe(false);
       });
 
-      invalidIps.forEach((ip) => {
-        expect(service["isValidIpAddress"](ip)).toBe(false);
+      it("should handle non-string types", () => {
+        expect(service["isValidIpAddress"](123 as any)).toBe(false);
+        expect(service["isValidIpAddress"]({} as any)).toBe(false);
+        expect(service["isValidIpAddress"]([] as any)).toBe(false);
+      });
+
+      it("should handle whitespace trimming", () => {
+        expect(service["isValidIpAddress"]("  192.168.1.1  ")).toBe(true);
+        expect(service["isValidIpAddress"]("   ")).toBe(false);
+      });
+
+      it("should reject empty string after trimming", () => {
+        expect(service["isValidIpAddress"]("")).toBe(false);
+        expect(service["isValidIpAddress"]("   ")).toBe(false);
       });
     });
   });

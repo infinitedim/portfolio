@@ -42,6 +42,11 @@ export function getTRPCClient() {
   if (typeof window === "undefined") {
     throw new Error("tRPC client is only available on the client side");
   }
+
+  if (!trpcClient) {
+    throw new Error("tRPC client failed to initialize");
+  }
+
   return trpcClient;
 }
 

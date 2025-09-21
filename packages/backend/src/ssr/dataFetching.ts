@@ -1,9 +1,23 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { cache } from "react";
 import { notFound } from "next/navigation";
+import { securityLogger } from "../logging/logger";
 
 // Types for portfolio data
+interface GitHubRepository {
+  name: string;
+  description: string | null;
+  stargazers_count: number;
+  forks_count: number;
+  language: string | null;
+  updated_at: string;
+}
+
+interface GitHubUser {
+  followers: number;
+  following: number;
+  public_repos: number;
+}
+
 export interface PortfolioData {
   skills: SkillCategory[];
   projects: Project[];
@@ -139,7 +153,13 @@ async function fetchWithCache<T>(
 
     return data as T;
   } catch (error) {
-    console.error(`Fetch error for ${url}:`, error);
+    securityLogger.error("Fetch error occurred", {
+      url,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      component: "SSRDataFetching",
+      operation: "safeFetch",
+    });
     throw error;
   }
 }
@@ -182,7 +202,12 @@ export const getExperienceData = cache(async (): Promise<Experience[]> => {
 
     return response.data;
   } catch (error) {
-    console.error("Failed to fetch experience data:", error);
+    securityLogger.error("Failed to fetch experience data", {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      component: "SSRDataFetching",
+      operation: "getExperienceData",
+    });
     return [];
   }
 });
@@ -203,7 +228,12 @@ export const getAboutData = cache(async (): Promise<AboutInfo> => {
 
     return response.data;
   } catch (error) {
-    console.error("Failed to fetch about data:", error);
+    securityLogger.error("Failed to fetch about data", {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      component: "SSRDataFetching",
+      operation: "getAboutData",
+    });
     return getFallbackAboutData();
   }
 });
@@ -289,24 +319,31 @@ export const getGitHubData = cache(
         }),
       ]);
 
-      const repositories = (reposResponse as any[]).map((repo) => ({
-        name: repo.name,
-        description: repo.description || "",
-        stars: repo.stargazers_count,
-        forks: repo.forks_count,
-        language: repo.language || "Unknown",
-        updated: repo.updated_at,
-      }));
+      const repositories = (reposResponse as GitHubRepository[]).map(
+        (repo) => ({
+          name: repo.name,
+          description: repo.description || "",
+          stars: repo.stargazers_count,
+          forks: repo.forks_count,
+          language: repo.language || "Unknown",
+          updated: repo.updated_at,
+        }),
+      );
 
       const profile = {
-        followers: (userResponse as any).followers,
-        following: (userResponse as any).following,
-        publicRepos: (userResponse as any).public_repos,
+        followers: (userResponse as GitHubUser).followers,
+        following: (userResponse as GitHubUser).following,
+        publicRepos: (userResponse as GitHubUser).public_repos,
       };
 
       return { repositories, profile };
     } catch (error) {
-      console.error("Failed to fetch GitHub data:", error);
+      securityLogger.error("Failed to fetch GitHub data", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: "SSRDataFetching",
+        operation: "getGitHubData",
+      });
       return {
         repositories: [],
         profile: { followers: 0, following: 0, publicRepos: 0 },

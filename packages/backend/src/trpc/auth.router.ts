@@ -7,6 +7,7 @@ import { RedisService } from "../redis/redis.service";
 import { SecurityService } from "../security/security.service";
 import { AuditLogService } from "../security/audit-log.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { securityLogger } from "../logging/logger";
 
 // Simple in-memory IP-based limiter: 1 request per minute
 const loginRateMap = new Map<string, number>();
@@ -151,7 +152,12 @@ export const authRouter = router({
 
         return { success: true } as const;
       } catch (error) {
-        console.error(error);
+        securityLogger.error("Logout error (non-critical)", {
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          component: "AuthRouter",
+          operation: "logout",
+        });
         // Logout should always succeed, even if there's an error
         return { success: true } as const;
       }

@@ -546,17 +546,31 @@ export class GlobalErrorHandler {
 
   /**
    * Handle unhandled promise rejections with sanitization
-   * @param {any} reason - The reason for the unhandled promise rejection
-   * @param {Promise<any>} _promise - The promise that was rejected
+   * @param {unknown} reason - The reason for the unhandled promise rejection
+   * @param {Promise<unknown>} _promise - The promise that was rejected
    */
-  handleUnhandledRejection(reason: any, _promise: Promise<any>): void {
+  handleUnhandledRejection(reason: unknown, _promise: Promise<unknown>): void {
+    const reasonMessage =
+      reason instanceof Error
+        ? reason.message
+        : typeof reason === "object" &&
+            reason !== null &&
+            "message" in reason &&
+            typeof (reason as { message: unknown }).message === "string"
+          ? (reason as { message: string }).message
+          : String(reason);
+
     const sanitizedReason =
       process.env.NODE_ENV === "production"
-        ? this.sanitizeErrorMessage(reason?.message || String(reason))
-        : reason?.message || reason;
+        ? this.sanitizeErrorMessage(reasonMessage)
+        : reasonMessage;
 
     const sanitizedStack =
-      process.env.NODE_ENV === "production" ? "[REDACTED]" : reason?.stack;
+      process.env.NODE_ENV === "production"
+        ? "[REDACTED]"
+        : reason instanceof Error
+          ? reason.stack
+          : undefined;
 
     this.logger.error("Unhandled Promise Rejection", {
       reason: sanitizedReason,

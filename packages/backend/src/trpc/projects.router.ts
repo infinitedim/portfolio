@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from "zod";
 import { router, publicProcedure } from "@portfolio/trpc";
+import type { TrpcContext } from "./context";
 
 const ProjectsUpdateSchema = z.object({
   section: z.enum(["skills", "projects", "experience", "about"]),
@@ -23,7 +23,7 @@ export const projectsRouter = router({
         ctx,
         input,
       }: {
-        ctx: any;
+        ctx: TrpcContext;
         input:
           | {
               section?: string | undefined;
@@ -43,7 +43,7 @@ export const projectsRouter = router({
         ctx,
         input,
       }: {
-        ctx: any;
+        ctx: TrpcContext;
         input: z.infer<typeof ProjectsUpdateSchema>;
       }) => {
         if (!ctx.user) throw new Error("Unauthorized");

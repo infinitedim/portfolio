@@ -1,23 +1,19 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import type {
-  ThemeConfig,
-  ThemeName,
-  ThemeColors,
-} from "@portfolio/frontend/src/types/theme";
+import type { ThemeConfig, ThemeName, ThemeColors } from "../types/theme";
 import {
   themes,
   defaultTheme,
   getSortedThemeNames,
   validateTheme,
-} from "@portfolio/frontend/src/lib/themes/themeConfig";
+} from "../lib/themes/themeConfig";
 import {
   safeDOMManipulation,
   useLocalStorage,
   useMountRef,
 } from "./utils/hookUtils";
-import { PerformanceMonitor } from "@portfolio/frontend/src/lib/performance/PerformanceMonitor";
+import { PerformanceMonitor } from "../lib/performance/PerformanceMonitor";
 
 // Constants
 const STORAGE_KEY = "terminal-theme" as const;

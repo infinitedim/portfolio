@@ -8,6 +8,7 @@ import jwt, { type SignOptions } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { RedisService } from "../redis/redis.service";
 import { getEnv } from "../env.config";
+import { securityLogger } from "../logging/logger";
 
 // ============================================================================
 // INTERFACES AND TYPES
@@ -287,6 +288,8 @@ export class SecurityService {
 
   constructor(private readonly redisService: RedisService) {}
 
+  private readonly securityLogger = securityLogger;
+
   // ============================================================================
   // JWT AUTHENTICATION
   // ============================================================================
@@ -351,7 +354,10 @@ export class SecurityService {
         audience: this.JWT_AUDIENCE,
       }) as JWTPayload;
     } catch (error) {
-      console.error("Error verifying access token:", error);
+      securityLogger.error("Error verifying access token", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       throw new Error("Invalid or expired access token");
     }
   }
@@ -369,7 +375,10 @@ export class SecurityService {
         audience: this.JWT_AUDIENCE,
       }) as RefreshTokenPayload;
     } catch (error) {
-      console.error("Error verifying refresh token:", error);
+      securityLogger.error("Error verifying refresh token", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       throw new Error("Invalid or expired refresh token");
     }
   }
@@ -427,7 +436,10 @@ export class SecurityService {
         Buffer.from(storedHash, "hex"),
       );
     } catch (error) {
-      console.error("Error verifying API key:", error);
+      securityLogger.error("Error verifying API key", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return false;
     }
   }
@@ -538,7 +550,12 @@ export class SecurityService {
         resetTime,
       };
     } catch (error) {
-      console.error("Rate limit check failed:", error);
+      securityLogger.error("Rate limit check failed", {
+        error: error instanceof Error ? error.message : String(error),
+        key,
+        type,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       // Fail open - allow request if Redis is down
       return {
         isBlocked: false,
@@ -573,7 +590,12 @@ export class SecurityService {
         isBlocked,
       };
     } catch (error) {
-      console.error("Rate limit info failed:", error);
+      securityLogger.error("Rate limit info failed", {
+        error: error instanceof Error ? error.message : String(error),
+        key,
+        type,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return {
         current: 0,
         limit: config.max,
@@ -598,7 +620,12 @@ export class SecurityService {
       await this.redisService.del(windowKey);
       await this.redisService.del(blockKey);
     } catch (error) {
-      console.error("Rate limit reset failed:", error);
+      securityLogger.error("Rate limit reset failed", {
+        error: error instanceof Error ? error.message : String(error),
+        key,
+        type,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
     }
   }
 
@@ -606,7 +633,12 @@ export class SecurityService {
     try {
       await this.redisService.set(key, "1", Math.ceil(duration / 1000));
     } catch (error) {
-      console.error("Block key failed:", error);
+      securityLogger.error("Block key failed", {
+        error: error instanceof Error ? error.message : String(error),
+        key,
+        duration,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
     }
   }
 
@@ -615,7 +647,11 @@ export class SecurityService {
       const exists = await this.redisService.exists(`blocked:${key}`);
       return exists === true;
     } catch (error) {
-      console.error("Check blocked key failed:", error);
+      securityLogger.error("Check blocked key failed", {
+        error: error instanceof Error ? error.message : String(error),
+        key,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return false;
     }
   }
@@ -624,7 +660,11 @@ export class SecurityService {
     try {
       return await this.redisService.keys(pattern);
     } catch (error) {
-      console.error("Get blocked keys failed:", error);
+      securityLogger.error("Get blocked keys failed", {
+        error: error instanceof Error ? error.message : String(error),
+        pattern,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return [];
     }
   }
@@ -633,7 +673,11 @@ export class SecurityService {
     try {
       await this.redisService.del(key);
     } catch (error) {
-      console.error("Unblock key failed:", error);
+      securityLogger.error("Unblock key failed", {
+        error: error instanceof Error ? error.message : String(error),
+        key,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
     }
   }
 
@@ -652,7 +696,10 @@ export class SecurityService {
 
       return stats;
     } catch (error) {
-      console.error("Get rate limit stats failed:", error);
+      securityLogger.error("Get rate limit stats failed", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return {};
     }
   }
@@ -687,7 +734,12 @@ export class SecurityService {
 
       return keysToDelete.length;
     } catch (error) {
-      console.error("Cleanup expired keys failed:", error);
+      this.securityLogger.error("Failed to cleanup expired keys", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: "SecurityService",
+        operation: "cleanupExpiredKeys",
+      });
       return 0;
     }
   }
@@ -961,7 +1013,12 @@ export class SecurityService {
         );
       });
     } catch (error) {
-      console.error("Error verifying hash:", error);
+      this.securityLogger.error("Failed to verify hash", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: "SecurityService",
+        operation: "verifyHash",
+      });
       return false;
     }
   }
@@ -988,7 +1045,12 @@ export class SecurityService {
         Buffer.from(expectedSignature, "hex"),
       );
     } catch (error) {
-      console.error("Error verifying signature:", error);
+      this.securityLogger.error("Failed to verify signature", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: "SecurityService",
+        operation: "verifySignature",
+      });
       return false;
     }
   }
@@ -1126,10 +1188,30 @@ export class SecurityService {
     };
 
     if (getEnv().NODE_ENV === "production") {
-      // TODO: Send to monitoring service (Sentry, DataDog, etc.)
-      console.error("Security Event:", event);
+      // Send to monitoring service and structured logging
+      this.securityLogger.error("Security event detected", {
+        type: event.type,
+        timestamp: event.timestamp,
+        ip: event.ip,
+        userAgent: event.userAgent,
+        url: event.url,
+        method: event.method,
+        details: event.details,
+        component: "SecurityService",
+        operation: "logSecurityEvent",
+      });
     } else {
-      console.warn("Security Event:", event);
+      this.securityLogger.warn("Security event detected (development)", {
+        type: event.type,
+        timestamp: event.timestamp,
+        ip: event.ip,
+        userAgent: event.userAgent,
+        url: event.url,
+        method: event.method,
+        details: event.details,
+        component: "SecurityService",
+        operation: "logSecurityEvent",
+      });
     }
   }
 
@@ -1256,7 +1338,12 @@ export class SecurityService {
           const { userId, ...data } = sessionData;
           return { userId, data };
         } catch (error) {
-          console.error("Error validating session:", error);
+          this.securityLogger.error("Failed to validate session", {
+            error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+            component: "SecurityService",
+            operation: "validateSession",
+          });
           return null; // Invalid session
         }
       },

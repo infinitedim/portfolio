@@ -170,6 +170,7 @@ const createEnvSchema = () => {
     // Spotify API (optional)
     SPOTIFY_CLIENT_SECRET: z.string().optional(),
     SPOTIFY_CLIENT_ID: z.string().optional(),
+    SPOTIFY_REDIRECT_URI: z.string().optional(),
 
     // AI Services (optional)
     PORTFOLIO_AI_KEY: z.string().optional(),

@@ -1,8 +1,4 @@
-import type {
-  ThemeConfig,
-  ThemeName,
-  ThemeRegistry,
-} from "@portfolio/frontend/src/types/theme";
+import type { ThemeConfig, ThemeName, ThemeRegistry } from "../../types/theme";
 
 export const themes: ThemeRegistry = {
   default: {

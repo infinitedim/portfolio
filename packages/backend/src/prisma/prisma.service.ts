@@ -40,17 +40,15 @@ export class PrismaService
     });
 
     // Set up error handling for connection issues
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.$on("error", (e: any) => {
+    this.$on("error", (e: unknown) => {
       this.logger.error("Prisma Client Error:", e);
       this.isConnected = false;
-      this.handleConnectionError(e);
+      this.handleConnectionError(e instanceof Error ? e : new Error(String(e)));
     });
 
     // Set up info logging for connection events in development
     if (config.logLevel === "debug") {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.$on("info", (e: any) => {
+      this.$on("info", (e: unknown) => {
         this.logger.debug("Prisma Client Info:", e);
       });
     }

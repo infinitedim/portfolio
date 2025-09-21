@@ -4,6 +4,7 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import * as ipaddr from "ipaddr.js";
 
 @Injectable()
 export class AllowedIpService {
@@ -130,14 +131,99 @@ export class AllowedIpService {
   }
 
   private isValidIpAddress(ip: string): boolean {
-    // Basic IPv4 validation
-    const ipv4Regex =
-      /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    if (!ip || typeof ip !== "string") {
+      return false;
+    }
 
-    // Basic IPv6 validation (simplified)
-    const ipv6Regex = /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
+    // Trim whitespace and normalize the input
+    const normalizedIp = ip.trim();
 
-    return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+    // Check for empty string after trimming
+    if (!normalizedIp) {
+      return false;
+    }
+
+    // Additional pre-validation checks before using ipaddr.js
+    // Reject strings with leading zeros in IPv4 octets (security concern)
+    // Only apply this check to potential IPv4 addresses
+    const looksLikeIPv4 = /^\d+\.\d+/.test(normalizedIp);
+    if (looksLikeIPv4) {
+      const ipv4LeadingZeroPattern = /\b0\d+\b/;
+      if (ipv4LeadingZeroPattern.test(normalizedIp)) {
+        return false;
+      }
+
+      // Reject incomplete IPv4 addresses (must have 4 octets)
+      const ipv4Pattern = /^\d+\.\d+\.\d+\.\d+$/;
+      if (!ipv4Pattern.test(normalizedIp)) {
+        return false;
+      }
+    }
+
+    try {
+      // Use ipaddr.js for robust validation
+      const parsedIp = ipaddr.process(normalizedIp);
+
+      // Additional security checks
+      if (parsedIp.kind() === "ipv4") {
+        const ipv4 = parsedIp as ipaddr.IPv4;
+
+        // Reject localhost (127.0.0.0/8)
+        if (ipv4.match(ipaddr.IPv4.parse("127.0.0.0"), 8)) {
+          return false;
+        }
+
+        // Reject 0.0.0.0/8 (this network)
+        if (ipv4.match(ipaddr.IPv4.parse("0.0.0.0"), 8)) {
+          return false;
+        }
+
+        // Reject 169.254.0.0/16 (link-local)
+        if (ipv4.match(ipaddr.IPv4.parse("169.254.0.0"), 16)) {
+          return false;
+        }
+
+        // Reject 224.0.0.0/4 (multicast)
+        if (ipv4.match(ipaddr.IPv4.parse("224.0.0.0"), 4)) {
+          return false;
+        }
+
+        // Reject 240.0.0.0/4 (reserved) but allow 255.255.255.255
+        if (
+          ipv4.match(ipaddr.IPv4.parse("240.0.0.0"), 4) &&
+          normalizedIp !== "255.255.255.255"
+        ) {
+          return false;
+        }
+      } else if (parsedIp.kind() === "ipv6") {
+        const ipv6 = parsedIp as ipaddr.IPv6;
+
+        // Reject loopback (::1)
+        if (ipv6.toString() === "::1") {
+          return false;
+        }
+
+        // Reject unspecified address (::)
+        if (ipv6.toString() === "::") {
+          return false;
+        }
+
+        // Reject link-local addresses (fe80::/10)
+        if (ipv6.match(ipaddr.IPv6.parse("fe80::"), 10)) {
+          return false;
+        }
+
+        // Reject multicast addresses (ff00::/8)
+        if (ipv6.match(ipaddr.IPv6.parse("ff00::"), 8)) {
+          return false;
+        }
+      }
+
+      return true;
+    } catch (_error) {
+      // ipaddr.js throws an error for invalid IP addresses
+      return false;
+    }
   }
 
   async getIpStats(adminUserId: string) {
