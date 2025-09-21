@@ -88,7 +88,6 @@
     "vaul": "^0.9.6",
     "winston": "^3.17.0",
     "zod": "^3.24.1",
-    "@portfolio/logger": "workspace:*",
     "@portfolio/backend": "workspace:*"
   },
   "devDependencies": {

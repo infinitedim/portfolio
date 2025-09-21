@@ -1,6 +1,5 @@
 import { cache } from "react";
 import { notFound } from "next/navigation";
-import { securityLogger } from "../logging/logger";
 
 // Types for portfolio data
 interface GitHubRepository {
@@ -153,7 +152,7 @@ async function fetchWithCache<T>(
 
     return data as T;
   } catch (error) {
-    securityLogger.error("Fetch error occurred", {
+    console.error("Fetch error occurred", {
       url,
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
@@ -202,7 +201,7 @@ export const getExperienceData = cache(async (): Promise<Experience[]> => {
 
     return response.data;
   } catch (error) {
-    securityLogger.error("Failed to fetch experience data", {
+    console.error("Failed to fetch experience data", {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
       component: "SSRDataFetching",
@@ -228,7 +227,7 @@ export const getAboutData = cache(async (): Promise<AboutInfo> => {
 
     return response.data;
   } catch (error) {
-    securityLogger.error("Failed to fetch about data", {
+    console.error("Failed to fetch about data", {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
       component: "SSRDataFetching",
@@ -338,7 +337,7 @@ export const getGitHubData = cache(
 
       return { repositories, profile };
     } catch (error) {
-      securityLogger.error("Failed to fetch GitHub data", {
+      console.error("Failed to fetch GitHub data", {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
         component: "SSRDataFetching",
