@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type JSX } from "react";
+import { useState, useEffect, useRef, type JSX } from "react";
 import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
 
 interface TerminalLoadingProgressProps {
@@ -21,17 +21,49 @@ const DEFAULT_FILES = [
   "src/components/ui/button.tsx",
   "src/components/ui/card.tsx",
   "src/components/ui/input.tsx",
+  "src/components/ui/badge.tsx",
+  "src/components/ui/avatar.tsx",
+  "src/components/ui/dialog.tsx",
+  "src/components/ui/dropdown-menu.tsx",
+  "src/components/ui/popover.tsx",
+  "src/components/ui/tooltip.tsx",
+  "src/components/ui/sheet.tsx",
+  "src/components/ui/select.tsx",
+  "src/components/ui/textarea.tsx",
+  "src/components/ui/label.tsx",
+  "src/components/ui/separator.tsx",
+  "src/components/ui/progress.tsx",
   "src/components/terminal/Terminal.tsx",
   "src/components/terminal/CommandInput.tsx",
+  "src/components/terminal/CommandHistory.tsx",
+  "src/components/terminal/TerminalOutput.tsx",
+  "src/components/projects/ProjectCard.tsx",
+  "src/components/projects/ProjectsGrid.tsx",
+  "src/components/projects/ProjectsFilter.tsx",
+  "src/components/layout/Header.tsx",
+  "src/components/layout/Footer.tsx",
+  "src/components/layout/Navigation.tsx",
   "src/hooks/useTheme.ts",
   "src/hooks/useTerminal.ts",
+  "src/hooks/useLocalStorage.ts",
+  "src/hooks/useDebounce.ts",
   "src/lib/commands/commandRegistry.ts",
   "src/lib/themes/themeConfig.ts",
+  "src/lib/utils/validation.ts",
+  "src/lib/utils/formatting.ts",
   "src/types/terminal.ts",
   "src/types/theme.ts",
+  "src/types/project.ts",
+  "src/types/api.ts",
+  "src/app/layout.tsx",
+  "src/app/page.tsx",
+  "src/app/projects/page.tsx",
+  "src/app/globals.css",
   "package.json",
   "tailwind.config.ts",
   "next.config.js",
+  "tsconfig.json",
+  ".env.local",
 ];
 
 /**
@@ -67,6 +99,7 @@ export function TerminalLoadingProgress({
   const [currentFileIndex, setCurrentFileIndex] = useState(-1);
   const [isComplete, setIsComplete] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Initialize files
   useEffect(() => {
@@ -122,6 +155,21 @@ export function TerminalLoadingProgress({
     return () => clearInterval(interval);
   }, [startTime, duration, files.length, isComplete, onComplete]);
 
+  // Auto-scroll to keep current file visible
+  useEffect(() => {
+    if (currentFileIndex >= 0 && scrollContainerRef.current) {
+      const currentElement = scrollContainerRef.current.querySelector(
+        `[data-file-index="${currentFileIndex}"]`,
+      );
+      if (currentElement) {
+        currentElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    }
+  }, [currentFileIndex]);
+
   const getStatusIcon = (status: LoadingFile["status"]) => {
     switch (status) {
       case "pending":
@@ -165,7 +213,8 @@ export function TerminalLoadingProgress({
   return (
     <div
       key={`terminal-loading-${theme}`}
-      className="font-mono text-sm space-y-1 max-h-80 overflow-y-auto"
+      ref={scrollContainerRef}
+      className="font-mono text-sm space-y-1 max-h-[28rem] overflow-y-auto"
       role="status"
       aria-label="Loading files"
     >
@@ -179,18 +228,30 @@ export function TerminalLoadingProgress({
         <div className="flex items-center gap-2">
           <span className="animate-pulse">📦</span>
           <span>Loading application files...</span>
+          <span
+            className="text-xs"
+            style={{ color: themeConfig.colors.muted }}
+          >
+            ({loadingFiles.filter((f) => f.status === "complete").length}/
+            {files.length})
+          </span>
         </div>
       </div>
       <div className="space-y-1">
         {loadingFiles.map((file, index) => {
           const isCurrentFile = index === currentFileIndex;
-          const shouldShow = index <= currentFileIndex + 2;
+          // Show more files: current file, up to 5 ahead, and all completed files
+          const shouldShow =
+            file.status === "complete" ||
+            file.status === "loading" ||
+            index <= currentFileIndex + 5;
 
-          if (!shouldShow && file.status === "pending") return null;
+          if (!shouldShow) return null;
 
           return (
             <div
               key={file.path}
+              data-file-index={index}
               // eslint-disable-next-line prettier/prettier
               className={`flex items-center gap-3 py-1 px-2 rounded transition-all duration-200 ${isCurrentFile ? "bg-opacity-20" : ""
                 // eslint-disable-next-line prettier/prettier

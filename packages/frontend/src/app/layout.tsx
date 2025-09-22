@@ -9,8 +9,12 @@ import {
   Roboto_Mono,
 } from "next/font/google";
 import "./globals.css";
-import ClientLayout from "./client-layout";
 import type { JSX, ReactNode } from "react";
+import PWARegistration from "../components/pwa/PWARegistration";
+import { TRPCProvider } from "../components/provider/TrpcProvider";
+import { AuthProvider } from "../lib/auth";
+import { AccessibilityProvider } from "../components/accessibility/AccessibilityProvider";
+import { ScreenReaderAnnouncer } from "../components/accessibility/ScreenReaderAnnouncer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -281,7 +285,15 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} antialiased`}>
-        <ClientLayout>{children}</ClientLayout>
+        <PWARegistration />
+        <TRPCProvider>
+          <AuthProvider>
+            <AccessibilityProvider>
+              <ScreenReaderAnnouncer message="Terminal Portfolio" />
+              {children}
+            </AccessibilityProvider>
+          </AuthProvider>
+        </TRPCProvider>
       </body>
     </html>
   );

@@ -1,11 +1,11 @@
 import { Metadata } from "next";
-import { Terminal } from "@portfolio/frontend/src/components/terminal/Terminal";
-import { StaticContent } from "@portfolio/frontend/src/components/ssr/StaticContent";
+import { Terminal } from "../components/terminal/Terminal";
+import { StaticContent } from "../components/ssr/StaticContent";
 import { type JSX, Suspense } from "react";
-import { TerminalLoadingProgress } from "@portfolio/frontend/src/components/ui/TerminalLoadingProgress";
-import { HomeTerminalHeader } from "@portfolio/frontend/src/components/ui/HomeTerminalHeader";
+import { TerminalLoadingProgress } from "../components/ui/TerminalLoadingProgress";
+import { HomeTerminalHeader } from "../components/ui/HomeTerminalHeader";
+import { LetterGlitch } from "../components/ui/LetterGlitch";
 
-// Generate metadata for homepage
 export const metadata: Metadata = {
   title: "Terminal Portfolio | Full-Stack Developer",
   description:
@@ -87,29 +87,18 @@ export default function HomePage(): JSX.Element {
         id="main-content"
         className="relative"
       >
-        {/* Decorative letter glitch background (non-interactive) */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 z-0 pointer-events-none"
-        >
-          <div className="letter-glitch-bg">
-            <span
-              className="glitch"
-              data-text="TERMINAL PORTFOLIO"
-            >
-              TERMINAL PORTFOLIO
-            </span>
-          </div>
-        </div>
+        <LetterGlitch
+          glitchSpeed={30}
+          centerVignette={true}
+          outerVignette={false}
+          smooth={true}
+          characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+=-_|\\/<>?"
+          className="opacity-30"
+        />
 
         <div className="relative z-10">
-          {/* Terminal Header */}
           <HomeTerminalHeader />
-
-          {/* Static content that can be server-rendered */}
           <StaticContent />
-
-          {/* Interactive terminal with suspense boundary */}
           <Suspense
             fallback={
               <div

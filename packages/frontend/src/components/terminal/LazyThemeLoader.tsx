@@ -41,12 +41,6 @@ export function LazyThemeLoader({
         >
           <div className="w-full max-w-md p-6">
             <TerminalLoadingProgress
-              files={[
-                "src/lib/themes/themeConfig.ts",
-                "src/types/theme.ts",
-                "src/hooks/useTheme.ts",
-                "theme-config.json",
-              ]}
               duration={2000}
               completionText="🎨 Theme loaded successfully!"
               autoStart={true}

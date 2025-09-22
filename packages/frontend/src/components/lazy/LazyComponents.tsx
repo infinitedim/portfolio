@@ -28,18 +28,6 @@ export const LazyRoadmapVisualizer = lazy(() =>
   })),
 );
 
-export const LazyCommandSuggestionsDemo = lazy(() =>
-  import("../terminal/CommandSuggestionsDemo").then((module) => ({
-    default: module.CommandSuggestionsDemo,
-  })),
-);
-
-export const LazyTerminalLoadingDemo = lazy(() =>
-  import("../ui/TerminalLoadingDemo").then((module) => ({
-    default: module.TerminalLoadingDemo,
-  })),
-);
-
 export const LazyHistorySearchPanel = lazy(() =>
   import("../terminal/HistorySearchPanel").then((module) => ({
     default: module.HistorySearchPanel,
@@ -154,18 +142,6 @@ export const RoadmapVisualizer = withLazyLoading(
   LazyRoadmapVisualizer,
   "Loading roadmap...",
   "md",
-);
-
-export const CommandSuggestionsDemo = withLazyLoading(
-  LazyCommandSuggestionsDemo,
-  "Loading demo...",
-  "sm",
-);
-
-export const TerminalLoadingDemo = withLazyLoading(
-  LazyTerminalLoadingDemo,
-  "Loading demo...",
-  "sm",
 );
 
 export const HistorySearchPanel = withLazyLoading(

@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { PWAInstallPrompt } from "./PWAInstallPrompt";
 
+// Define the BeforeInstallPromptEvent interface
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
   readonly userChoice: Promise<{
@@ -13,6 +14,7 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
 }
 
+// Extend the Window interface
 declare global {
   interface WindowEventMap {
     beforeinstallprompt: BeforeInstallPromptEvent;
@@ -21,7 +23,14 @@ declare global {
 
 /**
  * PWA Registration component that handles service worker registration
- * and provides install prompt functionality with enhanced error handling
+ * and provides install prompt functionality with comprehensive error handling
+ *
+ * Features:
+ * - Service worker registration with update handling
+ * - Install prompt management
+ * - Cross-browser compatibility
+ * - Comprehensive error handling
+ * - Memory leak prevention
  */
 export function PWARegistration() {
   const [deferredPrompt, setDeferredPrompt] =
@@ -29,72 +38,90 @@ export function PWARegistration() {
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [swUpdateAvailable, setSwUpdateAvailable] = useState(false);
 
-  // Enhanced feature detection
-  const isEnvironmentSupported = useCallback(() => {
+  const mountedRef = useRef(true);
+  const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
+  const handlersRef = useRef<{
+    beforeInstallPrompt: ((e: Event) => void) | null;
+    appInstalled: ((e: Event) => void) | null;
+    updateFound: (() => void) | null;
+    stateChange: (() => void) | null;
+    message: ((e: Event) => void) | null;
+  }>({
+    beforeInstallPrompt: null,
+    appInstalled: null,
+    updateFound: null,
+    stateChange: null,
+    message: null,
+  });
+
+  const isEnvironmentSupported = useCallback((): boolean => {
     try {
-      return (
-        typeof window !== "undefined" &&
-        window !== null &&
-        typeof navigator !== "undefined" &&
-        navigator !== null &&
-        "serviceWorker" in navigator &&
-        navigator.serviceWorker !== null &&
-        typeof navigator.serviceWorker.register === "function"
-      );
+      if (typeof window === "undefined" || !window) {
+        return false;
+      }
+
+      if (typeof navigator === "undefined" || !navigator) {
+        return false;
+      }
+
+      if (!("serviceWorker" in navigator) || !navigator.serviceWorker) {
+        return false;
+      }
+
+      if (typeof navigator.serviceWorker.register !== "function") {
+        return false;
+      }
+
+      if (!window.isSecureContext) {
+        console.warn("PWA: Not in secure context (HTTPS required)");
+        return false;
+      }
+
+      return true;
     } catch (err) {
       console.warn("PWA: Environment check failed:", err);
       return false;
     }
   }, []);
 
-  // Safe event listener helper
   const safeAddEventListener = useCallback(
-    (
-      target: any,
-      event: string,
-      handler: EventListener,
+    <K extends keyof WindowEventMap>(
+      target: EventTarget | null,
+      event: K | string,
+      handler: EventListener | null,
       options?: AddEventListenerOptions,
     ): boolean => {
-      try {
-        if (
-          target &&
-          typeof target.addEventListener === "function" &&
-          typeof handler === "function"
-        ) {
-          target.addEventListener(event, handler, options);
-          return true;
-        }
-        console.warn(
-          `PWA: Cannot attach ${event} listener - invalid target or handler`,
-        );
+      if (!target || !handler || typeof handler !== "function") {
         return false;
+      }
+
+      try {
+        target.addEventListener(event as string, handler, options);
+        return true;
       } catch (err) {
-        console.error(`PWA: Failed to attach ${event} listener:`, err);
+        console.error(`PWA: Failed to add ${event} listener:`, err);
         return false;
       }
     },
     [],
   );
 
-  // Safe event listener removal helper
   const safeRemoveEventListener = useCallback(
-    (
-      target: any,
-      event: string,
-      handler: EventListener,
+    <K extends keyof WindowEventMap>(
+      target: EventTarget | null,
+      event: K | string,
+      handler: EventListener | null,
       options?: EventListenerOptions,
     ): boolean => {
-      try {
-        if (
-          target &&
-          typeof target.removeEventListener === "function" &&
-          typeof handler === "function"
-        ) {
-          target.removeEventListener(event, handler, options);
-          return true;
-        }
+      if (!target || !handler || typeof handler !== "function") {
         return false;
+      }
+
+      try {
+        target.removeEventListener(event as string, handler, options);
+        return true;
       } catch (err) {
         console.error(`PWA: Failed to remove ${event} listener:`, err);
         return false;
@@ -103,342 +130,318 @@ export function PWARegistration() {
     [],
   );
 
-  // Enhanced service worker registration with comprehensive error handling
-  const registerServiceWorker = useCallback(async () => {
-    if (!isEnvironmentSupported()) {
-      console.log("PWA: Service workers not supported in this environment");
+  const checkInstallationStatus = useCallback((): boolean => {
+    try {
+      if (typeof window === "undefined" || !window) return false;
+
+      const isStandalone =
+        window.matchMedia?.("(display-mode: standalone)")?.matches || false;
+      const isIOSStandalone = (navigator as any).standalone === true;
+      const isTWA = document.referrer.includes("android-app://");
+      const isInstalledPWA = isStandalone || isIOSStandalone || isTWA;
+
+      if (isInstalledPWA) {
+        console.log("PWA: App is running as installed PWA");
+      }
+
+      return isInstalledPWA;
+    } catch (err) {
+      console.error("PWA: Error checking installation status:", err);
+      return false;
+    }
+  }, []);
+
+  const registerServiceWorker =
+    useCallback(async (): Promise<ServiceWorkerRegistration | null> => {
+      if (!isEnvironmentSupported()) {
+        console.log("PWA: Service workers not supported");
+        return null;
+      }
+
+      try {
+        console.log("PWA: Registering service worker...");
+
+        const registration = await navigator.serviceWorker.register("/sw.js", {
+          scope: "/",
+          updateViaCache: "none",
+        });
+
+        if (!registration) {
+          throw new Error("Registration returned null");
+        }
+
+        registrationRef.current = registration;
+        console.log(
+          "PWA: Service worker registered successfully:",
+          registration,
+        );
+
+        registration.update().catch((err) => {
+          console.warn("PWA: Update check failed:", err);
+        });
+
+        handlersRef.current.updateFound = () => {
+          if (!mountedRef.current) return;
+
+          const newWorker = registration.installing;
+          if (!newWorker) return;
+
+          console.log("PWA: New service worker found");
+
+          handlersRef.current.stateChange = () => {
+            if (!mountedRef.current) return;
+
+            if (
+              newWorker.state === "installed" &&
+              navigator.serviceWorker.controller
+            ) {
+              console.log("PWA: New content available");
+              setSwUpdateAvailable(true);
+
+              window.dispatchEvent(new CustomEvent("sw-update-available"));
+            }
+          };
+
+          safeAddEventListener(
+            newWorker,
+            "statechange",
+            handlersRef.current.stateChange,
+          );
+        };
+
+        safeAddEventListener(
+          registration,
+          "updatefound",
+          handlersRef.current.updateFound,
+        );
+
+        handlersRef.current.message = (event: Event) => {
+          if (!mountedRef.current) return;
+
+          const messageEvent = event as MessageEvent;
+          if (messageEvent.data?.type === "SKIP_WAITING_COMPLETE") {
+            console.log("PWA: Reloading for update...");
+            window.location.reload();
+          }
+        };
+
+        safeAddEventListener(
+          navigator.serviceWorker,
+          "message",
+          handlersRef.current.message,
+        );
+
+        return registration;
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        console.error("PWA: Service worker registration failed:", error);
+        setError(`Service worker registration failed: ${errorMessage}`);
+        return null;
+      }
+    }, [isEnvironmentSupported, safeAddEventListener]);
+
+  const handleInstallClick = useCallback(async () => {
+    if (!deferredPrompt) {
+      console.warn("PWA: No deferred prompt available");
+      setIsInstallable(false);
       return;
     }
 
     try {
-      console.log("PWA: Attempting service worker registration...");
-
-      // Additional safety check
-      if (typeof navigator.serviceWorker.register !== "function") {
-        throw new Error("Service worker register method is not available");
+      console.log("PWA: Showing install prompt...");
+      if (typeof deferredPrompt.prompt !== "function") {
+        throw new Error("Prompt method not available");
       }
 
-      const registration = await navigator.serviceWorker.register("/sw.js", {
-        scope: "/",
-      });
-
-      // Validate registration object
-      if (!registration || typeof registration !== "object") {
-        throw new Error("Service worker registration returned invalid object");
-      }
-
-      console.log("PWA: Service worker registered successfully:", registration);
-
-      // Handle service worker updates with enhanced safety
-      if (typeof registration.addEventListener === "function") {
-        const handleUpdateFound = () => {
-          try {
-            console.log("PWA: New service worker version found");
-            const newWorker = registration.installing;
-
-            if (newWorker && typeof newWorker.addEventListener === "function") {
-              const handleStateChange = () => {
-                try {
-                  if (
-                    newWorker.state === "installed" &&
-                    navigator?.serviceWorker?.controller
-                  ) {
-                    console.log(
-                      "PWA: New content available, refresh to update",
-                    );
-                    // You could dispatch a custom event here for UI updates
-                    window.dispatchEvent(
-                      new CustomEvent("sw-update-available"),
-                    );
-                  }
-                } catch (err) {
-                  console.error("PWA: State change handler error:", err);
-                }
-              };
-
-              safeAddEventListener(newWorker, "statechange", handleStateChange);
-            }
-          } catch (err) {
-            console.error("PWA: Update found handler error:", err);
-          }
-        };
-
-        safeAddEventListener(registration, "updatefound", handleUpdateFound);
-      }
-
-      // Handle service worker messages with enhanced safety
-      if (
-        navigator.serviceWorker &&
-        typeof navigator.serviceWorker.addEventListener === "function"
-      ) {
-        const handleMessage = (event: Event) => {
-          try {
-            const messageEvent = event as MessageEvent;
-            if (messageEvent?.data) {
-              console.log(
-                "PWA: Message from service worker:",
-                messageEvent.data,
-              );
-              // Handle specific message types here if needed
-            }
-          } catch (err) {
-            console.error("PWA: Message handler error:", err);
-          }
-        };
-
-        safeAddEventListener(navigator.serviceWorker, "message", handleMessage);
-      }
-
-      return registration;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      console.error("PWA: Service worker registration failed:", error);
-      setError(`Service worker registration failed: ${errorMessage}`);
-      throw error;
-    }
-  }, [isEnvironmentSupported, safeAddEventListener]);
-
-  // Enhanced install click handler with comprehensive error handling
-  const handleInstallClick = useCallback(async () => {
-    try {
-      // Comprehensive validation of deferred prompt
-      if (
-        !deferredPrompt ||
-        typeof deferredPrompt !== "object" ||
-        typeof deferredPrompt.prompt !== "function"
-      ) {
-        console.warn("PWA: Invalid or missing install prompt object");
-        setIsInstallable(false);
-        setDeferredPrompt(null);
-        return;
-      }
-
-      console.log("PWA: Showing install prompt");
-
-      // Call prompt method with additional safety
       await deferredPrompt.prompt();
-
-      // Validate userChoice availability
       if (
-        !deferredPrompt.userChoice ||
-        typeof deferredPrompt.userChoice.then !== "function"
+        deferredPrompt.userChoice &&
+        typeof deferredPrompt.userChoice.then === "function"
       ) {
-        console.warn("PWA: User choice promise not available");
-        setDeferredPrompt(null);
-        setIsInstallable(false);
-        return;
-      }
+        const choiceResult = await deferredPrompt.userChoice;
 
-      const choiceResult = await deferredPrompt.userChoice;
+        console.log("PWA: User choice:", choiceResult?.outcome);
 
-      if (choiceResult && typeof choiceResult === "object") {
-        console.log("PWA: User choice:", choiceResult.outcome);
-
-        if (choiceResult.outcome === "accepted") {
-          console.log("PWA: User accepted install prompt");
+        if (choiceResult?.outcome === "accepted") {
+          console.log("PWA: User accepted installation");
           setIsInstalled(true);
+
+          window.dispatchEvent(new CustomEvent("pwa-installed"));
         } else {
-          console.log("PWA: User dismissed install prompt");
+          console.log("PWA: User dismissed installation");
         }
       }
-
-      // Clean up prompt state
-      setDeferredPrompt(null);
-      setIsInstallable(false);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
       console.error("PWA: Install prompt failed:", error);
       setError(`Install prompt failed: ${errorMessage}`);
-
-      // Clean up state on error
+    } finally {
       setDeferredPrompt(null);
       setIsInstallable(false);
     }
   }, [deferredPrompt]);
 
-  // Enhanced dismiss handler
   const handleDismiss = useCallback(() => {
-    try {
-      console.log("PWA: Install prompt dismissed by user");
-      setIsInstallable(false);
-      setDeferredPrompt(null);
-      setError(null);
-    } catch (err) {
-      console.error("PWA: Error in dismiss handler:", err);
-    }
+    console.log("PWA: Install prompt dismissed");
+    setIsInstallable(false);
+    setDeferredPrompt(null);
+    setError(null);
   }, []);
 
   useEffect(() => {
-    // Clear any previous errors
+    mountedRef.current = true;
     setError(null);
 
-    // Enhanced environment check
     if (!isEnvironmentSupported()) {
-      console.log("PWA: Environment not supported, skipping PWA setup");
+      console.log("PWA: Environment not supported");
       return;
     }
 
-    // Register service worker with error handling
-    registerServiceWorker().catch((err) => {
-      console.error("PWA: Service worker registration failed in effect:", err);
-    });
-
-    // Enhanced install prompt handler
-    const handleBeforeInstallPrompt = (e: Event) => {
-      try {
-        const promptEvent = e as BeforeInstallPromptEvent;
-        if (!promptEvent || typeof promptEvent !== "object") {
-          console.warn("PWA: Invalid install prompt event");
-          return;
-        }
-
-        console.log("PWA: Install prompt available");
-        promptEvent.preventDefault();
-
-        // Additional validation of prompt object
-        if (
-          typeof promptEvent.prompt === "function" &&
-          promptEvent.userChoice &&
-          typeof promptEvent.userChoice.then === "function"
-        ) {
-          setDeferredPrompt(promptEvent);
-          setIsInstallable(true);
-          setError(null);
-        } else {
-          console.warn("PWA: Install prompt event missing required methods");
-        }
-      } catch (err) {
-        console.error("PWA: Error handling install prompt event:", err);
-        setError("Failed to handle install prompt");
-      }
-    };
-
-    // Enhanced app installed handler
-    const handleAppInstalled = (e: Event) => {
-      try {
-        console.log("PWA: App was installed", e);
-        setIsInstalled(true);
-        setIsInstallable(false);
-        setDeferredPrompt(null);
-        setError(null);
-      } catch (err) {
-        console.error("PWA: Error handling app installed event:", err);
-      }
-    };
-
-    // Enhanced installation check
-    const checkIfInstalled = () => {
-      try {
-        if (typeof window === "undefined" || !window) return;
-
-        // Check for standalone display mode
-        let isStandalone = false;
-        if (window.matchMedia && typeof window.matchMedia === "function") {
-          const mediaQuery = window.matchMedia("(display-mode: standalone)");
-          isStandalone = mediaQuery ? (mediaQuery.matches ?? false) : false;
-        }
-
-        // Check for iOS standalone mode
-        let isIOSInstalled = false;
-        if (navigator && navigator.userAgent) {
-          const userAgent = navigator.userAgent;
-          const isIOS = /iPad|iPhone|iPod/.test(userAgent);
-          if (isIOS && navigator && (navigator as any).standalone === true) {
-            isIOSInstalled = true;
-          }
-        }
-
-        if (isStandalone || isIOSInstalled) {
-          setIsInstalled(true);
-          console.log("PWA: App is running as installed PWA");
-        }
-      } catch (err) {
-        console.error("PWA: Error checking install status:", err);
-      }
-    };
-
-    // Attach event listeners with enhanced error handling
-    const listenersAttached = {
-      beforeinstallprompt: false,
-      appinstalled: false,
-    };
-
-    try {
-      if (window && typeof window.addEventListener === "function") {
-        listenersAttached.beforeinstallprompt = safeAddEventListener(
-          window,
-          "beforeinstallprompt",
-          handleBeforeInstallPrompt,
-        );
-        listenersAttached.appinstalled = safeAddEventListener(
-          window,
-          "appinstalled",
-          handleAppInstalled,
-        );
-      }
-    } catch (err) {
-      console.error("PWA: Failed to attach install listeners:", err);
-      setError("Failed to initialize PWA listeners");
+    if (checkInstallationStatus()) {
+      setIsInstalled(true);
+      setIsInstallable(false);
     }
 
-    // Check installation status
-    checkIfInstalled();
+    registerServiceWorker().catch((err) => {
+      console.error("PWA: Registration failed in effect:", err);
+    });
 
-    // Cleanup function
-    return () => {
-      try {
-        if (window && typeof window.removeEventListener === "function") {
-          if (listenersAttached.beforeinstallprompt) {
-            safeRemoveEventListener(
-              window,
-              "beforeinstallprompt",
-              handleBeforeInstallPrompt,
-            );
-          }
-          if (listenersAttached.appinstalled) {
-            safeRemoveEventListener(window, "appinstalled", handleAppInstalled);
-          }
-        }
-      } catch (err) {
-        console.error("PWA: Error during cleanup:", err);
+    handlersRef.current.beforeInstallPrompt = (e: Event) => {
+      if (!mountedRef.current) return;
+
+      const promptEvent = e as BeforeInstallPromptEvent;
+
+      console.log("PWA: Install prompt available");
+      e.preventDefault();
+
+      if (
+        promptEvent &&
+        typeof promptEvent.prompt === "function" &&
+        promptEvent.userChoice &&
+        typeof promptEvent.userChoice.then === "function"
+      ) {
+        setDeferredPrompt(promptEvent);
+        setIsInstallable(true);
+        setError(null);
+      } else {
+        console.warn("PWA: Invalid install prompt event");
       }
+    };
+
+    handlersRef.current.appInstalled = (e: Event) => {
+      if (!mountedRef.current) return;
+
+      console.log("PWA: App was installed", e);
+      setIsInstalled(true);
+      setIsInstallable(false);
+      setDeferredPrompt(null);
+      setError(null);
+    };
+
+    safeAddEventListener(
+      window,
+      "beforeinstallprompt",
+      handlersRef.current.beforeInstallPrompt,
+    );
+    safeAddEventListener(
+      window,
+      "appinstalled",
+      handlersRef.current.appInstalled,
+    );
+
+    return () => {
+      mountedRef.current = false;
+
+      if (handlersRef.current.beforeInstallPrompt) {
+        safeRemoveEventListener(
+          window,
+          "beforeinstallprompt",
+          handlersRef.current.beforeInstallPrompt,
+        );
+      }
+
+      if (handlersRef.current.appInstalled) {
+        safeRemoveEventListener(
+          window,
+          "appinstalled",
+          handlersRef.current.appInstalled,
+        );
+      }
+
+      if (registrationRef.current && handlersRef.current.updateFound) {
+        safeRemoveEventListener(
+          registrationRef.current,
+          "updatefound",
+          handlersRef.current.updateFound,
+        );
+      }
+
+      if (navigator.serviceWorker && handlersRef.current.message) {
+        safeRemoveEventListener(
+          navigator.serviceWorker,
+          "message",
+          handlersRef.current.message,
+        );
+      }
+
+      registrationRef.current = null;
+      handlersRef.current = {
+        beforeInstallPrompt: null,
+        appInstalled: null,
+        updateFound: null,
+        stateChange: null,
+        message: null,
+      };
     };
   }, [
     isEnvironmentSupported,
+    checkInstallationStatus,
     registerServiceWorker,
     safeAddEventListener,
     safeRemoveEventListener,
   ]);
 
-  // Error state rendering
-  if (error) {
-    console.error("PWA: Component error state:", error);
-    // You might want to render an error UI here or report to error tracking
+  useEffect(() => {
+    if (swUpdateAvailable && mountedRef.current) {
+      const shouldUpdate = window.confirm(
+        "A new version is available! Would you like to update now?",
+      );
+
+      if (shouldUpdate) {
+        if (registrationRef.current?.waiting) {
+          registrationRef.current.waiting.postMessage({ type: "SKIP_WAITING" });
+        }
+      }
+
+      setSwUpdateAvailable(false);
+    }
+  }, [swUpdateAvailable]);
+
+  useEffect(() => {
+    if (error) {
+      console.error("PWA Component Error:", error);
+    }
+  }, [error]);
+
+  if (!isInstallable || isInstalled) {
     return null;
   }
 
-  // Enhanced conditional rendering with additional safety checks
-  if (
-    isInstallable &&
-    !isInstalled &&
-    PWAInstallPrompt &&
-    typeof PWAInstallPrompt === "function"
-  ) {
-    try {
-      return (
-        <PWAInstallPrompt
-          onInstall={handleInstallClick}
-          onDismiss={handleDismiss}
-        />
-      );
-    } catch (err) {
-      console.error("PWA: Error rendering install prompt:", err);
-      setError("Failed to render install prompt");
-      return null;
-    }
+  try {
+    return (
+      <PWAInstallPrompt
+        onInstall={handleInstallClick}
+        onDismiss={handleDismiss}
+        delay={5000}
+        persistDismissal={true}
+      />
+    );
+  } catch (err) {
+    console.error("PWA: Error rendering install prompt:", err);
+    return null;
   }
-
-  return null;
 }
+
+export default PWARegistration;
