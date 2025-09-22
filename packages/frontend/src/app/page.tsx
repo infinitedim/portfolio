@@ -88,26 +88,20 @@ export default function HomePage(): JSX.Element {
         className="relative"
       >
         <LetterGlitch
-          glitchSpeed={30}
+          glitchSpeed={20}
           centerVignette={true}
           outerVignette={false}
           smooth={true}
-          characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+=-_|\\/<>?"
-          className="opacity-30"
+          characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝ#%&*+=-_|\\/<>?"
+          className="opacity-40"
         />
 
-        <div className="relative z-10">
+        <div className="relative z-20">
           <HomeTerminalHeader />
           <StaticContent />
           <Suspense
             fallback={
-              <div
-                className="min-h-screen w-full flex items-center justify-center"
-                style={{
-                  backgroundColor: "#000000",
-                  color: "#ffffff",
-                }}
-              >
+              <div className="min-h-screen w-full flex items-center justify-center bg-black text-white">
                 <TerminalLoadingProgress />
               </div>
             }

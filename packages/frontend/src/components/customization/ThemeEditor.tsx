@@ -27,6 +27,9 @@ export function ThemeEditor({
   const { themeConfig } = useTheme();
   const [editedTheme, setEditedTheme] = useState<CustomTheme>(theme);
   const [previewMode, setPreviewMode] = useState(false);
+  const [colorRule, setColorRule] = useState<
+    "70-20-5-1-1-1-2" | "50-25-10-5-5-3-2" | "40-20-15-10-5-5-5"
+  >("70-20-5-1-1-1-2");
 
   useEffect(() => {
     setEditedTheme(theme);
@@ -36,7 +39,7 @@ export function ThemeEditor({
     setEditedTheme((prev) => ({
       ...prev,
       colors: {
-        ...prev.colors,
+        ...(prev.colors || {}),
         [colorKey]: value,
       },
     }));
@@ -57,7 +60,7 @@ export function ThemeEditor({
     if (!previewMode) {
       // Apply preview
       const root = document.documentElement;
-      Object.entries(editedTheme.colors).forEach(([key, value]) => {
+      Object.entries(editedTheme.colors || {}).forEach(([key, value]) => {
         root.style.setProperty(`--terminal-${key}`, value);
       });
     } else {
@@ -68,6 +71,104 @@ export function ThemeEditor({
       });
     }
     setPreviewMode(!previewMode);
+  };
+
+  const generateRandomTheme = () => {
+    // Parse color rule percentages
+    const rulePercentages = colorRule.split("-").map(Number);
+    const [
+      _bgPercent,
+      _primaryPercent,
+      _secondaryPercent,
+      accentPercent,
+      successPercent,
+      errorPercent,
+      neutralPercent,
+    ] = rulePercentages;
+
+    // Generate base hue and theme type
+    const baseHue = Math.floor(Math.random() * 360);
+    const isLightTheme = Math.random() > 0.5;
+
+    // Helper function to generate color
+    const generateColor = (
+      hue: number,
+      saturation: number,
+      lightness: number,
+    ) => {
+      return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    };
+
+    const colors = {
+      bg: isLightTheme
+        ? generateColor(baseHue, 10, 95)
+        : generateColor(baseHue, 15, 8),
+      text: isLightTheme
+        ? generateColor(baseHue, 20, 15)
+        : generateColor(baseHue, 20, 85),
+      prompt: generateColor((baseHue + 30) % 360, 60, isLightTheme ? 45 : 65),
+      success: generateColor(120, 50 + successPercent, isLightTheme ? 40 : 55),
+      error: generateColor(0, 60 + errorPercent, isLightTheme ? 45 : 60),
+      accent: generateColor(
+        baseHue,
+        70 + accentPercent,
+        isLightTheme ? 50 : 60,
+      ),
+      border: isLightTheme
+        ? generateColor(baseHue, 15 + neutralPercent, 75)
+        : generateColor(baseHue, 20 + neutralPercent, 25),
+    };
+
+    const themeNames = [
+      "Cosmic",
+      "Neon",
+      "Ocean",
+      "Forest",
+      "Sunset",
+      "Aurora",
+      "Midnight",
+      "Ruby",
+      "Emerald",
+      "Sapphire",
+      "Violet",
+      "Golden",
+      "Silver",
+      "Copper",
+      "Arctic",
+      "Desert",
+      "Jungle",
+      "Volcanic",
+      "Crystal",
+      "Shadow",
+    ];
+
+    const adjectives = [
+      "Dark",
+      "Light",
+      "Bright",
+      "Soft",
+      "Bold",
+      "Vivid",
+      "Muted",
+      "Electric",
+      "Pastel",
+      "Deep",
+      "Cool",
+      "Warm",
+      "Retro",
+      "Modern",
+      "Classic",
+    ];
+
+    const randomName = `${adjectives[Math.floor(Math.random() * adjectives.length)]} ${themeNames[Math.floor(Math.random() * themeNames.length)]}`;
+
+    setEditedTheme((prev) => ({
+      ...prev,
+      name: randomName,
+      description: `Randomly generated ${isLightTheme ? "light" : "dark"} theme`,
+      author: "Random Generator",
+      colors,
+    }));
   };
 
   const colorFields = [
@@ -119,6 +220,69 @@ export function ThemeEditor({
           </div>
         </div>
 
+        {/* Generate Random Theme Section - Only show for new themes */}
+        {!theme.id && (
+          <div
+            className="mt-3 p-3 rounded border"
+            style={{
+              backgroundColor: `${themeConfig.colors.accent}05`,
+              borderColor: `${themeConfig.colors.accent}30`,
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <label
+                  htmlFor="colorRule"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Color Rule
+                </label>
+                <select
+                  id="colorRule"
+                  value={colorRule}
+                  onChange={(e) =>
+                    setColorRule(e.target.value as typeof colorRule)
+                  }
+                  className="w-full px-3 py-2 rounded border text-sm"
+                  style={{
+                    backgroundColor: `${themeConfig.colors.muted}10`,
+                    borderColor: themeConfig.colors.border,
+                    color: themeConfig.colors.text,
+                  }}
+                >
+                  <option value="70-20-5-1-1-1-2">
+                    70-20-5-1-1-1-2 (Balanced)
+                  </option>
+                  <option value="50-25-10-5-5-3-2">
+                    50-25-10-5-5-3-2 (Even)
+                  </option>
+                  <option value="40-20-15-10-5-5-5">
+                    40-20-15-10-5-5-5 (Distributed)
+                  </option>
+                </select>
+              </div>
+              <div className="flex-shrink-0">
+                <div className="block text-sm font-medium mb-1 opacity-0">
+                  Action
+                </div>
+                <button
+                  onClick={generateRandomTheme}
+                  className="px-4 py-2 rounded text-sm font-medium transition-all duration-200 hover:scale-105"
+                  style={{
+                    backgroundColor: themeConfig.colors.accent,
+                    color: themeConfig.colors.bg,
+                  }}
+                >
+                  Generate Random Theme
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto p-4">
         {/* Basic Info */}
         <div className="space-y-3">
           <div>
@@ -183,7 +347,7 @@ export function ThemeEditor({
                   <div
                     className="w-8 h-8 rounded border"
                     style={{
-                      backgroundColor: editedTheme.colors[key],
+                      backgroundColor: editedTheme.colors?.[key] || "#000000",
                       borderColor: themeConfig.colors.border,
                     }}
                   />
@@ -192,14 +356,14 @@ export function ThemeEditor({
                 <div className="flex gap-2">
                   <input
                     type="color"
-                    value={editedTheme.colors[key]}
+                    value={editedTheme.colors?.[key] || "#000000"}
                     onChange={(e) => handleColorChange(key, e.target.value)}
                     className="w-12 h-8 rounded border cursor-pointer"
                     style={{ borderColor: themeConfig.colors.border }}
                   />
                   <input
                     type="text"
-                    value={editedTheme.colors[key]}
+                    value={editedTheme.colors?.[key] || "#000000"}
                     onChange={(e) => handleColorChange(key, e.target.value)}
                     className="flex-1 px-3 py-1 rounded border bg-transparent font-mono text-sm"
                     style={{
@@ -211,55 +375,6 @@ export function ThemeEditor({
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* Color Harmony Tools */}
-          <div
-            className="p-3 rounded border"
-            style={{
-              backgroundColor: `${themeConfig.colors.accent}10`,
-              borderColor: `${themeConfig.colors.accent}40`,
-            }}
-          >
-            <h5
-              className="font-medium mb-2"
-              style={{ color: themeConfig.colors.accent }}
-            >
-              Color Harmony Tools
-            </h5>
-            <div className="flex gap-2 text-sm">
-              <button
-                onClick={() => {
-                  // Generate complementary colors
-                  const baseColor = editedTheme.colors.accent;
-                  // Simple complementary color logic (this could be more sophisticated)
-                  const complementary = baseColor.replace("#", "#ff");
-                  handleColorChange("success", complementary);
-                }}
-                className="px-2 py-1 rounded border hover:opacity-80"
-                style={{
-                  borderColor: themeConfig.colors.border,
-                  color: themeConfig.colors.text,
-                }}
-              >
-                Generate Complementary
-              </button>
-              <button
-                onClick={() => {
-                  // Generate monochromatic palette
-                  const base = editedTheme.colors.bg;
-                  // Simple monochromatic variations
-                  handleColorChange("border", base + "40");
-                }}
-                className="px-2 py-1 rounded border hover:opacity-80"
-                style={{
-                  borderColor: themeConfig.colors.border,
-                  color: themeConfig.colors.text,
-                }}
-              >
-                Monochromatic
-              </button>
-            </div>
           </div>
         </div>
       </div>

@@ -534,6 +534,7 @@ export function Terminal({
                 inputRef={commandInputRef}
                 getCommandSuggestions={getCommandSuggestions}
                 getFrequentCommands={getFrequentCommands}
+                showOnEmpty={true}
               />
             </div>
 

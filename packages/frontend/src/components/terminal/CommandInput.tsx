@@ -110,20 +110,30 @@ export function CommandInput({
     return () => clearTimeout(timeoutId);
   }, [value, actualInputRef]);
 
-  // Show suggestions on input change - improved timing for better UX
+  // Show suggestions on input change - simplified and more reliable
   useEffect(() => {
     const timeoutId = setTimeout(() => {
+      console.log("Suggestion effect triggered:", {
+        value,
+        valueLength: value.length,
+        showOnEmpty,
+        isProcessing,
+        showTabCompletion,
+      });
+
       const shouldShowSuggestions =
-        (value.length > 0 || showOnEmpty) &&
         !isProcessing &&
-        !showTabCompletion;
+        !showTabCompletion &&
+        (value.length > 0 || showOnEmpty);
+
+      console.log("Should show suggestions:", shouldShowSuggestions);
       setShowSuggestions(shouldShowSuggestions);
 
-      // Trigger suggestion updates immediately for better responsiveness
+      // Trigger suggestion updates for better responsiveness
       if (shouldShowSuggestions) {
         setSuggestionTrigger((prev) => !prev);
       }
-    }, 80); // Reduced debounce for more responsive suggestions
+    }, 50); // Reduced debounce for better responsiveness
 
     return () => clearTimeout(timeoutId);
   }, [value, isProcessing, showTabCompletion, showOnEmpty]);
@@ -347,6 +357,8 @@ export function CommandInput({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
+    console.log("Input changed:", { oldValue: value, newValue, showOnEmpty });
+
     onChange(newValue);
 
     // Update cursor index immediately for responsive feel
@@ -356,6 +368,14 @@ export function CommandInput({
     // Clear error when user starts typing
     if (newValue !== value) {
       onClearError?.();
+    }
+
+    // Force suggestions to show immediately - bypass the debounce
+    const shouldShow = newValue.length > 0 || showOnEmpty;
+    console.log("Forcing suggestions:", shouldShow);
+    setShowSuggestions(shouldShow);
+    if (shouldShow) {
+      setSuggestionTrigger((prev) => !prev);
     }
   };
 
@@ -498,13 +518,7 @@ export function CommandInput({
       {showSuggestions && (
         <CommandSuggestions
           input={value}
-          availableCommands={
-            getCommandSuggestions && value.trim()
-              ? getCommandSuggestions(value, 8)
-              : !value.trim() && getFrequentCommands
-                ? [...getFrequentCommands().slice(0, 5), ...availableCommands]
-                : availableCommands
-          }
+          availableCommands={availableCommands}
           onSelect={handleSuggestionSelect}
           onCommandUsed={(command) => {
             // Track command usage for analytics if needed

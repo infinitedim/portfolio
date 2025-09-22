@@ -74,12 +74,18 @@ export function CommandSuggestions({
 
   // Smooth visibility transitions with proper timing
   useEffect(() => {
+    console.log("CommandSuggestions visibility effect:", { visible, suggestionsLength: suggestions.length });
+
     if (visible && suggestions.length > 0) {
       // Small delay for smoother appearance
-      const timer = setTimeout(() => setIsVisible(true), 10);
+      const timer = setTimeout(() => {
+        console.log("Setting isVisible to true");
+        setIsVisible(true);
+      }, 10);
       return () => clearTimeout(timer);
     } else {
-      // Longer delay for graceful disappearance
+      // Immediate hide when not visible or no suggestions
+      console.log("Setting isVisible to false");
       setIsVisible(false);
     }
   }, [visible, suggestions.length]);
@@ -163,8 +169,19 @@ export function CommandSuggestions({
 
   // Don't render if not visible or no suggestions
   if (!isVisible || suggestions.length === 0 || !themeConfig?.colors) {
+    console.log("CommandSuggestions NOT rendering:", {
+      isVisible,
+      suggestionsLength: suggestions.length,
+      hasThemeConfig: !!themeConfig?.colors
+    });
     return null;
   }
+
+  console.log("CommandSuggestions IS rendering:", {
+    isVisible,
+    suggestionsLength: suggestions.length,
+    suggestions: suggestions.map(s => s.command)
+  });
 
   const getTypeIcon = (type: SuggestionItem["type"]) => {
     switch (type) {

@@ -17,7 +17,7 @@ const LetterGlitchClient = dynamic(() => import("./LetterGlitchClient"), {
   ssr: false,
   loading: () => (
     <canvas
-      className="fixed inset-0 w-full h-full pointer-events-none opacity-30"
+      className="fixed inset-0 w-full h-full pointer-events-none opacity-20"
       style={{
         zIndex: -1,
         background: "transparent",

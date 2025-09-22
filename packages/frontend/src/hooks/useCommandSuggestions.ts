@@ -371,10 +371,19 @@ export function useCommandSuggestions(
   // Generate contextual suggestions based on user behavior
   const generateContextualSuggestions = useCallback(
     (query: string): SuggestionItem[] => {
+      console.log("generateContextualSuggestions called:", {
+        query,
+        showOnEmpty,
+        availableCommandsCount: availableCommands.length,
+        recentCommandsCount: userContext.recentCommands.length,
+      });
+
       const results: SuggestionItem[] = [];
 
       // If query is empty, show popular/recent commands
       if (!query && showOnEmpty) {
+        console.log("Generating empty query suggestions...");
+
         // Recent commands
         userContext.recentCommands.forEach((cmd, index) => {
           if (availableCommands.includes(cmd)) {
@@ -491,14 +500,26 @@ export function useCommandSuggestions(
 
   // Update suggestions when debounced input changes
   useEffect(() => {
+    console.log("useCommandSuggestions effect:", {
+      debouncedInput,
+      debouncedInputLength: debouncedInput.length,
+      minQueryLength,
+      showOnEmpty,
+      availableCommands: availableCommands.length,
+    });
+
     if (debouncedInput.length < minQueryLength && !showOnEmpty) {
+      console.log("Clearing suggestions due to length check");
       setSuggestions([]);
       return;
     }
 
+    console.log("Generating suggestions...");
     const newSuggestions = generateSuggestions(debouncedInput);
+    console.log("Generated suggestions:", newSuggestions);
     setSuggestions(newSuggestions);
     lastQueryRef.current = debouncedInput;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedInput, generateSuggestions, minQueryLength, showOnEmpty]);
 
   // Public API

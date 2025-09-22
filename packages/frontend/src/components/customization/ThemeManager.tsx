@@ -135,9 +135,28 @@ export function ThemeManager({
   };
 
   if (isEditing) {
+    // Create a default theme for new theme creation
+    const defaultTheme: CustomTheme = {
+      id: "",
+      name: "New Theme",
+      description: "A custom theme",
+      author: "User",
+      colors: {
+        bg: "#1a1a1a",
+        text: "#ffffff",
+        prompt: "#00ff00",
+        success: "#00ff00",
+        error: "#ff0000",
+        accent: "#0080ff",
+        border: "#333333",
+      },
+      source: "custom",
+      createdAt: new Date(),
+    };
+
     return (
       <ThemeEditor
-        theme={selectedTheme || ({} as CustomTheme)}
+        theme={selectedTheme || defaultTheme}
         onSave={handleSaveTheme}
         onCancel={() => {
           setIsEditing(false);
@@ -172,7 +191,7 @@ export function ThemeManager({
             className="px-4 py-2 rounded text-sm font-medium transition-all duration-200 hover:scale-105"
             style={{
               backgroundColor: themeConfig.colors.accent,
-              color: themeConfig.colors.bg,
+              color: themeConfig.colors?.bg || "#000000",
             }}
           >
             + Create Theme
@@ -265,6 +284,15 @@ export function ThemeManager({
             {filteredThemes.map((theme) => {
               const isActive = isThemeActive(theme.id as ThemeName);
 
+              const isActiveStyle = {
+                backgroundColor: isActive
+                  ? `${themeConfig.colors.success || themeConfig.colors.accent}30`
+                  : themeConfig.colors.accent,
+                color: isActive
+                  ? themeConfig.colors.success || themeConfig.colors.accent
+                  : themeConfig.colors.bg,
+              };
+
               return (
                 <div
                   key={theme.id}
@@ -356,15 +384,7 @@ export function ThemeManager({
                     <button
                       onClick={() => handleApplyTheme(theme.id)}
                       className="flex-1 px-3 py-1.5 rounded text-sm font-medium transition-all duration-200 hover:scale-105"
-                      style={{
-                        backgroundColor: isActive
-                          ? `${themeConfig.colors.success || themeConfig.colors.accent}30`
-                          : themeConfig.colors.accent,
-                        color: isActive
-                          ? themeConfig.colors.success ||
-                            themeConfig.colors.accent
-                          : themeConfig.colors.bg,
-                      }}
+                      style={isActiveStyle}
                       disabled={isActive}
                     >
                       {isActive ? "✓ Active" : "Apply"}
