@@ -104,19 +104,19 @@ export function MobileTerminal({ children }: MobileTerminalProps): JSX.Element {
         </div>
       )}
 
-      {/* Mobile-specific header */}
+      {/* Mobile-specific header - Compact version */}
       <div
-        className="sticky top-0 z-40 p-4 border-b backdrop-blur-sm"
+        className="sticky top-0 z-40 px-3 py-2 border-b backdrop-blur-sm"
         style={{
           backgroundColor: `${themeConfig.colors.bg}f5`,
           borderColor: themeConfig.colors.border,
-          paddingTop: "calc(1rem + env(safe-area-inset-top))",
+          paddingTop: "calc(0.5rem + env(safe-area-inset-top))",
         }}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div
-              className="text-sm font-mono font-bold"
+              className="text-xs font-mono font-bold"
               style={{ color: themeConfig.colors.accent }}
             >
               Terminal Portfolio

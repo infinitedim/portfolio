@@ -501,8 +501,75 @@ body {
   opacity: 1;
 }
 
-/* Responsive Design */
+/* Terminal with Glitch Background */
+.terminal-container {
+  backdrop-filter: blur(0.5px);
+  -webkit-backdrop-filter: blur(0.5px);
+}
+
+/* Ensure terminal content is readable over glitch */
+.terminal-container .space-y-4 {
+  position: relative;
+  z-index: 1;
+}
+
+/* Global Mobile Optimizations */
 @media (max-width: 768px) {
+
+  /* Ensure proper mobile viewport */
+  html,
+  body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* Terminal Container Mobile Optimizations */
+  .terminal-container {
+    padding-top: 0.5rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    min-height: 100vh;
+    min-height: 100dvh;
+    /* Support for dynamic viewport height */
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Mobile content spacing */
+  .terminal-container .space-y-4>*+* {
+    margin-top: 1rem;
+  }
+
+  /* Ensure full width usage on mobile */
+  .terminal-container>div {
+    max-width: 100% !important;
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+  }
+
+  /* Mobile terminal history optimizations */
+  .terminal-history {
+    font-size: 0.875rem;
+    line-height: 1.4;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Mobile command input optimizations */
+  .command-input-container {
+    padding: 0.75rem 0;
+    margin-top: 1rem;
+    width: 100%;
+  }
+
+  /* Mobile ASCII banner adjustments */
+  .ascii-banner {
+    font-size: 6px !important;
+    line-height: 1.1 !important;
+  }
+
+  /* Quick command grid for mobile */
   .quick-command-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
@@ -524,6 +591,20 @@ body {
     width: 3rem;
     height: 3rem;
     font-size: 1.25rem;
+  }
+
+  /* Mobile-specific optimizations for long text */
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-size: 0.75rem;
+  }
+
+  /* Ensure mobile terminal doesn't have horizontal scroll */
+  .mobile-terminal {
+    width: 100%;
+    overflow-x: hidden;
   }
 }
 

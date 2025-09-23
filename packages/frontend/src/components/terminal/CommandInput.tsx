@@ -99,6 +99,20 @@ export function CommandInput({
     }
   }, [isProcessing, actualInputRef]);
 
+  // Show suggestions on mount if showOnEmpty is true
+  useEffect(() => {
+    console.log("CommandInput suggestions effect:", {
+      showOnEmpty,
+      valueLength: value.length,
+      getCommandSuggestions: !!getCommandSuggestions,
+    });
+
+    if (showOnEmpty && value.length === 0) {
+      setShowSuggestions(true);
+      setSuggestionTrigger((prev) => !prev);
+    }
+  }, [showOnEmpty, value.length, getCommandSuggestions]);
+
   // Update cursor index when input changes - debounced for performance
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -269,17 +283,21 @@ export function CommandInput({
         break;
 
       case "Tab":
-        // Only prevent default if we're showing suggestions or tab completion
-        // Otherwise, let browser handle normal tab navigation
-        if (showSuggestions || showTabCompletion || value.trim()) {
-          e.preventDefault();
-          if (showSuggestions) {
-            // Let CommandSuggestions handle Tab
-            return;
-          }
-          handleTabCompletion();
+        e.preventDefault(); // Always prevent default tab behavior in terminal
+
+        if (showSuggestions) {
+          // If suggestions are visible, let CommandSuggestions handle it
+          return;
         }
-        // If input is empty and no suggestions, allow normal tab navigation
+
+        // If no suggestions are showing, trigger tab completion or show suggestions
+        if (value.trim()) {
+          handleTabCompletion();
+        } else {
+          // Show suggestions when tab is pressed on empty input
+          setShowSuggestions(true);
+          setSuggestionTrigger((prev) => !prev);
+        }
         break;
 
       case "ArrowLeft":
@@ -370,13 +388,17 @@ export function CommandInput({
       onClearError?.();
     }
 
-    // Force suggestions to show immediately - bypass the debounce
+    // Show suggestions when user types or when showOnEmpty is true
     const shouldShow = newValue.length > 0 || showOnEmpty;
-    console.log("Forcing suggestions:", shouldShow);
+    console.log("Should show suggestions:", shouldShow, {
+      inputLength: newValue.length,
+      showOnEmpty,
+    });
+
     setShowSuggestions(shouldShow);
-    if (shouldShow) {
-      setSuggestionTrigger((prev) => !prev);
-    }
+
+    // Always trigger suggestion update when input changes
+    setSuggestionTrigger((prev) => !prev);
   };
 
   const handleInputSelect = (e: React.SyntheticEvent<HTMLInputElement>) => {
@@ -384,9 +406,19 @@ export function CommandInput({
     setCursorIndex(target.selectionStart || 0);
   };
 
+  const handleInputFocus = () => {
+    // Show suggestions when input gains focus, especially if showOnEmpty is true
+    if (showOnEmpty || value.length > 0) {
+      setShowSuggestions(true);
+      setSuggestionTrigger((prev) => !prev);
+    }
+  };
+
   const handleInputClick = (e: React.MouseEvent<HTMLInputElement>) => {
     const target = e.target as HTMLInputElement;
     setCursorIndex(target.selectionStart || 0);
+    // Also trigger focus behavior on click
+    handleInputFocus();
   };
 
   const handleInputKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -425,6 +457,7 @@ export function CommandInput({
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onSelect={handleInputSelect}
+            onFocus={handleInputFocus}
             onClick={handleInputClick}
             onKeyUp={handleInputKeyUp}
             className="w-full bg-transparent border-0 outline-none font-mono text-sm p-0 m-0 resize-none"
@@ -441,7 +474,7 @@ export function CommandInput({
               padding: "0",
               margin: "0",
             }}
-            placeholder="Type a command..."
+            placeholder="Type a command or press Tab for suggestions..."
             disabled={isProcessing}
             autoComplete="off"
             autoCorrect="off"

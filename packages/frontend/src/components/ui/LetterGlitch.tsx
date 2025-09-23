@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { type JSX } from "react";
 
 interface LetterGlitchProps {
+  glitchColors?: string[];
   glitchSpeed?: number;
   centerVignette?: boolean;
   outerVignette?: boolean;
@@ -19,7 +20,7 @@ const LetterGlitchClient = dynamic(() => import("./LetterGlitchClient"), {
     <canvas
       className="fixed inset-0 w-full h-full pointer-events-none opacity-20"
       style={{
-        zIndex: -1,
+        zIndex: -10,
         background: "transparent",
       }}
       aria-hidden="true"
@@ -44,7 +45,7 @@ export function LetterGlitch(props: LetterGlitchProps): JSX.Element {
     return (
       <div
         className={`fixed inset-0 w-full h-full pointer-events-none ${props.className || ""}`}
-        style={{ zIndex: -1 }}
+        style={{ zIndex: -10 }}
         aria-hidden="true"
       />
     );

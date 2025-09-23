@@ -29,7 +29,7 @@ export function TerminalHistory({
   return (
     <div
       key={`terminal-history-${theme}`}
-      className="space-y-4"
+      className="space-y-4 terminal-history"
       role="log"
       aria-label="Command history"
     >

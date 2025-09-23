@@ -9,4 +9,5 @@ export { InteractiveWelcome } from "./InteractiveWelcome";
 export { NotificationToast } from "./NotificationToast";
 export { ProgressIndicator } from "./ProgressIndicator";
 export { TerminalLoadingProgress } from "./TerminalLoadingProgress";
+export { CommandLoadingIndicator } from "./CommandLoadingIndicator";
 export { ThemeSwitcher } from "./ThemeSwitcher";

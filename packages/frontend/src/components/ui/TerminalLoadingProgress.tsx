@@ -5,65 +5,50 @@ import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
 
 interface TerminalLoadingProgressProps {
   duration?: number;
-  files?: string[];
+  files?: Array<string | { path: string; size?: string }>;
   completionText?: string;
   onComplete?: () => void;
   autoStart?: boolean;
+  showSystemInfo?: boolean;
+  showProgressBar?: boolean;
+  enableTypewriter?: boolean;
 }
 
 interface LoadingFile {
   path: string;
-  status: "pending" | "loading" | "complete";
+  status: "pending" | "loading" | "complete" | "error";
   progress?: number;
+  size?: string;
+  loadTime?: number;
 }
 
 const DEFAULT_FILES = [
-  "src/components/ui/button.tsx",
-  "src/components/ui/card.tsx",
-  "src/components/ui/input.tsx",
-  "src/components/ui/badge.tsx",
-  "src/components/ui/avatar.tsx",
-  "src/components/ui/dialog.tsx",
-  "src/components/ui/dropdown-menu.tsx",
-  "src/components/ui/popover.tsx",
-  "src/components/ui/tooltip.tsx",
-  "src/components/ui/sheet.tsx",
-  "src/components/ui/select.tsx",
-  "src/components/ui/textarea.tsx",
-  "src/components/ui/label.tsx",
-  "src/components/ui/separator.tsx",
-  "src/components/ui/progress.tsx",
-  "src/components/terminal/Terminal.tsx",
-  "src/components/terminal/CommandInput.tsx",
-  "src/components/terminal/CommandHistory.tsx",
-  "src/components/terminal/TerminalOutput.tsx",
-  "src/components/projects/ProjectCard.tsx",
-  "src/components/projects/ProjectsGrid.tsx",
-  "src/components/projects/ProjectsFilter.tsx",
-  "src/components/layout/Header.tsx",
-  "src/components/layout/Footer.tsx",
-  "src/components/layout/Navigation.tsx",
-  "src/hooks/useTheme.ts",
-  "src/hooks/useTerminal.ts",
-  "src/hooks/useLocalStorage.ts",
-  "src/hooks/useDebounce.ts",
-  "src/lib/commands/commandRegistry.ts",
-  "src/lib/themes/themeConfig.ts",
-  "src/lib/utils/validation.ts",
-  "src/lib/utils/formatting.ts",
-  "src/types/terminal.ts",
-  "src/types/theme.ts",
-  "src/types/project.ts",
-  "src/types/api.ts",
-  "src/app/layout.tsx",
-  "src/app/page.tsx",
-  "src/app/projects/page.tsx",
-  "src/app/globals.css",
-  "package.json",
-  "tailwind.config.ts",
-  "next.config.js",
-  "tsconfig.json",
-  ".env.local",
+  { path: "src/components/ui/button.tsx", size: "4.2 KB" },
+  { path: "src/components/ui/card.tsx", size: "3.1 KB" },
+  { path: "src/components/ui/input.tsx", size: "2.8 KB" },
+  { path: "src/components/ui/badge.tsx", size: "1.9 KB" },
+  { path: "src/components/ui/avatar.tsx", size: "3.5 KB" },
+  { path: "src/components/ui/dialog.tsx", size: "5.2 KB" },
+  { path: "src/components/ui/dropdown-menu.tsx", size: "6.8 KB" },
+  { path: "src/components/ui/popover.tsx", size: "4.1 KB" },
+  { path: "src/components/ui/tooltip.tsx", size: "2.7 KB" },
+  { path: "src/components/ui/sheet.tsx", size: "4.9 KB" },
+  { path: "src/components/terminal/Terminal.tsx", size: "18.2 KB" },
+  { path: "src/components/terminal/CommandInput.tsx", size: "12.4 KB" },
+  { path: "src/components/terminal/CommandHistory.tsx", size: "8.1 KB" },
+  { path: "src/components/terminal/TerminalOutput.tsx", size: "6.3 KB" },
+  { path: "src/hooks/useTheme.ts", size: "7.9 KB" },
+  { path: "src/hooks/useTerminal.ts", size: "15.6 KB" },
+  { path: "src/hooks/useLocalStorage.ts", size: "3.2 KB" },
+  { path: "src/lib/commands/commandRegistry.ts", size: "22.1 KB" },
+  { path: "src/lib/themes/themeConfig.ts", size: "9.8 KB" },
+  { path: "src/lib/utils/validation.ts", size: "4.5 KB" },
+  { path: "src/types/terminal.ts", size: "2.9 KB" },
+  { path: "src/types/theme.ts", size: "1.8 KB" },
+  { path: "package.json", size: "3.4 KB" },
+  { path: "tailwind.config.ts", size: "2.1 KB" },
+  { path: "next.config.js", size: "1.6 KB" },
+  { path: "tsconfig.json", size: "1.2 KB" },
 ];
 
 /**
@@ -93,27 +78,39 @@ export function TerminalLoadingProgress({
   completionText = "✅ All files loaded successfully!",
   onComplete,
   autoStart = true,
+  showSystemInfo = true,
 }: TerminalLoadingProgressProps): JSX.Element {
   const { themeConfig, theme, mounted } = useTheme();
   const [loadingFiles, setLoadingFiles] = useState<LoadingFile[]>([]);
   const [currentFileIndex, setCurrentFileIndex] = useState(-1);
   const [isComplete, setIsComplete] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
+  const [globalProgress, setGlobalProgress] = useState(0);
+  const [systemInfo, setSystemInfo] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Initialize files
   useEffect(() => {
-    const initialFiles: LoadingFile[] = files.map((path) => ({
-      path,
-      status: "pending",
-    }));
+    const initialFiles: LoadingFile[] = files.map((file) => {
+      const fileData = typeof file === "string" ? { path: file } : file;
+      return {
+        path: fileData.path,
+        status: "pending" as const,
+        size: fileData.size,
+        loadTime: 0,
+      };
+    });
     setLoadingFiles(initialFiles);
 
     if (autoStart) {
       setStartTime(Date.now());
+      if (showSystemInfo) {
+        setSystemInfo("🔧 Initializing terminal environment...");
+      }
     }
-  }, [files, autoStart]);
+  }, [files, autoStart, showSystemInfo]);
 
+  // Enhanced loading effect with realistic timing
   useEffect(() => {
     if (!startTime || isComplete) return;
 
@@ -123,12 +120,38 @@ export function TerminalLoadingProgress({
     const interval = setInterval(() => {
       if (currentIndex >= files.length) {
         setIsComplete(true);
+        setGlobalProgress(100);
+        if (showSystemInfo) {
+          setSystemInfo("🎉 Terminal initialization complete!");
+        }
         onComplete?.();
         clearInterval(interval);
         return;
       }
 
       setCurrentFileIndex(currentIndex);
+      const fileStartTime = Date.now();
+
+      // Update system info based on current file
+      if (showSystemInfo) {
+        const currentFile =
+          typeof files[currentIndex] === "string"
+            ? (files[currentIndex] as string)
+            : (files[currentIndex] as { path: string }).path;
+
+        if (currentFile.includes("theme")) {
+          setSystemInfo("🎨 Loading theme configurations...");
+        } else if (currentFile.includes("terminal")) {
+          setSystemInfo("💻 Initializing terminal components...");
+        } else if (currentFile.includes("hook")) {
+          setSystemInfo("🔗 Setting up React hooks...");
+        } else if (currentFile.includes("command")) {
+          setSystemInfo("⚡ Loading command registry...");
+        } else {
+          setSystemInfo(`📦 Loading ${currentFile.split("/").pop()}...`);
+        }
+      }
+
       setLoadingFiles((prev) =>
         prev.map((file, index) => {
           if (index === currentIndex) {
@@ -138,11 +161,16 @@ export function TerminalLoadingProgress({
         }),
       );
 
+      // Update global progress
+      setGlobalProgress(Math.round((currentIndex / files.length) * 100));
+
+      // Complete the file after a realistic delay
       setTimeout(() => {
+        const loadTime = Date.now() - fileStartTime;
         setLoadingFiles((prev) =>
           prev.map((file, index) => {
             if (index === currentIndex) {
-              return { ...file, status: "complete" as const };
+              return { ...file, status: "complete" as const, loadTime };
             }
             return file;
           }),
@@ -153,7 +181,7 @@ export function TerminalLoadingProgress({
     }, fileLoadDuration);
 
     return () => clearInterval(interval);
-  }, [startTime, duration, files.length, isComplete, onComplete]);
+  }, [startTime, duration, files, isComplete, onComplete, showSystemInfo]);
 
   // Auto-scroll to keep current file visible
   useEffect(() => {
@@ -170,7 +198,7 @@ export function TerminalLoadingProgress({
     }
   }, [currentFileIndex]);
 
-  const getStatusIcon = (status: LoadingFile["status"]) => {
+  const getStatusIcon = (status: LoadingFile["status"], loadTime?: number) => {
     switch (status) {
       case "pending":
         return <span style={{ color: themeConfig.colors.muted }}>⏳</span>;
@@ -180,17 +208,25 @@ export function TerminalLoadingProgress({
             className="animate-spin"
             style={{ color: themeConfig.colors.accent }}
           >
-            ◐
+            ⟳
           </span>
         );
-      case "complete":
+      case "complete": {
+        const icon = loadTime && loadTime < 100 ? "⚡" : "✓";
         return (
           <span
             style={{
               color: themeConfig.colors.success || themeConfig.colors.accent,
             }}
           >
-            ✓
+            {icon}
+          </span>
+        );
+      }
+      case "error":
+        return (
+          <span style={{ color: themeConfig.colors.error || "#ef4444" }}>
+            ✗
           </span>
         );
       default:
@@ -214,37 +250,57 @@ export function TerminalLoadingProgress({
     <div
       key={`terminal-loading-${theme}`}
       ref={scrollContainerRef}
-      className="font-mono text-sm space-y-1 max-h-[28rem] overflow-y-auto"
+      className="font-mono text-sm space-y-1 max-h-[32rem] overflow-y-auto"
       role="status"
       aria-label="Loading files"
     >
+      {/* Header with animated logo and progress */}
       <div
-        className="text-center border-b pb-2 mb-3"
+        className="text-center border-b pb-3 mb-4"
         style={{
           borderColor: themeConfig.colors.border,
           color: themeConfig.colors.accent,
         }}
       >
-        <div className="flex items-center gap-2">
-          <span className="animate-pulse">📦</span>
-          <span>Loading application files...</span>
-          <span
-            className="text-xs"
-            style={{ color: themeConfig.colors.muted }}
-          >
-            ({loadingFiles.filter((f) => f.status === "complete").length}/
-            {files.length})
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <span className={isComplete ? "" : "animate-pulse"}>
+            {isComplete ? "�" : "�📦"}
+          </span>
+          <span className="text-lg font-bold">Terminal Portfolio</span>
+        </div>
+
+        {/* Progress bar */}
+        <div className="w-full bg-gray-800 rounded-full h-2 mb-2">
+          <div
+            className="h-2 rounded-full transition-all duration-300 ease-out"
+            style={{
+              width: `${globalProgress}%`,
+              backgroundColor: themeConfig.colors.accent,
+              boxShadow: `0 0 8px ${themeConfig.colors.accent}40`,
+            }}
+          />
+        </div>
+
+        {/* Status info */}
+        <div className="flex items-center justify-between text-xs">
+          <span style={{ color: themeConfig.colors.muted }}>
+            {systemInfo || "Initializing..."}
+          </span>
+          <span style={{ color: themeConfig.colors.muted }}>
+            {loadingFiles.filter((f) => f.status === "complete").length}/
+            {files.length} ({globalProgress}%)
           </span>
         </div>
       </div>
+
+      {/* File loading list */}
       <div className="space-y-1">
         {loadingFiles.map((file, index) => {
           const isCurrentFile = index === currentFileIndex;
-          // Show more files: current file, up to 5 ahead, and all completed files
           const shouldShow =
             file.status === "complete" ||
             file.status === "loading" ||
-            index <= currentFileIndex + 5;
+            index <= currentFileIndex + 3;
 
           if (!shouldShow) return null;
 
@@ -252,10 +308,7 @@ export function TerminalLoadingProgress({
             <div
               key={file.path}
               data-file-index={index}
-              // eslint-disable-next-line prettier/prettier
-              className={`flex items-center gap-3 py-1 px-2 rounded transition-all duration-200 ${isCurrentFile ? "bg-opacity-20" : ""
-                // eslint-disable-next-line prettier/prettier
-                }`}
+              className={`flex items-center gap-3 py-2 px-3 rounded-md transition-all duration-200 ${isCurrentFile ? "bg-opacity-20 scale-[1.02]" : ""}`}
               style={{
                 backgroundColor: isCurrentFile
                   ? `${themeConfig.colors.accent}20`
@@ -264,27 +317,41 @@ export function TerminalLoadingProgress({
                   file.status === "complete"
                     ? themeConfig.colors.success || themeConfig.colors.accent
                     : themeConfig.colors.text,
+                transform: isCurrentFile ? "translateX(4px)" : "translateX(0)",
               }}
             >
-              <div className="w-4 flex justify-center">
-                {getStatusIcon(file.status)}
+              <div className="w-5 flex justify-center">
+                {getStatusIcon(file.status, file.loadTime)}
               </div>
-              <div className="flex-1">
-                <span
-                  className={file.status === "loading" ? "animate-pulse" : ""}
+
+              <div className="flex-1 min-w-0">
+                <div
+                  className={`truncate ${file.status === "loading" ? "animate-pulse" : ""}`}
                 >
                   {getFileDisplayName(file.path)}
-                </span>
+                </div>
+                {file.size && (
+                  <div
+                    className="text-xs mt-1"
+                    style={{ color: themeConfig.colors.muted }}
+                  >
+                    {file.size}
+                    {file.loadTime && file.status === "complete" && (
+                      <span className="ml-2">({file.loadTime}ms)</span>
+                    )}
+                  </div>
+                )}
               </div>
+
               {file.status === "loading" && (
                 <div className="flex gap-1">
                   {[0, 1, 2].map((dot) => (
                     <div
                       key={dot}
-                      className="w-1 h-1 rounded-full animate-bounce"
+                      className="w-1.5 h-1.5 rounded-full animate-bounce"
                       style={{
                         backgroundColor: themeConfig.colors.accent,
-                        animationDelay: `${dot * 0.1}s`,
+                        animationDelay: `${dot * 0.15}s`,
                       }}
                     />
                   ))}
@@ -294,26 +361,58 @@ export function TerminalLoadingProgress({
           );
         })}
       </div>
+
+      {/* Completion message */}
       {isComplete && (
         <div
-          className="mt-4 pt-3 border-t"
+          className="mt-6 pt-4 border-t"
           style={{ borderColor: themeConfig.colors.border }}
         >
           <div
-            className="flex items-center gap-2 font-bold"
+            className="flex items-center gap-3 font-bold text-lg mb-2"
             style={{
               color: themeConfig.colors.success || themeConfig.colors.accent,
             }}
           >
-            <span>🎉</span>
+            <span className="animate-bounce">🎉</span>
             <span>{completionText}</span>
           </div>
+
+          <div className="grid grid-cols-2 gap-4 text-xs">
+            <div
+              className="bg-gray-800 rounded-lg p-3"
+              style={{ backgroundColor: `${themeConfig.colors.accent}10` }}
+            >
+              <div style={{ color: themeConfig.colors.muted }}>
+                Files Loaded
+              </div>
+              <div
+                className="text-lg font-bold"
+                style={{ color: themeConfig.colors.accent }}
+              >
+                {files.length}
+              </div>
+            </div>
+
+            <div
+              className="bg-gray-800 rounded-lg p-3"
+              style={{ backgroundColor: `${themeConfig.colors.accent}10` }}
+            >
+              <div style={{ color: themeConfig.colors.muted }}>Load Time</div>
+              <div
+                className="text-lg font-bold"
+                style={{ color: themeConfig.colors.accent }}
+              >
+                {((Date.now() - (startTime || 0)) / 1000).toFixed(1)}s
+              </div>
+            </div>
+          </div>
+
           <div
-            className="text-xs mt-1"
+            className="text-center text-xs mt-4 animate-pulse"
             style={{ color: themeConfig.colors.muted }}
           >
-            Loaded {files.length} files in{" "}
-            {((Date.now() - (startTime || 0)) / 1000).toFixed(1)}s
+            🎯 Ready to explore? Press any key to continue...
           </div>
         </div>
       )}

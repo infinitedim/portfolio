@@ -137,7 +137,6 @@ export function useTerminal(
   // Enhanced command history with advanced features
   const {
     addCommand: addToAdvancedHistory,
-    getSuggestions,
     analytics,
     favorites,
     clearHistory: clearAdvancedHistory,
@@ -689,9 +688,58 @@ export function useTerminal(
   const getCommandSuggestions = useCallback(
     (input: string, limit: number = 8) => {
       if (!input.trim()) return [];
-      return getSuggestions(input, limit);
+
+      // Get all available commands from the CommandParser
+      const allCommands = [
+        "help",
+        "skills",
+        "customize",
+        "themes",
+        "fonts",
+        "status",
+        "clear",
+        "alias",
+        "about",
+        "contact",
+        "projects",
+        "experience",
+        "education",
+        "roadmap",
+        "theme",
+        "font",
+        "language",
+        "now-playing",
+        "demo",
+        "github",
+        "tech-stack",
+        "resume",
+        "social",
+        "shortcuts",
+        "easter-eggs",
+      ];
+
+      const query = input.toLowerCase();
+      const suggestions = allCommands
+        .filter((command) => command.toLowerCase().includes(query))
+        .sort((a, b) => {
+          // Exact match first
+          if (a.toLowerCase() === query) return -1;
+          if (b.toLowerCase() === query) return 1;
+
+          // Prefix matches
+          const aStartsWith = a.toLowerCase().startsWith(query);
+          const bStartsWith = b.toLowerCase().startsWith(query);
+          if (aStartsWith && !bStartsWith) return -1;
+          if (!aStartsWith && bStartsWith) return 1;
+
+          // Alphabetical order for same type matches
+          return a.localeCompare(b);
+        })
+        .slice(0, limit);
+
+      return suggestions;
     },
-    [getSuggestions],
+    [],
   );
 
   const getFrequentCommands = useCallback(() => {

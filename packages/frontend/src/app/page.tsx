@@ -4,7 +4,6 @@ import { StaticContent } from "../components/ssr/StaticContent";
 import { type JSX, Suspense } from "react";
 import { TerminalLoadingProgress } from "../components/ui/TerminalLoadingProgress";
 import { HomeTerminalHeader } from "../components/ui/HomeTerminalHeader";
-import { LetterGlitch } from "../components/ui/LetterGlitch";
 
 export const metadata: Metadata = {
   title: "Terminal Portfolio | Full-Stack Developer",
@@ -87,28 +86,17 @@ export default function HomePage(): JSX.Element {
         id="main-content"
         className="relative"
       >
-        <LetterGlitch
-          glitchSpeed={20}
-          centerVignette={true}
-          outerVignette={false}
-          smooth={true}
-          characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝ#%&*+=-_|\\/<>?"
-          className="opacity-40"
-        />
-
-        <div className="relative z-20">
-          <HomeTerminalHeader />
-          <StaticContent />
-          <Suspense
-            fallback={
-              <div className="min-h-screen w-full flex items-center justify-center bg-black text-white">
-                <TerminalLoadingProgress />
-              </div>
-            }
-          >
-            <Terminal />
-          </Suspense>
-        </div>
+        <HomeTerminalHeader />
+        <StaticContent />
+        <Suspense
+          fallback={
+            <div className="min-h-screen w-full flex items-center justify-center bg-black text-white">
+              <TerminalLoadingProgress />
+            </div>
+          }
+        >
+          <Terminal />
+        </Suspense>
       </main>
 
       {/* Structured data for the homepage */}

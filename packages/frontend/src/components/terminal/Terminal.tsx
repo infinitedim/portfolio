@@ -19,9 +19,10 @@ import { CustomizationService } from "@portfolio/frontend/src/lib/services/custo
 import { CustomizationButton } from "../customization/CustomizationButton";
 import { CustomizationManager } from "../customization/CustomizationManager";
 import { SkipLinks } from "@portfolio/frontend/src/components/accessibility/SkipToContent";
-import { TerminalLoadingProgress } from "../ui";
+import { TerminalLoadingProgress, CommandLoadingIndicator } from "../ui";
 import { SpotifyAuth } from "../ui/SpotifyAuth";
 import { NowPlayingWidget } from "../ui/NowPlayingWidget";
+import { LetterGlitch } from "../ui/LetterGlitch";
 
 interface TerminalProps {
   onThemeChange?: (theme: string) => void;
@@ -101,7 +102,7 @@ export function Terminal({
   useEffect(() => {
     const timer = setTimeout(() => {
       setHasMinimumLoadingTime(true);
-    }, 2000); // 2 second minimum loading time
+    }, 3000); // 3 second minimum loading time to show the enhanced progress
 
     return () => clearTimeout(timer);
   }, []);
@@ -431,22 +432,49 @@ export function Terminal({
   // MODIFICATION: Use mounted state to prevent hydration issues and ensure minimum loading time
   if (!mounted || !themeConfig || !fontConfig || !hasMinimumLoadingTime) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-black text-white">
-        <TerminalLoadingProgress
-          duration={2500}
-          files={[
-            "src/components/terminal/Terminal.tsx",
-            "src/hooks/useTheme.ts",
-            "src/hooks/useFont.ts",
-            "src/lib/themes/themeConfig.ts",
-            "src/lib/fonts/fontConfig.ts",
-            "src/components/ui/TerminalLoadingProgress.tsx",
-            "package.json",
-            "next.config.js",
-          ]}
-          completionText="🚀 Terminal ready!"
-          autoStart={true}
-        />
+      <div className="min-h-screen w-full flex items-center justify-center bg-black text-white relative overflow-hidden">
+        {/* Background effect for loading screen */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-800" />
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20" />
+
+        <div className="relative z-10 w-full max-w-2xl mx-auto px-4">
+          <TerminalLoadingProgress
+            duration={3500}
+            files={[
+              {
+                path: "src/components/terminal/Terminal.tsx",
+                size: "18.2 KB",
+              },
+              { path: "src/hooks/useTheme.ts", size: "7.9 KB" },
+              { path: "src/hooks/useFont.ts", size: "5.4 KB" },
+              { path: "src/hooks/useTerminal.ts", size: "15.6 KB" },
+              { path: "src/lib/themes/themeConfig.ts", size: "9.8 KB" },
+              { path: "src/lib/fonts/fontConfig.ts", size: "6.2 KB" },
+              { path: "src/components/ui/LetterGlitch.tsx", size: "8.1 KB" },
+              { path: "src/components/ui/ASCIIBanner.tsx", size: "4.3 KB" },
+              {
+                path: "src/components/terminal/CommandInput.tsx",
+                size: "12.4 KB",
+              },
+              {
+                path: "src/lib/commands/commandRegistry.ts",
+                size: "22.1 KB",
+              },
+              {
+                path: "src/hooks/useCommandSuggestions.ts",
+                size: "11.8 KB",
+              },
+              { path: "src/types/terminal.ts", size: "2.9 KB" },
+              { path: "package.json", size: "3.4 KB" },
+              { path: "next.config.js", size: "1.6 KB" },
+            ]}
+            completionText="🚀 Terminal Portfolio Ready!"
+            autoStart={true}
+            showSystemInfo={true}
+            showProgressBar={true}
+            enableTypewriter={true}
+          />
+        </div>
       </div>
     );
   }
@@ -470,10 +498,11 @@ export function Terminal({
           id="main-content"
           // MODIFICATION: Removed `appliedTheme` from the key. `theme` is the correct state to use.
           key={`terminal-${theme}`}
-          className={`min-h-screen w-full pt-16 p-4 sm:p-6 lg:p-8 cursor-text terminal-container ${!isReducedMotion ? "transition-all duration-300" : ""}`}
+          className={`min-h-screen w-full pt-4 px-2 pb-4 sm:pt-16 sm:px-6 lg:px-8 cursor-text terminal-container relative ${!isReducedMotion ? "transition-all duration-300" : ""}`}
           style={{
             // MODIFICATION: Add deep property guards with fallbacks
-            backgroundColor: themeConfig?.colors?.bg || "#000000",
+            // Make background transparent to show glitch effect
+            backgroundColor: "transparent",
             color: themeConfig?.colors?.text || "#ffffff",
             fontFamily: fontConfig?.family || "monospace",
             fontWeight: fontConfig?.weight || "normal",
@@ -485,8 +514,20 @@ export function Terminal({
           role="main"
           aria-label="Terminal interface"
         >
-          <div className="max-w-4xl mx-auto space-y-8 mt-10">
-            <div className="mb-8">
+          {/* Background Letter Glitch Effect */}
+          <LetterGlitch
+            glitchColors={["#2b4539", "#61dca3", "#61b3dc"]}
+            glitchSpeed={50}
+            centerVignette={false}
+            outerVignette={true}
+            smooth={true}
+            characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>.,0123456789ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝ"
+            className="opacity-30"
+          />
+
+          {/* Terminal Content */}
+          <div className="relative z-10 w-full max-w-4xl mx-auto space-y-4 sm:space-y-8 mt-2 sm:mt-10">
+            <div className="mb-4 sm:mb-8">
               <ASCIIBanner />
             </div>
 
@@ -500,10 +541,28 @@ export function Terminal({
 
             {/* Terminal History */}
             <TerminalHistory history={history} />
+
+            {/* Command Loading Indicator */}
+            {isProcessing && (
+              <CommandLoadingIndicator
+                command={currentInput}
+                visible={isProcessing}
+                messages={[
+                  "Processing command...",
+                  "Executing request...",
+                  "Gathering data...",
+                  "Compiling response...",
+                  "Almost finished...",
+                ]}
+              />
+            )}
+
             <div
               id="command-input"
-              className="sticky bottom-0 py-2"
-              style={{ backgroundColor: themeConfig?.colors?.bg || "#000000" }}
+              className="sticky bottom-0 py-2 command-input-container"
+              style={{
+                backgroundColor: "transparent",
+              }}
               suppressHydrationWarning={true}
               tabIndex={-1}
             >
@@ -528,8 +587,19 @@ export function Terminal({
                   "experience",
                   "education",
                   "roadmap",
+                  "progress",
                   "theme",
                   "font",
+                  "language",
+                  "demo",
+                  "github",
+                  "tech-stack",
+                  "now-playing",
+                  "resume",
+                  "social",
+                  "shortcuts",
+                  "easter-eggs",
+                  "pwa",
                 ]}
                 inputRef={commandInputRef}
                 getCommandSuggestions={getCommandSuggestions}
