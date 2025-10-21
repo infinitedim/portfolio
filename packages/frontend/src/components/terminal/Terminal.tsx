@@ -210,8 +210,27 @@ export function Terminal({
   // Early return if hooks are not properly initialized
   if (!themeHookResult || !fontHookResult) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-black text-white">
-        <TerminalLoadingProgress />
+      <div
+        className="min-h-screen w-full flex items-center justify-center bg-black text-white relative overflow-hidden"
+        suppressHydrationWarning={true}
+      >
+        {/* Background effect for loading screen */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-800" />
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20" />
+
+        <div className="relative z-10 w-full max-w-2xl mx-auto px-4">
+          <TerminalLoadingProgress
+            duration={2000}
+            files={[
+              { path: "Initializing hooks...", size: "" },
+              { path: "Loading theme configuration...", size: "" },
+              { path: "Loading font configuration...", size: "" },
+            ]}
+            completionText="🔧 Hooks initialized!"
+            autoStart={true}
+            showSystemInfo={true}
+          />
+        </div>
       </div>
     );
   }
@@ -432,7 +451,10 @@ export function Terminal({
   // MODIFICATION: Use mounted state to prevent hydration issues and ensure minimum loading time
   if (!mounted || !themeConfig || !fontConfig || !hasMinimumLoadingTime) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-black text-white relative overflow-hidden">
+      <div
+        className="min-h-screen w-full flex items-center justify-center bg-black text-white relative overflow-hidden"
+        suppressHydrationWarning={true}
+      >
         {/* Background effect for loading screen */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-800" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20" />
@@ -493,12 +515,23 @@ export function Terminal({
         <DevelopmentBanner />
         <AccessibilityMenu />
 
+        {/* Full Viewport Background Letter Glitch Effect */}
+        <LetterGlitch
+          glitchColors={["#2b4539", "#61dca3", "#61b3dc"]}
+          glitchSpeed={50}
+          centerVignette={false}
+          outerVignette={true}
+          smooth={true}
+          characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>.,0123456789ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝ"
+          className="opacity-30 fixed inset-0 z-0"
+        />
+
         <div
           ref={terminalRef}
           id="main-content"
           // MODIFICATION: Removed `appliedTheme` from the key. `theme` is the correct state to use.
           key={`terminal-${theme}`}
-          className={`min-h-screen w-full pt-4 px-2 pb-4 sm:pt-16 sm:px-6 lg:px-8 cursor-text terminal-container relative ${!isReducedMotion ? "transition-all duration-300" : ""}`}
+          className={`min-h-screen w-full pt-4 px-2 pb-4 sm:pt-16 sm:px-6 lg:px-8 cursor-text terminal-container relative z-10 ${!isReducedMotion ? "transition-all duration-300" : ""}`}
           style={{
             // MODIFICATION: Add deep property guards with fallbacks
             // Make background transparent to show glitch effect
@@ -514,113 +547,103 @@ export function Terminal({
           role="main"
           aria-label="Terminal interface"
         >
-          {/* Background Letter Glitch Effect */}
-          <LetterGlitch
-            glitchColors={["#2b4539", "#61dca3", "#61b3dc"]}
-            glitchSpeed={50}
-            centerVignette={false}
-            outerVignette={true}
-            smooth={true}
-            characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>.,0123456789ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝ"
-            className="opacity-30"
-          />
+          {
+            /* Terminal Content */
+            <div className="relative z-10 w-full max-w-4xl mx-auto space-y-4 sm:space-y-8 mt-2 sm:mt-10">
+              <div className="mb-4 sm:mb-8">
+                <ASCIIBanner />
+              </div>
 
-          {/* Terminal Content */}
-          <div className="relative z-10 w-full max-w-4xl mx-auto space-y-4 sm:space-y-8 mt-2 sm:mt-10">
-            <div className="mb-4 sm:mb-8">
-              <ASCIIBanner />
+              {/* Interactive Welcome */}
+              {showWelcome && history.length === 0 && (
+                <InteractiveWelcome
+                  onCommandSelect={handleWelcomeCommandSelect}
+                  onDismiss={() => setShowWelcome(false)}
+                />
+              )}
+
+              {/* Terminal History */}
+              <TerminalHistory history={history} />
+
+              {/* Command Loading Indicator */}
+              {isProcessing && (
+                <CommandLoadingIndicator
+                  command={currentInput}
+                  visible={isProcessing}
+                  messages={[
+                    "Processing command...",
+                    "Executing request...",
+                    "Gathering data...",
+                    "Compiling response...",
+                    "Almost finished...",
+                  ]}
+                />
+              )}
+
+              <div
+                id="command-input"
+                className="sticky bottom-0 py-2 command-input-container"
+                style={{
+                  backgroundColor: "transparent",
+                }}
+                suppressHydrationWarning={true}
+                tabIndex={-1}
+              >
+                <CommandInput
+                  value={currentInput}
+                  onChange={setCurrentInput}
+                  onSubmit={handleSubmit}
+                  onHistoryNavigate={navigateHistory}
+                  isProcessing={isProcessing}
+                  availableCommands={[
+                    "help",
+                    "skills",
+                    "customize",
+                    "themes",
+                    "fonts",
+                    "status",
+                    "clear",
+                    "alias",
+                    "about",
+                    "contact",
+                    "projects",
+                    "experience",
+                    "education",
+                    "roadmap",
+                    "progress",
+                    "theme",
+                    "font",
+                    "language",
+                    "demo",
+                    "github",
+                    "tech-stack",
+                    "now-playing",
+                    "resume",
+                    "social",
+                    "shortcuts",
+                    "easter-eggs",
+                    "pwa",
+                  ]}
+                  inputRef={commandInputRef}
+                  getCommandSuggestions={getCommandSuggestions}
+                  getFrequentCommands={getFrequentCommands}
+                  showOnEmpty={true}
+                />
+              </div>
+
+              {/* Auto-scroll anchor */}
+              <div ref={bottomRef} />
             </div>
+          }
 
-            {/* Interactive Welcome */}
-            {showWelcome && history.length === 0 && (
-              <InteractiveWelcome
-                onCommandSelect={handleWelcomeCommandSelect}
-                onDismiss={() => setShowWelcome(false)}
-              />
-            )}
-
-            {/* Terminal History */}
-            <TerminalHistory history={history} />
-
-            {/* Command Loading Indicator */}
-            {isProcessing && (
-              <CommandLoadingIndicator
-                command={currentInput}
-                visible={isProcessing}
-                messages={[
-                  "Processing command...",
-                  "Executing request...",
-                  "Gathering data...",
-                  "Compiling response...",
-                  "Almost finished...",
-                ]}
-              />
-            )}
-
-            <div
-              id="command-input"
-              className="sticky bottom-0 py-2 command-input-container"
-              style={{
-                backgroundColor: "transparent",
-              }}
-              suppressHydrationWarning={true}
-              tabIndex={-1}
-            >
-              <CommandInput
-                value={currentInput}
-                onChange={setCurrentInput}
-                onSubmit={handleSubmit}
-                onHistoryNavigate={navigateHistory}
-                isProcessing={isProcessing}
-                availableCommands={[
-                  "help",
-                  "skills",
-                  "customize",
-                  "themes",
-                  "fonts",
-                  "status",
-                  "clear",
-                  "alias",
-                  "about",
-                  "contact",
-                  "projects",
-                  "experience",
-                  "education",
-                  "roadmap",
-                  "progress",
-                  "theme",
-                  "font",
-                  "language",
-                  "demo",
-                  "github",
-                  "tech-stack",
-                  "now-playing",
-                  "resume",
-                  "social",
-                  "shortcuts",
-                  "easter-eggs",
-                  "pwa",
-                ]}
-                inputRef={commandInputRef}
-                getCommandSuggestions={getCommandSuggestions}
-                getFrequentCommands={getFrequentCommands}
-                showOnEmpty={true}
-              />
-            </div>
-
-            {/* Auto-scroll anchor */}
-            <div ref={bottomRef} />
+          {/* Customization Button */}
+          <div
+            id="customization"
+            tabIndex={-1}
+          >
+            <CustomizationButton />
           </div>
         </div>
-
-        {/* Customization Button */}
-        <div
-          id="customization"
-          tabIndex={-1}
-        >
-          <CustomizationButton />
-        </div>
-
         {/* Customization Manager */}
         <CustomizationManager
           isOpen={showCustomizationManager}

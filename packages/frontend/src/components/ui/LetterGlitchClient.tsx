@@ -129,9 +129,14 @@ const LetterGlitchClient: React.FC<LetterGlitchClientProps> = ({
   };
 
   const drawLetters = () => {
-    if (!context.current || letters.current.length === 0) return;
+    if (!context.current || !canvasRef.current || letters.current.length === 0)
+      return;
     const ctx = context.current;
-    const { width, height } = canvasRef.current!.getBoundingClientRect();
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    if (!rect || rect.width === 0 || rect.height === 0) return;
+
+    const { width, height } = rect;
     ctx.clearRect(0, 0, width, height);
     ctx.font = `${fontSize}px monospace`;
     ctx.textBaseline = "top";
@@ -227,7 +232,9 @@ const LetterGlitchClient: React.FC<LetterGlitchClientProps> = ({
     window.addEventListener("resize", handleResize);
 
     return () => {
-      cancelAnimationFrame(animationRef.current!);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
       window.removeEventListener("resize", handleResize);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -235,8 +242,12 @@ const LetterGlitchClient: React.FC<LetterGlitchClientProps> = ({
 
   return (
     <div
-      className={`absolute inset-0 w-full h-full overflow-hidden ${className}`}
-      style={{ zIndex: -10 }}
+      className={`w-full h-full overflow-hidden ${className}`}
+      style={{
+        position: className?.includes("fixed") ? "fixed" : "absolute",
+        inset: 0,
+        zIndex: className?.includes("z-0") ? 0 : -10,
+      }}
     >
       <canvas
         ref={canvasRef}

@@ -62,7 +62,7 @@ export function CommandInput({
   const [showCursor, setShowCursor] = useState(true);
   const [showTabCompletion, setShowTabCompletion] = useState(false);
   const [tabCompletionIndex, setTabCompletionIndex] = useState(0);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(showOnEmpty);
   const [suggestionTrigger, setSuggestionTrigger] = useState(false);
   const [securityWarning, setSecurityWarning] = useState<string | null>(null);
   const [cursorPosition, setCursorPosition] = useState(0);

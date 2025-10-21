@@ -87,10 +87,13 @@ export function TerminalLoadingProgress({
   const [startTime, setStartTime] = useState<number | null>(null);
   const [globalProgress, setGlobalProgress] = useState(0);
   const [systemInfo, setSystemInfo] = useState("");
+  const [completionTime, setCompletionTime] = useState<number | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Initialize files
   useEffect(() => {
+    if (!mounted) return;
+
     const initialFiles: LoadingFile[] = files.map((file) => {
       const fileData = typeof file === "string" ? { path: file } : file;
       return {
@@ -108,7 +111,7 @@ export function TerminalLoadingProgress({
         setSystemInfo("🔧 Initializing terminal environment...");
       }
     }
-  }, [files, autoStart, showSystemInfo]);
+  }, [files, autoStart, showSystemInfo, mounted]);
 
   // Enhanced loading effect with realistic timing
   useEffect(() => {
@@ -121,6 +124,7 @@ export function TerminalLoadingProgress({
       if (currentIndex >= files.length) {
         setIsComplete(true);
         setGlobalProgress(100);
+        setCompletionTime(Date.now());
         if (showSystemInfo) {
           setSystemInfo("🎉 Terminal initialization complete!");
         }
@@ -253,6 +257,7 @@ export function TerminalLoadingProgress({
       className="font-mono text-sm space-y-1 max-h-[32rem] overflow-y-auto"
       role="status"
       aria-label="Loading files"
+      suppressHydrationWarning={true}
     >
       {/* Header with animated logo and progress */}
       <div
@@ -403,7 +408,10 @@ export function TerminalLoadingProgress({
                 className="text-lg font-bold"
                 style={{ color: themeConfig.colors.accent }}
               >
-                {((Date.now() - (startTime || 0)) / 1000).toFixed(1)}s
+                {completionTime && startTime
+                  ? ((completionTime - startTime) / 1000).toFixed(1)
+                  : "0.0"}
+                s
               </div>
             </div>
           </div>
