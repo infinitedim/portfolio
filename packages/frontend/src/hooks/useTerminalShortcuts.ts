@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useAdvancedCommandHistory } from "./useCommandHistory";
+import { useCommandHistory } from "./useCommandHistory";
 import type { KeyboardShortcut } from "../components/terminal/KeyboardShortcuts";
 
 interface UseTerminalShortcutsOptions {
@@ -24,7 +24,7 @@ export function useTerminalShortcuts({
   onShortcutsOpen,
   onCommandExecute,
 }: UseTerminalShortcutsOptions = {}) {
-  const { getSuggestions: _getSuggestions } = useAdvancedCommandHistory();
+  const { getSuggestions: _getSuggestions } = useCommandHistory();
   const [shortcuts, setShortcuts] = useState<KeyboardShortcut[]>([]);
   const [customShortcuts, setCustomShortcuts] = useState<
     Record<string, string[]>
