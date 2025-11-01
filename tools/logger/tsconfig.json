@@ -3,8 +3,14 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": ".",
-    "lib": ["esnext"],
-    "noEmit": false
+    "lib": [
+      "esnext"
+    ],
+    "noEmit": false,
+    "ignoreDeprecations": "5.0",
   },
-  "include": ["src/**/*", "index.ts"]
+  "include": [
+    "src/**/*",
+    "index.ts"
+  ]
 }

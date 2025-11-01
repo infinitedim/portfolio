@@ -22,12 +22,7 @@
         "name": "next"
       }
     ],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
+    "ignoreDeprecations": "5.0",
     "declaration": true,
     "declarationMap": true,
     "outDir": "./dist",

@@ -220,12 +220,12 @@ export function validateEnv(): ValidatedEnv {
       console.error("❌ Environment validation failed:");
 
       // Group errors by type
-      const missingRequired = error.errors.filter(
-        (err) => err.code === "invalid_type" && err.received === "undefined",
+      const missingRequired = error.issues.filter(
+        (err) => err.code === "invalid_type" && err.expected === "undefined",
       );
 
-      const invalidFormat = error.errors.filter(
-        (err) => err.code !== "invalid_type" || err.received !== "undefined",
+      const invalidFormat = error.issues.filter(
+        (err) => err.code !== "invalid_type" || err.expected !== "undefined",
       );
 
       if (missingRequired.length > 0) {

@@ -754,7 +754,7 @@ export class SecurityService {
     } catch (error) {
       if (error instanceof z.ZodError) {
         throw new BadRequestException(
-          `Validation failed: ${error.errors[0]?.message}`,
+          `Validation failed: ${error.issues[0]?.message}`,
         );
       }
       throw error;

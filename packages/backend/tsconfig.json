@@ -3,13 +3,16 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
+    "lib": [
+      "esnext"
+    ],
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
     "strict": true,
     "noImplicitAny": false,
     "noEmit": false,
-    "noEmitOnError": false
+    "noEmitOnError": false,
   },
   "include": [
     "src/**/*"

@@ -1,5 +1,5 @@
+import { NotFoundException } from "@nestjs/common";
 import { cache } from "react";
-import { notFound } from "next/navigation";
 
 // Types for portfolio data
 interface GitHubRepository {
@@ -143,7 +143,7 @@ async function fetchWithCache<T>(
 
     if (!response.ok) {
       if (response.status === 404) {
-        notFound();
+        new NotFoundException();
       }
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }

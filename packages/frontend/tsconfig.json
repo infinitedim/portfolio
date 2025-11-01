@@ -17,6 +17,7 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "noImplicitAny": false,
+    "ignoreDeprecations": "5.0",
     "plugins": [
       {
         "name": "next"

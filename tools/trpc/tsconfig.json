@@ -6,7 +6,8 @@
     "lib": [
       "esnext"
     ],
-    "noEmit": false
+    "noEmit": false,
+    "ignoreDeprecations": "5.0",
   },
   "include": [
     "src/**/*"
