@@ -22,6 +22,8 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
+    "ignoreDeprecation": "6.0",
     "paths": {
       "@portfolio/frontend/*": [
         "./packages/frontend/src/*"
