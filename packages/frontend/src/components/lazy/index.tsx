@@ -9,12 +9,6 @@ export const LazyCustomizationManager = lazy(() =>
   })),
 );
 
-export const LazyTerminalLoadingDemo = lazy(() =>
-  import("../ui/TerminalLoadingDemo").then((module) => ({
-    default: module.TerminalLoadingDemo,
-  })),
-);
-
 export const LazyThemeEditor = lazy(() =>
   import("../customization/ThemeEditor").then((module) => ({
     default: module.ThemeEditor,

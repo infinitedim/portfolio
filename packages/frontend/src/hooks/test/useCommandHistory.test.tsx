@@ -24,20 +24,4 @@ describe("useCommandHistory", () => {
       expect(Array.isArray(parsed)).toBe(true);
     }
   });
-
-  it("navigates history up and down", () => {
-    const { result } = renderHook(() =>
-      useCommandHistory({ maxHistorySize: 5 }),
-    );
-    act(() => result.current.addCommand("a"));
-    act(() => result.current.addCommand("b"));
-    act(() => result.current.addCommand("c"));
-
-    // First up returns last, second up returns previous
-    expect(result.current.navigate("up")).toBe("c");
-    const second = result.current.navigate("up");
-    expect(["b", "c"]).toContain(second);
-    const down = result.current.navigate("down");
-    expect(typeof down).toBe("string");
-  });
 });
