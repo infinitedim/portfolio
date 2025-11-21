@@ -1,8 +1,8 @@
 {
   "version": 2,
   "functions": {
-    "packages/frontend/src/app/api/**/*.ts": {
-      "runtime": "nodejs22.x",
+    "packages/frontend/src/app/api/**/route.ts": {
+      "runtime": "nodejs20.x",
       "maxDuration": 30
     }
   },
