@@ -9,13 +9,6 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     globals: true,
     css: true,
-    // Optimize memory usage for large test suites
-    pool: "forks",
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],

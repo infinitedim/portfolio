@@ -1,13 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import {
-  Inter,
-  JetBrains_Mono,
-  Fira_Code,
-  Source_Code_Pro,
-  Inconsolata,
-  Ubuntu_Mono,
-  Roboto_Mono,
-} from "next/font/google";
 import "./globals.css";
 import type { JSX, ReactNode } from "react";
 import PWARegistration from "../components/pwa/PWARegistration";
@@ -15,49 +6,6 @@ import { TRPCProvider } from "../components/provider/TrpcProvider";
 import { AuthProvider } from "../lib/auth";
 import { AccessibilityProvider } from "../components/accessibility/AccessibilityProvider";
 import { ScreenReaderAnnouncer } from "../components/accessibility/ScreenReaderAnnouncer";
-
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-jetbrains-mono",
-});
-
-const firaCode = Fira_Code({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-fira-code",
-});
-
-const sourceCodePro = Source_Code_Pro({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-source-code-pro",
-});
-
-const inconsolata = Inconsolata({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inconsolata",
-});
-
-const ubuntuMono = Ubuntu_Mono({
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
-  variable: "--font-ubuntu-mono",
-});
-
-const robotoMono = Roboto_Mono({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-roboto-mono",
-});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -201,20 +149,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jetbrainsMono.variable} ${firaCode.variable} ${sourceCodePro.variable} ${inconsolata.variable} ${ubuntuMono.variable} ${robotoMono.variable}`}
+      className={"antialiased"}
     >
       <head>
-        {/* Preconnect to external domains for performance */}
-        <link
-          rel="preconnect"
-          href="https://fonts.googleapis.com"
-        />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-
         {/* DNS prefetch for performance */}
         <link
           rel="dns-prefetch"
@@ -284,7 +221,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.className} antialiased`}>
+      <body className={"antialiased"}>
         <PWARegistration />
         <TRPCProvider>
           <AuthProvider>

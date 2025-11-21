@@ -4,7 +4,7 @@ import type { TrpcContext } from "./context";
 
 const ProjectsUpdateSchema = z.object({
   section: z.enum(["skills", "projects", "experience", "about"]),
-  data: z.record(z.unknown()),
+  data: z.record(z.string(), z.unknown()),
 });
 
 export const projectsRouter = router({

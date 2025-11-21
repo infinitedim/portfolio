@@ -11,37 +11,7 @@ const nextConfig = {
     // webpackBuildWorker: true,
     serverActions: { bodySizeLimit: "2mb" },
   },
-
-  // Webpack optimizations for production
-  webpack: (config, { dev, isServer, webpack }) => {
-    // Performance optimizations
-    // Removed custom splitChunks for stability during debugging of undefined factory errors.
-
-    // Add webpack plugins for development
-    if (dev) {
-      config.plugins.push(
-        new webpack.DefinePlugin({
-          __DEV__: JSON.stringify(true),
-        }),
-      );
-    }
-
-    // SVG handling
-    config.module.rules.push({
-      test: /\.svg$/,
-      use: [
-        {
-          loader: "@svgr/webpack",
-          options: {
-            typescript: true,
-            dimensions: false,
-          },
-        },
-      ],
-    });
-
-    return config;
-  },
+  turbopack: {},
 
   // Image optimization with Vercel
   images: {
@@ -70,16 +40,6 @@ const nextConfig = {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
 
-  // Public runtime config
-  publicRuntimeConfig: {
-    APP_ENV: process.env.NODE_ENV,
-    ANALYTICS_ENABLED: process.env.NEXT_PUBLIC_ANALYTICS_ENABLED === "true",
-  },
-
-  // Server runtime config
-  serverRuntimeConfig: {
-    SECRET: process.env.SECRET_KEY,
-  },
 
   // Compiler options
   compiler: {
@@ -103,17 +63,10 @@ const nextConfig = {
   // trailingSlash: true, // Uncomment for static export
   // distDir: 'out', // Uncomment for static export
 
-  // ESLint configuration
-  eslint: {
-    // Disable ESLint during builds (handled by CI/CD)
-    ignoreDuringBuilds: true,
-    dirs: ["src", "components", "hooks", "lib"],
-  },
 
   // TypeScript configuration
   typescript: {
-    // Disable type checking during builds (handled by CI/CD)
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 
   // Headers for security and performance
@@ -135,10 +88,6 @@ const nextConfig = {
           {
             key: "X-Frame-Options",
             value: "DENY",
-          },
-          {
-            key: "X-XSS-Protection",
-            value: "1; mode=block",
           },
           {
             key: "Referrer-Policy",

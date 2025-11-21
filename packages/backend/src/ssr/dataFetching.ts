@@ -1,4 +1,3 @@
-import { NotFoundException } from "@nestjs/common";
 import { cache } from "react";
 
 // Types for portfolio data
@@ -143,7 +142,7 @@ async function fetchWithCache<T>(
 
     if (!response.ok) {
       if (response.status === 404) {
-        new NotFoundException();
+        throw new Error("Not Found");
       }
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }

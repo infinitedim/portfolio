@@ -40,15 +40,14 @@
     },
     "lint": {
       "outputs": [],
-      "dependsOn": ["^build"]
+      "dependsOn": []
     },
     "type-check": {
       "outputs": [],
-      "dependsOn": ["^build"]
+      "dependsOn": []
     },
     "test": {
-      "outputs": ["coverage/**"],
-      "dependsOn": ["^build"]
+      "outputs": ["coverage/**"]
     }
   }
 }
