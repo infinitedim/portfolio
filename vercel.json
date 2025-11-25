@@ -1,11 +1,4 @@
 {
-  "version": 2,
-  "functions": {
-    "packages/frontend/src/app/api/**/route.ts": {
-      "runtime": "nodejs20.x",
-      "maxDuration": 30
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
@@ -19,12 +12,7 @@
         {
           "key": "Permissions-Policy",
           "value": "geolocation=(), microphone=(), camera=(), payment=(), usb=(), bluetooth=()"
-        }
-      ]
-    },
-    {
-      "source": "/(.*)",
-      "headers": [
+        },
         {
           "key": "Strict-Transport-Security",
           "value": "max-age=31536000; includeSubDomains; preload"
@@ -42,13 +30,13 @@
       "destination": "/api/portfolio/health"
     }
   ],
+  "cleanUrls": true,
+  "trailingSlash": false,
   "relatedProjects": [
     "packages/frontend",
     "packages/backend",
     "packages/ui",
     "tools/logger",
     "tools/trpc"
-  ],
-  "cleanUrls": true,
-  "trailingSlash": false
+  ]
 }

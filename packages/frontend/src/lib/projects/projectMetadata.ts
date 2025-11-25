@@ -35,7 +35,6 @@ export const PROJECT_CATEGORIES: Record<ProjectCategory, string> = {
   other: "Other",
 };
 
-// Sample project data
 export const SAMPLE_PROJECTS: ProjectMetadata[] = [
   {
     id: "portfolio-terminal",
@@ -52,36 +51,6 @@ export const SAMPLE_PROJECTS: ProjectMetadata[] = [
     updatedAt: "2024-01-20",
     image: "/images/portfolio-terminal.png",
     tags: ["portfolio", "terminal", "interactive", "fullstack"],
-  },
-  {
-    id: "task-manager-api",
-    name: "Task Manager API",
-    description:
-      "RESTful API for task management with authentication and real-time updates",
-    demoUrl: "https://task-manager-api.herokuapp.com/docs",
-    githubUrl: "https://github.com/yourusername/task-manager-api",
-    technologies: ["Node.js", "Express", "MongoDB", "JWT", "Socket.io"],
-    category: "api",
-    featured: true,
-    createdAt: "2024-01-10",
-    updatedAt: "2024-01-18",
-    image: "/images/task-manager-api.png",
-    tags: ["api", "backend", "authentication", "real-time"],
-  },
-  {
-    id: "weather-app",
-    name: "Weather Dashboard",
-    description: "Real-time weather application with location-based forecasts",
-    demoUrl: "https://weather-dashboard.vercel.app",
-    githubUrl: "https://github.com/yourusername/weather-app",
-    liveUrl: "https://weather-dashboard.vercel.app",
-    technologies: ["React", "TypeScript", "OpenWeather API", "Chart.js"],
-    category: "web-app",
-    featured: false,
-    createdAt: "2024-01-05",
-    updatedAt: "2024-01-12",
-    image: "/images/weather-app.png",
-    tags: ["weather", "dashboard", "charts"],
   },
 ];
 
