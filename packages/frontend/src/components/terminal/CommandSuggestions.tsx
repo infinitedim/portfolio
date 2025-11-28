@@ -2,11 +2,11 @@
 "use client";
 
 import { useState, useEffect, useRef, type JSX } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 import {
   useCommandSuggestions,
   type SuggestionItem,
-} from "@portfolio/frontend/src/hooks/useCommandSuggestions";
+} from "@/hooks/useCommandSuggestions";
 
 interface CommandSuggestionsProps {
   input: string;
@@ -342,7 +342,7 @@ export function CommandSuggestions({
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 {/* Type Icon */}
                 <span
-                  className="flex-shrink-0 text-sm transition-transform duration-200 group-hover:scale-110"
+                  className="shrink-0 text-sm transition-transform duration-200 group-hover:scale-110"
                   style={{ color: getTypeColor(suggestion.type) }}
                   title={`Match type: ${suggestion.type}`}
                 >
@@ -367,7 +367,7 @@ export function CommandSuggestions({
                     {/* Category Badge */}
                     {suggestion.category && (
                       <span
-                        className="text-xs px-2 py-0.5 rounded-full flex-shrink-0 font-medium"
+                        className="text-xs px-2 py-0.5 rounded-full shrink-0 font-medium"
                         style={{
                           backgroundColor: `${getCategoryColor(suggestion.category)}15`,
                           color: getCategoryColor(suggestion.category),
@@ -382,7 +382,7 @@ export function CommandSuggestions({
                       suggestion.frequency &&
                       suggestion.frequency > 0 && (
                         <span
-                          className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
+                          className="text-xs px-2 py-0.5 rounded-full shrink-0"
                           style={{
                             backgroundColor: `${themeConfig.colors.success}15`,
                             color: themeConfig.colors.success,
@@ -417,7 +417,7 @@ export function CommandSuggestions({
               </div>
 
               {/* Score and Additional Info */}
-              <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+              <div className="flex items-center gap-2 shrink-0 ml-3">
                 {/* Last Used */}
                 {suggestion.lastUsed && (
                   <span

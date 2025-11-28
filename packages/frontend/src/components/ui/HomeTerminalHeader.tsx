@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, JSX } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 
 /**
  * This component is a terminal header that displays the current time and portfolio metrics.

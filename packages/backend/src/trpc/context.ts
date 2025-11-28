@@ -2,6 +2,8 @@ import * as trpc from "@trpc/server";
 import type * as trpcExpress from "@trpc/server/adapters/express";
 import type { Request } from "express";
 import type { AuthUser } from "../auth/auth.service";
+import { SecurityService } from "../security/security.service";
+import { RedisService } from "../redis/redis.service";
 
 export type TrpcContext = {
   req: Request;
@@ -16,16 +18,27 @@ export type TrpcContext = {
 export async function createBackendContext(
   opts: trpcExpress.CreateExpressContextOptions,
 ) {
-  // Avoid constructing services here; just parse the token. Verification
-  // should be performed where DI is available (e.g., in resolvers).
   const authHeader = opts.req?.headers?.["authorization"];
+  let user: AuthUser | undefined = undefined;
 
-  // Note: we intentionally do not verify the token here to avoid
-  // constructing services in a minimal context. Resolvers should
-  // perform verification when they have access to application services.
-  void authHeader;
+  // Parse and verify JWT token if present
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    try {
+      const token = authHeader.substring(7);
+      const securityService = new SecurityService(new RedisService());
+      const payload = securityService.verifyAccessToken(token);
 
-  const user: AuthUser | undefined = undefined;
+      if (payload && payload.userId) {
+        user = {
+          userId: payload.userId,
+          email: payload.email || "",
+          role: payload.role,
+        };
+      }
+    } catch {
+      // Token invalid or expired - user remains undefined
+    }
+  }
 
   return { req: opts.req, user } satisfies TrpcContext;
 }

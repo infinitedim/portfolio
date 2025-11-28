@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@portfolio/frontend/src/lib/utils/utils";
+import { cn } from "@/lib/utils/utils";
 import { JSX } from "react";
 
 interface ImagePlaceholderProps {

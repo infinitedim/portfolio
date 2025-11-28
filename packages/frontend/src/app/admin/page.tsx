@@ -3,10 +3,10 @@
 
 import { JSX, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ProtectedRoute } from "@portfolio/frontend/src/components/admin/ProtectedRoute";
-import { TerminalHeader } from "@portfolio/frontend/src/components/admin/TerminalHeader";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import { useAuth } from "@portfolio/frontend/src/lib/auth/AuthContext";
+import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
+import { TerminalHeader } from "@/components/admin/TerminalHeader";
+import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 /**
  * @returns {JSX.Element} Admin Dashboard Page

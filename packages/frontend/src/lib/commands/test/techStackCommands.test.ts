@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { techStackCommand } from "../techStackCommands";
-import { ProjectMetadataService } from "@portfolio/frontend/src/lib/projects/projectMetadata";
+import { ProjectMetadataService } from "@/lib/projects/projectMetadata";
 
 describe("techStackCommand", () => {
   beforeEach(() => {

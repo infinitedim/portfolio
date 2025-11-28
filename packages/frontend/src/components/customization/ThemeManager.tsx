@@ -2,11 +2,11 @@
 "use client";
 
 import { useState, type JSX } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import { CustomizationService } from "@portfolio/frontend/src/lib/services/customizationService";
+import { useTheme } from "@/hooks/useTheme";
+import { CustomizationService } from "@/lib/services/customizationService";
 import { ThemeEditor } from "./ThemeEditor";
-import type { CustomTheme } from "@portfolio/frontend/src/types/customization";
-import { ThemeName } from "@portfolio/frontend/src/types/theme";
+import type { CustomTheme } from "@/types/customization";
+import { ThemeName } from "@/types/theme";
 
 interface ThemeManagerProps {
   themes: CustomTheme[];

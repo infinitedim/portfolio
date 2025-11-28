@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { ThemeConfig } from "@portfolio/frontend/src/types/theme";
+import type { ThemeConfig } from "@/types/theme";
 
 interface ErrorHandlerProps {
   themeConfig: ThemeConfig;

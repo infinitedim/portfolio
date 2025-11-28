@@ -105,6 +105,9 @@ export interface RefreshTokenPayload {
 // SECURITY SERVICE
 // ============================================================================
 
+// In-memory fallback rate limiter for when Redis is unavailable
+const inMemoryRateLimits = new Map<string, { count: number; resetTime: number }>();
+
 @Injectable()
 export class SecurityService {
   // JWT Configuration - using validated environment
@@ -556,12 +559,48 @@ export class SecurityService {
         type,
         stack: error instanceof Error ? error.stack : undefined,
       });
-      // Fail open - allow request if Redis is down
-      return {
-        isBlocked: false,
-        remaining: config.max,
-        resetTime: now + config.windowMs,
-      };
+
+      // Fail closed with in-memory fallback for security-critical rate limits
+      const fallbackKey = `${type}:${key}`;
+      const now = Date.now();
+      const fallbackData = inMemoryRateLimits.get(fallbackKey);
+
+      // Clean up expired entries periodically
+      if (inMemoryRateLimits.size > 10000) {
+        for (const [k, v] of inMemoryRateLimits.entries()) {
+          if (v.resetTime < now) inMemoryRateLimits.delete(k);
+        }
+      }
+
+      if (fallbackData && fallbackData.resetTime > now) {
+        fallbackData.count++;
+        if (fallbackData.count > config.max) {
+          return {
+            isBlocked: true,
+            remaining: 0,
+            resetTime: fallbackData.resetTime,
+            retryAfter: Math.ceil((fallbackData.resetTime - now) / 1000),
+            message: config.message,
+            statusCode: config.statusCode,
+          };
+        }
+        return {
+          isBlocked: false,
+          remaining: Math.max(0, config.max - fallbackData.count),
+          resetTime: fallbackData.resetTime,
+        };
+      } else {
+        // Create new window
+        inMemoryRateLimits.set(fallbackKey, {
+          count: 1,
+          resetTime: now + config.windowMs,
+        });
+        return {
+          isBlocked: false,
+          remaining: config.max - 1,
+          resetTime: now + config.windowMs,
+        };
+      }
     }
   }
 

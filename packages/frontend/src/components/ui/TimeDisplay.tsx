@@ -5,7 +5,7 @@ import {
   LocationService,
   type LocationInfo,
   type TimeInfo,
-} from "@portfolio/frontend/src/lib/location/locationService";
+} from "@/lib/location/locationService";
 import { Clock, MapPin, Globe, Wifi, RefreshCw } from "lucide-react";
 
 interface TimeDisplayProps {
@@ -212,7 +212,7 @@ export function TimeDisplay({ onClose }: TimeDisplayProps): JSX.Element {
           {/* Location Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
-              <MapPin className="w-5 h-5 text-green-400 flex-shrink-0" />
+              <MapPin className="w-5 h-5 text-green-400 shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="text-white font-medium truncate">
                   {location.city}, {location.region}
@@ -224,7 +224,7 @@ export function TimeDisplay({ onClose }: TimeDisplayProps): JSX.Element {
             </div>
 
             <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
-              <Globe className="w-5 h-5 text-blue-400 flex-shrink-0" />
+              <Globe className="w-5 h-5 text-blue-400 shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="text-white font-medium">
                   {location.latitude.toFixed(4)},{" "}
@@ -235,7 +235,7 @@ export function TimeDisplay({ onClose }: TimeDisplayProps): JSX.Element {
             </div>
 
             <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
-              <Wifi className="w-5 h-5 text-purple-400 flex-shrink-0" />
+              <Wifi className="w-5 h-5 text-purple-400 shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="text-white font-medium truncate">
                   {location.ip}
@@ -245,7 +245,7 @@ export function TimeDisplay({ onClose }: TimeDisplayProps): JSX.Element {
             </div>
 
             <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
-              <div className="w-5 h-5 flex-shrink-0 text-center text-lg">
+              <div className="w-5 h-5 shrink-0 text-center text-lg">
                 {getWeatherEmoji()}
               </div>
               <div className="flex-1 min-w-0">

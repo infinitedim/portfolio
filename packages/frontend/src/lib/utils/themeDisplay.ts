@@ -1,11 +1,11 @@
 import {
   themes,
   getSortedThemeNames,
-} from "@portfolio/frontend/src/lib/themes/themeConfig";
+} from "@/lib/themes/themeConfig";
 import type {
   ThemeName,
   ThemeRegistry,
-} from "@portfolio/frontend/src/types/theme";
+} from "@/types/theme";
 
 export interface ThemeDisplayOptions {
   showCurrent?: boolean;

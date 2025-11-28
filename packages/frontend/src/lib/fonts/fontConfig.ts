@@ -1,4 +1,4 @@
-import type { FontConfig, FontName } from "@portfolio/frontend/src/types/font";
+import type { FontConfig, FontName } from "@/types/font";
 
 export const fonts: Record<FontName, FontConfig> = {
   "jetbrains-mono": {

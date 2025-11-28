@@ -1,6 +1,6 @@
 "use client";
 
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 import type { JSX } from "react";
 
 interface ProgressIndicatorProps {
@@ -71,9 +71,8 @@ export function ProgressIndicator({
         style={{ backgroundColor: `${themeConfig.colors.border}40` }}
       >
         <div
-          className={`${heights[size]} rounded-full transition-all duration-500 ease-out ${
-            animated ? "animate-pulse" : ""
-          }`}
+          className={`${heights[size]} rounded-full transition-all duration-500 ease-out ${animated ? "animate-pulse" : ""
+            }`}
           style={{
             width: `${Math.min(100, Math.max(0, progress))}%`,
             backgroundColor: themeConfig.colors.accent,

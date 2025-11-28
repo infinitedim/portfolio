@@ -2,8 +2,8 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import { useCommandHistory } from "@portfolio/frontend/src/hooks/useCommandHistory";
+import { useTheme } from "@/hooks/useTheme";
+import { useCommandHistory } from "@/hooks/useCommandHistory";
 
 // Interactive timeline data structure
 interface TimelineEntry {
@@ -394,7 +394,7 @@ export function InteractiveCommandHistory({
                       <div className="flex items-center gap-3 mb-2">
                         {/* Status indicator */}
                         <div
-                          className="w-3 h-3 rounded-full flex-shrink-0"
+                          className="w-3 h-3 rounded-full shrink-0"
                           style={{
                             backgroundColor: entry.success
                               ? themeConfig.colors.success

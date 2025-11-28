@@ -6,9 +6,9 @@ import type {
   CustomTheme,
   ThemeExport,
   CustomizationSettings,
-} from "@portfolio/frontend/src/types/customization";
-import { themes } from "@portfolio/frontend/src/lib/themes/themeConfig";
-import { fonts } from "@portfolio/frontend/src/lib/fonts/fontConfig";
+} from "@/types/customization";
+import { themes } from "@/lib/themes/themeConfig";
+import { fonts } from "@/lib/fonts/fontConfig";
 
 export class CustomizationService {
   private static instance: CustomizationService;

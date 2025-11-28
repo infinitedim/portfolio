@@ -36,10 +36,17 @@ if (typeof window !== "undefined") {
           url: getTRPCUrl(),
           headers: () => {
             try {
-              const token = localStorage.getItem("accessToken");
-              return token ? { Authorization: `Bearer ${token}` } : {};
-            } catch (error) {
-              console.warn("Failed to access localStorage:", error);
+              // Import authService dynamically to get current in-memory token
+              // This aligns with the secure token storage pattern used by AuthService
+              // which keeps access tokens in memory only (not localStorage)
+              const { authService } = require("./auth/authService");
+              const memoryToken = authService.getAccessToken();
+              if (memoryToken) {
+                return { Authorization: `Bearer ${memoryToken}` };
+              }
+              return {};
+            } catch (err) {
+              console.warn("Token retrieval failed:", err);
               return {};
             }
           },

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { CommandParser } from "@portfolio/frontend/src/lib/commands/commandParser";
+import { CommandParser } from "@/lib/commands/commandParser";
 import {
   createHelpCommand,
   aboutCommand,
@@ -13,14 +13,14 @@ import {
   statusCommand,
   aliasCommand,
   pwaCommand,
-} from "@portfolio/frontend/src/lib/commands/commandRegistry";
+} from "@/lib/commands/commandRegistry";
 import {
   languageCommand,
   languageListCommand,
   languageInfoCommand,
-} from "@portfolio/frontend/src/lib/commands/languageCommands";
+} from "@/lib/commands/languageCommands";
 import { useCommandHistory } from "./useCommandHistory";
-import { generateId } from "@portfolio/frontend/src/lib/utils/utils";
+import { generateId } from "@/lib/utils/utils";
 
 // Lazy load commands that depend on RoadmapService to avoid SSR issues
 const getSkillsCommand = async () => {
@@ -52,26 +52,26 @@ import {
   customizeCommand,
   themesCommand,
   fontsCommand,
-} from "@portfolio/frontend/src/lib/commands/customizationCommands";
+} from "@/lib/commands/customizationCommands";
 import {
   demoCommand,
   setDemoCallback,
-} from "@portfolio/frontend/src/lib/commands/demoCommands";
-import { githubCommand } from "@portfolio/frontend/src/lib/commands/githubCommands";
-import { techStackCommand } from "@portfolio/frontend/src/lib/commands/techStackCommands";
-import { createNowPlayingCommand } from "@portfolio/frontend/src/lib/commands/nowPlayingCommands";
-import { createLocationCommand } from "@portfolio/frontend/src/lib/commands/locationCommands";
+} from "@/lib/commands/demoCommands";
+import { githubCommand } from "@/lib/commands/githubCommands";
+import { techStackCommand } from "@/lib/commands/techStackCommands";
+import { createNowPlayingCommand } from "@/lib/commands/nowPlayingCommands";
+import { createLocationCommand } from "@/lib/commands/locationCommands";
 import {
   resumeCommand,
   socialCommand,
   shortcutsCommand,
   enhancedContactCommand,
   easterEggsCommand,
-} from "@portfolio/frontend/src/lib/commands/commands";
+} from "@/lib/commands/commands";
 import type {
   CommandOutput,
   TerminalHistory,
-} from "@portfolio/frontend/src/types/terminal";
+} from "@/types/terminal";
 
 const STORAGE_KEYS = {
   COMMAND_HISTORY: "terminal-command-history",

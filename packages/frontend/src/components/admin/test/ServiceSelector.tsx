@@ -1,6 +1,6 @@
 "use client";
 
-import type { ThemeConfig } from "@portfolio/frontend/src/types/theme";
+import type { ThemeConfig } from "@/types/theme";
 import type { Service } from "../BackendTestingDashboard";
 
 interface ServiceSelectorProps {
@@ -30,11 +30,10 @@ export function ServiceSelector({
         <button
           key={service.name}
           onClick={() => onServiceSelect(service)}
-          className={`w-full p-4 text-left border rounded-lg transition-all duration-200 font-mono text-sm ${
-            selectedService?.name === service.name
-              ? "scale-105"
-              : "hover:scale-102 hover:opacity-80"
-          }`}
+          className={`w-full p-4 text-left border rounded-lg transition-all duration-200 font-mono text-sm ${selectedService?.name === service.name
+            ? "scale-105"
+            : "hover:scale-102 hover:opacity-80"
+            }`}
           style={{
             borderColor:
               selectedService?.name === service.name
@@ -52,7 +51,7 @@ export function ServiceSelector({
         >
           <div className="flex items-start space-x-3">
             <div
-              className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+              className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
               style={{
                 backgroundColor:
                   selectedService?.name === service.name

@@ -54,12 +54,13 @@ export const authRouter = router({
     .mutation(async ({ input, ctx }) => {
       await assertLoginRate(ctx);
 
-      const securityService = new SecurityService(new RedisService());
+      const redisService = new RedisService();
+      const securityService = new SecurityService(redisService);
       const auditLogService = new AuditLogService(
         new PrismaService(),
-        new RedisService(),
+        redisService,
       );
-      const auth = new AuthService(securityService, auditLogService);
+      const auth = new AuthService(securityService, auditLogService, redisService);
 
       try {
         // Get client IP from request context
@@ -97,12 +98,13 @@ export const authRouter = router({
   refresh: publicProcedure
     .input(z.object({ refreshToken: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const securityService = new SecurityService(new RedisService());
+      const redisService = new RedisService();
+      const securityService = new SecurityService(redisService);
       const auditLogService = new AuditLogService(
         new PrismaService(),
-        new RedisService(),
+        redisService,
       );
-      const auth = new AuthService(securityService, auditLogService);
+      const auth = new AuthService(securityService, auditLogService, redisService);
 
       try {
         // Get client IP from request context
@@ -134,12 +136,13 @@ export const authRouter = router({
   logout: publicProcedure
     .input(z.object({ accessToken: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const securityService = new SecurityService(new RedisService());
+      const redisService = new RedisService();
+      const securityService = new SecurityService(redisService);
       const auditLogService = new AuditLogService(
         new PrismaService(),
-        new RedisService(),
+        redisService,
       );
-      const auth = new AuthService(securityService, auditLogService);
+      const auth = new AuthService(securityService, auditLogService, redisService);
 
       try {
         // Get client IP from request context
@@ -166,12 +169,13 @@ export const authRouter = router({
   validate: publicProcedure
     .input(z.object({ accessToken: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const securityService = new SecurityService(new RedisService());
+      const redisService = new RedisService();
+      const securityService = new SecurityService(redisService);
       const auditLogService = new AuditLogService(
         new PrismaService(),
-        new RedisService(),
+        redisService,
       );
-      const auth = new AuthService(securityService, auditLogService);
+      const auth = new AuthService(securityService, auditLogService, redisService);
 
       try {
         const req = (ctx as { req?: express.Request }).req;

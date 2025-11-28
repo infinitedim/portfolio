@@ -1,9 +1,9 @@
 import type {
   Command,
   CommandOutput,
-} from "@portfolio/frontend/src/types/terminal";
-import { ArgumentParser } from "@portfolio/frontend/src/lib/utils/argParser";
-import { generateId } from "@portfolio/frontend/src/lib/utils/utils";
+} from "@/types/terminal";
+import { ArgumentParser } from "@/lib/utils/argParser";
+import { generateId } from "@/lib/utils/utils";
 
 /**
  * Resume command - Download/view formatted resume

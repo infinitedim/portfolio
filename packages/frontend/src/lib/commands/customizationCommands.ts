@@ -1,6 +1,6 @@
-import type { Command } from "@portfolio/frontend/src/types/terminal";
-import { generateId } from "@portfolio/frontend/src/lib/utils/utils";
-import { CustomizationService } from "@portfolio/frontend/src/lib/services/customizationService";
+import type { Command } from "@/types/terminal";
+import { generateId } from "@/lib/utils/utils";
+import { CustomizationService } from "@/lib/services/customizationService";
 
 const customizationService = CustomizationService.getInstance();
 

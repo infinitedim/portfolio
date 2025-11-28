@@ -3,8 +3,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import type { ThemeConfig } from "@portfolio/frontend/src/types/theme";
-import { useAuth } from "@portfolio/frontend/src/lib/auth/AuthContext";
+import type { ThemeConfig } from "@/types/theme";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 interface TerminalLoginFormProps {
   onLoginSuccess?: () => void;
@@ -149,7 +149,7 @@ export function TerminalLoginForm({
         }}
       >
         <span
-          className={`font-mono text-sm flex-shrink-0 transition-all duration-300 ${isFocused ? "opacity-100" : "opacity-80"}`}
+          className={`font-mono text-sm shrink-0 transition-all duration-300 ${isFocused ? "opacity-100" : "opacity-80"}`}
           style={{
             color: themeConfig.colors.accent,
             transform: isFocused ? "translateX(4px)" : "translateX(0)",

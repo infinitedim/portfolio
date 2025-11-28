@@ -1,8 +1,8 @@
-import { LocationService } from "@portfolio/frontend/src/lib/location/locationService";
+import { LocationService } from "@/lib/location/locationService";
 import type {
   Command,
   CommandOutput,
-} from "@portfolio/frontend/src/types/terminal";
+} from "@/types/terminal";
 
 /**
  * Create a location command

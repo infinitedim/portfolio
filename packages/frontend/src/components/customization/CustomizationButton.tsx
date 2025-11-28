@@ -1,7 +1,7 @@
 "use client";
 
 import { type JSX, useState } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 import { CustomizationManager } from "./CustomizationManager";
 
 /**

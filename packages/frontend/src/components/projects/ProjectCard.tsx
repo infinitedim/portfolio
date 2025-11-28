@@ -2,8 +2,8 @@
 
 import { memo, JSX, Suspense } from "react";
 import { Project } from "@/lib/data/dataFetching";
-import { OptimizedImage } from "@portfolio/frontend/src/components/ui/OptimizedImage";
-import { ImageErrorBoundary } from "@portfolio/frontend/src/components/error/ImageErrorBoundary";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import { ImageErrorBoundary } from "@/components/error/ImageErrorBoundary";
 
 interface ProjectCardProps {
   project: Project;

@@ -2,17 +2,17 @@
 "use client";
 
 import { useState, useEffect, JSX, useCallback } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import { CustomizationService } from "@portfolio/frontend/src/lib/services/customizationService";
+import { useTheme } from "@/hooks/useTheme";
+import { CustomizationService } from "@/lib/services/customizationService";
 import { ThemeManager } from "./ThemeManager";
 import { FontManager } from "./FontManager";
 import { SettingsManager } from "./SettingsManager";
 import { ImportExportManager } from "./ImportExportManager";
-import { TerminalLoadingProgress } from "@portfolio/frontend/src/components/ui/TerminalLoadingProgress";
+import { TerminalLoadingProgress } from "@/components/ui/TerminalLoadingProgress";
 import type {
   CustomTheme,
   CustomFont,
-} from "@portfolio/frontend/src/types/customization";
+} from "@/types/customization";
 
 interface CustomizationManagerProps {
   isOpen: boolean;

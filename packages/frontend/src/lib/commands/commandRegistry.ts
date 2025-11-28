@@ -1,12 +1,12 @@
-import type { Command } from "@portfolio/frontend/src/types/terminal";
-import { generateId } from "@portfolio/frontend/src/lib/utils/utils";
-import { ArgumentParser } from "@portfolio/frontend/src/lib/utils/argParser";
-import { ThemeDisplay } from "@portfolio/frontend/src/lib/utils/themeDisplay";
+import type { Command } from "@/types/terminal";
+import { generateId } from "@/lib/utils/utils";
+import { ArgumentParser } from "@/lib/utils/argParser";
+import { ThemeDisplay } from "@/lib/utils/themeDisplay";
 import {
   themes,
   getSortedThemeNames,
-} from "@portfolio/frontend/src/lib/themes/themeConfig";
-import type { ThemeName } from "@portfolio/frontend/src/types/theme";
+} from "@/lib/themes/themeConfig";
+import type { ThemeName } from "@/types/theme";
 
 export const createHelpCommand = (getCommands: () => Command[]): Command => ({
   name: "help",

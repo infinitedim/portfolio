@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import type { ThemeConfig } from "@portfolio/frontend/src/types/theme";
+import type { ThemeConfig } from "@/types/theme";
 
 interface LogEntry {
   id: string;
@@ -260,9 +260,8 @@ export function LoggingMonitor({ themeConfig }: LoggingMonitorProps) {
                 <button
                   key={level}
                   onClick={() => toggleLevel(level)}
-                  className={`px-2 py-1 text-xs border rounded transition-colors ${
-                    selectedLevels.has(level) ? "opacity-100" : "opacity-50"
-                  }`}
+                  className={`px-2 py-1 text-xs border rounded transition-colors ${selectedLevels.has(level) ? "opacity-100" : "opacity-50"
+                    }`}
                   style={{
                     borderColor: getLevelColor(level),
                     color: getLevelColor(level),
@@ -282,9 +281,8 @@ export function LoggingMonitor({ themeConfig }: LoggingMonitorProps) {
                 <button
                   key={source}
                   onClick={() => toggleSource(source)}
-                  className={`px-2 py-1 text-xs border rounded transition-colors ${
-                    selectedSources.has(source) ? "opacity-100" : "opacity-50"
-                  }`}
+                  className={`px-2 py-1 text-xs border rounded transition-colors ${selectedSources.has(source) ? "opacity-100" : "opacity-50"
+                    }`}
                   style={{
                     borderColor: themeConfig.colors.border,
                     color: themeConfig.colors.text,

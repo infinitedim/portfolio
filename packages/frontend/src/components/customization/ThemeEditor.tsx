@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, JSX } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import type { CustomTheme } from "@portfolio/frontend/src/types/customization";
+import { useTheme } from "@/hooks/useTheme";
+import type { CustomTheme } from "@/types/customization";
 
 interface ThemeEditorProps {
   theme: CustomTheme;

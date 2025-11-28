@@ -1,7 +1,7 @@
 "use client";
 
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import type { RoadmapData } from "@portfolio/frontend/src/types/roadmap";
+import { useTheme } from "@/hooks/useTheme";
+import type { RoadmapData } from "@/types/roadmap";
 import { ProgressBar } from "./ProgressBar";
 import { JSX } from "react";
 

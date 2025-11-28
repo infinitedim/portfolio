@@ -1,14 +1,14 @@
 import type {
   Command,
   CommandOutput,
-} from "@portfolio/frontend/src/types/terminal";
-import { generateId } from "@portfolio/frontend/src/lib/utils/utils";
-import { i18n, t } from "@portfolio/frontend/src/lib/i18n/i18nService";
+} from "@/types/terminal";
+import { generateId } from "@/lib/utils/utils";
+import { i18n, t } from "@/lib/i18n/i18nService";
 import {
   isRegionalVariant,
   getFallbackLocale,
   getLocaleConfig,
-} from "@portfolio/frontend/src/lib/i18n/locales";
+} from "@/lib/i18n/locales";
 
 export const languageCommand: Command = {
   name: "lang",

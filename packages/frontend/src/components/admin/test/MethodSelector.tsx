@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 "use client";
 
-import type { ThemeConfig } from "@portfolio/frontend/src/types/theme";
+import type { ThemeConfig } from "@/types/theme";
 import type { ServiceMethod } from "../BackendTestingDashboard";
 
 interface MethodSelectorProps {
@@ -75,7 +75,7 @@ export function MethodSelector({
         >
           <div className="flex items-start space-x-3">
             <div
-              className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+              className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
               style={{
                 backgroundColor: getMethodColor(method.httpMethod),
                 color: "#ffffff",

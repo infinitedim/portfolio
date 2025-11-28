@@ -3,7 +3,7 @@ import type {
   RoadmapSkill,
   ProgressUpdate,
   RoadmapCategory,
-} from "@portfolio/frontend/src/types/roadmap";
+} from "@/types/roadmap";
 
 // Roadmap.sh API response interface
 interface RoadmapApiResponse {

@@ -2,7 +2,7 @@
 
 import { JSX, useState } from "react";
 import Image from "next/image";
-import { cn } from "@portfolio/frontend/src/lib/utils/utils";
+import { cn } from "@/lib/utils/utils";
 
 interface OptimizedImageProps {
   src: string;

@@ -1,7 +1,7 @@
 import type {
   Command,
   CommandOutput,
-} from "@portfolio/frontend/src/types/terminal";
+} from "@/types/terminal";
 
 export interface NowPlayingCommandOptions {
   onOpenNowPlaying: () => void;

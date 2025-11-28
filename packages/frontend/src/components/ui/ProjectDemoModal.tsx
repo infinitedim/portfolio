@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { X, ExternalLink, RefreshCw, AlertCircle } from "lucide-react";
-import { ProjectMetadataService } from "@portfolio/frontend/src/lib/projects/projectMetadata";
+import { ProjectMetadataService } from "@/lib/projects/projectMetadata";
 
 interface ProjectDemoModalProps {
   isOpen: boolean;

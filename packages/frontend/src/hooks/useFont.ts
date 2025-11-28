@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import type { FontName } from "@portfolio/frontend/src/types/font";
+import type { FontName } from "@/types/font";
 import {
   fonts,
   defaultFont,
-} from "@portfolio/frontend/src/lib/fonts/fontConfig";
+} from "@/lib/fonts/fontConfig";
 
 // Constants
 const STORAGE_KEY = "terminal-font" as const;

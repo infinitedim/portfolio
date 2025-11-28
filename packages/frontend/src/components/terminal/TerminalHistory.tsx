@@ -1,9 +1,9 @@
 "use client";
 
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import { useAccessibility } from "@portfolio/frontend/src/components/accessibility/AccessibilityProvider";
+import { useTheme } from "@/hooks/useTheme";
+import { useAccessibility } from "@/components/accessibility/AccessibilityProvider";
 import { CommandOutput } from "./CommandOutput";
-import type { TerminalHistory as TerminalHistoryType } from "@portfolio/frontend/src/types/terminal";
+import type { TerminalHistory as TerminalHistoryType } from "@/types/terminal";
 import { type JSX } from "react";
 
 interface TerminalHistoryProps {

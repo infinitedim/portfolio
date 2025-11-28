@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, type JSX } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import { PerformanceMonitor } from "@portfolio/frontend/src/lib/performance/PerformanceMonitor";
+import { useTheme } from "@/hooks/useTheme";
+import { PerformanceMonitor } from "@/lib/performance/PerformanceMonitor";
 
 interface PerformanceDashboardProps {
   isOpen: boolean;
@@ -165,9 +165,8 @@ export function PerformanceDashboard({
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`w-full text-left px-3 py-2 rounded text-sm transition-all duration-200 ${
-                    selectedCategory === category ? "font-medium" : ""
-                  }`}
+                  className={`w-full text-left px-3 py-2 rounded text-sm transition-all duration-200 ${selectedCategory === category ? "font-medium" : ""
+                    }`}
                   style={{
                     backgroundColor:
                       selectedCategory === category
@@ -408,7 +407,7 @@ export function PerformanceDashboard({
                           <td className="p-2 text-xs opacity-75">
                             {new Date(
                               report.generatedAt -
-                                (performance.now() - metric.timestamp),
+                              (performance.now() - metric.timestamp),
                             ).toLocaleTimeString()}
                           </td>
                         </tr>

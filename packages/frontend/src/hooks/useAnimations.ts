@@ -1,5 +1,5 @@
 import { useRef, useCallback, useEffect, useState } from "react";
-import { useAccessibility } from "@portfolio/frontend/src/components/accessibility/AccessibilityProvider";
+import { useAccessibility } from "@/components/accessibility/AccessibilityProvider";
 import { useMountRef, generateId, withErrorHandling } from "./utils/hookUtils";
 
 export interface AnimationConfig {

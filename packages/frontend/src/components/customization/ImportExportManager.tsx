@@ -3,8 +3,8 @@
 import type React from "react";
 
 import { useState, useRef, JSX } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import { CustomizationService } from "@portfolio/frontend/src/lib/services/customizationService";
+import { useTheme } from "@/hooks/useTheme";
+import { CustomizationService } from "@/lib/services/customizationService";
 
 interface ImportExportManagerProps {
   onUpdate: () => void;

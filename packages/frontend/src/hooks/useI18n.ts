@@ -3,7 +3,7 @@ import {
   i18n,
   t,
   type TranslationKeys,
-} from "@portfolio/frontend/src/lib/i18n/i18nService";
+} from "@/lib/i18n/i18nService";
 
 /**
  * React hook for internationalization

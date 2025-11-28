@@ -2,9 +2,9 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo, JSX } from "react";
-import type { TerminalHistory } from "@portfolio/frontend/src/types/terminal";
+import type { TerminalHistory } from "@/types/terminal";
 import { CommandOutput } from "./CommandOutput";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 
 interface VirtualizedHistoryProps {
   history: TerminalHistory[];

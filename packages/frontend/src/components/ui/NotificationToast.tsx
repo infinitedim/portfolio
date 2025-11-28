@@ -1,7 +1,7 @@
 "use client";
 
 import { type JSX, useEffect, useState } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 
 interface NotificationToastProps {
   message: string;
@@ -122,10 +122,9 @@ export function NotificationToast({
       className={`
         fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg backdrop-blur-sm
         transition-all duration-300 ease-out max-w-sm
-        ${
-          isVisible
-            ? "opacity-100 translate-x-0 animate-in slide-in-from-right"
-            : "opacity-0 translate-x-full animate-out slide-out-to-right"
+        ${isVisible
+          ? "opacity-100 translate-x-0 animate-in slide-in-from-right"
+          : "opacity-0 translate-x-full animate-out slide-out-to-right"
         }
       `}
       style={{
@@ -140,7 +139,7 @@ export function NotificationToast({
     >
       <div className="flex items-center gap-3">
         <span
-          className="text-lg flex-shrink-0"
+          className="text-lg shrink-0"
           aria-hidden="true"
           role="img"
         >
@@ -157,8 +156,8 @@ export function NotificationToast({
         <button
           onClick={handleClose}
           className={`
-            opacity-70 hover:opacity-100 transition-all duration-200 
-            p-1 rounded focus:outline-none focus:ring-2 focus:ring-opacity-50 
+            opacity-70 hover:opacity-100 transition-all duration-200
+            p-1 rounded focus:outline-none focus:ring-2 focus:ring-opacity-50
             hover:scale-110 focus:scale-110
           `}
           style={{

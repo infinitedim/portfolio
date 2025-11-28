@@ -7,7 +7,7 @@ import {
   type KeyboardEvent,
   type JSX,
 } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 
 export interface KeyboardShortcut {
   id: string;

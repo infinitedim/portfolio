@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, type JSX } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 import { useCommandHistory } from "../../hooks/useCommandHistory";
-import { useTerminalShortcuts } from "@portfolio/frontend/src/hooks/useTerminalShortcuts";
+import { useTerminalShortcuts } from "@/hooks/useTerminalShortcuts";
 import { HistorySearchPanel } from "./HistorySearchPanel";
 import { KeyboardShortcut } from "./KeyboardShortcuts";
 

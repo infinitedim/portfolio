@@ -1,6 +1,6 @@
-import type { Command } from "@portfolio/frontend/src/types/terminal";
-import { generateId } from "@portfolio/frontend/src/lib/utils/utils";
-import type { RoadmapSkill } from "@portfolio/frontend/src/types/roadmap";
+import type { Command } from "@/types/terminal";
+import { generateId } from "@/lib/utils/utils";
+import type { RoadmapSkill } from "@/types/roadmap";
 
 // Lazy load the roadmap service to avoid SSR issues
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

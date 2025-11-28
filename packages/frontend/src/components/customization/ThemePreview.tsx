@@ -1,7 +1,7 @@
 "use client";
 
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import type { CustomTheme } from "@portfolio/frontend/src/types/customization";
+import { useTheme } from "@/hooks/useTheme";
+import type { CustomTheme } from "@/types/customization";
 import { JSX } from "react";
 
 interface ThemePreviewProps {

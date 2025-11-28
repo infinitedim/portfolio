@@ -1,4 +1,4 @@
-import { type Command } from "@portfolio/frontend/src/types/terminal";
+import { type Command } from "@/types/terminal";
 
 // Default aliases
 const DEFAULT_ALIASES: Record<string, string> = {

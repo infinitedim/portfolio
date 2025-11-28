@@ -4,10 +4,10 @@
 import type React from "react";
 
 import { useState, useRef, JSX } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import { useFont } from "@portfolio/frontend/src/hooks/useFont";
-import { CustomizationService } from "@portfolio/frontend/src/lib/services/customizationService";
-import type { CustomFont } from "@portfolio/frontend/src/types/customization";
+import { useTheme } from "@/hooks/useTheme";
+import { useFont } from "@/hooks/useFont";
+import { CustomizationService } from "@/lib/services/customizationService";
+import type { CustomFont } from "@/types/customization";
 
 interface FontManagerProps {
   fonts: CustomFont[];

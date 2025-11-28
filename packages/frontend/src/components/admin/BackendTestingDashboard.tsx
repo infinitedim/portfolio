@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, JSX } from "react";
-import type { ThemeConfig } from "@portfolio/frontend/src/types/theme";
+import type { ThemeConfig } from "@/types/theme";
 import { ServiceSelector } from "./test/ServiceSelector";
 import { MethodSelector } from "./test/MethodSelector";
 import { ParameterInput } from "./test/ParameterInput";
@@ -602,11 +602,10 @@ export function BackendTestingDashboard({
               <button
                 onClick={executeRequest}
                 disabled={isLoading}
-                className={`w-full p-3 rounded font-mono text-sm transition-all duration-200 ${
-                  isLoading
+                className={`w-full p-3 rounded font-mono text-sm transition-all duration-200 ${isLoading
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:scale-105"
-                }`}
+                  }`}
                 style={{
                   backgroundColor: themeConfig.colors.accent,
                   color: themeConfig.colors.bg,

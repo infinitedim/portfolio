@@ -9,10 +9,10 @@ import {
   type JSX,
 } from "react";
 // Correctly use your custom theme hook
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 import { TabCompletion } from "./TabCompletion";
 import { CommandSuggestions } from "./CommandSuggestions";
-import { useSecurity } from "@portfolio/frontend/src/hooks/useSecurity";
+import { useSecurity } from "@/hooks/useSecurity";
 
 interface CommandInputProps {
   value: string;
@@ -442,7 +442,7 @@ export function CommandInput({
   return (
     <div className="flex items-center gap-2 w-full">
       <span
-        className="font-mono text-sm flex-shrink-0"
+        className="font-mono text-sm shrink-0"
         style={{ color: themeConfig.colors.accent }}
       >
         {prompt}

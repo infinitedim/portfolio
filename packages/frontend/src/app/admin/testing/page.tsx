@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { TerminalHeader } from "@portfolio/frontend/src/components/admin/TerminalHeader";
-import { TerminalSidebar } from "@portfolio/frontend/src/components/admin/TerminalSidebar";
-import { BackendTestingDashboard } from "@portfolio/frontend/src/components/admin/BackendTestingDashboard";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { TerminalHeader } from "@/components/admin/TerminalHeader";
+import { TerminalSidebar } from "@/components/admin/TerminalSidebar";
+import { BackendTestingDashboard } from "@/components/admin/BackendTestingDashboard";
+import { useTheme } from "@/hooks/useTheme";
 
 type DashboardView =
   | "overview"

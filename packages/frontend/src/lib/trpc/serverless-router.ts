@@ -156,19 +156,24 @@ const authRouter = router({
           };
         }
 
-        // Use constant-time comparison to prevent timing attacks
-        const emailMatch = input.email === adminEmail;
+        // Use constant-time comparison to prevent timing attacks for email
+        const emailBuffer = Buffer.from(input.email.padEnd(256, '\0'));
+        const adminEmailBuffer = Buffer.from(adminEmail.padEnd(256, '\0'));
+        const emailMatch = emailBuffer.length === adminEmailBuffer.length &&
+          require('crypto').timingSafeEqual(emailBuffer, adminEmailBuffer);
 
-        // Check if ADMIN_PASSWORD_HASH exists for bcrypt comparison, otherwise use direct comparison for dev
+        // Check if ADMIN_PASSWORD_HASH exists for bcrypt comparison
         const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
         let passwordMatch = false;
 
         if (adminPasswordHash) {
-          // Production: use bcrypt to compare hashed password
+          // Production: use bcrypt to compare hashed password (already timing-safe)
           passwordMatch = await bcrypt.compare(input.password, adminPasswordHash);
         } else if (process.env.NODE_ENV !== "production") {
-          // Development only: direct comparison (should never be used in production)
-          passwordMatch = input.password === adminPassword;
+          // Development only: use timing-safe comparison even in dev for consistency
+          // Hash the password first to make comparison secure
+          const devHash = await bcrypt.hash(adminPassword, 10);
+          passwordMatch = await bcrypt.compare(input.password, devHash);
         }
 
         if (!emailMatch || !passwordMatch) {

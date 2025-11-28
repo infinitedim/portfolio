@@ -2,13 +2,13 @@
 
 import { useState, useEffect, JSX } from "react";
 import { useRouter } from "next/navigation";
-import { TerminalHeader } from "@portfolio/frontend/src/components/admin/TerminalHeader";
-import { TerminalSidebar } from "@portfolio/frontend/src/components/admin/TerminalSidebar";
-import { PerformanceMonitor } from "@portfolio/frontend/src/components/admin/PerformanceMonitor";
-import { LoggingMonitor } from "@portfolio/frontend/src/components/admin/LoggingMonitor";
-import { BlogEditor } from "@portfolio/frontend/src/components/admin/BlogEditor";
-import { BackendTestingDashboard } from "@portfolio/frontend/src/components/admin/BackendTestingDashboard";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { TerminalHeader } from "@/components/admin/TerminalHeader";
+import { TerminalSidebar } from "@/components/admin/TerminalSidebar";
+import { PerformanceMonitor } from "@/components/admin/PerformanceMonitor";
+import { LoggingMonitor } from "@/components/admin/LoggingMonitor";
+import { BlogEditor } from "@/components/admin/BlogEditor";
+import { BackendTestingDashboard } from "@/components/admin/BackendTestingDashboard";
+import { useTheme } from "@/hooks/useTheme";
 
 type DashboardView =
   | "overview"

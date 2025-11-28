@@ -1,6 +1,6 @@
 "use client";
 
-import type { ThemeConfig } from "@portfolio/frontend/src/types/theme";
+import type { ThemeConfig } from "@/types/theme";
 
 type DashboardView =
   | "overview"
@@ -79,11 +79,10 @@ export function TerminalSidebar({
           <button
             key={item.id}
             onClick={() => onViewChange(item.id as DashboardView)}
-            className={`w-full p-3 text-left border rounded transition-all duration-200 font-mono text-sm ${
-              currentView === item.id
+            className={`w-full p-3 text-left border rounded transition-all duration-200 font-mono text-sm ${currentView === item.id
                 ? "scale-105"
                 : "hover:scale-102 hover:opacity-80"
-            }`}
+              }`}
             style={{
               borderColor:
                 currentView === item.id

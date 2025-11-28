@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { TerminalLoginForm } from "@portfolio/frontend/src/components/admin/TerminalLoginForm";
-import { TerminalHeader } from "@portfolio/frontend/src/components/admin/TerminalHeader";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import { useAuth } from "@portfolio/frontend/src/lib/auth/AuthContext";
+import { TerminalLoginForm } from "@/components/admin/TerminalLoginForm";
+import { TerminalHeader } from "@/components/admin/TerminalHeader";
+import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 /**
  *
@@ -85,9 +85,8 @@ export default function AdminLoginPage() {
               onClick={handleBack}
               onMouseEnter={() => setIsBackHovered(true)}
               onMouseLeave={() => setIsBackHovered(false)}
-              className={`px-3 py-1 text-xs font-mono rounded transition-all duration-200 ${
-                isBackHovered ? "scale-105" : "scale-100"
-              }`}
+              className={`px-3 py-1 text-xs font-mono rounded transition-all duration-200 ${isBackHovered ? "scale-105" : "scale-100"
+                }`}
               style={{
                 backgroundColor: isBackHovered
                   ? themeConfig.colors.accent

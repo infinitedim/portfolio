@@ -2,8 +2,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import { useCommandHistory } from "@portfolio/frontend/src/hooks/useCommandHistory";
+import { useTheme } from "@/hooks/useTheme";
+import { useCommandHistory } from "@/hooks/useCommandHistory";
 
 interface CommandNode {
   id: string;

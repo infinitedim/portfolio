@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useMemo, JSX } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 
 /**
  * A clean ASCII banner component for the terminal portfolio

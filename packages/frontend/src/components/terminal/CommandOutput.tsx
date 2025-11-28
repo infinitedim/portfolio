@@ -1,8 +1,8 @@
 "use client";
 
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import { useAccessibility } from "@portfolio/frontend/src/components/accessibility/AccessibilityProvider";
-import type { CommandOutput as CommandOutputType } from "@portfolio/frontend/src/types/terminal";
+import { useTheme } from "@/hooks/useTheme";
+import { useAccessibility } from "@/components/accessibility/AccessibilityProvider";
+import type { CommandOutput as CommandOutputType } from "@/types/terminal";
 import type { JSX } from "react";
 
 interface CommandOutputProps {
@@ -93,7 +93,7 @@ export function CommandOutput({ output }: CommandOutputProps): JSX.Element {
         <div className="flex items-start gap-2">
           {icon && (
             <span
-              className="flex-shrink-0 mt-0.5"
+              className="shrink-0 mt-0.5"
               aria-hidden="true"
             >
               {icon}

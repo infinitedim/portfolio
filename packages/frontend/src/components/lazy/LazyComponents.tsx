@@ -1,7 +1,7 @@
 "use client";
 
 import { lazy, Suspense, type ComponentType, type JSX } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 
 // Lazy load heavy components for better performance
 export const LazyCustomizationManager = lazy(() =>

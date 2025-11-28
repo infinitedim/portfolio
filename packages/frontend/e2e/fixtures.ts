@@ -19,16 +19,17 @@ export const test = base.extend<CustomFixtures>({
   authenticatedPage: async ({ page }, use) => {
     // Mock authentication state
     await page.addInitScript(() => {
-      // Set up mock auth tokens in localStorage
+      // Set up mock auth tokens in sessionStorage (matching security model)
       const mockUser = {
         userId: "test-user-id",
         email: "admin@test.com",
         role: "admin",
       };
 
-      localStorage.setItem("accessToken", "mock-access-token");
-      localStorage.setItem("refreshToken", "mock-refresh-token");
-      localStorage.setItem("user", JSON.stringify(mockUser));
+      // Note: accessToken should be in-memory only, but for E2E tests we need persistence
+      // This is a test-only compromise - production uses memory storage
+      sessionStorage.setItem("__auth_rt", "mock-refresh-token");
+      sessionStorage.setItem("__auth_user", JSON.stringify(mockUser));
     });
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -39,6 +40,9 @@ export const test = base.extend<CustomFixtures>({
 
     // Cleanup
     await page.evaluate(() => {
+      sessionStorage.removeItem("__auth_rt");
+      sessionStorage.removeItem("__auth_user");
+      // Also clean legacy localStorage items
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");

@@ -135,7 +135,7 @@ export function NowPlayingWidget(): JSX.Element {
         )}
       </div>
 
-      <ExternalLink className="w-5 h-5 text-green-400 flex-shrink-0" />
+      <ExternalLink className="w-5 h-5 text-green-400 shrink-0" />
     </a>
   );
 }

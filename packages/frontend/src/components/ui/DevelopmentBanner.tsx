@@ -1,6 +1,6 @@
 "use client";
 
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 import { useState, useEffect, type JSX } from "react";
 
 /**

@@ -1,8 +1,8 @@
 import type {
   Command,
   CommandOutput,
-} from "@portfolio/frontend/src/types/terminal";
-import { generateId } from "@portfolio/frontend/src/lib/utils/utils";
+} from "@/types/terminal";
+import { generateId } from "@/lib/utils/utils";
 import { TypoTolerance } from "./typoTolerance";
 
 export class CommandParser {

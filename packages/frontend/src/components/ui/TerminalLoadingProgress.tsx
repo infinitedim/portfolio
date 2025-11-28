@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, type JSX } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 
 interface TerminalLoadingProgressProps {
   duration?: number;

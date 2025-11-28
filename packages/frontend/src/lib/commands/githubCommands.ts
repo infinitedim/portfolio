@@ -1,8 +1,8 @@
-import { GitHubService } from "@portfolio/frontend/src/lib/github/githubService";
+import { GitHubService } from "@/lib/github/githubService";
 import type {
   Command,
   CommandOutput,
-} from "@portfolio/frontend/src/types/terminal";
+} from "@/types/terminal";
 
 export const githubCommand: Command = {
   name: "github",

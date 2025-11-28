@@ -2,8 +2,8 @@
 
 import { type JSX, useState, useCallback } from "react";
 import { useAccessibility } from "./AccessibilityProvider";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import type { ThemeName } from "@portfolio/frontend/src/types/theme";
+import { useTheme } from "@/hooks/useTheme";
+import type { ThemeName } from "@/types/theme";
 
 /**
  * Renders a menu with accessibility options for the user.

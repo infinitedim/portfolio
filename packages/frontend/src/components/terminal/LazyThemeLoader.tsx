@@ -4,8 +4,8 @@
 import React, { type ComponentType } from "react";
 
 import { JSX, lazy, Suspense } from "react";
-import type { ThemeName } from "@portfolio/frontend/src/types/theme";
-import { TerminalLoadingProgress } from "@portfolio/frontend/src/components/ui/TerminalLoadingProgress";
+import type { ThemeName } from "@/types/theme";
+import { TerminalLoadingProgress } from "@/components/ui/TerminalLoadingProgress";
 
 const ThemeConfigs = lazy(() =>
   import("@portfolio/frontend/src/lib/themes/themeConfig").then((module) => ({

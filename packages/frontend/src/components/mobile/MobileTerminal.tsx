@@ -2,8 +2,8 @@
 
 import type React from "react";
 import { useState, useEffect, JSX } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import { useMobile } from "@portfolio/frontend/src/hooks/useMobile";
+import { useTheme } from "@/hooks/useTheme";
+import { useMobile } from "@/hooks/useMobile";
 
 interface MobileTerminalProps {
   children: React.ReactNode;

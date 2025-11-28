@@ -8,7 +8,7 @@ import React, {
   useCallback,
   memo,
 } from "react";
-import type { ThemeConfig } from "@portfolio/frontend/src/types/theme";
+import type { ThemeConfig } from "@/types/theme";
 
 interface PerformanceData {
   timestamp: number;

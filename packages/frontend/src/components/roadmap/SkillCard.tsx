@@ -1,9 +1,9 @@
 "use client";
 
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import type { RoadmapSkill } from "@portfolio/frontend/src/types/roadmap";
+import { useTheme } from "@/hooks/useTheme";
+import type { RoadmapSkill } from "@/types/roadmap";
 import { ProgressBar } from "./ProgressBar";
-import { formatTimestamp } from "@portfolio/frontend/src/lib/utils/utils";
+import { formatTimestamp } from "@/lib/utils/utils";
 import { JSX } from "react";
 
 interface SkillCardProps {

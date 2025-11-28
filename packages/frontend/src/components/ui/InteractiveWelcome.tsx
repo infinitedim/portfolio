@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, memo, JSX } from "react";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 
 interface InteractiveWelcomeProps {
   onCommandSelect: (command: string) => void;
@@ -66,9 +66,8 @@ export const InteractiveWelcome = memo(function InteractiveWelcome({
           <button
             key={cmd.command}
             onClick={() => handleCommandClick(cmd.command)}
-            className={`p-3 rounded-lg border transition-all duration-200 text-left hover:scale-105 ${
-              selectedCommand === cmd.command ? "animate-pulse" : ""
-            }`}
+            className={`p-3 rounded-lg border transition-all duration-200 text-left hover:scale-105 ${selectedCommand === cmd.command ? "animate-pulse" : ""
+              }`}
             style={{
               borderColor: themeConfig.colors.border,
               backgroundColor:

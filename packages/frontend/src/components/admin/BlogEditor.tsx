@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import type { ThemeConfig } from "@portfolio/frontend/src/types/theme";
+import type { ThemeConfig } from "@/types/theme";
 
 interface BlogPost {
   id: string;
@@ -176,9 +176,82 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
     setIsSaving(false);
   };
 
+  /**
+   * Sanitize HTML to prevent XSS attacks
+   * Allows safe tags only and removes dangerous attributes
+   */
+  const sanitizeHtml = (html: string): string => {
+    // Define allowed tags and attributes
+    const allowedTags = [
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "p",
+      "br",
+      "strong",
+      "em",
+      "code",
+      "pre",
+      "ul",
+      "ol",
+      "li",
+      "blockquote",
+      "a",
+    ];
+    const allowedAttributes: Record<string, string[]> = {
+      a: ["href", "title"],
+    };
+
+    // Create a temporary element to parse HTML
+    if (typeof document === "undefined") return html;
+
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+
+    // Recursively sanitize nodes
+    const sanitizeNode = (node: Node): void => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as Element;
+        const tagName = element.tagName.toLowerCase();
+
+        // Remove disallowed tags but keep their text content
+        if (!allowedTags.includes(tagName)) {
+          const text = document.createTextNode(element.textContent || "");
+          element.parentNode?.replaceChild(text, element);
+          return;
+        }
+
+        // Remove dangerous attributes
+        const attrs = Array.from(element.attributes);
+        for (const attr of attrs) {
+          const attrName = attr.name.toLowerCase();
+          // Remove event handlers and javascript: URLs
+          if (
+            attrName.startsWith("on") ||
+            (attrName === "href" &&
+              attr.value.toLowerCase().includes("javascript:"))
+          ) {
+            element.removeAttribute(attr.name);
+          } else if (!allowedAttributes[tagName]?.includes(attrName)) {
+            element.removeAttribute(attr.name);
+          }
+        }
+      }
+
+      // Process child nodes
+      Array.from(node.childNodes).forEach(sanitizeNode);
+    };
+
+    sanitizeNode(temp);
+    return temp.innerHTML;
+  };
+
   const renderMarkdownPreview = (markdown: string) => {
-    // Simple Markdown to HTML conversion
-    return markdown
+    // Simple Markdown to HTML conversion with sanitization
+    const html = markdown
       .replace(/^### (.*$)/gim, "<h3>$1</h3>")
       .replace(/^## (.*$)/gim, "<h2>$1</h2>")
       .replace(/^# (.*$)/gim, "<h1>$1</h1>")
@@ -187,6 +260,9 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
       .replace(/```(\w+)?\n([\s\S]*?)```/gim, "<pre><code>$2</code></pre>")
       .replace(/`([^`]+)`/gim, "<code>$1</code>")
       .replace(/\n/gim, "<br>");
+
+    // Sanitize output to prevent XSS
+    return sanitizeHtml(html);
   };
 
   return (

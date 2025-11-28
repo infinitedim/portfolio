@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@portfolio/ui/src/button";
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 import type { JSX } from "react";
 
 /**

@@ -2,10 +2,10 @@
 
 import { useState, useEffect, type JSX } from "react";
 // Correctly use your custom theme hook
-import { useTheme } from "@portfolio/frontend/src/hooks/useTheme";
-import { CustomizationService } from "@portfolio/frontend/src/lib/services/customizationService";
-import type { CustomizationSettings } from "@portfolio/frontend/src/types/customization";
-import { TerminalLoadingProgress } from "@portfolio/frontend/src/components/ui/TerminalLoadingProgress";
+import { useTheme } from "@/hooks/useTheme";
+import { CustomizationService } from "@/lib/services/customizationService";
+import type { CustomizationSettings } from "@/types/customization";
+import { TerminalLoadingProgress } from "@/components/ui/TerminalLoadingProgress";
 
 /**
  * Manages general and appearance settings for the terminal.
@@ -168,7 +168,7 @@ export function SettingsManager(): JSX.Element {
                   onChange={(e) =>
                     handleSettingChange("autoSave", e.target.checked)
                   }
-                  // Simplified toggle styling for clarity
+                // Simplified toggle styling for clarity
                 />
               </div>
               {/* Other settings toggles would follow a similar pattern... */}
