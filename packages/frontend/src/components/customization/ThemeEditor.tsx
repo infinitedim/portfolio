@@ -264,7 +264,7 @@ export function ThemeEditor({
                   </option>
                 </select>
               </div>
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <div className="block text-sm font-medium mb-1 opacity-0">
                   Action
                 </div>
