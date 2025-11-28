@@ -1,0 +1,460 @@
+/**
+ * Serverless-compatible tRPC router for Next.js API routes
+ * This router is designed to work without NestJS dependencies
+ */
+
+import { initTRPC, TRPCError } from "@trpc/server";
+import { z } from "zod";
+import { Redis } from "@upstash/redis";
+import { PrismaClient } from "@prisma/client";
+
+// Initialize tRPC
+const t = initTRPC.create();
+
+export const router = t.router;
+export const publicProcedure = t.procedure;
+
+// Lazy-initialized clients for serverless
+let prismaClient: PrismaClient | null = null;
+let redisClient: Redis | null = null;
+
+function getPrisma(): PrismaClient {
+  if (!prismaClient) {
+    prismaClient = new PrismaClient();
+  }
+  return prismaClient;
+}
+
+function getRedis(): Redis | null {
+  if (!redisClient && process.env.UPSTASH_REDIS_REST_URL) {
+    redisClient = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN || "",
+    });
+  }
+  return redisClient;
+}
+
+// Rate limiting helper
+const rateLimitMap = new Map<string, number>();
+
+async function checkRateLimit(
+  key: string,
+  windowMs: number = 60000,
+): Promise<boolean> {
+  const redis = getRedis();
+
+  if (redis) {
+    try {
+      const exists = await redis.get<string>(`ratelimit:${key}`);
+      if (exists) return false;
+      await redis.set(`ratelimit:${key}`, "1", {
+        ex: Math.floor(windowMs / 1000),
+      });
+      return true;
+    } catch {
+      // Fallback to in-memory
+    }
+  }
+
+  const now = Date.now();
+  const last = rateLimitMap.get(key) ?? 0;
+  if (now - last < windowMs) return false;
+  rateLimitMap.set(key, now);
+  return true;
+}
+
+// Health router
+const healthRouter = router({
+  check: publicProcedure.query(async () => {
+    return { status: "ok", timestamp: new Date().toISOString() };
+  }),
+
+  detailed: publicProcedure.query(async () => {
+    const checks: Record<string, { status: string; error?: string }> = {};
+
+    // Check database
+    try {
+      await getPrisma().$queryRaw`SELECT 1`;
+      checks.database = { status: "healthy" };
+    } catch (error) {
+      checks.database = {
+        status: "unhealthy",
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+
+    // Check Redis
+    try {
+      const redis = getRedis();
+      if (redis) {
+        await redis.ping();
+        checks.redis = { status: "healthy" };
+      } else {
+        checks.redis = { status: "not configured" };
+      }
+    } catch (error) {
+      checks.redis = {
+        status: "unhealthy",
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+
+    const allHealthy = Object.values(checks).every(
+      (c) => c.status === "healthy" || c.status === "not configured",
+    );
+
+    return {
+      status: allHealthy ? "healthy" : "unhealthy",
+      timestamp: new Date().toISOString(),
+      checks,
+    };
+  }),
+});
+
+// Auth types
+interface AuthUser {
+  userId: string;
+  email: string;
+  role: "admin";
+}
+
+// Auth router (simplified for serverless)
+const authRouter = router({
+  login: publicProcedure
+    .input(z.object({ email: z.string().email(), password: z.string().min(1) }))
+    .mutation(
+      async ({
+        input,
+      }): Promise<
+        | {
+            success: true;
+            user: AuthUser;
+            accessToken: string;
+            refreshToken: string;
+          }
+        | { success: false; error: string }
+      > => {
+        const allowed = await checkRateLimit(`login:${input.email}`);
+        if (!allowed) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Too many login attempts",
+          });
+        }
+
+        // Check admin credentials from environment
+        const adminEmail = process.env.ADMIN_EMAIL;
+        const adminPassword = process.env.ADMIN_PASSWORD;
+
+        if (!adminEmail || !adminPassword) {
+          return {
+            success: false,
+            error: "Admin credentials not configured",
+          };
+        }
+
+        if (input.email !== adminEmail || input.password !== adminPassword) {
+          return {
+            success: false,
+            error: "Invalid credentials",
+          };
+        }
+
+        // Generate simple tokens (in production, use proper JWT)
+        const accessToken = `access_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const refreshToken = `refresh_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
+        // Store tokens in Redis if available
+        const redis = getRedis();
+        if (redis) {
+          await redis.set(`token:${accessToken}`, input.email, { ex: 3600 }); // 1 hour
+          await redis.set(`refresh:${refreshToken}`, input.email, {
+            ex: 86400 * 7,
+          }); // 7 days
+        }
+
+        return {
+          success: true,
+          user: {
+            userId: "admin-1",
+            email: input.email,
+            role: "admin",
+          },
+          accessToken,
+          refreshToken,
+        };
+      },
+    ),
+
+  refresh: publicProcedure
+    .input(z.object({ refreshToken: z.string() }))
+    .mutation(
+      async ({
+        input,
+      }): Promise<
+        | { success: true; accessToken: string; refreshToken: string }
+        | { success: false; error: string }
+      > => {
+        const redis = getRedis();
+        if (!redis) {
+          return {
+            success: false,
+            error: "Token refresh not available",
+          };
+        }
+
+        const email = await redis.get<string>(`refresh:${input.refreshToken}`);
+        if (!email) {
+          return {
+            success: false,
+            error: "Invalid refresh token",
+          };
+        }
+
+        // Generate new tokens
+        const accessToken = `access_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const refreshToken = `refresh_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
+        await redis.set(`token:${accessToken}`, email, { ex: 3600 });
+        await redis.set(`refresh:${refreshToken}`, email, { ex: 86400 * 7 });
+        await redis.del(`refresh:${input.refreshToken}`);
+
+        return {
+          success: true,
+          accessToken,
+          refreshToken,
+        };
+      },
+    ),
+
+  logout: publicProcedure
+    .input(z.object({ accessToken: z.string() }))
+    .mutation(async ({ input }): Promise<{ success: true }> => {
+      const redis = getRedis();
+      if (redis) {
+        await redis.del(`token:${input.accessToken}`);
+      }
+      return { success: true };
+    }),
+
+  validate: publicProcedure
+    .input(z.object({ accessToken: z.string() }))
+    .mutation(
+      async ({
+        input,
+      }): Promise<
+        { success: true; user: AuthUser } | { success: false; error: string }
+      > => {
+        const redis = getRedis();
+        if (!redis) {
+          return {
+            success: false,
+            error: "Token validation not available",
+          };
+        }
+
+        const email = await redis.get<string>(`token:${input.accessToken}`);
+        if (!email) {
+          return {
+            success: false,
+            error: "Invalid or expired token",
+          };
+        }
+
+        return {
+          success: true,
+          user: {
+            userId: "admin-1",
+            email,
+            role: "admin",
+          },
+        };
+      },
+    ),
+});
+
+// Spotify router
+const spotifyRouter = router({
+  nowPlaying: publicProcedure.query(async () => {
+    const redis = getRedis();
+
+    // Check cache first
+    if (redis) {
+      try {
+        const cached = await redis.get<{
+          isPlaying: boolean;
+          title?: string;
+          artist?: string;
+        }>("spotify:now-playing");
+        if (cached) return cached;
+      } catch {
+        // Continue without cache
+      }
+    }
+
+    // Fetch from Spotify API
+    if (!process.env.SPOTIFY_REFRESH_TOKEN) {
+      return { isPlaying: false };
+    }
+
+    try {
+      // Get access token
+      const tokenResponse = await fetch(
+        "https://accounts.spotify.com/api/token",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Basic ${Buffer.from(
+              `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`,
+            ).toString("base64")}`,
+          },
+          body: new URLSearchParams({
+            grant_type: "refresh_token",
+            refresh_token: process.env.SPOTIFY_REFRESH_TOKEN,
+          }),
+        },
+      );
+
+      if (!tokenResponse.ok) {
+        return { isPlaying: false };
+      }
+
+      const { access_token } = (await tokenResponse.json()) as {
+        access_token: string;
+      };
+
+      // Get currently playing
+      const nowPlayingResponse = await fetch(
+        "https://api.spotify.com/v1/me/player/currently-playing",
+        {
+          headers: { Authorization: `Bearer ${access_token}` },
+        },
+      );
+
+      if (nowPlayingResponse.status === 204 || !nowPlayingResponse.ok) {
+        return { isPlaying: false };
+      }
+
+      const data = (await nowPlayingResponse.json()) as {
+        is_playing: boolean;
+        item?: {
+          name: string;
+          artists: Array<{ name: string }>;
+          album: { name: string; images: Array<{ url: string }> };
+          external_urls: { spotify: string };
+          duration_ms: number;
+        };
+        progress_ms?: number;
+      };
+
+      const result = {
+        isPlaying: data.is_playing,
+        title: data.item?.name,
+        artist: data.item?.artists?.map((a) => a.name).join(", "),
+        album: data.item?.album?.name,
+        albumArt: data.item?.album?.images?.[0]?.url,
+        songUrl: data.item?.external_urls?.spotify,
+        duration: data.item?.duration_ms,
+        progress: data.progress_ms,
+      };
+
+      // Cache for 30 seconds
+      if (redis) {
+        try {
+          await redis.set("spotify:now-playing", result, { ex: 30 });
+        } catch {
+          // Ignore cache errors
+        }
+      }
+
+      return result;
+    } catch {
+      return { isPlaying: false };
+    }
+  }),
+});
+
+// Security router
+const securityRouter = router({
+  validateInput: publicProcedure
+    .input(z.object({ input: z.string() }))
+    .mutation(({ input }) => {
+      // Basic XSS and SQL injection detection
+      const dangerousPatterns = [
+        /<script/i,
+        /javascript:/i,
+        /on\w+=/i,
+        /SELECT.*FROM/i,
+        /INSERT.*INTO/i,
+        /UPDATE.*SET/i,
+        /DELETE.*FROM/i,
+        /DROP.*TABLE/i,
+        /--/,
+        /;.*SELECT/i,
+      ];
+
+      const hasDangerousContent = dangerousPatterns.some((pattern) =>
+        pattern.test(input.input),
+      );
+
+      return {
+        isValid: !hasDangerousContent,
+        sanitizedInput: input.input.replace(/<[^>]*>/g, ""),
+        riskLevel: hasDangerousContent ? "high" : "low",
+      };
+    }),
+
+  checkRateLimit: publicProcedure
+    .input(z.object({ key: z.string(), type: z.string() }))
+    .mutation(async ({ input }) => {
+      const allowed = await checkRateLimit(`${input.type}:${input.key}`);
+      return { allowed, remaining: allowed ? 1 : 0 };
+    }),
+});
+
+// Projects router
+const projectsRouter = router({
+  get: publicProcedure
+    .input(
+      z
+        .object({
+          section: z.string().optional(),
+          limit: z.number().optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ input }) => {
+      // Fetch from database or return static data
+      try {
+        const prisma = getPrisma();
+
+        // Example: fetch projects from database
+        // Modify this based on your actual schema
+        const projects = await prisma.$queryRaw`
+          SELECT * FROM "Project"
+          ${input?.limit ? `LIMIT ${input.limit}` : ""}
+        `.catch(() => []);
+
+        return { data: projects, meta: { section: input?.section } };
+      } catch {
+        return { data: [], meta: { section: input?.section } };
+      }
+    }),
+});
+
+// Main app router
+export const appRouter = router({
+  health: healthRouter.check,
+  healthDetailed: healthRouter.detailed,
+  auth: authRouter,
+  spotify: spotifyRouter,
+  security: securityRouter,
+  projects: projectsRouter,
+  echo: publicProcedure
+    .input(z.object({ msg: z.string() }))
+    .query(({ input }) => input),
+});
+
+export type AppRouter = typeof appRouter;

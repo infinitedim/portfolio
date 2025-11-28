@@ -73,8 +73,8 @@ Object.defineProperty(global, "crypto", {
   writable: true,
 });
 
-// Mock centralized logger
-vi.mock("@portfolio/backend/src/logging/logger", () => ({
+// Mock centralized logger (local mock since we don't import from backend)
+vi.mock("@/lib/logger", () => ({
   logger: {
     warn: vi.fn(),
     error: vi.fn(),
@@ -87,8 +87,8 @@ vi.mock("@portfolio/backend/src/logging/logger", () => ({
   logAPICall: vi.fn(),
 }));
 
-// Mock security functions
-vi.mock("@portfolio/backend/src/security/csp", () => ({
+// Mock security functions (local mock)
+vi.mock("@/lib/security/csp", () => ({
   generateNonce: vi.fn(() => "test-nonce"),
   getSecurityHeaders: vi.fn(() => ({
     "Content-Security-Policy": "test-csp",

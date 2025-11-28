@@ -4,7 +4,9 @@ import bundleAnalyzer from "@next/bundle-analyzer";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  serverExternalPackages: ["@prisma/client"],
+  // Transpile monorepo packages (only UI and shared packages)
+  transpilePackages: ["@portfolio/ui"],
+  serverExternalPackages: ["@prisma/client", "bcryptjs"],
   // Temporarily disable experimental flags while diagnosing module factory error
   experimental: {
     // optimizePackageImports: ["@/components", "@/hooks", "@/lib"],

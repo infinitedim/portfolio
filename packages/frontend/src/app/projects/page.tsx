@@ -4,9 +4,9 @@ import {
   getProjectsData,
   getFeaturedProjects,
   type Project,
-} from "@portfolio/backend/src/ssr/dataFetching";
-import { ProjectCard } from "@portfolio/frontend/src/components/projects/ProjectCard";
-import { ProjectsLoading } from "@portfolio/frontend/src/components/projects/ProjectsLoading";
+} from "@/lib/data/dataFetching";
+import { ProjectCard } from "@/components/projects/ProjectCard";
+import { ProjectsLoading } from "@/components/projects/ProjectsLoading";
 
 // Route segment config for optimization
 export const revalidate = 3600; // Revalidate every hour

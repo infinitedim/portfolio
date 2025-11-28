@@ -1,4 +1,8 @@
 {
+  "buildCommand": "bun x prisma generate --schema=./packages/backend/prisma/schema.prisma && cd packages/frontend && bun run build",
+  "installCommand": "bun install",
+  "framework": "nextjs",
+  "outputDirectory": "packages/frontend/.next",
   "headers": [
     {
       "source": "/(.*)",
@@ -23,20 +27,13 @@
   "rewrites": [
     {
       "source": "/api/health",
-      "destination": "/api/portfolio/health"
+      "destination": "/api/trpc/health"
     },
     {
       "source": "/healthz",
-      "destination": "/api/portfolio/health"
+      "destination": "/api/trpc/health"
     }
   ],
   "cleanUrls": true,
-  "trailingSlash": false,
-  "relatedProjects": [
-    "packages/frontend",
-    "packages/backend",
-    "packages/ui",
-    "tools/logger",
-    "tools/trpc"
-  ]
+  "trailingSlash": false
 }

@@ -1,22 +1,39 @@
 import { createTRPCReact } from "@trpc/react-query";
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
+import type { AppRouter } from "@/lib/trpc/serverless-router";
 
-// Create tRPC React hooks
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const trpc = createTRPCReact<any>();
+// Create tRPC React hooks with proper typing
+export const trpc = createTRPCReact<AppRouter>();
 
 // Create tRPC client for direct calls (non-hook usage) - only on client side
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let trpcClient: any = null;
+let trpcClient: ReturnType<typeof createTRPCProxyClient<AppRouter>> | null =
+  null;
+
+/**
+ * Get the tRPC API URL based on environment
+ * Uses internal API route in production, external API in development
+ */
+function getTRPCUrl(): string {
+  if (typeof window !== "undefined") {
+    // Browser: use relative URL for internal API route
+    return "/api/trpc";
+  }
+  // SSR: use absolute URL
+  const vercelUrl = process.env.VERCEL_URL;
+  if (vercelUrl) {
+    return `https://${vercelUrl}/api/trpc`;
+  }
+  // Fallback for local development
+  return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api/trpc";
+}
 
 // Only create the client on the client side
 if (typeof window !== "undefined") {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    trpcClient = createTRPCProxyClient<any>({
+    trpcClient = createTRPCProxyClient<AppRouter>({
       links: [
         httpBatchLink({
-          url: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/trpc",
+          url: getTRPCUrl(),
           headers: () => {
             try {
               const token = localStorage.getItem("accessToken");

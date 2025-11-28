@@ -100,7 +100,7 @@ class AuthService {
       } else {
         return {
           success: false,
-          error: result.error || "Login failed",
+          error: !result.success ? result.error : "Login failed",
         };
       }
     } catch (error) {
@@ -170,7 +170,7 @@ class AuthService {
         this.clearTokens();
         return {
           success: false,
-          error: result.error || "Token refresh failed",
+          error: !result.success ? result.error : "Token refresh failed",
         };
       }
     } catch (error) {
@@ -265,7 +265,7 @@ class AuthService {
           this.clearTokens();
           return {
             success: false,
-            error: result.error || "Token validation failed",
+            error: !result.success ? result.error : "Token validation failed",
           };
         }
       }
