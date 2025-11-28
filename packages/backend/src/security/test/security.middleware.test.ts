@@ -254,10 +254,11 @@ describe("SecurityMiddleware", () => {
         mockSecurityService.checkRateLimit.mockResolvedValue({
           isBlocked: false,
         });
-        mockSecurityService.sanitizeInput.mockImplementation((input) =>
-          typeof input === "string"
-            ? input.replace(/<script.*?<\/script>/gi, "")
-            : input,
+        mockSecurityService.sanitizeInput.mockImplementation(
+          (input: unknown) =>
+            typeof input === "string"
+              ? input.replace(/<script.*?<\/script>/gi, "")
+              : input,
         );
         mockSecurityService.validateInput.mockReturnValue(true);
 

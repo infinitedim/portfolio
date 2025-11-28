@@ -26,9 +26,8 @@ import { generateId } from "@portfolio/frontend/src/lib/utils/utils";
 const getSkillsCommand = async () => {
   if (typeof window === "undefined") return null;
   try {
-    const { skillsCommand } = await import(
-      "@portfolio/frontend/src/lib/commands/skillsCommands"
-    );
+    const { skillsCommand } =
+      await import("@portfolio/frontend/src/lib/commands/skillsCommands");
     return skillsCommand;
   } catch (error) {
     console.error("Failed to load skills command:", error);
@@ -40,9 +39,8 @@ const getRoadmapCommands = async () => {
   if (typeof window === "undefined")
     return { roadmapCommand: null, progressCommand: null };
   try {
-    const { roadmapCommand, progressCommand } = await import(
-      "@portfolio/frontend/src/lib/commands/roadmapCommands"
-    );
+    const { roadmapCommand, progressCommand } =
+      await import("@portfolio/frontend/src/lib/commands/roadmapCommands");
     return { roadmapCommand, progressCommand };
   } catch (error) {
     console.error("Failed to load roadmap commands:", error);
@@ -327,9 +325,8 @@ export function useTerminal(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           let monitor: any;
           try {
-            const { PerformanceMonitor } = await import(
-              "@portfolio/frontend/src/lib/performance/PerformanceMonitor"
-            );
+            const { PerformanceMonitor } =
+              await import("@portfolio/frontend/src/lib/performance/PerformanceMonitor");
             monitor = PerformanceMonitor.getInstance().getReport();
           } catch (error) {
             console.warn("Failed to load performance monitor:", error);
@@ -408,8 +405,9 @@ export function useTerminal(
               monitor.summary.totalCommands > 0
                 ? (
                     ((monitor.summary.totalCommands -
-                      monitor.metrics.filter((m) => m.name.includes("error"))
-                        .length) /
+                      monitor.metrics.filter((m: { name: string }) =>
+                        m.name.includes("error"),
+                      ).length) /
                       monitor.summary.totalCommands) *
                     100
                   ).toFixed(1)

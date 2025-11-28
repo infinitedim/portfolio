@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { GitHubService } from "@portfolio/frontend/src/lib/github/githubService";
 import type {
   Command,
@@ -437,7 +436,12 @@ async function getUserGists(username: string): Promise<CommandOutput> {
 
   try {
     const githubService = GitHubService.getInstance();
-    const gists = (await githubService.getUserGists(username)) as any;
+    const gists = (await githubService.getUserGists(username)) as Array<{
+      description: string | null;
+      files: Record<string, unknown>;
+      created_at: string;
+      html_url: string;
+    }>;
 
     if (gists.length === 0) {
       return {
@@ -450,10 +454,17 @@ async function getUserGists(username: string): Promise<CommandOutput> {
 
     const gistList = gists
       .slice(0, 5) // Show only first 5 gists
-      .map((gist) => {
-        const files = Object.keys(gist.files).length;
-        return `📄 ${gist.description || "Untitled gist"}\n   📁 ${files} file(s)\n   📅 ${new Date(gist.created_at).toLocaleDateString()}\n   🔗 ${gist.html_url}`;
-      })
+      .map(
+        (gist: {
+          description: string | null;
+          files: Record<string, unknown>;
+          created_at: string;
+          html_url: string;
+        }) => {
+          const files = Object.keys(gist.files).length;
+          return `📄 ${gist.description || "Untitled gist"}\n   📁 ${files} file(s)\n   📅 ${new Date(gist.created_at).toLocaleDateString()}\n   🔗 ${gist.html_url}`;
+        },
+      )
       .join("\n\n");
 
     const moreText =

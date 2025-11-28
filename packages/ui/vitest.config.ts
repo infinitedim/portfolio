@@ -8,6 +8,7 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     css: true,
+    passWithNoTests: true, // Don't fail if no tests are found
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],

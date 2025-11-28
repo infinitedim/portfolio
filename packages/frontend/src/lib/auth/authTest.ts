@@ -21,9 +21,10 @@ export async function testSecurityFixes(): Promise<void> {
       "setCookie",
       "getCookie",
       "removeCookie",
-    ];
+    ] as const;
     const missingMethods = requiredMethods.filter(
-      (method) => typeof SecureAuth[method] !== "function",
+      (method) =>
+        typeof SecureAuth[method as keyof typeof SecureAuth] !== "function",
     );
 
     if (missingMethods.length === 0) {

@@ -45,7 +45,10 @@ export function ThemeEditor({
     }));
   };
 
-  const handleMetadataChange = (field: keyof CustomTheme, value) => {
+  const handleMetadataChange = (
+    field: keyof CustomTheme,
+    value: CustomTheme[keyof CustomTheme],
+  ) => {
     setEditedTheme((prev) => ({
       ...prev,
       [field]: value,

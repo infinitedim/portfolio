@@ -5,13 +5,8 @@ import { ServerlessConfig } from "../config/serverless.config";
 export class PrismaService extends PrismaClient {
   constructor() {
     const config = ServerlessConfig.getConfig();
-    super({
-      // Optimize for serverless environments
-      datasources: {
-        db: {
-          url: config.databaseUrl,
-        },
-      },
+    // Prisma 7+ configuration - URL passed directly to constructor
+    super(config.databaseUrl, {
       // Connection pooling for serverless
       log: config.logLevel === "debug" ? ["query", "error", "warn"] : ["error"],
     });

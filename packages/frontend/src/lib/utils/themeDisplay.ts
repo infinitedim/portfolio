@@ -2,7 +2,10 @@ import {
   themes,
   getSortedThemeNames,
 } from "@portfolio/frontend/src/lib/themes/themeConfig";
-import type { ThemeName } from "@portfolio/frontend/src/types/theme";
+import type {
+  ThemeName,
+  ThemeRegistry,
+} from "@portfolio/frontend/src/types/theme";
 
 export interface ThemeDisplayOptions {
   showCurrent?: boolean;
@@ -62,7 +65,7 @@ export class ThemeDisplay {
       themeGroups.forEach((group) => {
         const row = group
           .map((theme) => {
-            const config = themes[theme];
+            const config = (themes as ThemeRegistry)[theme as ThemeName];
             if (!config) return null;
             const isCurrent = currentTheme === theme;
             const indicator = isCurrent ? "► " : "  ";
@@ -110,15 +113,15 @@ export class ThemeDisplay {
     return lines.join("\n");
   }
 
-  static generateThemeComparison(themes: ThemeName[]): string {
-    if (themes.length === 0) return "No themes to compare";
+  static generateThemeComparison(themeNames: ThemeName[]): string {
+    if (themeNames.length === 0) return "No themes to compare";
 
     const lines = ["🔍 Theme Comparison", "═".repeat(50), ""];
 
-    const maxNameLength = Math.max(...themes.map((t) => t.length));
+    const maxNameLength = Math.max(...themeNames.map((t) => t.length));
 
-    themes.forEach((themeName) => {
-      const config = themes[themeName] ? themes[themeName] : null;
+    themeNames.forEach((themeName) => {
+      const config = (themes as ThemeRegistry)[themeName];
       if (!config) return;
 
       lines.push(`${themeName.padEnd(maxNameLength)} | ${config.name}`);

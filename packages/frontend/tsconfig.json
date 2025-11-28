@@ -16,8 +16,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "noImplicitAny": false,
-    "ignoreDeprecations": "5.0",
+    "noImplicitAny": true,
     "plugins": [
       {
         "name": "next"

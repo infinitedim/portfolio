@@ -271,7 +271,7 @@ describe("BlogService", () => {
 
   describe("list", () => {
     it("should return paginated blog posts with default parameters", async () => {
-      const mockPosts = [
+      const mockPosts: Array<{ id: number; title: string; slug: string }> = [
         { id: 1, title: "Post 1", slug: "post-1" },
         { id: 2, title: "Post 2", slug: "post-2" },
       ];
@@ -335,7 +335,7 @@ describe("BlogService", () => {
     });
 
     it("should handle pagination edge cases", async () => {
-      const mockPosts = [];
+      const mockPosts: Array<{ id: number; title: string; slug: string }> = [];
       const mockTotal = 0;
 
       mockPrismaService.$transaction.mockResolvedValue([mockPosts, mockTotal]);

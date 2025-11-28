@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "bun x tsc -p tsconfig.json",
     "test": "vitest",
@@ -11,12 +13,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@nestjs/common": "^11.1.7",
+    "@nestjs/common": "^11.1.9",
     "nest-winston": "^1.10.2",
     "winston": "^3.18.3"
-  },
-  "devDependencies": {
-    "jsdom": "^27.0.1",
-    "vitest": "^4.0.3"
   }
 }

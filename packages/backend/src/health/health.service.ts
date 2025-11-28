@@ -97,7 +97,14 @@ export class HealthService {
       await this.prisma.$queryRaw`SELECT 1`;
 
       // Test a simple query
-      const result = await this.prisma.$queryRaw`
+      const result = await this.prisma.$queryRaw<
+        Array<{
+          version: string;
+          database: string;
+          user: string;
+          timestamp: Date;
+        }>
+      >`
         SELECT
           version() as version,
           current_database() as database,
@@ -112,11 +119,9 @@ export class HealthService {
         responseTime,
         lastChecked: new Date().toISOString(),
         details: {
-          version: (typeof result === "object" &&
-            result?.[0]?.version) as string,
-          database: (typeof result === "object" &&
-            result?.[0]?.database) as string,
-          user: (typeof result === "object" && result?.[0]?.user) as string,
+          version: result?.[0]?.version ?? "unknown",
+          database: result?.[0]?.database ?? "unknown",
+          user: result?.[0]?.user ?? "unknown",
           connectionPool: "active",
         },
       };

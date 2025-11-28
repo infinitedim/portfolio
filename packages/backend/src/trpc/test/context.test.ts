@@ -1,8 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { Request } from "express";
+import type { Mock } from "vitest";
 
 // Mock the context creation function
 const mockCreateBackendContext = vi.fn();
+
+// Extend global type for test mocks
+declare global {
+  var createBackendContext: Mock;
+}
+
 global.createBackendContext = mockCreateBackendContext;
 
 describe("tRPC Context", () => {

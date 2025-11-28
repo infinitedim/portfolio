@@ -30,7 +30,10 @@ export function SettingsManager(): JSX.Element {
     setSettings(currentSettings);
   }, [customizationService]);
 
-  const handleSettingChange = (key: keyof CustomizationSettings, value) => {
+  const handleSettingChange = (
+    key: keyof CustomizationSettings,
+    value: CustomizationSettings[keyof CustomizationSettings],
+  ) => {
     if (!settings) return;
 
     const newSettings = { ...settings, [key]: value };

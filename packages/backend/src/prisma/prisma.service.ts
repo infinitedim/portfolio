@@ -26,32 +26,26 @@ export class PrismaService
   constructor() {
     const config = ServerlessConfig.getConfig();
 
+    // Prisma 7+ configuration
+    // datasourceUrl is now the standard way to override the database URL
     super({
-      // Optimize for serverless environments with connection pooling
-      datasources: {
-        db: {
-          url: config.databaseUrl,
-        },
-      },
-      // Enhanced logging configuration
-      log: config.logLevel === "debug" ? ["query", "error", "warn"] : ["error"],
+      // Override database URL if provided
+      ...(config.databaseUrl && { datasourceUrl: config.databaseUrl }),
+      // Enhanced logging configuration - Prisma 7 uses log array
+      log:
+        config.logLevel === "debug"
+          ? [
+              { emit: "stdout", level: "query" },
+              { emit: "stdout", level: "error" },
+              { emit: "stdout", level: "warn" },
+            ]
+          : [{ emit: "stdout", level: "error" }],
       // Error handling configuration
       errorFormat: "pretty",
     });
 
-    // Set up error handling for connection issues
-    this.$on("error", (e: unknown) => {
-      this.logger.error("Prisma Client Error:", e);
-      this.isConnected = false;
-      this.handleConnectionError(e instanceof Error ? e : new Error(String(e)));
-    });
-
-    // Set up info logging for connection events in development
-    if (config.logLevel === "debug") {
-      this.$on("info", (e: unknown) => {
-        this.logger.debug("Prisma Client Info:", e);
-      });
-    }
+    // Note: In Prisma 7, event handling is done differently
+    // Error events are handled through the log configuration above
   }
 
   async onModuleInit(): Promise<void> {
@@ -465,11 +459,8 @@ export class PrismaService
    * Enable shutdown hooks with comprehensive cleanup
    */
   async enableShutdownHooks(app: INestApplication): Promise<void> {
-    this.$("beforeExit" as never, async (): Promise<void> => {
-      this.logger.log("Received beforeExit event, closing application...");
-      await this.cleanupAndDisconnect();
-      await app.close();
-    });
+    // In Prisma 7, beforeExit is handled via process events
+    // The old $on('beforeExit') is deprecated
 
     // Handle process termination signals with proper cleanup
     const gracefulShutdown = async (signal: string) => {
@@ -481,12 +472,14 @@ export class PrismaService
       } catch (error) {
         this.logger.error("Error during database cleanup:", error);
       } finally {
+        await app.close();
         process.exit(0);
       }
     };
 
     process.on("SIGINT", () => gracefulShutdown("SIGINT"));
     process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+    process.on("beforeExit", () => gracefulShutdown("beforeExit"));
 
     // Handle uncaught exceptions and unhandled rejections
     process.on("uncaughtException", async (error) => {

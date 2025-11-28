@@ -1,10 +1,13 @@
+// Prisma Schema for Portfolio Backend
+// Prisma 7.x - Connection URL configured in prisma.config.ts
+// See: https://pris.ly/d/config-datasource
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 // Admin User with enhanced profile and security features

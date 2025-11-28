@@ -39,7 +39,7 @@ interface SpotifyCurrentlyPlayingResponse {
   progress_ms?: number;
 }
 
-interface NowPlayingResponse {
+export interface NowPlayingResponse {
   isPlaying: boolean;
   title?: string;
   artist?: string;

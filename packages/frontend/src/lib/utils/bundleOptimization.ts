@@ -94,9 +94,7 @@ export const SplittingStrategies = {
     terminal: () =>
       import("@portfolio/frontend/src/components/terminal/Terminal"),
     customization: () =>
-      import(
-        "@portfolio/frontend/src/components/customization/CustomizationManager"
-      ),
+      import("@portfolio/frontend/src/components/customization/CustomizationManager"),
   }),
 
   // Feature-based splitting

@@ -14,6 +14,11 @@ const mockRouter = {
   logout: vi.fn(),
 };
 
+// Extend global type for test mocks
+declare global {
+  var authRouter: typeof mockRouter;
+}
+
 // Mock the auth router module
 global.authRouter = mockRouter;
 

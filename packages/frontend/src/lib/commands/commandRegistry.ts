@@ -333,9 +333,9 @@ export const themeCommand: Command = {
       const currentTheme =
         (typeof window !== "undefined"
           ? (localStorage.getItem("terminal-theme") as ThemeName)
-          : "dark") || "dark";
+          : "default") || "default";
 
-      const config = themes[currentTheme];
+      const config = themes[currentTheme as ThemeName];
       const currentInfo = [
         "📍 Current Theme Information",
         "═".repeat(35),

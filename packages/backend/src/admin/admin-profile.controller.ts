@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
 } from "@nestjs/common";
+import type { Request as ExpressRequest } from "express";
 import { AdminProfileService } from "./admin-profile.service";
 import { AllowedIpService } from "./allowed-ip.service";
 import {
@@ -27,7 +28,7 @@ export class AdminProfileController {
   ) {}
 
   @Get()
-  async getProfile(@Request() req) {
+  async getProfile(@Request() req: ExpressRequest & { user?: { id: string } }) {
     const adminUserId = req.user?.id;
     if (!adminUserId) {
       throw new Error("User not authenticated");
@@ -56,7 +57,7 @@ export class AdminProfileController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createProfile(
-    @Request() req,
+    @Request() req: ExpressRequest & { user?: { id: string } },
     @Body()
     data: {
       bio?: string;
@@ -97,7 +98,7 @@ export class AdminProfileController {
 
   @Put()
   async updateProfile(
-    @Request() req,
+    @Request() req: ExpressRequest & { user?: { id: string } },
     @Body()
     data: {
       bio?: string;
@@ -138,7 +139,7 @@ export class AdminProfileController {
 
   @Put("user-info")
   async updateUserInfo(
-    @Request() req,
+    @Request() req: ExpressRequest & { user?: { id: string } },
     @Body()
     data: {
       firstName?: string;
@@ -177,7 +178,9 @@ export class AdminProfileController {
 
   // IP Allowlist endpoints
   @Get("allowed-ips")
-  async getAllowedIps(@Request() req) {
+  async getAllowedIps(
+    @Request() req: ExpressRequest & { user?: { id: string } },
+  ) {
     const adminUserId = req.user?.id;
     if (!adminUserId) {
       throw new Error("User not authenticated");
@@ -205,7 +208,7 @@ export class AdminProfileController {
   @Post("allowed-ips")
   @HttpCode(HttpStatus.CREATED)
   async addAllowedIp(
-    @Request() req,
+    @Request() req: ExpressRequest & { user?: { id: string } },
     @Body()
     data: {
       ipAddress: string;
@@ -243,7 +246,7 @@ export class AdminProfileController {
 
   @Put("allowed-ips/:id")
   async updateAllowedIp(
-    @Request() req,
+    @Request() req: ExpressRequest & { user?: { id: string } },
     @Param("id") id: string,
     @Body()
     data: {
@@ -283,7 +286,10 @@ export class AdminProfileController {
 
   @Post("allowed-ips/:id/remove")
   @HttpCode(HttpStatus.OK)
-  async removeAllowedIp(@Request() req, @Param("id") id: string) {
+  async removeAllowedIp(
+    @Request() req: ExpressRequest & { user?: { id: string } },
+    @Param("id") id: string,
+  ) {
     const adminUserId = req.user?.id;
     if (!adminUserId) {
       throw new Error("User not authenticated");
@@ -314,7 +320,7 @@ export class AdminProfileController {
   }
 
   @Get("allowed-ips/stats")
-  async getIpStats(@Request() req) {
+  async getIpStats(@Request() req: ExpressRequest & { user?: { id: string } }) {
     const adminUserId = req.user?.id;
     if (!adminUserId) {
       throw new Error("User not authenticated");

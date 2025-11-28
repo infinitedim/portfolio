@@ -366,8 +366,10 @@ export class CustomizationService {
     });
   }
 
-  private validateTheme(theme): boolean {
-    return (
+  private validateTheme(
+    theme: Partial<CustomTheme> | null | undefined,
+  ): boolean {
+    return Boolean(
       theme &&
       typeof theme.name === "string" &&
       theme.colors &&
@@ -377,7 +379,7 @@ export class CustomizationService {
       typeof theme.colors.success === "string" &&
       typeof theme.colors.error === "string" &&
       typeof theme.colors.accent === "string" &&
-      typeof theme.colors.border === "string"
+      typeof theme.colors.border === "string",
     );
   }
 
