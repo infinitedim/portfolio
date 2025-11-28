@@ -46,7 +46,6 @@
     "@swc/cli": "^0.7.9",
     "@swc/core": "^1.15.3",
     "@types/bcryptjs": "^2.4.6",
-    "sanitize-html": "^2.17.0",
-    "typescript": "^6.0.0"
+    "sanitize-html": "^2.17.0"
   }
 }
