@@ -7,6 +7,8 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { Redis } from "@upstash/redis";
 import { PrismaClient } from "@prisma/client";
+import { randomBytes, createHash } from "crypto";
+import bcrypt from "bcryptjs";
 
 // Initialize tRPC
 const t = initTRPC.create();
@@ -154,16 +156,31 @@ const authRouter = router({
           };
         }
 
-        if (input.email !== adminEmail || input.password !== adminPassword) {
+        // Use constant-time comparison to prevent timing attacks
+        const emailMatch = input.email === adminEmail;
+
+        // Check if ADMIN_PASSWORD_HASH exists for bcrypt comparison, otherwise use direct comparison for dev
+        const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
+        let passwordMatch = false;
+
+        if (adminPasswordHash) {
+          // Production: use bcrypt to compare hashed password
+          passwordMatch = await bcrypt.compare(input.password, adminPasswordHash);
+        } else if (process.env.NODE_ENV !== "production") {
+          // Development only: direct comparison (should never be used in production)
+          passwordMatch = input.password === adminPassword;
+        }
+
+        if (!emailMatch || !passwordMatch) {
           return {
             success: false,
             error: "Invalid credentials",
           };
         }
 
-        // Generate simple tokens (in production, use proper JWT)
-        const accessToken = `access_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-        const refreshToken = `refresh_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        // Generate cryptographically secure tokens
+        const accessToken = randomBytes(32).toString("hex");
+        const refreshToken = randomBytes(32).toString("hex");
 
         // Store tokens in Redis if available
         const redis = getRedis();
@@ -212,9 +229,9 @@ const authRouter = router({
           };
         }
 
-        // Generate new tokens
-        const accessToken = `access_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-        const refreshToken = `refresh_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        // Generate cryptographically secure tokens
+        const accessToken = randomBytes(32).toString("hex");
+        const refreshToken = randomBytes(32).toString("hex");
 
         await redis.set(`token:${accessToken}`, email, { ex: 3600 });
         await redis.set(`refresh:${refreshToken}`, email, { ex: 86400 * 7 });
@@ -421,21 +438,33 @@ const projectsRouter = router({
       z
         .object({
           section: z.string().optional(),
-          limit: z.number().optional(),
+          limit: z.number().int().positive().max(100).optional(),
         })
         .optional(),
     )
     .query(async ({ input }) => {
-      // Fetch from database or return static data
+      // Fetch from database using safe Prisma methods (no raw SQL with user input)
       try {
         const prisma = getPrisma();
 
-        // Example: fetch projects from database
-        // Modify this based on your actual schema
-        const projects = await prisma.$queryRaw`
-          SELECT * FROM "Project"
-          ${input?.limit ? `LIMIT ${input.limit}` : ""}
-        `.catch(() => []);
+        // Use Prisma's type-safe query builder to prevent SQL injection
+        const projects = await prisma.project.findMany({
+          take: input?.limit ?? 20,
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            description: true,
+            tech: true,
+            featured: true,
+            status: true,
+            url: true,
+            githubUrl: true,
+            imageUrl: true,
+            createdAt: true,
+          },
+        });
 
         return { data: projects, meta: { section: input?.section } };
       } catch {

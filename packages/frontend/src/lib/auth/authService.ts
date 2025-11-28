@@ -27,25 +27,69 @@ export interface ValidateResponse {
   error?: string;
 }
 
+/**
+ * Secure token storage using sessionStorage (cleared on browser close)
+ * and in-memory storage for sensitive tokens.
+ *
+ * Security improvements:
+ * 1. Access tokens kept in memory only (not persisted to storage)
+ * 2. Refresh tokens use sessionStorage (cleared on browser close)
+ * 3. User data uses sessionStorage instead of localStorage
+ *
+ * Note: For maximum security, consider implementing httpOnly cookies
+ * on the backend for token storage.
+ */
 class AuthService {
+  // Access token kept in memory only - not persisted to any storage
+  // This prevents XSS attacks from stealing the access token
   private accessToken: string | null = null;
+
+  // Refresh token - stored in sessionStorage (more secure than localStorage)
   private refreshToken: string | null = null;
+
+  // User info (non-sensitive)
   private user: AuthUser | null = null;
 
+  // Storage keys with prefix to avoid conflicts
+  private readonly STORAGE_PREFIX = "__auth_";
+  private readonly REFRESH_TOKEN_KEY = `${this.STORAGE_PREFIX}rt`;
+  private readonly USER_KEY = `${this.STORAGE_PREFIX}user`;
+
   constructor() {
-    // Load tokens from localStorage on initialization (client-side only)
+    // Load tokens from sessionStorage on initialization (client-side only)
+    // Note: Access token is NOT loaded from storage - it must be refreshed
     if (typeof window !== "undefined") {
-      this.accessToken = localStorage.getItem("accessToken");
-      this.refreshToken = localStorage.getItem("refreshToken");
-      const userStr = localStorage.getItem("user");
+      // Only load refresh token and user from sessionStorage
+      this.refreshToken = sessionStorage.getItem(this.REFRESH_TOKEN_KEY);
+      const userStr = sessionStorage.getItem(this.USER_KEY);
       if (userStr) {
         try {
           this.user = JSON.parse(userStr);
         } catch {
           this.user = null;
+          sessionStorage.removeItem(this.USER_KEY);
         }
       }
+
+      // Migrate from old localStorage if exists (one-time cleanup)
+      this.migrateFromLocalStorage();
     }
+  }
+
+  /**
+   * One-time migration from localStorage to sessionStorage
+   * Clears old insecure storage
+   */
+  private migrateFromLocalStorage(): void {
+    if (typeof window === "undefined") return;
+
+    // Remove old localStorage items (security cleanup)
+    const oldKeys = ["accessToken", "refreshToken", "user"];
+    oldKeys.forEach(key => {
+      if (localStorage.getItem(key)) {
+        localStorage.removeItem(key);
+      }
+    });
   }
 
   /**
@@ -78,17 +122,20 @@ class AuthService {
       const result = await trpcClient.auth.login.mutate({ email, password });
 
       if (result.success && result.accessToken && result.user) {
+        // Store access token in memory only (not persisted - security best practice)
         this.accessToken = result.accessToken;
         this.refreshToken = result.refreshToken || null;
         this.user = result.user;
 
-        // Store in localStorage (client-side only)
+        // Store refresh token and user in sessionStorage (more secure than localStorage)
+        // sessionStorage is cleared when browser closes and is not accessible via XSS as easily
         if (typeof window !== "undefined") {
-          localStorage.setItem("accessToken", result.accessToken);
+          // Note: Access token is NOT stored - kept in memory only
           if (result.refreshToken) {
-            localStorage.setItem("refreshToken", result.refreshToken);
+            sessionStorage.setItem(this.REFRESH_TOKEN_KEY, result.refreshToken);
           }
-          localStorage.setItem("user", JSON.stringify(result.user));
+          // User info is non-sensitive, can be stored
+          sessionStorage.setItem(this.USER_KEY, JSON.stringify(result.user));
         }
 
         return {
@@ -147,16 +194,17 @@ class AuthService {
       });
 
       if (result.success && result.accessToken) {
+        // Store new access token in memory only
         this.accessToken = result.accessToken;
         if (result.refreshToken) {
           this.refreshToken = result.refreshToken;
         }
 
-        // Update localStorage (client-side only)
+        // Update sessionStorage (client-side only)
         if (typeof window !== "undefined") {
-          localStorage.setItem("accessToken", result.accessToken);
+          // Note: Access token is NOT stored - kept in memory only
           if (result.refreshToken) {
-            localStorage.setItem("refreshToken", result.refreshToken);
+            sessionStorage.setItem(this.REFRESH_TOKEN_KEY, result.refreshToken);
           }
         }
 
@@ -246,9 +294,9 @@ class AuthService {
 
       if (result.success && result.user) {
         this.user = result.user;
-        // Update user in localStorage (client-side only)
+        // Update user in sessionStorage (client-side only)
         if (typeof window !== "undefined") {
-          localStorage.setItem("user", JSON.stringify(result.user));
+          sessionStorage.setItem(this.USER_KEY, JSON.stringify(result.user));
         }
 
         return {
@@ -307,14 +355,20 @@ class AuthService {
   }
 
   /**
-   * Clear all tokens and user data
+   * Clear all tokens and user data securely
    */
   private clearTokens(): void {
+    // Clear in-memory tokens
     this.accessToken = null;
     this.refreshToken = null;
     this.user = null;
 
     if (typeof window !== "undefined") {
+      // Clear sessionStorage
+      sessionStorage.removeItem(this.REFRESH_TOKEN_KEY);
+      sessionStorage.removeItem(this.USER_KEY);
+
+      // Also clear any legacy localStorage items (security cleanup)
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");

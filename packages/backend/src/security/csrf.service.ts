@@ -47,7 +47,7 @@ export class CSRFTokenService {
   }
 
   /**
-   * Validate a CSRF token
+   * Validate a CSRF token using timing-safe comparison
    * @param {string} sessionId - The session identifier
    * @param {string} token - The token to validate
    * @returns {Promise<CSRFValidationResult>} - The validation result
@@ -57,6 +57,14 @@ export class CSRFTokenService {
     token: string,
   ): Promise<CSRFValidationResult> {
     try {
+      // Input validation
+      if (!token || typeof token !== "string") {
+        return {
+          isValid: false,
+          error: "Invalid token format",
+        };
+      }
+
       const key = `${this.SESSION_PREFIX}${sessionId}`;
       const storedToken = await this.redisService.get<CSRFToken>(key);
 
@@ -76,7 +84,22 @@ export class CSRFTokenService {
         };
       }
 
-      if (storedToken.token !== token) {
+      // Use timing-safe comparison to prevent timing attacks
+      // Both tokens must be the same length for timingSafeEqual
+      const storedTokenBuffer = Buffer.from(storedToken.token, "hex");
+      const providedTokenBuffer = Buffer.from(token, "hex");
+
+      // Check if both are valid hex strings and same length
+      if (storedTokenBuffer.length !== providedTokenBuffer.length) {
+        return {
+          isValid: false,
+          error: "CSRF token mismatch",
+        };
+      }
+
+      const isValid = crypto.timingSafeEqual(storedTokenBuffer, providedTokenBuffer);
+
+      if (!isValid) {
         return {
           isValid: false,
           error: "CSRF token mismatch",
