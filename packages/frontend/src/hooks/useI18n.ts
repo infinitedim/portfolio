@@ -1,9 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import {
-  i18n,
-  t,
-  type TranslationKeys,
-} from "@/lib/i18n/i18nService";
+import { i18n, t, type TranslationKeys } from "@/lib/i18n/i18nService";
 
 /**
  * React hook for internationalization

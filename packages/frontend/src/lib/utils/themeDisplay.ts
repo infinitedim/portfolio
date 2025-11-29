@@ -1,11 +1,5 @@
-import {
-  themes,
-  getSortedThemeNames,
-} from "@/lib/themes/themeConfig";
-import type {
-  ThemeName,
-  ThemeRegistry,
-} from "@/types/theme";
+import { themes, getSortedThemeNames } from "@/lib/themes/themeConfig";
+import type { ThemeName, ThemeRegistry } from "@/types/theme";
 
 export interface ThemeDisplayOptions {
   showCurrent?: boolean;

@@ -85,8 +85,9 @@ export default function AdminLoginPage() {
               onClick={handleBack}
               onMouseEnter={() => setIsBackHovered(true)}
               onMouseLeave={() => setIsBackHovered(false)}
-              className={`px-3 py-1 text-xs font-mono rounded transition-all duration-200 ${isBackHovered ? "scale-105" : "scale-100"
-                }`}
+              className={`px-3 py-1 text-xs font-mono rounded transition-all duration-200 ${
+                isBackHovered ? "scale-105" : "scale-100"
+              }`}
               style={{
                 backgroundColor: isBackHovered
                   ? themeConfig.colors.accent

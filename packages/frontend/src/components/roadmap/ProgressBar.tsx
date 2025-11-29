@@ -42,8 +42,9 @@ export function ProgressBar({
         style={{ backgroundColor: `${themeConfig.colors.border}40` }}
       >
         <div
-          className={`${height} rounded-full transition-all duration-500 ease-out ${animated ? "animate-pulse" : ""
-            }`}
+          className={`${height} rounded-full transition-all duration-500 ease-out ${
+            animated ? "animate-pulse" : ""
+          }`}
           style={{
             width: `${clampedProgress}%`,
             backgroundColor: themeConfig.colors.accent,

@@ -5,6 +5,7 @@
 import { useState, useEffect, useRef } from "react";
 import type { ThemeConfig } from "@/types/theme";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { useI18n } from "@/hooks/useI18n";
 
 interface TerminalLoginFormProps {
   onLoginSuccess?: () => void;
@@ -22,6 +23,7 @@ export function TerminalLoginForm({
   themeConfig,
 }: TerminalLoginFormProps) {
   const { login } = useAuth();
+  const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [currentField, setCurrentField] = useState<"email" | "password">(
@@ -306,12 +308,12 @@ export function TerminalLoginForm({
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <span className="animate-spin">⏳</span>
-                  Authenticating...
+                  {t("loading")}
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
                   <span>🚀</span>
-                  Authenticate
+                  {t("submit")}
                 </span>
               )}
             </button>

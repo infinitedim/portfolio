@@ -2,10 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import type { FontName } from "@/types/font";
-import {
-  fonts,
-  defaultFont,
-} from "@/lib/fonts/fontConfig";
+import { fonts, defaultFont } from "@/lib/fonts/fontConfig";
 
 // Constants
 const STORAGE_KEY = "terminal-font" as const;

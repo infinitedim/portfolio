@@ -157,10 +157,12 @@ const authRouter = router({
         }
 
         // Use constant-time comparison to prevent timing attacks for email
-        const emailBuffer = Buffer.from(input.email.padEnd(256, '\0'));
-        const adminEmailBuffer = Buffer.from(adminEmail.padEnd(256, '\0'));
-        const emailMatch = emailBuffer.length === adminEmailBuffer.length &&
-          require('crypto').timingSafeEqual(emailBuffer, adminEmailBuffer);
+        const emailBuffer = Buffer.from(input.email.padEnd(256, "\0"));
+        const adminEmailBuffer = Buffer.from(adminEmail.padEnd(256, "\0"));
+        const emailMatch =
+          emailBuffer.length === adminEmailBuffer.length &&
+          createHash("sha256").update(emailBuffer).digest("hex") ===
+            createHash("sha256").update(adminEmailBuffer).digest("hex");
 
         // Check if ADMIN_PASSWORD_HASH exists for bcrypt comparison
         const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
@@ -168,7 +170,10 @@ const authRouter = router({
 
         if (adminPasswordHash) {
           // Production: use bcrypt to compare hashed password (already timing-safe)
-          passwordMatch = await bcrypt.compare(input.password, adminPasswordHash);
+          passwordMatch = await bcrypt.compare(
+            input.password,
+            adminPasswordHash,
+          );
         } else if (process.env.NODE_ENV !== "production") {
           // Development only: use timing-safe comparison even in dev for consistency
           // Hash the password first to make comparison secure

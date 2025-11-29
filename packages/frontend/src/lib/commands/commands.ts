@@ -1,7 +1,4 @@
-import type {
-  Command,
-  CommandOutput,
-} from "@/types/terminal";
+import type { Command, CommandOutput } from "@/types/terminal";
 import { ArgumentParser } from "@/lib/utils/argParser";
 import { generateId } from "@/lib/utils/utils";
 

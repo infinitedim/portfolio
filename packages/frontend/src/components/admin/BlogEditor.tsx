@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import type { ThemeConfig } from "@/types/theme";
+import { useI18n } from "@/hooks/useI18n";
 
 interface BlogPost {
   id: string;
@@ -25,6 +26,7 @@ interface BlogEditorProps {
  * @param root0.themeConfig
  */
 export function BlogEditor({ themeConfig }: BlogEditorProps) {
+  const { t } = useI18n();
   const [currentPost, setCurrentPost] = useState<BlogPost | null>(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -42,11 +44,11 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
   useEffect(() => {
     const sampleDraft: BlogPost = {
       id: "draft-1",
-      title: "New Blog Post",
+      title: t("blogNewPost"),
       slug: "new-blog-post",
       content:
         "# Welcome to the Blog Editor\n\nStart writing your content here...\n\n## Features\n\n- **Markdown Support**: Write in Markdown\n- **Live Preview**: See changes in real-time\n- **Auto-save**: Your work is automatically saved\n- **Terminal Theme**: Consistent with the admin interface\n\n## Code Example\n\n```javascript\nconsole.log('Hello, World!');\n```",
-      summary: "A brief summary of your blog post",
+      summary: "",
       tags: ["blog", "markdown"],
       published: false,
       createdAt: new Date().toISOString(),
@@ -59,6 +61,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
     setContent(sampleDraft.content);
     setSummary(sampleDraft.summary);
     setTags(sampleDraft.tags);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Auto-save functionality
@@ -112,7 +115,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
   const createNewDraft = () => {
     const newDraft: BlogPost = {
       id: `draft-${Date.now()}`,
-      title: "Untitled Post",
+      title: t("blogUntitled"),
       slug: "untitled-post",
       content: "# New Blog Post\n\nStart writing here...",
       summary: "",
@@ -294,7 +297,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
                 color: themeConfig.colors.accent,
               }}
             >
-              ✏️ New Draft
+              ✏️ {t("blogNewPost")}
             </button>
             <button
               onClick={saveDraft}
@@ -309,7 +312,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
                   : themeConfig.colors.success,
               }}
             >
-              {isSaving ? "💾 Saving..." : "💾 Save"}
+              {isSaving ? `💾 ${t("blogSaving")}` : `💾 ${t("blogSaveDraft")}`}
             </button>
             <button
               onClick={publishPost}
@@ -324,7 +327,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
                   : themeConfig.colors.accent,
               }}
             >
-              🚀 Publish
+              🚀 {t("blogPublish")}
             </button>
           </div>
         </div>
@@ -332,10 +335,10 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
         {/* Status */}
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center space-x-4">
-            <span>Drafts: {drafts.length}</span>
-            <span>Published: {drafts.filter((d) => d.published).length}</span>
+            <span>{t("blogDrafts")}: {drafts.length}</span>
+            <span>{t("blogPublished")}: {drafts.filter((d) => d.published).length}</span>
             {lastSaved && (
-              <span>Last saved: {lastSaved.toLocaleTimeString()}</span>
+              <span>{t("blogLastSaved")}: {lastSaved.toLocaleTimeString()}</span>
             )}
           </div>
           <button
@@ -350,7 +353,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
                 : themeConfig.colors.text,
             }}
           >
-            {isPreview ? "📝 Edit" : "👁️ Preview"}
+            {isPreview ? `📝 ${t("commandEdit")}` : `👁️ ${t("blogPreview")}`}
           </button>
         </div>
       </div>
@@ -369,7 +372,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
               className="text-sm font-bold mb-3"
               style={{ color: themeConfig.colors.accent }}
             >
-              Drafts
+              {t("blogDrafts")}
             </div>
             <div className="space-y-2">
               {drafts.map((draft) => {
@@ -402,7 +405,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
                         className="text-xs mt-1"
                         style={{ color: themeConfig.colors.success }}
                       >
-                        ✅ Published
+                        ✅ {t("blogPublished")}
                       </div>
                     )}
                   </button>
@@ -423,7 +426,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
           >
             {/* Title */}
             <div className="mb-4">
-              <div className="text-xs opacity-70 mb-2">Title</div>
+              <div className="text-xs opacity-70 mb-2">{t("blogTitle")}</div>
               <input
                 type="text"
                 value={title}
@@ -433,13 +436,13 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
                   borderColor: themeConfig.colors.border,
                   color: themeConfig.colors.text,
                 }}
-                placeholder="Enter post title..."
+                placeholder={`${t("blogTitle")}...`}
               />
             </div>
 
             {/* Summary */}
             <div className="mb-4">
-              <div className="text-xs opacity-70 mb-2">Summary</div>
+              <div className="text-xs opacity-70 mb-2">{t("blogSummary")}</div>
               <textarea
                 value={summary}
                 onChange={(e) => setSummary(e.target.value)}
@@ -449,13 +452,13 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
                   borderColor: themeConfig.colors.border,
                   color: themeConfig.colors.text,
                 }}
-                placeholder="Brief summary of the post..."
+                placeholder={`${t("blogSummary")}...`}
               />
             </div>
 
             {/* Tags */}
             <div className="mb-4">
-              <div className="text-xs opacity-70 mb-2">Tags</div>
+              <div className="text-xs opacity-70 mb-2">{t("blogTags")}</div>
               <div className="flex items-center space-x-2 mb-2">
                 <input
                   type="text"
@@ -467,7 +470,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
                     borderColor: themeConfig.colors.border,
                     color: themeConfig.colors.text,
                   }}
-                  placeholder="Add tag..."
+                  placeholder={`${t("blogAddTag")}...`}
                 />
                 <button
                   onClick={addTag}
@@ -477,7 +480,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
                     color: themeConfig.colors.accent,
                   }}
                 >
-                  Add
+                  {t("blogAddTag")}
                 </button>
               </div>
               <div className="flex flex-wrap gap-1">
@@ -504,7 +507,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
 
             {/* Content */}
             <div>
-              <div className="text-xs opacity-70 mb-2">Content</div>
+              <div className="text-xs opacity-70 mb-2">{t("blogContent")}</div>
               {isPreview ? (
                 <div
                   className="w-full min-h-[400px] px-3 py-2 text-sm border rounded font-mono overflow-y-auto"

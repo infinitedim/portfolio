@@ -9,10 +9,7 @@ import { FontManager } from "./FontManager";
 import { SettingsManager } from "./SettingsManager";
 import { ImportExportManager } from "./ImportExportManager";
 import { TerminalLoadingProgress } from "@/components/ui/TerminalLoadingProgress";
-import type {
-  CustomTheme,
-  CustomFont,
-} from "@/types/customization";
+import type { CustomTheme, CustomFont } from "@/types/customization";
 
 interface CustomizationManagerProps {
   isOpen: boolean;

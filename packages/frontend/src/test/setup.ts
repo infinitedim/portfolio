@@ -1,4 +1,8 @@
-import { vi, afterEach } from "vitest";
+import { vi, afterEach, expect } from "vitest";
+import * as matchers from "@testing-library/jest-dom/matchers";
+
+// Extend vitest's expect with jest-dom matchers
+expect.extend(matchers);
 
 // Mock Next.js modules
 vi.mock("next/server", () => ({
@@ -104,9 +108,9 @@ vi.mock("@/lib/security/csp", () => ({
 vi.stubEnv("NODE_ENV", "test");
 vi.stubEnv("ALLOWED_ORIGINS", "http://127.0.0.1:3000,https://example.com");
 
-// Mock Date for consistent timestamps
-const mockDate = new Date("2024-01-01T00:00:00.000Z");
-vi.spyOn(global, "Date").mockImplementation(() => mockDate as unknown as Date);
+// Mock Date.now for consistent timestamps without affecting Date constructor
+const MOCK_DATE = new Date("2024-01-01T00:00:00.000Z");
+vi.spyOn(Date, "now").mockImplementation(() => MOCK_DATE.getTime());
 
 // Mock Math.random for consistent A/B testing
 vi.spyOn(Math, "random").mockReturnValue(0.5);

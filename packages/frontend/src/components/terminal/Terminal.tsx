@@ -5,6 +5,7 @@
 import { useState, useRef, useEffect, useMemo, type JSX } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { useTerminal } from "@/hooks/useTerminal";
+import { useI18n } from "@/hooks/useI18n";
 import { useAccessibility } from "@/components/accessibility/AccessibilityProvider";
 import { CommandInput } from "./CommandInput";
 import { TerminalHistory } from "./TerminalHistory";
@@ -44,6 +45,7 @@ export function Terminal({
   const themeHookResult = useTheme();
   const fontHookResult = useFont();
   const { announceMessage, isReducedMotion } = useAccessibility();
+  const { t } = useI18n();
 
   // Add minimum loading time to ensure progress bar animation runs
   const [hasMinimumLoadingTime, setHasMinimumLoadingTime] = useState(false);
@@ -222,11 +224,11 @@ export function Terminal({
           <TerminalLoadingProgress
             duration={2000}
             files={[
-              { path: "Initializing hooks...", size: "" },
-              { path: "Loading theme configuration...", size: "" },
-              { path: "Loading font configuration...", size: "" },
+              { path: t("loading"), size: "" },
+              { path: t("loading"), size: "" },
+              { path: t("loading"), size: "" },
             ]}
-            completionText="🔧 Hooks initialized!"
+            completionText={`🔧 ${t("terminalReady")}!`}
             autoStart={true}
             showSystemInfo={true}
           />

@@ -8,7 +8,7 @@ import type { ThemeName } from "@/types/theme";
 import { TerminalLoadingProgress } from "@/components/ui/TerminalLoadingProgress";
 
 const ThemeConfigs = lazy(() =>
-  import("@portfolio/frontend/src/lib/themes/themeConfig").then((module) => ({
+  import("@/lib/themes/themeConfig").then((module) => ({
     default: module.themes as unknown as ComponentType<any>,
   })),
 );

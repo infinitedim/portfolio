@@ -101,12 +101,6 @@ export function CommandInput({
 
   // Show suggestions on mount if showOnEmpty is true
   useEffect(() => {
-    console.log("CommandInput suggestions effect:", {
-      showOnEmpty,
-      valueLength: value.length,
-      getCommandSuggestions: !!getCommandSuggestions,
-    });
-
     if (showOnEmpty && value.length === 0) {
       setShowSuggestions(true);
       setSuggestionTrigger((prev) => !prev);
@@ -127,20 +121,11 @@ export function CommandInput({
   // Show suggestions on input change - simplified and more reliable
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      console.log("Suggestion effect triggered:", {
-        value,
-        valueLength: value.length,
-        showOnEmpty,
-        isProcessing,
-        showTabCompletion,
-      });
-
       const shouldShowSuggestions =
         !isProcessing &&
         !showTabCompletion &&
         (value.length > 0 || showOnEmpty);
 
-      console.log("Should show suggestions:", shouldShowSuggestions);
       setShowSuggestions(shouldShowSuggestions);
 
       // Trigger suggestion updates for better responsiveness
@@ -231,9 +216,8 @@ export function CommandInput({
             }
 
             onSubmit(validation.sanitizedInput);
-          } catch (error) {
+          } catch {
             // Fallback to original value if validation fails
-            console.warn("Security validation error:", error);
             onSubmit(value.trim());
           }
           setShowTabCompletion(false);
@@ -375,7 +359,6 @@ export function CommandInput({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
-    console.log("Input changed:", { oldValue: value, newValue, showOnEmpty });
 
     onChange(newValue);
 
@@ -390,10 +373,6 @@ export function CommandInput({
 
     // Show suggestions when user types or when showOnEmpty is true
     const shouldShow = newValue.length > 0 || showOnEmpty;
-    console.log("Should show suggestions:", shouldShow, {
-      inputLength: newValue.length,
-      showOnEmpty,
-    });
 
     setShowSuggestions(shouldShow);
 
@@ -553,9 +532,8 @@ export function CommandInput({
           input={value}
           availableCommands={availableCommands}
           onSelect={handleSuggestionSelect}
-          onCommandUsed={(command) => {
+          onCommandUsed={() => {
             // Track command usage for analytics if needed
-            console.debug("Command used:", command);
           }}
           visible={showSuggestions}
           showOnEmpty={true}

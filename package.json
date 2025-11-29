@@ -26,8 +26,10 @@
     "test:tools": "turbo test --filter=@portfolio/trpc --filter=@portfolio/logger",
     "format": "bun x prettier --write .",
     "prepare": "husky",
-    "prisma:generate": "bun x prisma generate --schema=./packages/backend/prisma/schema.prisma",
-    "prisma:migrate": "bun x prisma migrate dev --schema=./packages/backend/prisma/schema.prisma"
+    "prisma:fix-symlink": "rm -rf packages/backend/node_modules/@prisma && cp -r node_modules/@prisma packages/backend/node_modules/",
+    "prisma:generate": "bun run prisma:fix-symlink && cd packages/backend && npx prisma generate",
+    "prisma:migrate": "bun run prisma:fix-symlink && cd packages/backend && npx prisma migrate dev",
+    "prisma:studio": "bun run prisma:fix-symlink && cd packages/backend && npx prisma studio"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",
@@ -37,6 +39,7 @@
     "@jridgewell/sourcemap-codec": "^1.5.5",
     "@playwright/test": "^1.57.0",
     "@rollup/plugin-terser": "^0.4.4",
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@total-typescript/ts-reset": "^0.6.1",
@@ -75,7 +78,7 @@
     "postcss-import": "^16.1.1",
     "postcss-preset-env": "^10.4.0",
     "prettier": "^3.7.1",
-    "prisma": "^7.0.1",
+    "prisma": "7.0.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.17",
     "tailwindcss-animate": "^1.0.7",
@@ -90,6 +93,8 @@
     "**/*.{css,html,json,md}": ["bun x prettier --write"]
   },
   "dependencies": {
+    "@prisma/client": "7.0.1",
+    "@prisma/config": "^7.0.1",
     "turbo": "^2.6.1"
   }
 }

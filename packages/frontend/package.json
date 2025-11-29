@@ -33,7 +33,6 @@
     "@hookform/resolvers": "^5.2.2",
     "@next/bundle-analyzer": "^16.0.5",
     "@prisma/client": "^7.0.1",
-    "@upstash/redis": "^1.35.7",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.8",
@@ -65,7 +64,9 @@
     "@trpc/client": "^11.7.2",
     "@trpc/react-query": "^11.7.2",
     "@trpc/server": "^11.7.2",
+    "@upstash/redis": "^1.35.7",
     "ai": "^5.0.104",
+    "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "crypto-js": "^4.2.0",
@@ -91,6 +92,7 @@
     "@next/eslint-plugin-next": "^16.0.5",
     "@tailwindcss/postcss": "^4.1.17",
     "eslint-config-next": "^16.0.5",
-    "local-ssl-proxy": "^2.0.5"
+    "local-ssl-proxy": "^2.0.5",
+    "prisma": "^7.0.1"
   }
 }

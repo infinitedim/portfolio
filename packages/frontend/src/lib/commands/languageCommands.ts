@@ -1,7 +1,4 @@
-import type {
-  Command,
-  CommandOutput,
-} from "@/types/terminal";
+import type { Command, CommandOutput } from "@/types/terminal";
 import { generateId } from "@/lib/utils/utils";
 import { i18n, t } from "@/lib/i18n/i18nService";
 import {

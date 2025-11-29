@@ -23,8 +23,7 @@ const getRoadmapService = async () => {
   roadmapServicePromise = (async () => {
     try {
       // Use dynamic import instead of require
-      const { RoadmapService } =
-        await import("@portfolio/frontend/src/lib/services/roadmapService");
+      const { RoadmapService } = await import("@/lib/services/roadmapService");
       roadmapService = RoadmapService.getInstance();
       return roadmapService;
     } catch (error) {

@@ -1,8 +1,5 @@
 import { ProjectMetadataService } from "@/lib/projects/projectMetadata";
-import type {
-  Command,
-  CommandOutput,
-} from "@/types/terminal";
+import type { Command, CommandOutput } from "@/types/terminal";
 
 export const techStackCommand: Command = {
   name: "tech-stack",

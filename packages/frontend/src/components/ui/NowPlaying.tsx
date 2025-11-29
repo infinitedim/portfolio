@@ -9,7 +9,7 @@ let trpc: any = null;
 if (typeof window !== "undefined") {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    trpc = require("@portfolio/frontend/src/lib/trpc").trpc;
+    trpc = require("@/lib/trpc").trpc;
   } catch (error) {
     console.warn("tRPC not available:", error);
   }

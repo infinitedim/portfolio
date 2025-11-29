@@ -30,10 +30,11 @@ export function ServiceSelector({
         <button
           key={service.name}
           onClick={() => onServiceSelect(service)}
-          className={`w-full p-4 text-left border rounded-lg transition-all duration-200 font-mono text-sm ${selectedService?.name === service.name
-            ? "scale-105"
-            : "hover:scale-102 hover:opacity-80"
-            }`}
+          className={`w-full p-4 text-left border rounded-lg transition-all duration-200 font-mono text-sm ${
+            selectedService?.name === service.name
+              ? "scale-105"
+              : "hover:scale-102 hover:opacity-80"
+          }`}
           style={{
             borderColor:
               selectedService?.name === service.name

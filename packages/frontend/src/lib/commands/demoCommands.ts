@@ -1,8 +1,5 @@
 import { ProjectMetadataService } from "@/lib/projects/projectMetadata";
-import type {
-  Command,
-  CommandOutput,
-} from "@/types/terminal";
+import type { Command, CommandOutput } from "@/types/terminal";
 
 // Global callback for opening demos
 let globalOnOpenDemo: ((projectId: string) => void) | null = null;

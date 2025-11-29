@@ -312,7 +312,34 @@ export class SecurityMiddleware implements NestMiddleware {
 
   private requiresCSRFToken(req: Request): boolean {
     const stateChangingMethods = ["POST", "PUT", "PATCH", "DELETE"];
-    const csrfRequiredPaths = ["/auth/login", "/auth/register", "/admin"];
+
+    // Paths that require CSRF protection for state-changing operations
+    const csrfRequiredPaths = [
+      "/auth/login",
+      "/auth/register",
+      "/admin",
+      "/api/",      // All API routes
+      "/trpc/",     // All tRPC routes (mutations)
+    ];
+
+    // Paths that are exempt from CSRF (typically read-only or have other auth)
+    const csrfExemptPaths = [
+      "/api/trpc",     // tRPC batch endpoint - uses JWT auth
+      "/trpc/health",  // Health checks
+      "/api/health",   // Health checks
+    ];
+
+    // Check if path is exempt
+    const isExempt = csrfExemptPaths.some((path) => req.path.startsWith(path));
+    if (isExempt) {
+      return false;
+    }
+
+    // Check if request has valid JWT - JWT-authenticated requests don't need CSRF
+    const hasJWT = req.headers.authorization?.startsWith("Bearer ");
+    if (hasJWT) {
+      return false;
+    }
 
     return (
       stateChangingMethods.includes(req.method) &&

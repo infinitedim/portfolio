@@ -2,6 +2,8 @@
 
 import { useState, useEffect, JSX } from "react";
 import { useTheme } from "@/hooks/useTheme";
+import { useI18n } from "@/hooks/useI18n";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 /**
  * This component is a terminal header that displays the current time and portfolio metrics.
@@ -9,6 +11,7 @@ import { useTheme } from "@/hooks/useTheme";
  */
 export function HomeTerminalHeader(): JSX.Element {
   const { themeConfig } = useTheme();
+  const { t } = useI18n();
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [portfolioMetrics, setPortfolioMetrics] = useState({
@@ -149,7 +152,7 @@ export function HomeTerminalHeader(): JSX.Element {
                   : themeConfig.colors.error || "#ff0000",
             }}
           />
-          <span className="opacity-70">Status:</span>
+          <span className="opacity-70">{t("terminalReady")}:</span>
           <span
             style={{
               color:
@@ -158,12 +161,12 @@ export function HomeTerminalHeader(): JSX.Element {
                   : themeConfig.colors.error || "#ff0000",
             }}
           >
-            {portfolioMetrics.status.toUpperCase()}
+            {portfolioMetrics.status === "online" ? "✓" : "✗"}
           </span>
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="opacity-70">Projects:</span>
+          <span className="opacity-70">{t("projects")}:</span>
           <span
             style={{
               color: getStatusColor(portfolioMetrics.projects, {
@@ -177,7 +180,7 @@ export function HomeTerminalHeader(): JSX.Element {
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="opacity-70">Skills:</span>
+          <span className="opacity-70">{t("skills")}:</span>
           <span
             style={{
               color: getStatusColor(portfolioMetrics.skills, {
@@ -278,6 +281,13 @@ export function HomeTerminalHeader(): JSX.Element {
           <span className="opacity-70">Time:</span>
           <span>{formatTime(currentTime)}</span>
         </div>
+
+        {/* Language Switcher */}
+        <LanguageSwitcher
+          variant="dropdown"
+          showNative={false}
+          showFlags={true}
+        />
       </div>
     </div>
   );

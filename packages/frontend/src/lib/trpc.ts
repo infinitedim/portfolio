@@ -34,12 +34,12 @@ if (typeof window !== "undefined") {
       links: [
         httpBatchLink({
           url: getTRPCUrl(),
-          headers: () => {
+          headers: async () => {
             try {
               // Import authService dynamically to get current in-memory token
               // This aligns with the secure token storage pattern used by AuthService
               // which keeps access tokens in memory only (not localStorage)
-              const { authService } = require("./auth/authService");
+              const { authService } = await import("./auth/authService");
               const memoryToken = authService.getAccessToken();
               if (memoryToken) {
                 return { Authorization: `Bearer ${memoryToken}` };

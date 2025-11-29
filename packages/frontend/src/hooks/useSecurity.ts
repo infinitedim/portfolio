@@ -11,7 +11,7 @@ let trpc: any = null;
 if (typeof window !== "undefined") {
   try {
     // Use dynamic import instead of require
-    import("@portfolio/frontend/src/lib/trpc")
+    import("@/lib/trpc")
       .then((module) => {
         trpc = module.trpc;
         return module;

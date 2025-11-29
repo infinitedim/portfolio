@@ -1,6 +1,7 @@
 "use client";
 
 import type { ThemeConfig } from "@/types/theme";
+import { useI18n } from "@/hooks/useI18n";
 
 type DashboardView =
   | "overview"
@@ -16,19 +17,37 @@ interface TerminalSidebarProps {
   themeConfig: ThemeConfig;
 }
 
-const navigationItems = [
-  { id: "overview", label: "Overview", command: "overview", icon: "🏠" },
-  {
-    id: "performance",
-    label: "Performance",
-    command: "performance",
-    icon: "📊",
-  },
-  { id: "logs", label: "Logs", command: "logs", icon: "📋" },
-  { id: "blog", label: "Blog Editor", command: "blog", icon: "✏️" },
-  { id: "testing", label: "Backend Testing", command: "testing", icon: "🧪" },
-  { id: "settings", label: "Settings", command: "settings", icon: "⚙️" },
-];
+type TranslationKey =
+  | "adminOverview"
+  | "adminPerformance"
+  | "adminLogs"
+  | "adminBlogEditor"
+  | "adminBackendTesting"
+  | "adminSettings";
+
+const navigationItems: {
+  id: DashboardView;
+  labelKey: TranslationKey;
+  command: string;
+  icon: string;
+}[] = [
+    { id: "overview", labelKey: "adminOverview", command: "overview", icon: "🏠" },
+    {
+      id: "performance",
+      labelKey: "adminPerformance",
+      command: "performance",
+      icon: "📊",
+    },
+    { id: "logs", labelKey: "adminLogs", command: "logs", icon: "📋" },
+    { id: "blog", labelKey: "adminBlogEditor", command: "blog", icon: "✏️" },
+    {
+      id: "testing",
+      labelKey: "adminBackendTesting",
+      command: "testing",
+      icon: "🧪",
+    },
+    { id: "settings", labelKey: "adminSettings", command: "settings", icon: "⚙️" },
+  ];
 
 /**
  *
@@ -42,6 +61,8 @@ export function TerminalSidebar({
   onViewChange,
   themeConfig,
 }: TerminalSidebarProps) {
+  const { t } = useI18n();
+
   return (
     <div
       className="w-64 border-r flex flex-col"
@@ -68,9 +89,11 @@ export function TerminalSidebar({
           className="text-lg font-bold"
           style={{ color: themeConfig.colors.accent }}
         >
-          Navigation
+          {t("adminNavigation")}
         </div>
-        <div className="text-xs opacity-50 mt-1">Available commands</div>
+        <div className="text-xs opacity-50 mt-1">
+          {t("adminAvailableCommands")}
+        </div>
       </div>
 
       {/* Navigation Menu */}
@@ -101,7 +124,7 @@ export function TerminalSidebar({
             <div className="flex items-center space-x-3">
               <span className="text-lg">{item.icon}</span>
               <div className="flex-1">
-                <div className="font-medium">{item.label}</div>
+                <div className="font-medium">{t(item.labelKey)}</div>
                 <div className="text-xs opacity-70">./{item.command}.sh</div>
               </div>
               {currentView === item.id && (
@@ -121,23 +144,23 @@ export function TerminalSidebar({
           className="text-sm font-bold mb-3"
           style={{ color: themeConfig.colors.accent }}
         >
-          System Status
+          {t("adminSystemStatus")}
         </div>
         <div className="space-y-2 text-xs">
           <div className="flex items-center justify-between">
-            <span className="opacity-70">CPU:</span>
+            <span className="opacity-70">{t("adminCPU")}:</span>
             <span>2.4%</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="opacity-70">Memory:</span>
+            <span className="opacity-70">{t("adminMemory")}:</span>
             <span>45.2%</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="opacity-70">Network:</span>
+            <span className="opacity-70">{t("adminNetwork")}:</span>
             <span>1.2MB/s</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="opacity-70">Disk:</span>
+            <span className="opacity-70">{t("adminDisk")}:</span>
             <span>12.8%</span>
           </div>
         </div>
@@ -151,13 +174,13 @@ export function TerminalSidebar({
             className="text-sm font-bold mb-2"
             style={{ color: themeConfig.colors.accent }}
           >
-            Quick Commands
+            {t("adminQuickCommands")}
           </div>
           <div className="space-y-1 text-xs opacity-70">
-            <div>• Ctrl+R: Refresh</div>
-            <div>• Ctrl+L: Clear logs</div>
-            <div>• Ctrl+S: Save</div>
-            <div>• Ctrl+Q: Quit</div>
+            <div>• Ctrl+R: {t("commandRefresh")}</div>
+            <div>• Ctrl+L: {t("commandClear")}</div>
+            <div>• Ctrl+S: {t("blogSaveDraft")}</div>
+            <div>• Ctrl+Q: {t("adminLogout")}</div>
           </div>
         </div>
       </div>

@@ -168,7 +168,7 @@ export function SettingsManager(): JSX.Element {
                   onChange={(e) =>
                     handleSettingChange("autoSave", e.target.checked)
                   }
-                // Simplified toggle styling for clarity
+                  // Simplified toggle styling for clarity
                 />
               </div>
               {/* Other settings toggles would follow a similar pattern... */}

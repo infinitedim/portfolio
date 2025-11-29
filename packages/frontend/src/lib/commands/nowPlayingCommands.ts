@@ -1,7 +1,4 @@
-import type {
-  Command,
-  CommandOutput,
-} from "@/types/terminal";
+import type { Command, CommandOutput } from "@/types/terminal";
 
 export interface NowPlayingCommandOptions {
   onOpenNowPlaying: () => void;

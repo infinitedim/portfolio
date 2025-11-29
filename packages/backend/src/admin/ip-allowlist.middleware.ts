@@ -3,9 +3,11 @@ import {
   Injectable,
   type NestMiddleware,
   ForbiddenException,
+  UnauthorizedException,
 } from "@nestjs/common";
 import type { Request, Response, NextFunction } from "express";
 import { AllowedIpService } from "./allowed-ip.service";
+import { securityLogger } from "../logging/logger";
 
 @Injectable()
 export class IpAllowlistMiddleware implements NestMiddleware {
@@ -17,19 +19,28 @@ export class IpAllowlistMiddleware implements NestMiddleware {
       return next();
     }
 
-    // Skip IP check for login routes
+    // Skip IP check for login/auth routes - these have their own protection
     if (req.path.includes("/login") || req.path.includes("/auth")) {
       return next();
     }
 
+    const clientIp = this.getClientIp(req);
     const adminUserId = (req as any).user?.id;
+
+    // If accessing protected admin routes without authentication, reject
     if (!adminUserId) {
-      return next();
+      securityLogger.warn("Unauthenticated access attempt to admin route", {
+        path: req.path,
+        ip: clientIp,
+        method: req.method,
+        component: "IpAllowlistMiddleware",
+      });
+      throw new UnauthorizedException(
+        "Authentication required to access admin routes",
+      );
     }
 
-    const clientIp = this.getClientIp(req);
-
-    // Check if IP is allowed
+    // Check if IP is allowed for the authenticated user
     const isAllowed = await this.allowedIpService.isIpAllowed(
       adminUserId,
       clientIp,

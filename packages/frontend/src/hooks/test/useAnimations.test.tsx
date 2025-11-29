@@ -2,12 +2,9 @@ import { describe, it, expect, vi } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 
 // Mock accessibility provider used by the hook
-vi.mock(
-  "@portfolio/frontend/src/components/accessibility/AccessibilityProvider",
-  () => ({
-    useAccessibility: () => ({ isReducedMotion: false }),
-  }),
-);
+vi.mock("@/components/accessibility/AccessibilityProvider", () => ({
+  useAccessibility: () => ({ isReducedMotion: false }),
+}));
 
 import { useAnimations, useTerminalAnimations } from "../useAnimations";
 

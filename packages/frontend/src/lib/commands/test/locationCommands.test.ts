@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 
-vi.mock("@portfolio/frontend/src/lib/location/locationService", () => ({
+vi.mock("@/lib/location/locationService", () => ({
   LocationService: {
     getInstance: () => ({
       getLocation: async () => ({

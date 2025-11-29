@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 
-vi.mock("@portfolio/frontend/src/lib/services/roadmapService", () => ({
+vi.mock("@/lib/services/roadmapService", () => ({
   RoadmapService: {
     getInstance: () => ({
       getUserProgress: async () => ({

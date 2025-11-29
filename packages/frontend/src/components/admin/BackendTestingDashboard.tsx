@@ -602,10 +602,11 @@ export function BackendTestingDashboard({
               <button
                 onClick={executeRequest}
                 disabled={isLoading}
-                className={`w-full p-3 rounded font-mono text-sm transition-all duration-200 ${isLoading
+                className={`w-full p-3 rounded font-mono text-sm transition-all duration-200 ${
+                  isLoading
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:scale-105"
-                  }`}
+                }`}
                 style={{
                   backgroundColor: themeConfig.colors.accent,
                   color: themeConfig.colors.bg,

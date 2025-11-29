@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTheme } from "@/hooks/useTheme";
+import { useI18n } from "@/hooks/useI18n";
 import { ThemeConfig } from "../../types/theme";
 
 type TerminalHeaderProps = {
@@ -17,6 +18,7 @@ export function TerminalHeader({
   themeConfig: themeProp,
 }: TerminalHeaderProps) {
   const { themeConfig } = useTheme();
+  const { t } = useI18n();
   const resolvedTheme = themeProp ?? themeConfig;
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [isClient, setIsClient] = useState(false);
@@ -131,7 +133,7 @@ export function TerminalHeader({
                   : resolvedTheme.colors.error || "#ff0000",
             }}
           />
-          <span className="opacity-70">System:</span>
+          <span className="opacity-70">{t("adminSystem")}:</span>
           <span
             style={{
               color:
@@ -140,19 +142,21 @@ export function TerminalHeader({
                   : themeConfig.colors.error || "#ff0000",
             }}
           >
-            {systemMetrics.systemStatus.toUpperCase()}
+            {systemMetrics.systemStatus === "online"
+              ? t("adminOnline")
+              : t("adminOffline")}
           </span>
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="opacity-70">Uptime:</span>
+          <span className="opacity-70">{t("adminUptime")}:</span>
           <span style={{ color: resolvedTheme.colors.accent }}>
             {systemMetrics.uptime}
           </span>
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="opacity-70">Load:</span>
+          <span className="opacity-70">{t("adminLoad")}:</span>
           <span
             style={{
               color: getStatusColor(systemMetrics.cpuLoad[0], {
@@ -166,7 +170,7 @@ export function TerminalHeader({
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="opacity-70">Processes:</span>
+          <span className="opacity-70">{t("adminProcesses")}:</span>
           <span style={{ color: resolvedTheme.colors.accent }}>
             {systemMetrics.processCount}
           </span>
@@ -179,7 +183,7 @@ export function TerminalHeader({
           className="font-bold"
           style={{ color: resolvedTheme.colors.accent }}
         >
-          PORTFOLIO ADMIN TERMINAL
+          {t("adminTitle").toUpperCase()}
         </span>
         <span className="opacity-50">v1.0.0</span>
       </div>
@@ -187,7 +191,7 @@ export function TerminalHeader({
       {/* Right side - Time and status */}
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-2">
-          <span className="opacity-70">CPU:</span>
+          <span className="opacity-70">{t("adminCPU")}:</span>
           <span
             style={{
               color: getStatusColor(systemMetrics.cpuLoad[0] * 100, {
@@ -201,7 +205,7 @@ export function TerminalHeader({
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="opacity-70">MEM:</span>
+          <span className="opacity-70">{t("adminMemory")}:</span>
           <span
             style={{
               color: getStatusColor(systemMetrics.memoryUsage, {
@@ -215,7 +219,7 @@ export function TerminalHeader({
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="opacity-70">DISK:</span>
+          <span className="opacity-70">{t("adminDisk")}:</span>
           <span
             style={{
               color: getStatusColor(systemMetrics.diskUsage, {
@@ -229,14 +233,14 @@ export function TerminalHeader({
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="opacity-70">NET:</span>
+          <span className="opacity-70">{t("adminNetwork")}:</span>
           <span style={{ color: resolvedTheme.colors.accent }}>
             {systemMetrics.networkSpeed}MB/s
           </span>
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="opacity-70">Time:</span>
+          <span className="opacity-70">{t("adminTime")}:</span>
           <span>{formatTime(currentTime)}</span>
         </div>
       </div>

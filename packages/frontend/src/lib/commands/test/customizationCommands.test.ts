@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 
-vi.mock("@portfolio/frontend/src/lib/services/customizationService", () => {
+vi.mock("@/lib/services/customizationService", () => {
   const mock = {
     getInstance: () => ({
       getCustomThemes: () => [],

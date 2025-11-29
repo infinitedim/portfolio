@@ -90,20 +90,17 @@ export const markUnusedExports = () => {
 export const SplittingStrategies = {
   // Route-based splitting
   byRoute: () => ({
-    home: () => import("@portfolio/frontend/src/app/page"),
-    terminal: () =>
-      import("@portfolio/frontend/src/components/terminal/Terminal"),
+    home: () => import("@/app/page"),
+    terminal: () => import("@/components/terminal/Terminal"),
     customization: () =>
-      import("@portfolio/frontend/src/components/customization/CustomizationManager"),
+      import("@/components/customization/CustomizationManager"),
   }),
 
   // Feature-based splitting
   byFeature: () => ({
-    themes: () => import("@portfolio/frontend/src/lib/themes/themeConfig"),
-    commands: () =>
-      import("@portfolio/frontend/src/lib/commands/commandRegistry"),
-    roadmap: () =>
-      import("@portfolio/frontend/src/lib/services/roadmapService"),
+    themes: () => import("@/lib/themes/themeConfig"),
+    commands: () => import("@/lib/commands/commandRegistry"),
+    roadmap: () => import("@/lib/services/roadmapService"),
   }),
 
   // Size-based splitting (for large libraries)

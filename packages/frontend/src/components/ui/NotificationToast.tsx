@@ -122,9 +122,10 @@ export function NotificationToast({
       className={`
         fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg backdrop-blur-sm
         transition-all duration-300 ease-out max-w-sm
-        ${isVisible
-          ? "opacity-100 translate-x-0 animate-in slide-in-from-right"
-          : "opacity-0 translate-x-full animate-out slide-out-to-right"
+        ${
+          isVisible
+            ? "opacity-100 translate-x-0 animate-in slide-in-from-right"
+            : "opacity-0 translate-x-full animate-out slide-out-to-right"
         }
       `}
       style={{

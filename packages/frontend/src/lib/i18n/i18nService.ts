@@ -48,6 +48,9 @@ export interface TranslationKeys {
   commandUsage: string;
   commandExamples: string;
   commandAliases: string;
+  commandEdit: string;
+  commandRefresh: string;
+  commandClear: string;
 
   // Language
   languageChanged: string;
@@ -108,6 +111,88 @@ export interface TranslationKeys {
   helpExamples: string;
   helpShortcuts: string;
   helpTips: string;
+
+  // Admin Panel
+  adminTitle: string;
+  adminDashboard: string;
+  adminOverview: string;
+  adminPerformance: string;
+  adminLogs: string;
+  adminBlogEditor: string;
+  adminBackendTesting: string;
+  adminSettings: string;
+  adminNavigation: string;
+  adminAvailableCommands: string;
+  adminSystemStatus: string;
+  adminQuickCommands: string;
+  adminLogout: string;
+
+  // Admin Header
+  adminSystem: string;
+  adminUptime: string;
+  adminLoad: string;
+  adminProcesses: string;
+  adminCPU: string;
+  adminMemory: string;
+  adminDisk: string;
+  adminNetwork: string;
+  adminTime: string;
+  adminOnline: string;
+  adminOffline: string;
+
+  // Blog Editor
+  blogNewPost: string;
+  blogUntitled: string;
+  blogTitle: string;
+  blogContent: string;
+  blogSummary: string;
+  blogTags: string;
+  blogAddTag: string;
+  blogPreview: string;
+  blogPublish: string;
+  blogSaveDraft: string;
+  blogLastSaved: string;
+  blogSaving: string;
+  blogDrafts: string;
+  blogPublished: string;
+  blogUnpublished: string;
+
+  // Backend Testing
+  testingTitle: string;
+  testingSelectService: string;
+  testingSelectMethod: string;
+  testingParameters: string;
+  testingExecute: string;
+  testingRequest: string;
+  testingResponse: string;
+  testingLoading: string;
+  testingSuccess: string;
+  testingError: string;
+  testingClear: string;
+
+  // Performance Monitor
+  performanceTitle: string;
+  performanceCPU: string;
+  performanceMemory: string;
+  performanceDisk: string;
+  performanceNetwork: string;
+  performanceLatency: string;
+  performanceRequests: string;
+  performanceErrors: string;
+  performanceUptime: string;
+
+  // Logging Monitor
+  logsTitle: string;
+  logsLevel: string;
+  logsTimestamp: string;
+  logsMessage: string;
+  logsClear: string;
+  logsFilter: string;
+  logsAll: string;
+  logsInfo: string;
+  logsWarning: string;
+  logsErrorLevel: string;
+  logsDebug: string;
 }
 
 // Translation data
@@ -151,6 +236,9 @@ const translations: Record<string, TranslationKeys> = {
     commandUsage: "Usage",
     commandExamples: "Examples",
     commandAliases: "Aliases",
+    commandEdit: "Edit",
+    commandRefresh: "Refresh",
+    commandClear: "Clear",
 
     // Language
     languageChanged: "Language changed successfully",
@@ -211,6 +299,88 @@ const translations: Record<string, TranslationKeys> = {
     helpExamples: "Examples",
     helpShortcuts: "Shortcuts",
     helpTips: "Tips",
+
+    // Admin Panel
+    adminTitle: "Admin Panel",
+    adminDashboard: "Dashboard",
+    adminOverview: "Overview",
+    adminPerformance: "Performance",
+    adminLogs: "Logs",
+    adminBlogEditor: "Blog Editor",
+    adminBackendTesting: "Backend Testing",
+    adminSettings: "Settings",
+    adminNavigation: "Navigation",
+    adminAvailableCommands: "Available commands",
+    adminSystemStatus: "System Status",
+    adminQuickCommands: "Quick Commands",
+    adminLogout: "Logout",
+
+    // Admin Header
+    adminSystem: "System",
+    adminUptime: "Uptime",
+    adminLoad: "Load",
+    adminProcesses: "Processes",
+    adminCPU: "CPU",
+    adminMemory: "MEM",
+    adminDisk: "DISK",
+    adminNetwork: "NET",
+    adminTime: "Time",
+    adminOnline: "ONLINE",
+    adminOffline: "OFFLINE",
+
+    // Blog Editor
+    blogNewPost: "New Post",
+    blogUntitled: "Untitled Post",
+    blogTitle: "Title",
+    blogContent: "Content",
+    blogSummary: "Summary",
+    blogTags: "Tags",
+    blogAddTag: "Add Tag",
+    blogPreview: "Preview",
+    blogPublish: "Publish",
+    blogSaveDraft: "Save Draft",
+    blogLastSaved: "Last saved",
+    blogSaving: "Saving...",
+    blogDrafts: "Drafts",
+    blogPublished: "Published",
+    blogUnpublished: "Unpublished",
+
+    // Backend Testing
+    testingTitle: "Backend Testing",
+    testingSelectService: "Select Service",
+    testingSelectMethod: "Select Method",
+    testingParameters: "Parameters",
+    testingExecute: "Execute",
+    testingRequest: "Request",
+    testingResponse: "Response",
+    testingLoading: "Loading...",
+    testingSuccess: "Success",
+    testingError: "Error",
+    testingClear: "Clear",
+
+    // Performance Monitor
+    performanceTitle: "Performance Monitor",
+    performanceCPU: "CPU Usage",
+    performanceMemory: "Memory Usage",
+    performanceDisk: "Disk Usage",
+    performanceNetwork: "Network",
+    performanceLatency: "Latency",
+    performanceRequests: "Requests",
+    performanceErrors: "Errors",
+    performanceUptime: "Uptime",
+
+    // Logging Monitor
+    logsTitle: "System Logs",
+    logsLevel: "Level",
+    logsTimestamp: "Timestamp",
+    logsMessage: "Message",
+    logsClear: "Clear Logs",
+    logsFilter: "Filter",
+    logsAll: "All",
+    logsInfo: "Info",
+    logsWarning: "Warning",
+    logsErrorLevel: "Error",
+    logsDebug: "Debug",
   },
 
   id_ID: {
@@ -252,6 +422,9 @@ const translations: Record<string, TranslationKeys> = {
     commandUsage: "Penggunaan",
     commandExamples: "Contoh",
     commandAliases: "Alias",
+    commandEdit: "Edit",
+    commandRefresh: "Segarkan",
+    commandClear: "Bersihkan",
 
     // Language
     languageChanged: "Bahasa berhasil diubah",
@@ -312,6 +485,88 @@ const translations: Record<string, TranslationKeys> = {
     helpExamples: "Contoh",
     helpShortcuts: "Shortcut",
     helpTips: "Tips",
+
+    // Admin Panel
+    adminTitle: "Panel Admin",
+    adminDashboard: "Dasbor",
+    adminOverview: "Ringkasan",
+    adminPerformance: "Performa",
+    adminLogs: "Log",
+    adminBlogEditor: "Editor Blog",
+    adminBackendTesting: "Pengujian Backend",
+    adminSettings: "Pengaturan",
+    adminNavigation: "Navigasi",
+    adminAvailableCommands: "Perintah tersedia",
+    adminSystemStatus: "Status Sistem",
+    adminQuickCommands: "Perintah Cepat",
+    adminLogout: "Keluar",
+
+    // Admin Header
+    adminSystem: "Sistem",
+    adminUptime: "Waktu Aktif",
+    adminLoad: "Beban",
+    adminProcesses: "Proses",
+    adminCPU: "CPU",
+    adminMemory: "MEM",
+    adminDisk: "DISK",
+    adminNetwork: "NET",
+    adminTime: "Waktu",
+    adminOnline: "ONLINE",
+    adminOffline: "OFFLINE",
+
+    // Blog Editor
+    blogNewPost: "Post Baru",
+    blogUntitled: "Post Tanpa Judul",
+    blogTitle: "Judul",
+    blogContent: "Konten",
+    blogSummary: "Ringkasan",
+    blogTags: "Tag",
+    blogAddTag: "Tambah Tag",
+    blogPreview: "Pratinjau",
+    blogPublish: "Publikasikan",
+    blogSaveDraft: "Simpan Draft",
+    blogLastSaved: "Terakhir disimpan",
+    blogSaving: "Menyimpan...",
+    blogDrafts: "Draft",
+    blogPublished: "Dipublikasikan",
+    blogUnpublished: "Belum Dipublikasikan",
+
+    // Backend Testing
+    testingTitle: "Pengujian Backend",
+    testingSelectService: "Pilih Layanan",
+    testingSelectMethod: "Pilih Metode",
+    testingParameters: "Parameter",
+    testingExecute: "Jalankan",
+    testingRequest: "Permintaan",
+    testingResponse: "Respons",
+    testingLoading: "Memuat...",
+    testingSuccess: "Berhasil",
+    testingError: "Kesalahan",
+    testingClear: "Hapus",
+
+    // Performance Monitor
+    performanceTitle: "Monitor Performa",
+    performanceCPU: "Penggunaan CPU",
+    performanceMemory: "Penggunaan Memori",
+    performanceDisk: "Penggunaan Disk",
+    performanceNetwork: "Jaringan",
+    performanceLatency: "Latensi",
+    performanceRequests: "Permintaan",
+    performanceErrors: "Kesalahan",
+    performanceUptime: "Waktu Aktif",
+
+    // Logging Monitor
+    logsTitle: "Log Sistem",
+    logsLevel: "Level",
+    logsTimestamp: "Waktu",
+    logsMessage: "Pesan",
+    logsClear: "Hapus Log",
+    logsFilter: "Filter",
+    logsAll: "Semua",
+    logsInfo: "Info",
+    logsWarning: "Peringatan",
+    logsErrorLevel: "Kesalahan",
+    logsDebug: "Debug",
   },
 
   es_ES: {
@@ -353,6 +608,9 @@ const translations: Record<string, TranslationKeys> = {
     commandUsage: "Uso",
     commandExamples: "Ejemplos",
     commandAliases: "Alias",
+    commandEdit: "Editar",
+    commandRefresh: "Actualizar",
+    commandClear: "Limpiar",
 
     // Language
     languageChanged: "Idioma cambiado exitosamente",
@@ -413,6 +671,88 @@ const translations: Record<string, TranslationKeys> = {
     helpExamples: "Ejemplos",
     helpShortcuts: "Atajos",
     helpTips: "Consejos",
+
+    // Admin Panel
+    adminTitle: "Panel de Admin",
+    adminDashboard: "Panel de Control",
+    adminOverview: "Vista General",
+    adminPerformance: "Rendimiento",
+    adminLogs: "Registros",
+    adminBlogEditor: "Editor de Blog",
+    adminBackendTesting: "Pruebas de Backend",
+    adminSettings: "Configuración",
+    adminNavigation: "Navegación",
+    adminAvailableCommands: "Comandos disponibles",
+    adminSystemStatus: "Estado del Sistema",
+    adminQuickCommands: "Comandos Rápidos",
+    adminLogout: "Cerrar Sesión",
+
+    // Admin Header
+    adminSystem: "Sistema",
+    adminUptime: "Tiempo Activo",
+    adminLoad: "Carga",
+    adminProcesses: "Procesos",
+    adminCPU: "CPU",
+    adminMemory: "MEM",
+    adminDisk: "DISCO",
+    adminNetwork: "RED",
+    adminTime: "Hora",
+    adminOnline: "EN LÍNEA",
+    adminOffline: "FUERA DE LÍNEA",
+
+    // Blog Editor
+    blogNewPost: "Nueva Entrada",
+    blogUntitled: "Entrada Sin Título",
+    blogTitle: "Título",
+    blogContent: "Contenido",
+    blogSummary: "Resumen",
+    blogTags: "Etiquetas",
+    blogAddTag: "Agregar Etiqueta",
+    blogPreview: "Vista Previa",
+    blogPublish: "Publicar",
+    blogSaveDraft: "Guardar Borrador",
+    blogLastSaved: "Último guardado",
+    blogSaving: "Guardando...",
+    blogDrafts: "Borradores",
+    blogPublished: "Publicado",
+    blogUnpublished: "No Publicado",
+
+    // Backend Testing
+    testingTitle: "Pruebas de Backend",
+    testingSelectService: "Seleccionar Servicio",
+    testingSelectMethod: "Seleccionar Método",
+    testingParameters: "Parámetros",
+    testingExecute: "Ejecutar",
+    testingRequest: "Solicitud",
+    testingResponse: "Respuesta",
+    testingLoading: "Cargando...",
+    testingSuccess: "Éxito",
+    testingError: "Error",
+    testingClear: "Limpiar",
+
+    // Performance Monitor
+    performanceTitle: "Monitor de Rendimiento",
+    performanceCPU: "Uso de CPU",
+    performanceMemory: "Uso de Memoria",
+    performanceDisk: "Uso de Disco",
+    performanceNetwork: "Red",
+    performanceLatency: "Latencia",
+    performanceRequests: "Solicitudes",
+    performanceErrors: "Errores",
+    performanceUptime: "Tiempo Activo",
+
+    // Logging Monitor
+    logsTitle: "Registros del Sistema",
+    logsLevel: "Nivel",
+    logsTimestamp: "Fecha/Hora",
+    logsMessage: "Mensaje",
+    logsClear: "Limpiar Registros",
+    logsFilter: "Filtrar",
+    logsAll: "Todos",
+    logsInfo: "Info",
+    logsWarning: "Advertencia",
+    logsErrorLevel: "Error",
+    logsDebug: "Depuración",
   },
 };
 

@@ -1,8 +1,5 @@
 import { LocationService } from "@/lib/location/locationService";
-import type {
-  Command,
-  CommandOutput,
-} from "@/types/terminal";
+import type { Command, CommandOutput } from "@/types/terminal";
 
 /**
  * Create a location command

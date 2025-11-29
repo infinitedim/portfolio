@@ -256,20 +256,22 @@ export function LoggingMonitor({ themeConfig }: LoggingMonitorProps) {
           <div>
             <div className="text-xs opacity-70 mb-2">Log Levels</div>
             <div className="flex flex-wrap gap-1">
-              {logLevels.map((level) => (
-                <button
-                  key={level}
-                  onClick={() => toggleLevel(level)}
-                  className={`px-2 py-1 text-xs border rounded transition-colors ${selectedLevels.has(level) ? "opacity-100" : "opacity-50"
-                    }`}
-                  style={{
-                    borderColor: getLevelColor(level),
-                    color: getLevelColor(level),
-                  }}
-                >
-                  {level}
-                </button>
-              ))}
+              {logLevels.map((level) => {
+                const logStyle = `px-2 py-1 text-xs border rounded transition-colors ${selectedLevels.has(level) ? "opacity-100" : "opacity-50"}`;
+                return (
+                  <button
+                    key={level}
+                    onClick={() => toggleLevel(level)}
+                    className={logStyle}
+                    style={{
+                      borderColor: getLevelColor(level),
+                      color: getLevelColor(level),
+                    }}
+                  >
+                    {level}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -281,8 +283,7 @@ export function LoggingMonitor({ themeConfig }: LoggingMonitorProps) {
                 <button
                   key={source}
                   onClick={() => toggleSource(source)}
-                  className={`px-2 py-1 text-xs border rounded transition-colors ${selectedSources.has(source) ? "opacity-100" : "opacity-50"
-                    }`}
+                  className={`px-2 py-1 text-xs border rounded transition-colors ${selectedSources.has(source) ? "opacity-100" : "opacity-50"}`}
                   style={{
                     borderColor: themeConfig.colors.border,
                     color: themeConfig.colors.text,
@@ -365,9 +366,7 @@ export function LoggingMonitor({ themeConfig }: LoggingMonitorProps) {
                   >
                     {log.level}
                   </span>
-                  <span className="opacity-70 min-w-[80px]">
-                    [{log.source}]
-                  </span>
+                  <span className="opacity-70 min-w-20">[{log.source}]</span>
                   <span className="flex-1">{log.message}</span>
                   {log.details && (
                     <span className="opacity-50 text-xs">({log.details})</span>

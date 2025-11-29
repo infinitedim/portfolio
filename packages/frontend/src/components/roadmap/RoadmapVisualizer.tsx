@@ -52,8 +52,9 @@ export function RoadmapVisualizer({
   }) => (
     <button
       onClick={() => setViewMode(mode)}
-      className={`px-3 py-1 text-sm rounded border transition-all duration-200 ${viewMode === mode ? "font-bold" : ""
-        }`}
+      className={`px-3 py-1 text-sm rounded border transition-all duration-200 ${
+        viewMode === mode ? "font-bold" : ""
+      }`}
       style={{
         backgroundColor:
           viewMode === mode
@@ -106,8 +107,9 @@ export function RoadmapVisualizer({
             <button
               key={filter}
               onClick={() => setSelectedFilter(filter)}
-              className={`px-2 py-1 rounded border transition-all duration-200 ${selectedFilter === filter ? "font-bold" : ""
-                }`}
+              className={`px-2 py-1 rounded border transition-all duration-200 ${
+                selectedFilter === filter ? "font-bold" : ""
+              }`}
               style={{
                 backgroundColor:
                   selectedFilter === filter

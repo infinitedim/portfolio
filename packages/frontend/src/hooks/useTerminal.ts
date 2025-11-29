@@ -26,8 +26,7 @@ import { generateId } from "@/lib/utils/utils";
 const getSkillsCommand = async () => {
   if (typeof window === "undefined") return null;
   try {
-    const { skillsCommand } =
-      await import("@portfolio/frontend/src/lib/commands/skillsCommands");
+    const { skillsCommand } = await import("@/lib/commands/skillsCommands");
     return skillsCommand;
   } catch (error) {
     console.error("Failed to load skills command:", error);
@@ -39,8 +38,9 @@ const getRoadmapCommands = async () => {
   if (typeof window === "undefined")
     return { roadmapCommand: null, progressCommand: null };
   try {
-    const { roadmapCommand, progressCommand } =
-      await import("@portfolio/frontend/src/lib/commands/roadmapCommands");
+    const { roadmapCommand, progressCommand } = await import(
+      "@/lib/commands/roadmapCommands"
+    );
     return { roadmapCommand, progressCommand };
   } catch (error) {
     console.error("Failed to load roadmap commands:", error);
@@ -53,10 +53,7 @@ import {
   themesCommand,
   fontsCommand,
 } from "@/lib/commands/customizationCommands";
-import {
-  demoCommand,
-  setDemoCallback,
-} from "@/lib/commands/demoCommands";
+import { demoCommand, setDemoCallback } from "@/lib/commands/demoCommands";
 import { githubCommand } from "@/lib/commands/githubCommands";
 import { techStackCommand } from "@/lib/commands/techStackCommands";
 import { createNowPlayingCommand } from "@/lib/commands/nowPlayingCommands";
@@ -68,10 +65,7 @@ import {
   enhancedContactCommand,
   easterEggsCommand,
 } from "@/lib/commands/commands";
-import type {
-  CommandOutput,
-  TerminalHistory,
-} from "@/types/terminal";
+import type { CommandOutput, TerminalHistory } from "@/types/terminal";
 
 const STORAGE_KEYS = {
   COMMAND_HISTORY: "terminal-command-history",
@@ -325,8 +319,9 @@ export function useTerminal(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           let monitor: any;
           try {
-            const { PerformanceMonitor } =
-              await import("@portfolio/frontend/src/lib/performance/PerformanceMonitor");
+            const { PerformanceMonitor } = await import(
+              "@/lib/performance/PerformanceMonitor"
+            );
             monitor = PerformanceMonitor.getInstance().getReport();
           } catch (error) {
             console.warn("Failed to load performance monitor:", error);

@@ -85,7 +85,7 @@ class AuthService {
 
     // Remove old localStorage items (security cleanup)
     const oldKeys = ["accessToken", "refreshToken", "user"];
-    oldKeys.forEach(key => {
+    oldKeys.forEach((key) => {
       if (localStorage.getItem(key)) {
         localStorage.removeItem(key);
       }
