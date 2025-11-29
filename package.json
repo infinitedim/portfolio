@@ -59,6 +59,7 @@
     "class-variance-authority": "^0.7.1",
     "concurrently": "^9.2.1",
     "cssnano": "^7.1.2",
+    "dotenv": "^17.2.3",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
@@ -95,6 +96,8 @@
   "dependencies": {
     "@prisma/client": "7.0.1",
     "@prisma/config": "^7.0.1",
+    "@types/pg": "^8.15.6",
+    "pg": "^8.16.3",
     "turbo": "^2.6.1"
   }
 }
