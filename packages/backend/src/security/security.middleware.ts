@@ -318,15 +318,15 @@ export class SecurityMiddleware implements NestMiddleware {
       "/auth/login",
       "/auth/register",
       "/admin",
-      "/api/",      // All API routes
-      "/trpc/",     // All tRPC routes (mutations)
+      "/api/", // All API routes
+      "/trpc/", // All tRPC routes (mutations)
     ];
 
     // Paths that are exempt from CSRF (typically read-only or have other auth)
     const csrfExemptPaths = [
-      "/api/trpc",     // tRPC batch endpoint - uses JWT auth
-      "/trpc/health",  // Health checks
-      "/api/health",   // Health checks
+      "/api/trpc", // tRPC batch endpoint - uses JWT auth
+      "/trpc/health", // Health checks
+      "/api/health", // Health checks
     ];
 
     // Check if path is exempt

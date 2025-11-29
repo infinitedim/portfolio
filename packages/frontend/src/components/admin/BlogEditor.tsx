@@ -335,10 +335,16 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
         {/* Status */}
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center space-x-4">
-            <span>{t("blogDrafts")}: {drafts.length}</span>
-            <span>{t("blogPublished")}: {drafts.filter((d) => d.published).length}</span>
+            <span>
+              {t("blogDrafts")}: {drafts.length}
+            </span>
+            <span>
+              {t("blogPublished")}: {drafts.filter((d) => d.published).length}
+            </span>
             {lastSaved && (
-              <span>{t("blogLastSaved")}: {lastSaved.toLocaleTimeString()}</span>
+              <span>
+                {t("blogLastSaved")}: {lastSaved.toLocaleTimeString()}
+              </span>
             )}
           </div>
           <button

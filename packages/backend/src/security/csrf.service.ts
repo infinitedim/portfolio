@@ -97,7 +97,10 @@ export class CSRFTokenService {
         };
       }
 
-      const isValid = crypto.timingSafeEqual(storedTokenBuffer, providedTokenBuffer);
+      const isValid = crypto.timingSafeEqual(
+        storedTokenBuffer,
+        providedTokenBuffer,
+      );
 
       if (!isValid) {
         return {

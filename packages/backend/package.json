@@ -45,6 +45,7 @@
     "ipaddr.js": "^2.2.0",
     "jsonwebtoken": "^9.0.2",
     "nest-winston": "^1.10.2",
+    "next": "^16.0.5",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "winston": "^3.18.3",

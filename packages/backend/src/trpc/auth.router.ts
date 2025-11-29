@@ -60,7 +60,11 @@ export const authRouter = router({
         new PrismaService(),
         redisService,
       );
-      const auth = new AuthService(securityService, auditLogService, redisService);
+      const auth = new AuthService(
+        securityService,
+        auditLogService,
+        redisService,
+      );
 
       try {
         // Get client IP from request context
@@ -104,7 +108,11 @@ export const authRouter = router({
         new PrismaService(),
         redisService,
       );
-      const auth = new AuthService(securityService, auditLogService, redisService);
+      const auth = new AuthService(
+        securityService,
+        auditLogService,
+        redisService,
+      );
 
       try {
         // Get client IP from request context
@@ -142,7 +150,11 @@ export const authRouter = router({
         new PrismaService(),
         redisService,
       );
-      const auth = new AuthService(securityService, auditLogService, redisService);
+      const auth = new AuthService(
+        securityService,
+        auditLogService,
+        redisService,
+      );
 
       try {
         // Get client IP from request context
@@ -175,7 +187,11 @@ export const authRouter = router({
         new PrismaService(),
         redisService,
       );
-      const auth = new AuthService(securityService, auditLogService, redisService);
+      const auth = new AuthService(
+        securityService,
+        auditLogService,
+        redisService,
+      );
 
       try {
         const req = (ctx as { req?: express.Request }).req;

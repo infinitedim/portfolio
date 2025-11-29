@@ -106,7 +106,10 @@ export interface RefreshTokenPayload {
 // ============================================================================
 
 // In-memory fallback rate limiter for when Redis is unavailable
-const inMemoryRateLimits = new Map<string, { count: number; resetTime: number }>();
+const inMemoryRateLimits = new Map<
+  string,
+  { count: number; resetTime: number }
+>();
 
 @Injectable()
 export class SecurityService {

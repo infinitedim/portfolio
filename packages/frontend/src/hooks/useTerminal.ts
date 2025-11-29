@@ -38,9 +38,8 @@ const getRoadmapCommands = async () => {
   if (typeof window === "undefined")
     return { roadmapCommand: null, progressCommand: null };
   try {
-    const { roadmapCommand, progressCommand } = await import(
-      "@/lib/commands/roadmapCommands"
-    );
+    const { roadmapCommand, progressCommand } =
+      await import("@/lib/commands/roadmapCommands");
     return { roadmapCommand, progressCommand };
   } catch (error) {
     console.error("Failed to load roadmap commands:", error);
@@ -319,9 +318,8 @@ export function useTerminal(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           let monitor: any;
           try {
-            const { PerformanceMonitor } = await import(
-              "@/lib/performance/PerformanceMonitor"
-            );
+            const { PerformanceMonitor } =
+              await import("@/lib/performance/PerformanceMonitor");
             monitor = PerformanceMonitor.getInstance().getReport();
           } catch (error) {
             console.warn("Failed to load performance monitor:", error);

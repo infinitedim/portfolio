@@ -371,15 +371,15 @@ export class CustomizationService {
   ): boolean {
     return Boolean(
       theme &&
-        typeof theme.name === "string" &&
-        theme.colors &&
-        typeof theme.colors.bg === "string" &&
-        typeof theme.colors.text === "string" &&
-        typeof theme.colors.prompt === "string" &&
-        typeof theme.colors.success === "string" &&
-        typeof theme.colors.error === "string" &&
-        typeof theme.colors.accent === "string" &&
-        typeof theme.colors.border === "string",
+      typeof theme.name === "string" &&
+      theme.colors &&
+      typeof theme.colors.bg === "string" &&
+      typeof theme.colors.text === "string" &&
+      typeof theme.colors.prompt === "string" &&
+      typeof theme.colors.success === "string" &&
+      typeof theme.colors.error === "string" &&
+      typeof theme.colors.accent === "string" &&
+      typeof theme.colors.border === "string",
     );
   }
 
