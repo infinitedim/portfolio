@@ -20,7 +20,7 @@ COPY tools/logger/package.json ./tools/logger/
 COPY tools/trpc/package.json ./tools/trpc/
 
 # Install production dependencies only
-RUN bun install --frozen-lockfile --production
+RUN bun install --production
 
 # Install all dependencies for build (separate layer)
 FROM base AS all-deps
@@ -32,7 +32,7 @@ COPY packages/backend/package.json ./packages/backend/
 COPY tools/logger/package.json ./tools/logger/
 COPY tools/trpc/package.json ./tools/trpc/
 
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Stage 3: Build the application
 FROM base AS builder

@@ -21,7 +21,7 @@ COPY tools/logger/package.json ./tools/logger/
 COPY tools/trpc/package.json ./tools/trpc/
 
 # Install all dependencies
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Stage 3: Build the application
 FROM base AS builder
