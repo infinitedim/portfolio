@@ -1,0 +1,41 @@
+# ============================================================================
+# Development Dockerfile for Next.js Frontend with Hot Reload
+# ============================================================================
+
+FROM oven/bun:1.3-alpine
+
+WORKDIR /app
+
+# Install dependencies needed for native modules and development
+RUN apk add --no-cache libc6-compat git
+
+# Copy package files
+COPY package.json bun.lock ./
+COPY packages/frontend/package.json ./packages/frontend/
+COPY packages/ui/package.json ./packages/ui/
+COPY tools/logger/package.json ./tools/logger/
+COPY tools/trpc/package.json ./tools/trpc/
+
+# Install dependencies
+RUN bun install
+
+# Copy source code (will be overridden by volume mount in development)
+COPY tsconfig.json ./
+COPY turbo.json ./
+COPY packages/frontend ./packages/frontend
+COPY packages/ui ./packages/ui
+COPY tools ./tools
+
+# Set environment
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+
+# Expose port
+EXPOSE 3000
+
+# Set working directory to frontend
+WORKDIR /app/packages/frontend
+
+# Start development server
+CMD ["bun", "run", "dev"]

@@ -1,0 +1,198 @@
+# ============================================================================
+# GitHub Actions CD Pipeline - Production Deployment
+# Runs on: Push to main branch (after CI passes)
+# ============================================================================
+
+name: CD - Production
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types: [completed]
+    branches: [main]
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+env:
+  DOCKER_REGISTRY: ghcr.io
+  DOCKER_REPO: ${{ github.repository }}
+
+jobs:
+  # ===========================================================================
+  # Deploy to Production VPS
+  # ===========================================================================
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_URL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get short SHA
+        id: sha
+        run: echo "short=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+
+      - name: Add VPS to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create deployment directory
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "mkdir -p ~/portfolio/docker/nginx/ssl"
+
+      - name: Copy Docker Compose files
+        run: |
+          scp docker-compose.prod.yml ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:~/portfolio/
+          scp -r docker/nginx ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:~/portfolio/docker/
+          scp scripts/deploy.sh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:~/portfolio/
+          scp scripts/health-check.sh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:~/portfolio/
+
+      - name: Create environment file
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cat > ~/portfolio/.env << 'EOF'
+          # Docker configuration
+          DOCKER_REGISTRY=${{ env.DOCKER_REGISTRY }}
+          DOCKER_REPO=${{ env.DOCKER_REPO }}
+          IMAGE_TAG=${{ steps.sha.outputs.short }}
+          DOMAIN=${{ vars.DOMAIN }}
+
+          # Database
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+
+          # Redis
+          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+
+          # JWT
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+          SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+
+          # Application URLs
+          CORS_ORIGIN=${{ vars.CORS_ORIGIN }}
+          NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }}
+
+          # Spotify (optional)
+          SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          SPOTIFY_REFRESH_TOKEN=${{ secrets.SPOTIFY_REFRESH_TOKEN }}
+
+          # Admin
+          ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
+          EOF"
+
+      - name: Login to Container Registry on VPS
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin"
+
+      - name: Pull latest images
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cd ~/portfolio && \
+            docker compose -f docker-compose.prod.yml pull"
+
+      - name: Deploy with zero-downtime
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cd ~/portfolio && \
+            chmod +x deploy.sh && \
+            ./deploy.sh"
+
+      - name: Run health checks
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cd ~/portfolio && \
+            chmod +x health-check.sh && \
+            ./health-check.sh"
+
+      - name: Run database migrations
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cd ~/portfolio && \
+            docker compose -f docker-compose.prod.yml exec -T backend bunx prisma migrate deploy"
+
+      - name: Cleanup old images
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "docker image prune -af --filter 'until=168h'"
+
+      - name: Notify deployment success
+        if: success()
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            {
+              "text": "✅ Deployment to production successful!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "✅ *Deployment Successful*\n\n*Repository:* ${{ github.repository }}\n*Branch:* main\n*Commit:* `${{ steps.sha.outputs.short }}`\n*URL:* ${{ vars.PRODUCTION_URL }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
+
+  # ===========================================================================
+  # Rollback Job (Manual Trigger)
+  # ===========================================================================
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    if: ${{ failure() || github.event_name == 'workflow_dispatch' }}
+    needs: deploy
+    environment:
+      name: production
+
+    steps:
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+
+      - name: Add VPS to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Rollback to previous version
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cd ~/portfolio && \
+            docker compose -f docker-compose.prod.yml down && \
+            git checkout HEAD~1 -- docker-compose.prod.yml && \
+            docker compose -f docker-compose.prod.yml up -d"
+
+      - name: Notify rollback
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            {
+              "text": "⚠️ Deployment rolled back!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "⚠️ *Deployment Rolled Back*\n\n*Repository:* ${{ github.repository }}\n*Reason:* Deployment failure detected"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true

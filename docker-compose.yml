@@ -1,0 +1,156 @@
+# ============================================================================
+# Docker Compose for Local Development
+# Includes: Frontend, Backend, PostgreSQL, Redis, Nginx
+# ============================================================================
+
+services:
+  # =========================================================================
+  # PostgreSQL Database
+  # =========================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: portfolio-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-portfolio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-portfolio_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-portfolio}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-portfolio} -d ${POSTGRES_DB:-portfolio}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - portfolio-network
+
+  # =========================================================================
+  # Redis Cache
+  # =========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: portfolio-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_dev_password}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "redis-cli",
+          "-a",
+          "${REDIS_PASSWORD:-redis_dev_password}",
+          "ping",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - portfolio-network
+
+  # =========================================================================
+  # Backend (NestJS)
+  # =========================================================================
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend.dev
+    container_name: portfolio-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-portfolio}:${POSTGRES_PASSWORD:-portfolio_dev_password}@postgres:5432/${POSTGRES_DB:-portfolio}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_dev_password}@redis:6379
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_jwt_refresh_secret_change_in_production}
+      SESSION_SECRET: ${SESSION_SECRET:-dev_session_secret}
+      CORS_ORIGIN: http://localhost:3000
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./packages/backend:/app/packages/backend:delegated
+      - ./tools:/app/tools:delegated
+      - /app/packages/backend/node_modules
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - portfolio-network
+
+  # =========================================================================
+  # Frontend (Next.js)
+  # =========================================================================
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend.dev
+    container_name: portfolio-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./packages/frontend:/app/packages/frontend:delegated
+      - ./packages/ui:/app/packages/ui:delegated
+      - ./tools:/app/tools:delegated
+      - /app/packages/frontend/node_modules
+      - /app/packages/ui/node_modules
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - portfolio-network
+
+  # =========================================================================
+  # Nginx Reverse Proxy (optional for local dev)
+  # =========================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: portfolio-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - portfolio-network
+    profiles:
+      - with-nginx
+
+# ============================================================================
+# Volumes
+# ============================================================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# ============================================================================
+# Networks
+# ============================================================================
+networks:
+  portfolio-network:
+    driver: bridge

@@ -1,0 +1,39 @@
+# ============================================================================
+# Development Dockerfile for NestJS Backend with Hot Reload
+# ============================================================================
+
+FROM oven/bun:1.3-alpine
+
+WORKDIR /app
+
+# Install dependencies needed for native modules and development
+RUN apk add --no-cache libc6-compat openssl git curl
+
+# Copy package files
+COPY package.json bun.lock ./
+COPY packages/backend/package.json ./packages/backend/
+COPY tools/logger/package.json ./tools/logger/
+COPY tools/trpc/package.json ./tools/trpc/
+
+# Install dependencies
+RUN bun install
+
+# Copy source code (will be overridden by volume mount in development)
+COPY tsconfig.json ./
+COPY turbo.json ./
+COPY packages/backend ./packages/backend
+COPY tools ./tools
+
+# Generate Prisma client
+WORKDIR /app/packages/backend
+RUN bunx prisma generate
+
+# Set environment
+ENV NODE_ENV=development
+ENV PORT=4000
+
+# Expose port
+EXPOSE 4000
+
+# Start development server with watch mode
+CMD ["bun", "run", "dev"]

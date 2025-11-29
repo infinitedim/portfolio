@@ -1,0 +1,11 @@
+# SSL certificates will be stored here
+#
+# For development: Generate self-signed certificate
+# ./scripts/setup-ssl.sh
+#
+# For production: Use Let's Encrypt
+# certbot certonly --standalone -d yourdomain.com
+#
+# Required files:
+# - fullchain.pem (certificate chain)
+# - privkey.pem (private key)
