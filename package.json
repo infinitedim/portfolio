@@ -79,7 +79,7 @@
     "postcss-import": "^16.1.1",
     "postcss-preset-env": "^10.4.0",
     "prettier": "^3.7.1",
-    "prisma": "7.0.1",
+    "prisma": "7.1.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.17",
     "tailwindcss-animate": "^1.0.7",
@@ -94,7 +94,7 @@
     "**/*.{css,html,json,md}": ["bun x prettier --write"]
   },
   "dependencies": {
-    "@prisma/client": "7.0.1",
+    "@prisma/client": "7.1.0",
     "@prisma/config": "^7.0.1",
     "@types/pg": "^8.15.6",
     "pg": "^8.16.3",
