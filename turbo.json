@@ -29,8 +29,8 @@
         "SPOTIFY_CLIENT_ID",
         "UPSTASH_REDIS_REST_URL",
         "UPSTASH_REDIS_REST_TOKEN",
-        "PORTFOLIO_AI_KEY",
-        "OPENAI_API_KEY"
+        "ANTHROPIC_API_KEY ",
+        "OPENANTHROPIC_API_KEY "
       ],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },

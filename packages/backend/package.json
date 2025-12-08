@@ -25,6 +25,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.53",
     "@nestjs/common": "^11.1.9",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.9",
@@ -38,6 +39,7 @@
     "@trpc/server": "^11.7.2",
     "@upstash/redis": "^1.35.7",
     "@vercel/node": "^5.5.13",
+    "ai": "^5.0.108",
     "bcryptjs": "^3.0.3",
     "cache-manager": "^7.2.5",
     "express": "^5.1.0",
@@ -57,6 +59,8 @@
     "@swc/cli": "^0.7.9",
     "@swc/core": "^1.15.3",
     "@types/bcryptjs": "^3.0.0",
-    "sanitize-html": "^2.17.0"
+    "@types/node": "^24.10.1",
+    "sanitize-html": "^2.17.0",
+    "ts-node": "^10.9.2"
   }
 }

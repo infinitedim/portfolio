@@ -8,13 +8,14 @@ import { RedisModule } from "./redis/redis.module";
 import { BlogModule } from "./blog/blog.module";
 import { SpotifyModule } from "./spotify/spotify.module";
 import { ProjectsModule } from "./projects/projects.module";
-// import { LoggingModule } from "./logging/logging.module";
 import { SecurityModule } from "./security/security.module";
 import { SecurityMiddleware } from "./security/security.middleware";
 import { CSRFMiddleware } from "./security/csrf.middleware";
 import { CommonModule } from "./common/common.module";
 import { APP_GUARD } from "@nestjs/core";
 import { validateEnv } from "./env.config";
+
+import { AiModule } from "./ai/ai.module";
 
 @Module({
   imports: [
@@ -36,9 +37,9 @@ import { validateEnv } from "./env.config";
     BlogModule,
     SpotifyModule,
     ProjectsModule,
-    // LoggingModule,
     SecurityModule,
     CommonModule,
+    AiModule,
   ],
   providers: [
     {

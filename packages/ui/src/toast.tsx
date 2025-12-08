@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 "use client";
 
 import * as React from "react";
@@ -7,16 +8,19 @@ import { X } from "lucide-react";
 
 import { cn } from "./utils";
 
-const ToastProvider = ToastPrimitives.Provider;
+const ToastProvider: typeof ToastPrimitives.Provider = ToastPrimitives.Provider;
 
-const ToastViewport = React.forwardRef<
+const ToastViewport: React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport> &
+  React.RefAttributes<React.ComponentRef<typeof ToastPrimitives.Viewport>>
+> = React.forwardRef<
   React.ComponentRef<typeof ToastPrimitives.Viewport>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport>
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Viewport
     ref={ref}
     className={cn(
-      "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+      "fixed top-0 z-100 flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
       className,
     )}
     {...props}
@@ -40,10 +44,14 @@ const toastVariants = cva(
   },
 );
 
-const Toast = React.forwardRef<
+const Toast: React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
+  VariantProps<typeof toastVariants> &
+  React.RefAttributes<React.ComponentRef<typeof ToastPrimitives.Root>>
+> = React.forwardRef<
   React.ComponentRef<typeof ToastPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
-    VariantProps<typeof toastVariants>
+  VariantProps<typeof toastVariants>
 >(({ className, variant, ...props }, ref) => {
   return (
     <ToastPrimitives.Root
@@ -55,7 +63,10 @@ const Toast = React.forwardRef<
 });
 Toast.displayName = ToastPrimitives.Root.displayName;
 
-const ToastAction = React.forwardRef<
+const ToastAction: React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Action> &
+  React.RefAttributes<React.ComponentRef<typeof ToastPrimitives.Action>>
+> = React.forwardRef<
   React.ComponentRef<typeof ToastPrimitives.Action>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Action>
 >(({ className, ...props }, ref) => (
@@ -70,7 +81,10 @@ const ToastAction = React.forwardRef<
 ));
 ToastAction.displayName = ToastPrimitives.Action.displayName;
 
-const ToastClose = React.forwardRef<
+const ToastClose: React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close> &
+  React.RefAttributes<React.ComponentRef<typeof ToastPrimitives.Close>>
+> = React.forwardRef<
   React.ComponentRef<typeof ToastPrimitives.Close>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close>
 >(({ className, ...props }, ref) => (
@@ -88,7 +102,10 @@ const ToastClose = React.forwardRef<
 ));
 ToastClose.displayName = ToastPrimitives.Close.displayName;
 
-const ToastTitle = React.forwardRef<
+const ToastTitle: React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Title> &
+  React.RefAttributes<React.ComponentRef<typeof ToastPrimitives.Title>>
+> = React.forwardRef<
   React.ComponentRef<typeof ToastPrimitives.Title>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Title>
 >(({ className, ...props }, ref) => (
@@ -100,7 +117,10 @@ const ToastTitle = React.forwardRef<
 ));
 ToastTitle.displayName = ToastPrimitives.Title.displayName;
 
-const ToastDescription = React.forwardRef<
+const ToastDescription: React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Description> &
+  React.RefAttributes<React.ComponentRef<typeof ToastPrimitives.Description>>
+> = React.forwardRef<
   React.ComponentRef<typeof ToastPrimitives.Description>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Description>
 >(({ className, ...props }, ref) => (

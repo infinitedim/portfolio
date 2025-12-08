@@ -173,8 +173,8 @@ const createEnvSchema = () => {
     SPOTIFY_REDIRECT_URI: z.string().optional(),
 
     // AI Services (optional)
-    PORTFOLIO_AI_KEY: z.string().optional(),
-    OPENAI_API_KEY: z.string().optional(),
+    ANTHROPIC_API_KEY : z.string().optional(),
+    OPENANTHROPIC_API_KEY : z.string().optional(),
 
     // Additional config for flexibility
     PORT: z

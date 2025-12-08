@@ -7,6 +7,17 @@
     "lib": [
       "esnext"
     ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@portfolio/ui/*": [
+        "../ui/*"
+      ],
+      "@portfolio/frontend": [
+        "../frontend/*"
+      ]
+    },
     "baseUrl": "./",
     "moduleResolution": "bundler",
     "emitDecoratorMetadata": true,

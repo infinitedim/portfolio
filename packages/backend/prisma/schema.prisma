@@ -4,14 +4,13 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../../../node_modules/.prisma/client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-// Admin User with enhanced profile and security features
 model AdminUser {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -41,7 +40,6 @@ model AdminUser {
   @@map("admin_users")
 }
 
-// Admin Profile for additional information
 model AdminProfile {
   id          String   @id @default(cuid())
   adminUserId String   @unique
@@ -49,17 +47,15 @@ model AdminProfile {
   phone       String?
   timezone    String   @default("UTC")
   language    String   @default("en")
-  preferences Json? // Store UI preferences, theme, etc.
+  preferences Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relations
   adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
 
   @@map("admin_profiles")
 }
 
-// IP Allowlist for admin access
 model AllowedIp {
   id          String    @id @default(cuid())
   adminUserId String
@@ -80,7 +76,6 @@ model AllowedIp {
   @@map("allowed_ips")
 }
 
-// Admin Sessions for better security
 model AdminSession {
   id          String   @id @default(cuid())
   adminUserId String
@@ -102,7 +97,6 @@ model AdminSession {
   @@map("admin_sessions")
 }
 
-// Audit Log for security tracking
 model AuditLog {
   id          String   @id @default(cuid())
   adminUserId String?

@@ -8,10 +8,8 @@ import { securityLogger } from "../logging/logger";
 
 export type AuthUser = { userId: string; email: string; role: "admin" };
 
-// Token blacklist prefix for Redis
 const TOKEN_BLACKLIST_PREFIX = "token:blacklist:";
-// Default blacklist TTL matches JWT expiry (15 minutes) + buffer
-const TOKEN_BLACKLIST_TTL = 20 * 60; // 20 minutes in seconds
+const TOKEN_BLACKLIST_TTL = 20 * 60;
 
 @Injectable()
 export class AuthService {
