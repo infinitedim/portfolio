@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { Button } from "@portfolio/ui/src/button";
+import { Button } from "@/ui/button";
 import { useTheme } from "@/hooks/useTheme";
 import type { JSX } from "react";
 

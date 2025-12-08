@@ -1,12 +1,19 @@
-import { router, publicProcedure } from "@portfolio/trpc";
+import { router, publicProcedure } from "./procedures";
 import { z } from "zod";
-import { SecurityService } from "../security/security.service";
-import { RedisService } from "../redis/redis.service";
-
-// Create security service instance
-const securityService = new SecurityService(new RedisService());
+import type { TrpcContext } from "./context";
 
 export const securityRouter = router({
+  // CSRF token generation - call this after login to get a token for mutations
+  getCsrfToken: publicProcedure.query(async ({ ctx }) => {
+    const typedCtx = ctx as TrpcContext;
+    const sessionId = typedCtx.services.csrf.getSessionId(typedCtx.req);
+    const token = await typedCtx.services.csrf.generateToken(sessionId);
+    return {
+      token: token.token,
+      expiresAt: token.expiresAt,
+    };
+  }),
+
   // Input validation
   validateInput: publicProcedure
     .input(
@@ -14,8 +21,9 @@ export const securityRouter = router({
         input: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
-      const result = securityService.validateCommand(input.input);
+    .mutation(async ({ input, ctx }) => {
+      const typedCtx = ctx as TrpcContext;
+      const result = typedCtx.services.security.validateCommand(input.input);
       return {
         isValid: result.isValid,
         sanitizedInput: result.sanitized,
@@ -32,8 +40,12 @@ export const securityRouter = router({
         type: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
-      return await securityService.checkRateLimit(input.key, input.type);
+    .mutation(async ({ input, ctx }) => {
+      const typedCtx = ctx as TrpcContext;
+      return await typedCtx.services.security.checkRateLimit(
+        input.key,
+        input.type,
+      );
     }),
 
   getRateLimitInfo: publicProcedure
@@ -43,8 +55,12 @@ export const securityRouter = router({
         type: z.string(),
       }),
     )
-    .query(async ({ input }) => {
-      return await securityService.getRateLimitInfo(input.key, input.type);
+    .query(async ({ input, ctx }) => {
+      const typedCtx = ctx as TrpcContext;
+      return await typedCtx.services.security.getRateLimitInfo(
+        input.key,
+        input.type,
+      );
     }),
 
   resetRateLimit: publicProcedure
@@ -54,14 +70,16 @@ export const securityRouter = router({
         type: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
-      await securityService.resetRateLimit(input.key, input.type);
+    .mutation(async ({ input, ctx }) => {
+      const typedCtx = ctx as TrpcContext;
+      await typedCtx.services.security.resetRateLimit(input.key, input.type);
       return { success: true };
     }),
 
   // Security metrics
-  getRateLimitStats: publicProcedure.query(async () => {
-    return await securityService.getRateLimitStats();
+  getRateLimitStats: publicProcedure.query(async ({ ctx }) => {
+    const typedCtx = ctx as TrpcContext;
+    return await typedCtx.services.security.getRateLimitStats();
   }),
 
   getBlockedKeys: publicProcedure
@@ -70,8 +88,9 @@ export const securityRouter = router({
         pattern: z.string().optional(),
       }),
     )
-    .query(async ({ input }) => {
-      return await securityService.getBlockedKeys(input.pattern);
+    .query(async ({ input, ctx }) => {
+      const typedCtx = ctx as TrpcContext;
+      return await typedCtx.services.security.getBlockedKeys(input.pattern);
     }),
 
   unblockKey: publicProcedure
@@ -80,8 +99,9 @@ export const securityRouter = router({
         key: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
-      await securityService.unblockKey(input.key);
+    .mutation(async ({ input, ctx }) => {
+      const typedCtx = ctx as TrpcContext;
+      await typedCtx.services.security.unblockKey(input.key);
       return { success: true };
     }),
 
@@ -92,8 +112,9 @@ export const securityRouter = router({
         text: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
-      return securityService.sanitizeText(input.text);
+    .mutation(async ({ input, ctx }) => {
+      const typedCtx = ctx as TrpcContext;
+      return typedCtx.services.security.sanitizeText(input.text);
     }),
 
   // Security checks
@@ -103,8 +124,9 @@ export const securityRouter = router({
         input: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
-      return securityService.hasSqlInjectionPatterns(input.input);
+    .mutation(async ({ input, ctx }) => {
+      const typedCtx = ctx as TrpcContext;
+      return typedCtx.services.security.hasSqlInjectionPatterns(input.input);
     }),
 
   hasXssPatterns: publicProcedure
@@ -113,8 +135,9 @@ export const securityRouter = router({
         input: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
-      return securityService.hasXssPatterns(input.input);
+    .mutation(async ({ input, ctx }) => {
+      const typedCtx = ctx as TrpcContext;
+      return typedCtx.services.security.hasXssPatterns(input.input);
     }),
 
   // Token generation
@@ -124,8 +147,9 @@ export const securityRouter = router({
         length: z.number().optional(),
       }),
     )
-    .mutation(async ({ input }) => {
-      return securityService.generateSecureToken(input.length);
+    .mutation(async ({ input, ctx }) => {
+      const typedCtx = ctx as TrpcContext;
+      return typedCtx.services.security.generateSecureToken(input.length);
     }),
 
   // Validation schemas
@@ -135,9 +159,10 @@ export const securityRouter = router({
         email: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const typedCtx = ctx as TrpcContext;
       try {
-        const validated = securityService.validateEmail(input.email);
+        const validated = typedCtx.services.security.validateEmail(input.email);
         return { isValid: true, email: validated };
       } catch (error) {
         return {
@@ -153,9 +178,12 @@ export const securityRouter = router({
         password: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const typedCtx = ctx as TrpcContext;
       try {
-        const validated = securityService.validatePassword(input.password);
+        const validated = typedCtx.services.security.validatePassword(
+          input.password,
+        );
         return { isValid: true, password: validated };
       } catch (error) {
         return {
@@ -171,9 +199,12 @@ export const securityRouter = router({
         username: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const typedCtx = ctx as TrpcContext;
       try {
-        const validated = securityService.validateUsername(input.username);
+        const validated = typedCtx.services.security.validateUsername(
+          input.username,
+        );
         return { isValid: true, username: validated };
       } catch (error) {
         return {

@@ -1,13 +1,36 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { useCommandHistory } from "../useCommandHistory";
+
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: vi.fn((key: string) => store[key] || null),
+    setItem: vi.fn((key: string, value: string) => {
+      store[key] = value;
+    }),
+    removeItem: vi.fn((key: string) => {
+      delete store[key];
+    }),
+    clear: vi.fn(() => {
+      store = {};
+    }),
+  };
+})();
+
+Object.defineProperty(window, "localStorage", {
+  value: localStorageMock,
+  writable: true,
+});
 
 describe("useCommandHistory", () => {
   beforeEach(() => {
-    localStorage.clear();
+    localStorageMock.clear();
+    vi.clearAllMocks();
   });
 
-  it("adds and persists commands", () => {
+  it("adds and persists commands", async () => {
     const { result } = renderHook(() =>
       useCommandHistory({ maxHistorySize: 3, persistKey: "test-history" }),
     );
@@ -16,12 +39,17 @@ describe("useCommandHistory", () => {
     act(() => result.current.addCommand("two"));
     act(() => result.current.addCommand("three"));
 
-    expect(result.current.history).toEqual(["one", "two", "three"]);
-    // Stored may be async; if present it should be an array
-    const stored = localStorage.getItem("test-history");
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      expect(Array.isArray(parsed)).toBe(true);
-    }
+    // Wait for state to update
+    await waitFor(() => {
+      expect(result.current.allHistory.length).toBe(3);
+    });
+
+    // The history stores CommandHistoryEntry objects, sorted by most recent first
+    const commands = result.current.allHistory.map((entry) => entry.command);
+    // Newest command first (LIFO order)
+    expect(commands).toEqual(["three", "two", "one"]);
+
+    // Verify localStorage was called
+    expect(localStorageMock.setItem).toHaveBeenCalled();
   });
 });

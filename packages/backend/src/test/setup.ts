@@ -216,16 +216,8 @@ vi.mock("@portfolio/backend/src/security/csrf.service", () => ({
   },
 }));
 
-// Mock Date.now and Math.random for consistent test results
-vi.stubGlobal("Date", {
-  ...Date,
-  now: vi.fn(() => 1640995200000), // Fixed timestamp for tests
-});
-
-vi.stubGlobal("Math", {
-  ...Math,
-  random: vi.fn(() => 0.5), // Fixed random value for tests
-});
+// Note: We removed Date and Math global mocks as they break native functionality
+// If you need consistent timestamps in tests, mock Date in individual test files
 
 // Use vitest's proper environment stubbing
 vi.stubEnv("NODE_ENV", "test");

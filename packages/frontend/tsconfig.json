@@ -20,13 +20,13 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./src/*"
+        "./src/*",
       ],
-      "@portfolio/ui/*": [
-        "../ui/*"
+      "@/backend/*": [
+        "../backend/src/*"
       ],
-      "@portfolio/backend": [
-        "../backend/*"
+      "@/ui/*": [
+        "../ui/src/*"
       ]
     },
     "plugins": [

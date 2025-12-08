@@ -1,26 +1,23 @@
 import express from "express";
 import * as trpcExpress from "@trpc/server/adapters/express";
-import { router, publicProcedure } from "@portfolio/trpc";
+import { router, publicProcedure } from "./procedures";
 import { z } from "zod";
 import { authRouter } from "./auth.router";
 import { projectsRouter } from "./projects.router";
 import { spotifyRouter } from "./spotify.router";
 import { securityRouter } from "./security.router";
 import { createBackendContext } from "./context";
-import { RedisService } from "../redis/redis.service";
-import { HealthService } from "../health/health.service";
-import { PrismaService } from "../prisma/prisma.service";
-import { DatabaseConnectionManager } from "../prisma/database-connection-manager.service";
 
 export const appRouter = router({
-  health: publicProcedure.query(async () => {
-    // Optional: quick cached health using Redis to absorb burst
+  health: publicProcedure.query(async ({ ctx }) => {
+    // Use singleton redis from context services
     try {
-      const redis = new RedisService();
-      const cached = await redis.get<{ status: string }>("api:health");
+      const cached = await ctx.services.redis.get<{ status: string }>(
+        "api:health",
+      );
       if (cached) return cached;
       const payload = { status: "ok" } as const;
-      await redis.set("api:health", payload, 5); // 5s burst cache
+      await ctx.services.redis.set("api:health", payload, 5); // 5s burst cache
       return payload;
     } catch {
       return { status: "ok" } as const;
@@ -28,14 +25,9 @@ export const appRouter = router({
   }),
 
   // Comprehensive health check
-  healthDetailed: publicProcedure.query(async () => {
+  healthDetailed: publicProcedure.query(async ({ ctx }) => {
     try {
-      const healthService = new HealthService(
-        new PrismaService(),
-        new RedisService(),
-        new DatabaseConnectionManager(new PrismaService()),
-      );
-      return await healthService.getDetailedHealth();
+      return await ctx.services.health.getDetailedHealth();
     } catch (error) {
       return {
         status: "unhealthy",
@@ -46,14 +38,9 @@ export const appRouter = router({
   }),
 
   // Database health check
-  healthDatabase: publicProcedure.query(async () => {
+  healthDatabase: publicProcedure.query(async ({ ctx }) => {
     try {
-      const healthService = new HealthService(
-        new PrismaService(),
-        new RedisService(),
-        new DatabaseConnectionManager(new PrismaService()),
-      );
-      const result = await healthService.checkHealth();
+      const result = await ctx.services.health.checkHealth();
       return {
         status: result.checks.database.status,
         responseTime: result.checks.database.responseTime,
@@ -69,14 +56,9 @@ export const appRouter = router({
   }),
 
   // Redis health check
-  healthRedis: publicProcedure.query(async () => {
+  healthRedis: publicProcedure.query(async ({ ctx }) => {
     try {
-      const healthService = new HealthService(
-        new PrismaService(),
-        new RedisService(),
-        new DatabaseConnectionManager(new PrismaService()),
-      );
-      const result = await healthService.checkHealth();
+      const result = await ctx.services.health.checkHealth();
       return {
         status: result.checks.redis.status,
         responseTime: result.checks.redis.responseTime,
@@ -92,14 +74,9 @@ export const appRouter = router({
   }),
 
   // Memory health check
-  healthMemory: publicProcedure.query(async () => {
+  healthMemory: publicProcedure.query(async ({ ctx }) => {
     try {
-      const healthService = new HealthService(
-        new PrismaService(),
-        new RedisService(),
-        new DatabaseConnectionManager(new PrismaService()),
-      );
-      const result = await healthService.checkHealth();
+      const result = await ctx.services.health.checkHealth();
       return {
         status: result.checks.memory.status,
         responseTime: result.checks.memory.responseTime,
@@ -115,14 +92,9 @@ export const appRouter = router({
   }),
 
   // System health check
-  healthSystem: publicProcedure.query(async () => {
+  healthSystem: publicProcedure.query(async ({ ctx }) => {
     try {
-      const healthService = new HealthService(
-        new PrismaService(),
-        new RedisService(),
-        new DatabaseConnectionManager(new PrismaService()),
-      );
-      const result = await healthService.checkHealth();
+      const result = await ctx.services.health.checkHealth();
       return {
         status: result.checks.system.status,
         responseTime: result.checks.system.responseTime,
@@ -138,14 +110,9 @@ export const appRouter = router({
   }),
 
   // Readiness probe
-  healthReady: publicProcedure.query(async () => {
+  healthReady: publicProcedure.query(async ({ ctx }) => {
     try {
-      const healthService = new HealthService(
-        new PrismaService(),
-        new RedisService(),
-        new DatabaseConnectionManager(new PrismaService()),
-      );
-      const result = await healthService.checkHealth();
+      const result = await ctx.services.health.checkHealth();
 
       const isReady =
         result.checks.database.status === "healthy" &&
@@ -178,14 +145,9 @@ export const appRouter = router({
   }),
 
   // Liveness probe
-  healthLive: publicProcedure.query(async () => {
+  healthLive: publicProcedure.query(async ({ ctx }) => {
     try {
-      const healthService = new HealthService(
-        new PrismaService(),
-        new RedisService(),
-        new DatabaseConnectionManager(new PrismaService()),
-      );
-      const result = await healthService.checkHealth();
+      const result = await ctx.services.health.checkHealth();
 
       const isAlive = result.status !== "unhealthy";
 

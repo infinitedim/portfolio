@@ -40,6 +40,11 @@ function getRedis(): Redis | null {
 // Rate limiting helper
 const rateLimitMap = new Map<string, number>();
 
+// Export function to clear rate limit map for testing
+export function clearRateLimitMap() {
+  rateLimitMap.clear();
+}
+
 async function checkRateLimit(
   key: string,
   windowMs: number = 60000,

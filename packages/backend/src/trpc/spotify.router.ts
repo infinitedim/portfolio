@@ -1,20 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { router, publicProcedure } from "@portfolio/trpc";
+import { router, publicProcedure } from "./procedures";
 import { SpotifyServiceBackend } from "../spotify/spotify.service";
-import { RedisService } from "../redis/redis.service";
 import { TRPCError } from "@trpc/server";
+import type { TrpcContext } from "./context";
 
 export const spotifyRouter = router({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   nowPlaying: publicProcedure.query(async ({ ctx }) => {
     try {
-      const redisService = new RedisService();
+      const typedCtx = ctx as TrpcContext;
       const spotifyService = new SpotifyServiceBackend(
         {
-          get: redisService.get.bind(redisService),
-          set: redisService.set.bind(redisService),
+          get: typedCtx.services.redis.get.bind(typedCtx.services.redis),
+          set: typedCtx.services.redis.set.bind(typedCtx.services.redis),
         } as any,
-        redisService,
+        typedCtx.services.redis,
       );
 
       const result = await spotifyService.nowPlaying();

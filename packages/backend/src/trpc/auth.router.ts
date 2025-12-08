@@ -1,50 +1,41 @@
 import { z } from "zod";
-import { router, publicProcedure } from "@portfolio/trpc";
-import { AuthService } from "../auth/auth.service";
+import { router, publicProcedure } from "./procedures";
 import { TRPCError } from "@trpc/server";
-import type express from "express";
-import { RedisService } from "../redis/redis.service";
-import { SecurityService } from "../security/security.service";
-import { AuditLogService } from "../security/audit-log.service";
-import { PrismaService } from "../prisma/prisma.service";
+import type { TrpcContext } from "./context";
 import { securityLogger } from "../logging/logger";
 
-// Simple in-memory IP-based limiter: 1 request per minute
-const loginRateMap = new Map<string, number>();
 /**
- * Enforce 1 login request per minute per IP
- * @param {express.Request | unknown} ctx - The context object
+ * Enforce 1 login request per minute per IP using context services.
+ * Uses Redis with in-memory fallback.
  */
-async function assertLoginRate(
-  ctx: { req?: express.Request } | unknown,
-): Promise<void> {
-  const req = (ctx as { req?: express.Request }).req;
-  const xf = (req?.headers?.["x-forwarded-for"] as string) || "";
-  const realIp = (req && (req as unknown as { ip?: string }).ip) || "";
-  const ip = xf.split(",")[0]?.trim() || realIp || "unknown";
+async function assertLoginRate(ctx: TrpcContext): Promise<void> {
+  const ip = ctx.clientIp;
 
   try {
-    const redis = new RedisService();
     const key = `auth:login:${ip}`;
-    const exists = await redis.get<string>(key);
+    const exists = await ctx.services.redis.get<string>(key);
     if (exists) {
       throw new TRPCError({
         code: "TOO_MANY_REQUESTS",
         message: "Rate limit exceeded",
       });
     }
-    await redis.set(key, "1", 60); // 1/min
-    return;
-  } catch {
-    const now = Date.now();
-    const last = loginRateMap.get(ip) ?? 0;
-    if (now - last < 60_000) {
+    await ctx.services.redis.set(key, "1", 60); // 1/min
+  } catch (error) {
+    if (error instanceof TRPCError) {
+      throw error;
+    }
+    // Redis failed, use in-memory fallback via security service
+    const rateLimitResult = await ctx.services.security.checkRateLimit(
+      ip,
+      "login",
+    );
+    if (rateLimitResult.isBlocked) {
       throw new TRPCError({
         code: "TOO_MANY_REQUESTS",
-        message: "Rate limit exceeded",
+        message: rateLimitResult.message || "Rate limit exceeded",
       });
     }
-    loginRateMap.set(ip, now);
   }
 }
 
@@ -52,32 +43,15 @@ export const authRouter = router({
   login: publicProcedure
     .input(z.object({ email: z.string().email(), password: z.string().min(1) }))
     .mutation(async ({ input, ctx }) => {
-      await assertLoginRate(ctx);
-
-      const redisService = new RedisService();
-      const securityService = new SecurityService(redisService);
-      const auditLogService = new AuditLogService(
-        new PrismaService(),
-        redisService,
-      );
-      const auth = new AuthService(
-        securityService,
-        auditLogService,
-        redisService,
-      );
+      const typedCtx = ctx as TrpcContext;
+      await assertLoginRate(typedCtx);
 
       try {
-        // Get client IP from request context
-        const req = (ctx as { req?: express.Request }).req;
-        const xf = (req?.headers?.["x-forwarded-for"] as string) || "";
-        const realIp = (req && (req as unknown as { ip?: string }).ip) || "";
-        const clientIp = xf.split(",")[0]?.trim() || realIp || "unknown";
-
-        const result = await auth.validateCredentials(
+        const result = await typedCtx.services.auth.validateCredentials(
           input.email,
           input.password,
-          clientIp,
-          req,
+          typedCtx.clientIp,
+          typedCtx.req,
         );
 
         return {
@@ -102,29 +76,13 @@ export const authRouter = router({
   refresh: publicProcedure
     .input(z.object({ refreshToken: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const redisService = new RedisService();
-      const securityService = new SecurityService(redisService);
-      const auditLogService = new AuditLogService(
-        new PrismaService(),
-        redisService,
-      );
-      const auth = new AuthService(
-        securityService,
-        auditLogService,
-        redisService,
-      );
+      const typedCtx = ctx as TrpcContext;
 
       try {
-        // Get client IP from request context
-        const req = (ctx as { req?: express.Request }).req;
-        const xf = (req?.headers?.["x-forwarded-for"] as string) || "";
-        const realIp = (req && (req as unknown as { ip?: string }).ip) || "";
-        const clientIp = xf.split(",")[0]?.trim() || realIp || "unknown";
-
-        const result = await auth.refreshToken(
+        const result = await typedCtx.services.auth.refreshToken(
           input.refreshToken,
-          clientIp,
-          req,
+          typedCtx.clientIp,
+          typedCtx.req,
         );
 
         return {
@@ -142,28 +100,22 @@ export const authRouter = router({
     }),
 
   logout: publicProcedure
-    .input(z.object({ accessToken: z.string() }))
+    .input(
+      z.object({
+        accessToken: z.string(),
+        refreshToken: z.string().optional(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
-      const redisService = new RedisService();
-      const securityService = new SecurityService(redisService);
-      const auditLogService = new AuditLogService(
-        new PrismaService(),
-        redisService,
-      );
-      const auth = new AuthService(
-        securityService,
-        auditLogService,
-        redisService,
-      );
+      const typedCtx = ctx as TrpcContext;
 
       try {
-        // Get client IP from request context
-        const req = (ctx as { req?: express.Request }).req;
-        const xf = (req?.headers?.["x-forwarded-for"] as string) || "";
-        const realIp = (req && (req as unknown as { ip?: string }).ip) || "";
-        const clientIp = xf.split(",")[0]?.trim() || realIp || "unknown";
-
-        await auth.logout(input.accessToken, clientIp, req);
+        await typedCtx.services.auth.logout(
+          input.accessToken,
+          typedCtx.clientIp,
+          typedCtx.req,
+          input.refreshToken,
+        );
 
         return { success: true } as const;
       } catch (error) {
@@ -181,21 +133,13 @@ export const authRouter = router({
   validate: publicProcedure
     .input(z.object({ accessToken: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const redisService = new RedisService();
-      const securityService = new SecurityService(redisService);
-      const auditLogService = new AuditLogService(
-        new PrismaService(),
-        redisService,
-      );
-      const auth = new AuthService(
-        securityService,
-        auditLogService,
-        redisService,
-      );
+      const typedCtx = ctx as TrpcContext;
 
       try {
-        const req = (ctx as { req?: express.Request }).req;
-        const user = await auth.validateToken(input.accessToken, req);
+        const user = await typedCtx.services.auth.validateToken(
+          input.accessToken,
+          typedCtx.req,
+        );
 
         return {
           success: true,
@@ -214,7 +158,8 @@ export const authRouter = router({
   spotifyLogin: publicProcedure
     .input(z.object({ code: z.string().min(1) }))
     .mutation(async ({ input, ctx }) => {
-      await assertLoginRate(ctx);
+      const typedCtx = ctx as TrpcContext;
+      await assertLoginRate(typedCtx);
 
       try {
         const { code } = input;

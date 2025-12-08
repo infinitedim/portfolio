@@ -73,16 +73,92 @@ export class SecurityMiddleware implements NestMiddleware {
   }
 
   /**
-   * Fallback method to get client IP when SecurityService is not available
+   * Get configured trusted proxies from environment.
+   * These are IP addresses of reverse proxies that we trust to provide X-Forwarded-For.
+   */
+  private getTrustedProxies(): string[] {
+    const proxies = process.env.TRUSTED_PROXIES || "";
+    return proxies
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+  }
+
+  /**
+   * Check if the request came from a trusted proxy.
+   * Only trust X-Forwarded-For when the immediate connection is from a known proxy.
+   */
+  private isFromTrustedProxy(req: Request): boolean {
+    const trustedProxies = this.getTrustedProxies();
+    if (trustedProxies.length === 0) {
+      // No trusted proxies configured - don't trust X-Forwarded-For
+      return false;
+    }
+
+    const socketIp =
+      req.socket?.remoteAddress || req.connection?.remoteAddress || "";
+
+    // Normalize IPv6-mapped IPv4 addresses (e.g., ::ffff:127.0.0.1 -> 127.0.0.1)
+    const normalizedSocketIp = socketIp.replace(/^::ffff:/, "");
+
+    return trustedProxies.some((proxy) => {
+      const normalizedProxy = proxy.replace(/^::ffff:/, "");
+      return normalizedSocketIp === normalizedProxy;
+    });
+  }
+
+  /**
+   * Secure method to get client IP with proper proxy validation.
+   * Only trusts X-Forwarded-For when request comes from a configured trusted proxy.
+   */
+  private getSecureClientIp(req: Request): string {
+    const socketIp =
+      req.socket?.remoteAddress ||
+      req.connection?.remoteAddress ||
+      req.ip ||
+      "unknown";
+
+    // Normalize IPv6-mapped IPv4
+    const normalizedSocketIp = socketIp.replace(/^::ffff:/, "");
+
+    // Only parse X-Forwarded-For if request came from a trusted proxy
+    if (this.isFromTrustedProxy(req)) {
+      const forwarded = req.headers["x-forwarded-for"];
+      if (typeof forwarded === "string") {
+        // Take the first IP in the chain (original client)
+        const clientIp = forwarded.split(",")[0]?.trim();
+        if (clientIp) {
+          securityLogger.debug("Using X-Forwarded-For from trusted proxy", {
+            clientIp,
+            socketIp: normalizedSocketIp,
+            component: "SecurityMiddleware",
+            operation: "getSecureClientIp",
+          });
+          return clientIp.replace(/^::ffff:/, "");
+        }
+      }
+    } else if (req.headers["x-forwarded-for"]) {
+      // Log when X-Forwarded-For is present but not trusted
+      securityLogger.warn(
+        "X-Forwarded-For header ignored - not from trusted proxy",
+        {
+          socketIp: normalizedSocketIp,
+          component: "SecurityMiddleware",
+          operation: "getSecureClientIp",
+        },
+      );
+    }
+
+    // Fallback to socket remote address
+    return normalizedSocketIp;
+  }
+
+  /**
+   * Fallback method to get client IP when SecurityService is not available.
+   * Uses secure client IP extraction with proxy validation.
    */
   private getFallbackClientIp(req: Request): string {
-    const forwarded = req.headers["x-forwarded-for"];
-    if (typeof forwarded === "string") {
-      return forwarded.split(",")[0]?.trim() ?? "unknown";
-    }
-    return (
-      req.connection?.remoteAddress ?? req.socket?.remoteAddress ?? "unknown"
-    );
+    return this.getSecureClientIp(req);
   }
 
   /**

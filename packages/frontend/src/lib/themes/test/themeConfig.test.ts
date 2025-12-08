@@ -89,7 +89,7 @@ describe("themeConfig", () => {
         const theme = themes[themeName as keyof typeof themes];
         const colors = theme.colors;
 
-        Object.entries(colors).forEach(([colorValue]) => {
+        Object.entries(colors).forEach(([_, colorValue]) => {
           expect(colorValue).toMatch(/^#[0-9a-fA-F]{6}$/);
         });
       });

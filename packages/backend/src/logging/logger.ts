@@ -70,6 +70,21 @@ export const logPerformanceMetric = (
   });
 };
 
+export const log = {
+  info: (message: string, meta?: Record<string, unknown>) => {
+    serverLogger.info(message, meta);
+  },
+  warning: (message: string, meta?: Record<string, unknown>) => {
+    serverLogger.warn(message, meta);
+  },
+  error: (message: string, meta?: Record<string, unknown>) => {
+    serverLogger.error(message, meta);
+  },
+  debug: (message: string, meta?: Record<string, unknown>) => {
+    serverLogger.debug(message, meta);
+  },
+};
+
 export const logAPICallEvent = (
   method: string,
   path: string,

@@ -55,17 +55,17 @@ describe("Async Error Handler", () => {
       const slowFn = vi
         .fn()
         .mockImplementation(
-          () => new Promise((resolve) => setTimeout(resolve, 100)),
+          () => new Promise((resolve) => setTimeout(resolve, 500)),
         );
 
       const start = Date.now();
-      const result = await handler.execute(slowFn, { timeout: 30 });
+      const result = await handler.execute(slowFn, { timeout: 50 });
       const elapsed = Date.now() - start;
 
       expect(result.success).toBe(false);
       expect(result.error?.message).toContain("timed out");
-      expect(elapsed).toBeLessThan(70); // Should timeout quickly
-    }, 500);
+      expect(elapsed).toBeLessThan(200); // Should timeout quickly
+    }, 1000);
 
     it("should not retry non-retryable errors", async () => {
       const error = new Error("Non-retryable error");

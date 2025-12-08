@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import type { Express } from "express";
 import { createExpressApp } from "../src/main";
+import { logger } from "../src/logging/logger";
 
 // Global variable to cache the Express app instance
 let appInstance: Express | undefined;
@@ -19,15 +20,26 @@ export default async function handler(
   try {
     // Initialize the app instance on first request (cold start)
     if (!appInstance) {
-      console.log("🚀 Initializing NestJS app for serverless environment...");
+      logger.info("Initializing NestJS app for serverless environment", {
+        component: "ServerlessHandler",
+        operation: "coldStart",
+      });
       appInstance = await createExpressApp();
-      console.log("✅ NestJS app initialized successfully");
+      logger.info("NestJS app initialized successfully", {
+        component: "ServerlessHandler",
+        operation: "coldStart",
+      });
     }
 
     // Handle the request through the Express app
     return appInstance(req, res);
   } catch (error) {
-    console.error("❌ Error in serverless handler:", error);
+    logger.error("Error in serverless handler", {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      component: "ServerlessHandler",
+      operation: "handleRequest",
+    });
 
     // Return a proper error response
     res.status(500).json({

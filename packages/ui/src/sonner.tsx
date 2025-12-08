@@ -1,7 +1,7 @@
 "use client";
 
 import { ComponentProps } from "react";
-import { useTheme } from "./hooks/useTheme";
+import { useTheme } from "@/frontend/hooks/useTheme";
 import { Toaster as Sonner } from "sonner";
 
 type ToasterProps = ComponentProps<typeof Sonner>;

@@ -108,12 +108,9 @@ vi.mock("@/lib/security/csp", () => ({
 vi.stubEnv("NODE_ENV", "test");
 vi.stubEnv("ALLOWED_ORIGINS", "http://127.0.0.1:3000,https://example.com");
 
-// Mock Date.now for consistent timestamps without affecting Date constructor
-const MOCK_DATE = new Date("2024-01-01T00:00:00.000Z");
-vi.spyOn(Date, "now").mockImplementation(() => MOCK_DATE.getTime());
-
-// Mock Math.random for consistent A/B testing
-vi.spyOn(Math, "random").mockReturnValue(0.5);
+// NOTE: Date.now and Math.random are NOT mocked globally to avoid issues
+// with tests that depend on unique IDs or timestamps.
+// Mock them locally in individual tests if needed.
 
 // Global test utilities
 global.ResizeObserver = vi.fn().mockImplementation(() => ({

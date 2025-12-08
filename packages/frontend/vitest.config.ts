@@ -9,6 +9,12 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     globals: true,
     css: true,
+    exclude: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/e2e/**", // Exclude Playwright e2e tests
+      "**/*.spec.ts", // Exclude all .spec.ts files (Playwright convention)
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
@@ -21,6 +27,7 @@ export default defineConfig({
         "**/dist/**",
         "**/.next/**",
         "**/public/**",
+        "**/e2e/**",
       ],
     },
   },
