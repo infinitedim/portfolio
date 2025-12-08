@@ -11,7 +11,7 @@ describe("AuthGuard", () => {
 
   beforeEach(() => {
     mockAuthService = {
-      verify: vi.fn(),
+      validateToken: vi.fn(),
     };
 
     mockRequest = {
@@ -31,7 +31,7 @@ describe("AuthGuard", () => {
   });
 
   describe("canActivate", () => {
-    it("should return true for valid Bearer token", () => {
+    it("should return true for valid Bearer token", async () => {
       const mockUser: AuthUser = {
         userId: "admin",
         email: "admin@example.com",
@@ -39,18 +39,21 @@ describe("AuthGuard", () => {
       };
 
       mockRequest.headers.authorization = "Bearer valid-token";
-      mockAuthService.verify.mockReturnValue(mockUser);
+      mockAuthService.validateToken.mockResolvedValue(mockUser);
 
-      const result = guard.canActivate(
+      const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
       expect(result).toBe(true);
-      expect(mockAuthService.verify).toHaveBeenCalledWith("valid-token");
+      expect(mockAuthService.validateToken).toHaveBeenCalledWith(
+        "valid-token",
+        mockRequest,
+      );
       expect(mockRequest.user).toEqual(mockUser);
     });
 
-    it("should return true for valid token without Bearer prefix", () => {
+    it("should return true for valid token without Bearer prefix", async () => {
       const mockUser: AuthUser = {
         userId: "admin",
         email: "admin@example.com",
@@ -58,65 +61,73 @@ describe("AuthGuard", () => {
       };
 
       mockRequest.headers.authorization = "valid-token";
-      mockAuthService.verify.mockReturnValue(mockUser);
+      mockAuthService.validateToken.mockResolvedValue(mockUser);
 
-      const result = guard.canActivate(
+      const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
       expect(result).toBe(true);
-      expect(mockAuthService.verify).toHaveBeenCalledWith("valid-token");
+      expect(mockAuthService.validateToken).toHaveBeenCalledWith(
+        "valid-token",
+        mockRequest,
+      );
       expect(mockRequest.user).toEqual(mockUser);
     });
 
-    it("should return false when no authorization header is present", () => {
-      const result = guard.canActivate(
+    it("should return false when no authorization header is present", async () => {
+      const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
       expect(result).toBe(false);
-      expect(mockAuthService.verify).not.toHaveBeenCalled();
+      expect(mockAuthService.validateToken).not.toHaveBeenCalled();
       expect(mockRequest.user).toBeUndefined();
     });
 
-    it("should return false when authorization header is not a string", () => {
+    it("should return false when authorization header is not a string", async () => {
       mockRequest.headers.authorization = ["Bearer", "token"];
 
-      const result = guard.canActivate(
+      const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
       expect(result).toBe(false);
-      expect(mockAuthService.verify).not.toHaveBeenCalled();
+      expect(mockAuthService.validateToken).not.toHaveBeenCalled();
       expect(mockRequest.user).toBeUndefined();
     });
 
-    it("should return false when authorization header is empty string", () => {
+    it("should return false when authorization header is empty string", async () => {
       mockRequest.headers.authorization = "";
 
-      const result = guard.canActivate(
+      const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
       expect(result).toBe(false);
-      expect(mockAuthService.verify).not.toHaveBeenCalled();
+      expect(mockAuthService.validateToken).not.toHaveBeenCalled();
       expect(mockRequest.user).toBeUndefined();
     });
 
-    it("should return false for invalid token", () => {
+    it("should return false for invalid token", async () => {
       mockRequest.headers.authorization = "Bearer invalid-token";
-      mockAuthService.verify.mockReturnValue(null);
+      mockAuthService.validateToken.mockRejectedValue(
+        new Error("Invalid token"),
+      );
 
-      const result = guard.canActivate(
+      const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
       expect(result).toBe(false);
-      expect(mockAuthService.verify).toHaveBeenCalledWith("invalid-token");
+      expect(mockAuthService.validateToken).toHaveBeenCalledWith(
+        "invalid-token",
+        mockRequest,
+      );
       expect(mockRequest.user).toBeUndefined();
     });
 
-    it("should handle Bearer token with extra spaces", () => {
+    it("should handle Bearer token with extra spaces", async () => {
       const mockUser: AuthUser = {
         userId: "admin",
         email: "admin@example.com",
@@ -124,20 +135,21 @@ describe("AuthGuard", () => {
       };
 
       mockRequest.headers.authorization = "Bearer  valid-token-with-spaces  ";
-      mockAuthService.verify.mockReturnValue(mockUser);
+      mockAuthService.validateToken.mockResolvedValue(mockUser);
 
-      const result = guard.canActivate(
+      const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
       expect(result).toBe(true);
-      expect(mockAuthService.verify).toHaveBeenCalledWith(
+      expect(mockAuthService.validateToken).toHaveBeenCalledWith(
         " valid-token-with-spaces  ",
+        mockRequest,
       );
       expect(mockRequest.user).toEqual(mockUser);
     });
 
-    it("should handle case-sensitive Bearer prefix", () => {
+    it("should handle case-sensitive Bearer prefix", async () => {
       const mockUser: AuthUser = {
         userId: "admin",
         email: "admin@example.com",
@@ -145,18 +157,21 @@ describe("AuthGuard", () => {
       };
 
       mockRequest.headers.authorization = "bearer valid-token";
-      mockAuthService.verify.mockReturnValue(mockUser);
+      mockAuthService.validateToken.mockResolvedValue(mockUser);
 
-      const result = guard.canActivate(
+      const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
       expect(result).toBe(true);
-      expect(mockAuthService.verify).toHaveBeenCalledWith("bearer valid-token");
+      expect(mockAuthService.validateToken).toHaveBeenCalledWith(
+        "bearer valid-token",
+        mockRequest,
+      );
       expect(mockRequest.user).toEqual(mockUser);
     });
 
-    it("should handle token that starts with Bearer but has no space", () => {
+    it("should handle token that starts with Bearer but has no space", async () => {
       const mockUser: AuthUser = {
         userId: "admin",
         email: "admin@example.com",
@@ -164,18 +179,21 @@ describe("AuthGuard", () => {
       };
 
       mockRequest.headers.authorization = "Bearervalid-token";
-      mockAuthService.verify.mockReturnValue(mockUser);
+      mockAuthService.validateToken.mockResolvedValue(mockUser);
 
-      const result = guard.canActivate(
+      const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
       expect(result).toBe(true);
-      expect(mockAuthService.verify).toHaveBeenCalledWith("Bearervalid-token");
+      expect(mockAuthService.validateToken).toHaveBeenCalledWith(
+        "Bearervalid-token",
+        mockRequest,
+      );
       expect(mockRequest.user).toEqual(mockUser);
     });
 
-    it("should properly extract token from Bearer authorization", () => {
+    it("should properly extract token from Bearer authorization", async () => {
       const mockUser: AuthUser = {
         userId: "admin",
         email: "admin@example.com",
@@ -184,35 +202,40 @@ describe("AuthGuard", () => {
 
       mockRequest.headers.authorization =
         "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
-      mockAuthService.verify.mockReturnValue(mockUser);
+      mockAuthService.validateToken.mockResolvedValue(mockUser);
 
-      const result = guard.canActivate(
+      const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
       expect(result).toBe(true);
-      expect(mockAuthService.verify).toHaveBeenCalledWith(
+      expect(mockAuthService.validateToken).toHaveBeenCalledWith(
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+        mockRequest,
       );
       expect(mockRequest.user).toEqual(mockUser);
     });
 
-    it("should handle AuthService throwing an error", () => {
+    it("should handle AuthService throwing an error", async () => {
       mockRequest.headers.authorization = "Bearer valid-token";
-      mockAuthService.verify.mockImplementation(() => {
-        throw new Error("Token verification failed");
-      });
+      mockAuthService.validateToken.mockRejectedValue(
+        new Error("Token verification failed"),
+      );
 
-      expect(() =>
-        guard.canActivate(mockExecutionContext as ExecutionContext),
-      ).toThrow("Token verification failed");
+      const result = await guard.canActivate(
+        mockExecutionContext as ExecutionContext,
+      );
+
+      expect(result).toBe(false);
     });
 
-    it("should set user to undefined when verification returns null", () => {
+    it("should set user to undefined when verification returns null", async () => {
       mockRequest.headers.authorization = "Bearer invalid-token";
-      mockAuthService.verify.mockReturnValue(null);
+      mockAuthService.validateToken.mockRejectedValue(
+        new Error("Invalid token"),
+      );
 
-      const result = guard.canActivate(
+      const result = await guard.canActivate(
         mockExecutionContext as ExecutionContext,
       );
 
@@ -220,7 +243,7 @@ describe("AuthGuard", () => {
       expect(mockRequest.user).toBeUndefined();
     });
 
-    it("should properly handle different authorization header formats", () => {
+    it("should properly handle different authorization header formats", async () => {
       const testCases = [
         {
           header: "Bearer token123",
@@ -237,7 +260,7 @@ describe("AuthGuard", () => {
         { header: "Bearer", expectedToken: "Bearer", shouldPass: false },
       ];
 
-      testCases.forEach(({ header, expectedToken, shouldPass }) => {
+      for (const { header, expectedToken, shouldPass } of testCases) {
         // Reset mocks
         vi.clearAllMocks();
         mockRequest.headers.authorization = header;
@@ -248,18 +271,23 @@ describe("AuthGuard", () => {
             email: "admin@example.com",
             role: "admin",
           };
-          mockAuthService.verify.mockReturnValue(mockUser);
+          mockAuthService.validateToken.mockResolvedValue(mockUser);
         } else {
-          mockAuthService.verify.mockReturnValue(null);
+          mockAuthService.validateToken.mockRejectedValue(
+            new Error("Invalid token"),
+          );
         }
 
-        const result = guard.canActivate(
+        const result = await guard.canActivate(
           mockExecutionContext as ExecutionContext,
         );
 
-        expect(mockAuthService.verify).toHaveBeenCalledWith(expectedToken);
+        expect(mockAuthService.validateToken).toHaveBeenCalledWith(
+          expectedToken,
+          mockRequest,
+        );
         expect(result).toBe(shouldPass);
-      });
+      }
     });
   });
 });

@@ -1,0 +1,13 @@
+# Trivy Ignore Configuration
+# ===========================
+# CVE yang diabaikan setelah evaluasi risiko
+
+# path-to-regexp ReDoS (GHSA-9wv6-86v2-598j / CVE-2024-45296)
+# Affected: @vercel/node -> path-to-regexp@6.1.0
+# Alasan: Kerentanan ini memerlukan input user yang tidak terkontrol ke route patterns.
+# Dalam konteks ini, route patterns dikontrol oleh developer, bukan user input.
+# Risiko: Rendah dalam konteks penggunaan ini
+CVE-2024-45296
+
+# Jika ada CVE lain yang perlu diabaikan setelah evaluasi, tambahkan di bawah ini
+# Format: CVE-YYYY-NNNNN atau vulnerability ID

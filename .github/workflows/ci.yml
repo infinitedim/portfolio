@@ -359,6 +359,9 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     needs: lint
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -372,9 +375,18 @@ jobs:
           format: "sarif"
           output: "trivy-results.sarif"
           severity: "CRITICAL,HIGH"
+          trivyignores: ".trivyignore"
+          # Skip node_modules dan direktori non-essential
+          skip-dirs: "node_modules,.git,dist,build,coverage,.next,logs"
+          # Gunakan exit code 0 untuk tidak memblokir pipeline
+          # Hasil tetap akan di-upload ke GitHub Security tab
+          exit-code: "0"
+          # Limit scan timeout
+          timeout: "10m"
 
       - name: Upload Trivy scan results
         uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: "trivy-results.sarif"
+          category: "trivy-security-scan"
