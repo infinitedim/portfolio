@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import { useSecurity } from "../useSecurity";
 
 // Mock tRPC
@@ -48,7 +48,9 @@ describe("useSecurity hook", () => {
   it("should detect dangerous input patterns", () => {
     const { result } = renderHook(() => useSecurity());
 
-    const validation = result.current.validateInputSync("<script>alert(1)</script>");
+    const validation = result.current.validateInputSync(
+      "<script>alert(1)</script>",
+    );
 
     expect(validation.isValid).toBe(false);
     expect(validation.riskLevel).toBe("high");

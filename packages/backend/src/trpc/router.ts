@@ -1,6 +1,6 @@
 import express from "express";
 import * as trpcExpress from "@trpc/server/adapters/express";
-import { router, publicProcedure } from "@portfolio/trpc";
+import { router, publicProcedure } from "./procedures";
 import { z } from "zod";
 import { authRouter } from "./auth.router";
 import { projectsRouter } from "./projects.router";

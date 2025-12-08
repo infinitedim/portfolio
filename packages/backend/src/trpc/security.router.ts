@@ -1,4 +1,4 @@
-import { router, publicProcedure } from "@portfolio/trpc";
+import { router, publicProcedure } from "./procedures";
 import { z } from "zod";
 import type { TrpcContext } from "./context";
 

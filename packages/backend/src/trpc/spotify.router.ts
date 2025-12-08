@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { router, publicProcedure } from "@portfolio/trpc";
+import { router, publicProcedure } from "./procedures";
 import { SpotifyServiceBackend } from "../spotify/spotify.service";
 import { TRPCError } from "@trpc/server";
 import type { TrpcContext } from "./context";

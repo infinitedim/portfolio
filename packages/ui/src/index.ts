@@ -48,6 +48,3 @@ export * from "./toggle";
 export * from "./toggle-group";
 export * from "./tooltip";
 export * from "./utils";
-export * from "./hooks/useTheme";
-export { useToast } from "./hooks/useToast";
-export * from "./hooks/useMobile";

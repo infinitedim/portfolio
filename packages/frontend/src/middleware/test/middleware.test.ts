@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
-
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { middleware } from "../middleware";
 import { NextRequest, NextResponse } from "next/server";

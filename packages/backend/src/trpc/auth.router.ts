@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { router, publicProcedure } from "@portfolio/trpc";
+import { router, publicProcedure } from "./procedures";
 import { TRPCError } from "@trpc/server";
 import type { TrpcContext } from "./context";
 import { securityLogger } from "../logging/logger";

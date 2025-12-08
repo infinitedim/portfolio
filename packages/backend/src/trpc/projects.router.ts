@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { router, publicProcedure } from "@portfolio/trpc";
+import { router, publicProcedure } from "./procedures";
 import type { TrpcContext } from "./context";
 
 const ProjectsUpdateSchema = z.object({
@@ -18,39 +18,20 @@ export const projectsRouter = router({
         .optional(),
     )
 
-    .query(
-      ({
-        ctx,
-        input,
-      }: {
-        ctx: TrpcContext;
-        input:
-          | {
-              section?: string | undefined;
-              limit?: number | undefined;
-            }
-          | undefined;
-      }) => {
-        if (!ctx.user) throw new Error("Unauthorized");
-        return { data: null, meta: null, input } as const;
-      },
-    ),
+    .query(({ ctx, input }) => {
+      const typedCtx = ctx as TrpcContext;
+      if (!typedCtx.user) throw new Error("Unauthorized");
+      return { data: null, meta: null, input } as const;
+    }),
   update: publicProcedure
     .input(ProjectsUpdateSchema)
 
-    .mutation(
-      ({
-        ctx,
-        input,
-      }: {
-        ctx: TrpcContext;
-        input: z.infer<typeof ProjectsUpdateSchema>;
-      }) => {
-        if (!ctx.user) throw new Error("Unauthorized");
-        return {
-          success: true,
-          message: `${input.section} updated successfully`,
-        } as const;
-      },
-    ),
+    .mutation(({ ctx, input }) => {
+      const typedCtx = ctx as TrpcContext;
+      if (!typedCtx.user) throw new Error("Unauthorized");
+      return {
+        success: true,
+        message: `${input.section} updated successfully`,
+      } as const;
+    }),
 });

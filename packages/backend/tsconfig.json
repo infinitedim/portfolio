@@ -3,11 +3,21 @@
   "compilerOptions": {
     "module": "esnext",
     "outDir": "dist",
-    "rootDir": "src",
     "lib": [
       "esnext"
     ],
-    "baseUrl": "./",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*",
+      ],
+      "@/backend/*": [
+        "../backend/src/*"
+      ],
+      "@/ui/*": [
+        "../ui/src/*"
+      ]
+    },
     "moduleResolution": "bundler",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,

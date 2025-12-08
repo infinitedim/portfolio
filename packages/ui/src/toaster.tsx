@@ -1,6 +1,6 @@
 "use client";
 
-import { useToast } from "./hooks/useToast";
+import { useToast, type ToasterToast } from "@/frontend/hooks/useToast";
 import {
   Toast,
   ToastClose,
@@ -18,7 +18,7 @@ import type { JSX } from "react";
  * @returns {JSX.Element} The Toaster component.
  * @example
  * // In your root layout (e.g., layout.tsx)
- * import { Toaster } from "@portfolio/frontend/components/ui/toaster";
+ * import { Toaster } from "@//ui/toaster";
  *
  * export default function RootLayout({ children }) {
  *   return (
@@ -33,7 +33,13 @@ export function Toaster(): JSX.Element {
 
   return (
     <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, ...props }) {
+      {toasts.map(function ({
+        id,
+        title,
+        description,
+        action,
+        ...props
+      }: ToasterToast) {
         return (
           <Toast
             key={id}

@@ -5,12 +5,12 @@
 import * as React from "react";
 import { generateId, useTimerManager, useMountRef } from "./utils/hookUtils";
 
-import type { ToastActionElement, ToastProps } from "@portfolio/ui/src/toast";
+import type { ToastActionElement, ToastProps } from "@/ui/toast";
 
 const TOAST_LIMIT = 1;
 const TOAST_REMOVE_DELAY = 1000000;
 
-type ToasterToast = ToastProps & {
+export type ToasterToast = ToastProps & {
   id: string;
   title?: React.ReactNode;
   description?: React.ReactNode;

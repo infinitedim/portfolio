@@ -409,7 +409,7 @@ describe("languageCommands", () => {
       it("should correctly indicate English (US) as current", async () => {
         mockCurrentLocale = "en_US";
         const result = await languageListCommand.execute([]);
-        const lines = result.content.split("\n");
+        const lines = (result.content as string).split("\n");
         const englishLine = lines.find((l: string) =>
           l.includes("English (US)"),
         );
