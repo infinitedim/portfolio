@@ -10,8 +10,12 @@ export type AuthUser = { userId: string; email: string; role: "admin" };
 
 // Token blacklist prefix for Redis
 const TOKEN_BLACKLIST_PREFIX = "token:blacklist:";
+// Token family prefix for refresh token rotation tracking
+const TOKEN_FAMILY_PREFIX = "token:family:";
 // Default blacklist TTL matches JWT expiry (15 minutes) + buffer
 const TOKEN_BLACKLIST_TTL = 20 * 60; // 20 minutes in seconds
+// Refresh token family TTL matches refresh token expiry (7 days) + buffer
+const TOKEN_FAMILY_TTL = 8 * 24 * 60 * 60; // 8 days in seconds
 
 @Injectable()
 export class AuthService {
@@ -113,7 +117,7 @@ export class AuthService {
       throw new UnauthorizedException("Invalid credentials");
     }
 
-    // Generate tokens
+    // Generate tokens with a new token family
     const user: AuthUser = {
       userId: "admin",
       email: validatedEmail,
@@ -121,7 +125,23 @@ export class AuthService {
     };
 
     const accessToken = this.securityService.generateAccessToken(user);
+    // generateRefreshToken creates a new familyId when none is provided
     const refreshToken = this.securityService.generateRefreshToken(user.userId);
+
+    // Initialize the token family in Redis for rotation tracking
+    const refreshPayload =
+      this.securityService.verifyRefreshToken(refreshToken);
+    const familyKey = `${TOKEN_FAMILY_PREFIX}${refreshPayload.familyId}`;
+    await this.redisService.set(
+      familyKey,
+      {
+        currentTokenId: refreshPayload.tokenId,
+        userId: user.userId,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      },
+      TOKEN_FAMILY_TTL,
+    );
 
     // Reset rate limit on successful login
     await this.securityService.resetRateLimit(clientIp, "login");
@@ -134,6 +154,13 @@ export class AuthService {
       request,
     );
 
+    securityLogger.debug("New token family created on login", {
+      familyId: refreshPayload.familyId,
+      userId: user.userId,
+      component: "AuthService",
+      operation: "validateCredentials",
+    });
+
     return { user, accessToken, refreshToken };
   }
 
@@ -145,6 +172,7 @@ export class AuthService {
     try {
       // Validate refresh token
       const payload = this.securityService.verifyRefreshToken(refreshToken);
+      const { userId, tokenId, familyId, jti } = payload;
 
       // Check rate limit for refresh attempts
       const rateLimitResult = await this.securityService.checkRateLimit(
@@ -157,9 +185,60 @@ export class AuthService {
         );
       }
 
-      // Generate new tokens
+      // Token rotation: verify this token hasn't been used before
+      const familyKey = `${TOKEN_FAMILY_PREFIX}${familyId}`;
+      const familyData = await this.redisService.get<{
+        currentTokenId: string;
+        userId: string;
+        createdAt: number;
+      }>(familyKey);
+
+      if (familyData) {
+        // Family exists - check if this is the current valid token
+        if (familyData.currentTokenId !== tokenId) {
+          // Token reuse detected! This could be a replay attack.
+          // Invalidate the entire family to force re-authentication
+          securityLogger.warn(
+            "Refresh token reuse detected - possible replay attack",
+            {
+              familyId,
+              presentedTokenId: tokenId,
+              expectedTokenId: familyData.currentTokenId,
+              userId,
+              clientIp,
+              component: "AuthService",
+              operation: "refreshToken",
+            },
+          );
+
+          // Delete the family to invalidate all tokens in the chain
+          await this.redisService.del(familyKey);
+
+          // Blacklist the presented token's jti if available
+          if (jti) {
+            await this.blacklistToken(jti);
+          }
+
+          await this.auditLogService.logSecurityEvent(
+            AuditEventType.SUSPICIOUS_ACTIVITY,
+            {
+              action: "REFRESH_TOKEN_REUSE",
+              familyId,
+              tokenId,
+              clientIp,
+            },
+            request,
+          );
+
+          throw new UnauthorizedException(
+            "Token has already been used. Please login again.",
+          );
+        }
+      }
+
+      // Generate new tokens (same family for rotation chain)
       const user: AuthUser = {
-        userId: payload.userId,
+        userId,
         email: this.adminEmail,
         role: "admin",
       };
@@ -167,10 +246,43 @@ export class AuthService {
       const newAccessToken = this.securityService.generateAccessToken(user);
       const newRefreshToken = this.securityService.generateRefreshToken(
         user.userId,
+        familyId, // Keep the same family for the rotation chain
       );
+
+      // Extract the new token's ID for family tracking
+      const newPayload =
+        this.securityService.verifyRefreshToken(newRefreshToken);
+
+      // Update family with new current token ID
+      await this.redisService.set(
+        familyKey,
+        {
+          currentTokenId: newPayload.tokenId,
+          userId,
+          createdAt: familyData?.createdAt ?? Date.now(),
+          updatedAt: Date.now(),
+        },
+        TOKEN_FAMILY_TTL,
+      );
+
+      // Blacklist the old token's jti to prevent reuse
+      if (jti) {
+        await this.blacklistToken(jti);
+      }
+
+      securityLogger.debug("Refresh token rotated successfully", {
+        familyId,
+        oldTokenId: tokenId,
+        newTokenId: newPayload.tokenId,
+        component: "AuthService",
+        operation: "refreshToken",
+      });
 
       return { accessToken: newAccessToken, refreshToken: newRefreshToken };
     } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       await this.auditLogService.logSecurityEvent(
         AuditEventType.SUSPICIOUS_ACTIVITY,
         {
@@ -201,19 +313,59 @@ export class AuthService {
     }
   }
 
-  async logout(token: string, clientIp: string, request?: any): Promise<void> {
+  async logout(
+    token: string,
+    clientIp: string,
+    request?: any,
+    refreshToken?: string,
+  ): Promise<void> {
     try {
-      // Extract JWT ID for blacklisting
+      // Extract JWT ID for blacklisting access token
       const jti = this.securityService.extractJWTId(token);
       if (jti) {
-        // Blacklist the token to prevent reuse after logout
+        // Blacklist the access token to prevent reuse after logout
         await this.blacklistToken(jti);
-        securityLogger.info("Token blacklisted on logout", {
+        securityLogger.info("Access token blacklisted on logout", {
           jti,
           clientIp,
           component: "AuthService",
           operation: "logout",
         });
+      }
+
+      // If refresh token provided, invalidate its entire family
+      if (refreshToken) {
+        try {
+          const refreshPayload =
+            this.securityService.verifyRefreshToken(refreshToken);
+          const familyKey = `${TOKEN_FAMILY_PREFIX}${refreshPayload.familyId}`;
+
+          // Delete the family to invalidate all tokens in the chain
+          await this.redisService.del(familyKey);
+
+          // Also blacklist the refresh token's jti
+          if (refreshPayload.jti) {
+            await this.blacklistToken(refreshPayload.jti, TOKEN_FAMILY_TTL);
+          }
+
+          securityLogger.info("Token family invalidated on logout", {
+            familyId: refreshPayload.familyId,
+            clientIp,
+            component: "AuthService",
+            operation: "logout",
+          });
+        } catch (refreshError) {
+          // Refresh token may already be expired/invalid - that's fine for logout
+          securityLogger.debug("Could not invalidate refresh token on logout", {
+            error:
+              refreshError instanceof Error
+                ? refreshError.message
+                : String(refreshError),
+            clientIp,
+            component: "AuthService",
+            operation: "logout",
+          });
+        }
       }
 
       // Reset rate limit for the client

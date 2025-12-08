@@ -2,6 +2,7 @@ import { Injectable, ForbiddenException } from "@nestjs/common";
 import type { NestMiddleware } from "@nestjs/common";
 import type { Request, Response, NextFunction } from "express";
 import { CSRFTokenService } from "./csrf.service";
+import { securityLogger } from "../logging/logger";
 
 @Injectable()
 export class CSRFMiddleware implements NestMiddleware {
@@ -82,7 +83,12 @@ export class CSRFMiddleware implements NestMiddleware {
         throw error;
       }
 
-      console.error("CSRF middleware error:", error);
+      securityLogger.error("CSRF middleware error", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        component: "CSRFMiddleware",
+        operation: "use",
+      });
       throw new ForbiddenException("CSRF validation failed");
     }
   }

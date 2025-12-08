@@ -13,8 +13,6 @@ import { defineConfig, type PrismaConfig } from "@prisma/config";
 export default defineConfig({
   earlyAccess: true,
   schema: path.join(__dirname, "schema.prisma"),
-
-  // Migration configuration - URL for prisma migrate commands
   migrate: {
     url: process.env.DATABASE_URL!,
   },

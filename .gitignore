@@ -233,4 +233,13 @@ localhost.crt
 
 .cursorignore
 
+# Compiled JavaScript in TypeScript source directories
+# These should never be committed - use proper build output directories instead
+packages/backend/src/**/*.js
+packages/backend/src/**/*.js.map
+packages/frontend/src/**/*.js
+packages/frontend/src/**/*.js.map
+tools/**/src/**/*.js
+tools/**/src/**/*.js.map
+
 # End of https://www.toptal.com/developers/gitignore/api/nextjs,visualstudiocode,git,turbo,vercel,node,react

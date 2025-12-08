@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { logger } from "../logging/logger";
 
 // Types for portfolio data
 interface GitHubRepository {
@@ -151,7 +152,7 @@ async function fetchWithCache<T>(
 
     return data as T;
   } catch (error) {
-    console.error("Fetch error occurred", {
+    logger.error("Fetch error occurred", {
       url,
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
@@ -165,21 +166,30 @@ async function fetchWithCache<T>(
 // React cache wrapper for server components
 export const getPortfolioData = cache(async (): Promise<PortfolioData> => {
   // ALWAYS use fallback data during production builds to avoid external API calls
-  console.log("Build mode detected - using static portfolio data");
+  logger.debug("Build mode detected - using static portfolio data", {
+    component: "SSRDataFetching",
+    operation: "getPortfolioData",
+  });
   return getFallbackPortfolioData();
 });
 
 // Get specific portfolio sections with optimized caching
 export const getSkillsData = cache(async (): Promise<SkillCategory[]> => {
   // Use static data during build time to avoid API calls
-  console.log("Build mode detected - returning empty skills array");
+  logger.debug("Build mode detected - returning empty skills array", {
+    component: "SSRDataFetching",
+    operation: "getSkillsData",
+  });
   return [];
 });
 
 export const getProjectsData = cache(
   async (limit?: number): Promise<Project[]> => {
     // ALWAYS use fallback data during production builds to avoid external API calls
-    console.log("Build mode detected - using static project data");
+    logger.debug("Build mode detected - using static project data", {
+      component: "SSRDataFetching",
+      operation: "getProjectsData",
+    });
     return limit ? STATIC_PROJECTS.slice(0, limit) : STATIC_PROJECTS;
   },
 );
@@ -200,7 +210,7 @@ export const getExperienceData = cache(async (): Promise<Experience[]> => {
 
     return response.data;
   } catch (error) {
-    console.error("Failed to fetch experience data", {
+    logger.error("Failed to fetch experience data", {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
       component: "SSRDataFetching",

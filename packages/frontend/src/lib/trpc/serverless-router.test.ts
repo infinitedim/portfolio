@@ -31,11 +31,13 @@ vi.mock("@prisma/client", () => ({
 }));
 
 // Import after mocks
-import { appRouter } from "./serverless-router";
+import { appRouter, clearRateLimitMap } from "./serverless-router";
 
 describe("Serverless tRPC Router", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Clear rate limit map before each test
+    clearRateLimitMap();
   });
 
   afterEach(() => {

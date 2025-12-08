@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useI18n } from "../useI18n";
+import { i18n } from "@/lib/i18n/i18nService";
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -27,6 +28,8 @@ describe("useI18n", () => {
   beforeEach(() => {
     localStorageMock.clear();
     vi.clearAllMocks();
+    // Reset i18n singleton to default locale
+    i18n.setLocale("en_US");
   });
 
   afterEach(() => {

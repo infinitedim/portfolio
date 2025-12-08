@@ -149,7 +149,8 @@ describe("utils", () => {
       const date = new Date("2024-01-05T09:08:07.000Z");
       const result = formatTimestamp(date);
       expect(result).toContain("01-05");
-      expect(result).toContain("09:08:07");
+      // Check that time portion contains padded values (timezone-agnostic)
+      expect(result).toMatch(/\d{2}:\d{2}:\d{2}$/);
     });
 
     it("should handle different months correctly", () => {

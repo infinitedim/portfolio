@@ -94,6 +94,8 @@ export interface JWTPayload {
 export interface RefreshTokenPayload {
   userId: string;
   tokenId: string;
+  /** Token family ID for rotation tracking - all tokens in a chain share the same familyId */
+  familyId: string;
   iat?: number;
   exp?: number;
   iss?: string;
@@ -323,17 +325,21 @@ export class SecurityService {
   /**
    * Generate JWT refresh token with enhanced security
    * @param {string} userId - The user ID for the refresh token
+   * @param {string} familyId - Optional family ID for token rotation tracking (new family if not provided)
    * @returns {string} The generated JWT refresh token
    */
-  generateRefreshToken(userId: string): string {
+  generateRefreshToken(userId: string, familyId?: string): string {
     const tokenId = crypto.randomUUID();
     const jti = crypto.randomUUID();
+    // Use provided familyId (for rotation) or create new family (for fresh login)
+    const tokenFamilyId = familyId ?? crypto.randomUUID();
     const payload: Omit<
       RefreshTokenPayload,
       "iat" | "exp" | "iss" | "aud" | "jti"
     > = {
       userId,
       tokenId,
+      familyId: tokenFamilyId,
     };
 
     const options: SignOptions = {

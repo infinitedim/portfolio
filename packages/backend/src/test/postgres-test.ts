@@ -91,7 +91,7 @@ async function testPostgresConnection() {
 
     if (tablesResult.rows.length > 0) {
       log(`Tables in database (${tablesResult.rows.length}):`, "info");
-      tablesResult.rows.forEach((row) => {
+      tablesResult.rows.forEach((row: { table_name: string }) => {
         console.log(`   - ${row.table_name}`);
       });
     } else {
@@ -109,9 +109,11 @@ async function testPostgresConnection() {
 
       if (migrationsResult.rows.length > 0) {
         log(`Recent Prisma migrations:`, "info");
-        migrationsResult.rows.forEach((row) => {
-          console.log(`   - ${row.migration_name} (${row.finished_at})`);
-        });
+        migrationsResult.rows.forEach(
+          (row: { migration_name: string; finished_at: string }) => {
+            console.log(`   - ${row.migration_name} (${row.finished_at})`);
+          },
+        );
       }
     } catch {
       log(

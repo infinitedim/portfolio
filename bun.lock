@@ -84,6 +84,7 @@
         "@prisma/config": "^7.0.1",
         "@trpc/client": "^11.7.2",
         "@trpc/server": "^11.7.2",
+        "@types/pg": "^8.15.6",
         "@upstash/redis": "^1.35.7",
         "@vercel/node": "^5.5.13",
         "bcryptjs": "^3.0.3",
