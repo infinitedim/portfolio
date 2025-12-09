@@ -52,7 +52,7 @@ jobs:
 
       - name: Generate Prisma Client
         working-directory: packages/backend
-        run: npx prisma generate
+        run: bun prisma:generate
 
       - name: Run ESLint
         run: bun run lint
@@ -118,7 +118,7 @@ jobs:
 
       - name: Generate Prisma Client
         working-directory: packages/backend
-        run: npx prisma generate
+        run: bun prisma:generate
 
       - name: Run database migrations
         working-directory: packages/backend
@@ -180,7 +180,7 @@ jobs:
       - name: Generate Prisma Client (Backend only)
         if: matrix.package == 'backend'
         working-directory: packages/backend
-        run: npx prisma generate
+        run: bun prisma:generate
 
       - name: Build ${{ matrix.package }}
         working-directory: packages/${{ matrix.package }}
@@ -258,7 +258,7 @@ jobs:
 
       - name: Generate Prisma Client
         working-directory: packages/backend
-        run: npx prisma generate
+        run: bun prisma:generate
 
       - name: Run database migrations
         working-directory: packages/backend
