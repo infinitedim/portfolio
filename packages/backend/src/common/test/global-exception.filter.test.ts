@@ -1,6 +1,18 @@
 /* eslint-disable promise/valid-params */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { HttpException, HttpStatus, type ArgumentsHost } from "@nestjs/common";
+import {
+  HttpException,
+  HttpStatus,
+  Logger,
+  type ArgumentsHost,
+} from "@nestjs/common";
+
+// Suppress NestJS Logger output by spying on Logger prototype
+vi.spyOn(Logger.prototype, "log").mockImplementation(() => {});
+vi.spyOn(Logger.prototype, "error").mockImplementation(() => {});
+vi.spyOn(Logger.prototype, "warn").mockImplementation(() => {});
+vi.spyOn(Logger.prototype, "debug").mockImplementation(() => {});
+vi.spyOn(Logger.prototype, "verbose").mockImplementation(() => {});
 
 // Mock security/audit-log.service before other imports
 vi.mock("../../security/audit-log.service", () => ({

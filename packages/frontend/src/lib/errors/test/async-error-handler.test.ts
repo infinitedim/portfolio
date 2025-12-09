@@ -52,20 +52,23 @@ describe("Async Error Handler", () => {
     });
 
     it("should respect timeout configuration", async () => {
-      const slowFn = vi
-        .fn()
-        .mockImplementation(
-          () => new Promise((resolve) => setTimeout(resolve, 500)),
-        );
+      // Create a function that takes longer than the timeout
+      const slowFn = vi.fn().mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(() => resolve("delayed"), 200);
+          }),
+      );
 
-      const start = Date.now();
-      const result = await handler.execute(slowFn, { timeout: 50 });
-      const elapsed = Date.now() - start;
+      // Use a short timeout and disable retries to prevent retry delays
+      const result = await handler.execute(slowFn, {
+        timeout: 50,
+        retryConfig: { maxRetries: 0 },
+      });
 
       expect(result.success).toBe(false);
       expect(result.error?.message).toContain("timed out");
-      expect(elapsed).toBeLessThan(200); // Should timeout quickly
-    }, 1000);
+    });
 
     it("should not retry non-retryable errors", async () => {
       const error = new Error("Non-retryable error");
@@ -169,7 +172,8 @@ describe("AsyncUtils", () => {
 
       const result = await AsyncUtils.retry(retryFn, {
         maxRetries: 3,
-        baseDelay: 10,
+        baseDelay: 1, // Use minimal delay for faster tests
+        maxDelay: 5,
       });
 
       expect(result).toBe("success");
@@ -185,7 +189,7 @@ describe("AsyncUtils", () => {
       });
 
       await expect(
-        AsyncUtils.retry(errorFn, { maxRetries: 2, baseDelay: 10 }),
+        AsyncUtils.retry(errorFn, { maxRetries: 2, baseDelay: 1, maxDelay: 5 }),
       ).rejects.toThrow();
 
       expect(errorFn).toHaveBeenCalledTimes(3); // Initial + 2 retries

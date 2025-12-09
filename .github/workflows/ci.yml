@@ -44,10 +44,10 @@ jobs:
 
       - name: Generate Prisma Client
         working-directory: packages/backend
-        run: bun x prisma generate
+        run: npx prisma generate
         env:
-          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
-          DIRECT_URL: postgresql://dummy:dummy@localhost:5432/dummy
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          DIRECT_URL: ${{ env.DIRECT_URL }}
 
       - name: Run ESLint
         run: bun run lint
@@ -109,7 +109,7 @@ jobs:
 
   #     - name: Generate Prisma Client
   #       working-directory: packages/backend
-  #       run: bun x prisma generate
+  #       run: npx prisma generate
   #       env:
   #         DATABASE_URL: postgresql://test:test@localhost:5432/portfolio_test
   #         DIRECT_URL: postgresql://test:test@localhost:5432/portfolio_test
@@ -118,16 +118,16 @@ jobs:
   #       working-directory: packages/backend
   #       run: bunx prisma migrate deploy
   #       env:
-  #         DATABASE_URL: postgresql://test:test@localhost:5432/portfolio_test
+  #         DATABASE_URL: ${{ env.DATABASE_URL }}
 
   #     - name: Run unit tests
   #       run: bun test
   #       env:
-  #         DATABASE_URL: postgresql://test:test@localhost:5432/portfolio_test
+  #         DATABASE_URL: ${{ env.DATABASE_URL }}
   #         REDIS_URL: redis://localhost:6379
-  #         JWT_SECRET: test_jwt_secret
-  #         JWT_REFRESH_SECRET: test_jwt_refresh_secret
-  #         SESSION_SECRET: test_session_secret
+  #         JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }}
+  #         JWT_REFRESH_SECRET: ${{ secrets.TEST_JWT_REFRESH_SECRET }}
+  #         SESSION_SECRET: ${{ secrets.TEST_SESSION_SECRET }}
 
   #     - name: Upload coverage reports
   #       uses: codecov/codecov-action@v5
@@ -170,7 +170,7 @@ jobs:
       - name: Generate Prisma Client (Backend only)
         if: matrix.package == 'backend'
         working-directory: packages/backend
-        run: bun x prisma generate
+        run: npx prisma generate
         env:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
           DIRECT_URL: postgresql://dummy:dummy@localhost:5432/dummy
@@ -247,7 +247,7 @@ jobs:
 
   #     - name: Generate Prisma Client
   #       working-directory: packages/backend
-  #       run: bun x prisma generate
+  #       run: npx prisma generate
   #       env:
   #         DATABASE_URL: postgresql://test:test@localhost:5432/portfolio_test
   #         DIRECT_URL: postgresql://test:test@localhost:5432/portfolio_test

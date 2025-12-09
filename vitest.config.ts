@@ -11,6 +11,8 @@ export default defineConfig({
       "**/coverage/**",
       "**/.{idea,git,cache,output,temp}/**",
       "**/prisma/migrations/**",
+      "**/e2e/**",
+      "**/generated/**",
     ],
     coverage: {
       provider: "v8",

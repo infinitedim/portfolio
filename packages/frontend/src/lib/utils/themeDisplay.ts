@@ -16,8 +16,11 @@ export class ThemeDisplay {
       currentTheme,
       compact = false,
       showColors = true,
-      columns = 2,
+      columns: rawColumns = 2,
     } = options;
+
+    // Ensure columns is at least 1 to prevent infinite loop
+    const columns = Math.max(1, rawColumns);
 
     const sortedThemes = getSortedThemeNames();
     const lines: string[] = [];
