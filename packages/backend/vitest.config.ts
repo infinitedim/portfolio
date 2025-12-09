@@ -13,6 +13,7 @@ export default defineConfig({
       "**/coverage/**",
       "**/.{idea,git,cache,output,temp}/**",
       "**/prisma/migrations/**",
+      "**/generated/**",
       // Exclude problematic test files that crash
       "**/logging/test/**",
       "**/dist/**/*.js",
@@ -28,6 +29,7 @@ export default defineConfig({
         "**/coverage/**",
         "**/dist/**",
         "**/prisma/**",
+        "**/generated/**",
         "**/.next/**",
         "**/public/**",
       ],

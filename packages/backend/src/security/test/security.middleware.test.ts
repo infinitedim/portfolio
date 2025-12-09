@@ -26,10 +26,24 @@ describe("SecurityMiddleware", () => {
 
   beforeEach(() => {
     mockSecurityService = {
-      checkRateLimit: vi.fn(),
+      checkRateLimit: vi.fn().mockResolvedValue({
+        isBlocked: false,
+        remaining: 99,
+        resetTime: Date.now() + 60000,
+      }),
       sanitizeInput: vi.fn(),
       validateInput: vi.fn(),
       logSecurityEvent: vi.fn(),
+      getClientIp: vi.fn().mockReturnValue("192.168.1.1"),
+      getRateLimitType: vi.fn().mockReturnValue("default"),
+      getRateLimitHeaders: vi.fn().mockReturnValue({
+        "X-RateLimit-Limit": "100",
+        "X-RateLimit-Remaining": "99",
+        "X-RateLimit-Reset": String(Date.now() + 60000),
+      }),
+      hasSqlInjectionPatterns: vi.fn().mockReturnValue(false),
+      hasXssPatterns: vi.fn().mockReturnValue(false),
+      sanitizeForLogging: vi.fn().mockImplementation((data) => data),
     };
 
     mockAuditLogService = {
@@ -38,7 +52,9 @@ describe("SecurityMiddleware", () => {
 
     mockCSRFService = {
       validateCSRFToken: vi.fn(),
-      generateCSRFToken: vi.fn(),
+      generateToken: vi.fn().mockResolvedValue({ token: "csrf-token" }),
+      getSessionId: vi.fn().mockReturnValue("session-123"),
+      setTokenCookie: vi.fn(),
     };
 
     mockRequest = {
@@ -114,16 +130,14 @@ describe("SecurityMiddleware", () => {
     });
 
     it("should warn about missing critical services", () => {
-      it("should warn about missing critical services", () => {
-        new SecurityMiddleware(); // No services provided
-        expect(securityLogger.warn).toHaveBeenCalledWith(
-          "SecurityService not available - rate limiting disabled",
-          expect.objectContaining({
-            component: "SecurityMiddleware",
-            operation: "constructor",
-          }),
-        );
-      });
+      new SecurityMiddleware(); // No services provided
+      expect(securityLogger.warn).toHaveBeenCalledWith(
+        "SecurityService not available - rate limiting disabled",
+        expect.objectContaining({
+          component: "SecurityMiddleware",
+          operation: "constructor",
+        }),
+      );
     });
 
     describe("use", () => {
@@ -173,7 +187,7 @@ describe("SecurityMiddleware", () => {
       it("should block requests when rate limited", async () => {
         mockSecurityService.checkRateLimit.mockResolvedValue({
           isBlocked: true,
-          reason: "Too many requests",
+          message: "Too many requests",
           retryAfter: 60,
         });
 
@@ -184,7 +198,9 @@ describe("SecurityMiddleware", () => {
         expect(mockAuditLogService.logSecurityEvent).toHaveBeenCalledWith(
           AuditEventType.RATE_LIMIT_EXCEEDED,
           expect.objectContaining({
-            reason: "Too many requests",
+            ip: "192.168.1.1",
+            path: "/api/test",
+            method: "GET",
             retryAfter: 60,
           }),
           mockRequest,
@@ -192,8 +208,9 @@ describe("SecurityMiddleware", () => {
         expect(nextFunction).not.toHaveBeenCalled();
       });
 
-      it("should validate CSRF token for state-changing methods", async () => {
+      it("should generate CSRF token for state-changing methods", async () => {
         mockRequest.method = "POST";
+        mockRequest.path = "/api/test";
         mockRequest.headers = {
           ...mockRequest.headers,
           "x-csrf-token": "valid-csrf-token",
@@ -201,9 +218,14 @@ describe("SecurityMiddleware", () => {
 
         mockSecurityService.checkRateLimit.mockResolvedValue({
           isBlocked: false,
+          remaining: 99,
+          resetTime: Date.now() + 60000,
         });
-        mockSecurityService.validateInput.mockReturnValue(true);
-        mockCSRFService.validateCSRFToken.mockReturnValue(true);
+        mockCSRFService.getSessionId = vi.fn().mockReturnValue("session-123");
+        mockCSRFService.generateToken.mockResolvedValue({
+          token: "new-csrf-token",
+        });
+        mockCSRFService.setTokenCookie = vi.fn();
 
         await middleware.use(
           mockRequest as Request,
@@ -211,56 +233,48 @@ describe("SecurityMiddleware", () => {
           nextFunction,
         );
 
-        expect(mockCSRFService.validateCSRFToken).toHaveBeenCalledWith(
-          "valid-csrf-token",
+        expect(mockCSRFService.generateToken).toHaveBeenCalledWith(
+          "session-123",
         );
         expect(nextFunction).toHaveBeenCalled();
       });
 
-      it("should reject requests with invalid CSRF tokens", async () => {
+      it("should continue without CSRF when service unavailable", async () => {
+        const middlewareWithoutCSRF = new SecurityMiddleware(
+          mockSecurityService,
+          mockAuditLogService,
+          undefined, // No CSRF service
+        );
+
         mockRequest.method = "POST";
-        mockRequest.headers = {
-          ...mockRequest.headers,
-          "x-csrf-token": "invalid-csrf-token",
-        };
+        mockRequest.path = "/api/test";
 
         mockSecurityService.checkRateLimit.mockResolvedValue({
           isBlocked: false,
+          remaining: 99,
+          resetTime: Date.now() + 60000,
         });
-        mockCSRFService.validateCSRFToken.mockReturnValue(false);
 
-        await expect(
-          middleware.use(
-            mockRequest as Request,
-            mockResponse as Response,
-            nextFunction,
-          ),
-        ).rejects.toThrow(ForbiddenException);
-
-        expect(mockAuditLogService.logSecurityEvent).toHaveBeenCalledWith(
-          AuditEventType.CSRF_TOKEN_INVALID,
-          expect.any(Object),
-          mockRequest,
+        await middlewareWithoutCSRF.use(
+          mockRequest as Request,
+          mockResponse as Response,
+          nextFunction,
         );
-        expect(nextFunction).not.toHaveBeenCalled();
+
+        expect(nextFunction).toHaveBeenCalled();
       });
 
-      it("should sanitize request inputs", async () => {
+      it("should validate request body for attacks", async () => {
         mockRequest.body = {
-          userInput: "<script>alert('xss')</script>",
+          userInput: "normal text",
           safeInput: "normal text",
         };
 
         mockSecurityService.checkRateLimit.mockResolvedValue({
           isBlocked: false,
+          remaining: 99,
+          resetTime: Date.now() + 60000,
         });
-        mockSecurityService.sanitizeInput.mockImplementation(
-          (input: unknown) =>
-            typeof input === "string"
-              ? input.replace(/<script.*?<\/script>/gi, "")
-              : input,
-        );
-        mockSecurityService.validateInput.mockReturnValue(true);
 
         await middleware.use(
           mockRequest as Request,
@@ -268,7 +282,7 @@ describe("SecurityMiddleware", () => {
           nextFunction,
         );
 
-        expect(mockSecurityService.sanitizeInput).toHaveBeenCalled();
+        expect(mockSecurityService.hasSqlInjectionPatterns).toHaveBeenCalled();
         expect(nextFunction).toHaveBeenCalled();
       });
 
@@ -295,8 +309,11 @@ describe("SecurityMiddleware", () => {
 
         mockSecurityService.checkRateLimit.mockResolvedValue({
           isBlocked: false,
+          remaining: 99,
+          resetTime: Date.now() + 60000,
         });
-        mockSecurityService.validateInput.mockReturnValue(false); // Indicates suspicious input
+        // Simulate SQL injection pattern detected
+        mockSecurityService.hasSqlInjectionPatterns.mockReturnValue(true);
 
         await expect(
           middleware.use(
@@ -307,10 +324,8 @@ describe("SecurityMiddleware", () => {
         ).rejects.toThrow(ForbiddenException);
 
         expect(mockAuditLogService.logSecurityEvent).toHaveBeenCalledWith(
-          AuditEventType.SUSPICIOUS_ACTIVITY,
-          expect.objectContaining({
-            reason: "Invalid input detected",
-          }),
+          AuditEventType.SQL_INJECTION_ATTEMPT,
+          expect.any(Object),
           mockRequest,
         );
       });
@@ -320,21 +335,22 @@ describe("SecurityMiddleware", () => {
           new Error("Rate limit service error"),
         );
 
-        // Should not throw but log the error and continue
-        await middleware.use(
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction,
-        );
-
-        expect(nextFunction).toHaveBeenCalled();
+        // Should throw ForbiddenException when error occurs
+        await expect(
+          middleware.use(
+            mockRequest as Request,
+            mockResponse as Response,
+            nextFunction,
+          ),
+        ).rejects.toThrow(ForbiddenException);
       });
 
       it("should set security headers", async () => {
         mockSecurityService.checkRateLimit.mockResolvedValue({
           isBlocked: false,
+          remaining: 99,
+          resetTime: Date.now() + 60000,
         });
-        mockSecurityService.validateInput.mockReturnValue(true);
 
         await middleware.use(
           mockRequest as Request,
@@ -358,19 +374,18 @@ describe("SecurityMiddleware", () => {
 
         mockSecurityService.checkRateLimit.mockResolvedValue({
           isBlocked: false,
+          remaining: 99,
+          resetTime: Date.now() + 60000,
         });
-        mockSecurityService.validateInput.mockReturnValue(true);
-        mockCSRFService.validateCSRFToken.mockReturnValue(true);
+        mockCSRFService.getSessionId = vi.fn().mockReturnValue("session-123");
+        mockCSRFService.generateToken.mockResolvedValue({
+          token: "csrf-token",
+        });
+        mockCSRFService.setTokenCookie = vi.fn();
 
         for (const method of methods) {
           mockRequest.method = method;
-
-          if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
-            mockRequest.headers = {
-              ...mockRequest.headers,
-              "x-csrf-token": "valid-token",
-            };
-          }
+          mockRequest.path = "/api/test";
 
           await middleware.use(
             mockRequest as Request,
@@ -383,16 +398,17 @@ describe("SecurityMiddleware", () => {
         }
       });
 
-      it("should validate request size limits", async () => {
-        mockRequest.headers = {
-          ...mockRequest.headers,
-          "content-length": "10485760", // 10MB
+      it("should detect SQL injection in request body", async () => {
+        mockRequest.body = {
+          query: "SELECT * FROM users",
         };
 
         mockSecurityService.checkRateLimit.mockResolvedValue({
           isBlocked: false,
+          remaining: 99,
+          resetTime: Date.now() + 60000,
         });
-        mockSecurityService.validateInput.mockReturnValue(false); // Assuming size validation fails
+        mockSecurityService.hasSqlInjectionPatterns.mockReturnValue(true);
 
         await expect(
           middleware.use(
@@ -403,10 +419,8 @@ describe("SecurityMiddleware", () => {
         ).rejects.toThrow(ForbiddenException);
 
         expect(mockAuditLogService.logSecurityEvent).toHaveBeenCalledWith(
-          AuditEventType.SUSPICIOUS_ACTIVITY,
-          expect.objectContaining({
-            reason: "Invalid input detected",
-          }),
+          AuditEventType.SQL_INJECTION_ATTEMPT,
+          expect.any(Object),
           mockRequest,
         );
       });

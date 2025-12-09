@@ -8,6 +8,16 @@ import {
 } from "../audit-log.service";
 import type { Request } from "express";
 
+// Mock the logger
+vi.mock("../../logging/logger", () => ({
+  securityLogger: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  },
+}));
+
 describe("AuditLogService", () => {
   let service: AuditLogService;
   let mockPrismaService: any;
@@ -113,19 +123,20 @@ describe("AuditLogService", () => {
         resource: "System",
       };
 
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
+      // Import and check the mocked logger
+      const { securityLogger } = await import("../../logging/logger");
 
       // Mock Redis set to throw an error during caching
       mockRedisService.set.mockRejectedValue(new Error("Redis error"));
 
       await service.logEvent(entry);
 
-      // Should not throw, but may log error
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Failed to log audit event:",
-        expect.any(Error),
+      // Should not throw, but should log error using securityLogger
+      expect(securityLogger.error).toHaveBeenCalledWith(
+        "Failed to log audit event",
+        expect.objectContaining({
+          error: "Redis error",
+        }),
       );
     });
   });
@@ -414,9 +425,8 @@ describe("AuditLogService", () => {
         resource: "Users",
       };
 
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
+      // Import and check the mocked logger
+      const { securityLogger } = await import("../../logging/logger");
 
       // Mock Redis set to throw an error during caching
       mockRedisService.set.mockRejectedValue(
@@ -425,9 +435,11 @@ describe("AuditLogService", () => {
 
       await service.logEvent(entry);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Failed to log audit event:",
-        expect.any(Error),
+      expect(securityLogger.error).toHaveBeenCalledWith(
+        "Failed to log audit event",
+        expect.objectContaining({
+          error: "Database connection failed",
+        }),
       );
     });
 

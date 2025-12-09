@@ -28,10 +28,11 @@
     "test:tools": "turbo test --filter=@portfolio/trpc --filter=@portfolio/logger",
     "format": "bun x prettier --write .",
     "prepare": "husky",
-    "prisma:fix-symlink": "rm -rf packages/backend/node_modules/@prisma && cp -r node_modules/@prisma packages/backend/node_modules/",
-    "prisma:generate": "bun run prisma:fix-symlink && cd packages/backend && npx prisma generate",
-    "prisma:migrate": "bun run prisma:fix-symlink && cd packages/backend && npx prisma migrate dev",
-    "prisma:studio": "bun run prisma:fix-symlink && cd packages/backend && npx prisma studio"
+    "prisma:generate": "cd packages/backend && bun x prisma generate",
+    "prisma:migrate": "cd packages/backend && bun x prisma migrate dev",
+    "prisma:migrate:deploy": "cd packages/backend && bun x prisma migrate deploy",
+    "prisma:migrate:create": "cd packages/backend && bun x prisma migrate dev --create-only",
+    "prisma:studio": "cd packages/backend && bun x prisma studio"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",

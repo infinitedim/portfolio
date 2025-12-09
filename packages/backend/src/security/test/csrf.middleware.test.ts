@@ -3,6 +3,16 @@ import { ForbiddenException } from "@nestjs/common";
 import { CSRFMiddleware } from "../csrf.middleware";
 import type { Request, Response, NextFunction } from "express";
 
+// Mock the logger
+vi.mock("../../logging/logger", () => ({
+  securityLogger: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  },
+}));
+
 describe("CSRFMiddleware", () => {
   let middleware: CSRFMiddleware;
   let mockCSRFTokenService: any;
@@ -66,6 +76,7 @@ describe("CSRFMiddleware", () => {
       ];
 
       for (const path of excludedPaths) {
+        mockRequest.path = path;
         mockRequest.url = path;
         mockRequest.method = "POST";
 
@@ -84,6 +95,7 @@ describe("CSRFMiddleware", () => {
     });
 
     it("should skip CSRF validation for API routes with valid JWT", async () => {
+      mockRequest.path = "/api/users";
       mockRequest.url = "/api/users";
       mockRequest.method = "POST";
       mockRequest.headers = {
@@ -101,6 +113,7 @@ describe("CSRFMiddleware", () => {
     });
 
     it("should skip CSRF validation for tRPC routes with valid JWT", async () => {
+      mockRequest.path = "/trpc/users.create";
       mockRequest.url = "/trpc/users.create";
       mockRequest.method = "POST";
       mockRequest.headers = {
@@ -192,6 +205,7 @@ describe("CSRFMiddleware", () => {
     });
 
     it("should handle validation service errors", async () => {
+      mockRequest.path = "/auth/login";
       mockRequest.url = "/auth/login";
       mockRequest.method = "POST";
       mockRequest.headers = {};
@@ -204,9 +218,8 @@ describe("CSRFMiddleware", () => {
         new Error("Service error"),
       );
 
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
+      // Import and check the mocked logger
+      const { securityLogger } = await import("../../logging/logger");
 
       await expect(
         middleware.use(
@@ -216,13 +229,15 @@ describe("CSRFMiddleware", () => {
         ),
       ).rejects.toThrow(ForbiddenException);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "CSRF middleware error:",
-        expect.any(Error),
+      expect(securityLogger.error).toHaveBeenCalledWith(
+        "CSRF middleware error",
+        expect.objectContaining({
+          error: "Service error",
+          component: "CSRFMiddleware",
+          operation: "use",
+        }),
       );
       expect(mockNext).not.toHaveBeenCalled();
-
-      consoleSpy.mockRestore();
     });
   });
 
@@ -432,9 +447,8 @@ describe("CSRFMiddleware", () => {
         new Error("Unexpected error"),
       );
 
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
+      // Import and check the mocked logger
+      const { securityLogger } = await import("../../logging/logger");
 
       await expect(
         middleware["validateCSRFToken"](
@@ -444,13 +458,15 @@ describe("CSRFMiddleware", () => {
         ),
       ).rejects.toThrow(new ForbiddenException("CSRF validation failed"));
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "CSRF middleware error:",
-        expect.any(Error),
+      expect(securityLogger.error).toHaveBeenCalledWith(
+        "CSRF middleware error",
+        expect.objectContaining({
+          error: "Unexpected error",
+          component: "CSRFMiddleware",
+          operation: "use",
+        }),
       );
       expect(mockNext).not.toHaveBeenCalled();
-
-      consoleSpy.mockRestore();
     });
   });
 

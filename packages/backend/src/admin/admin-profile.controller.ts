@@ -5,14 +5,12 @@ import {
   Put,
   Post,
   Body,
-  Param,
   Request,
   HttpCode,
   HttpStatus,
 } from "@nestjs/common";
 import type { Request as ExpressRequest } from "express";
 import { AdminProfileService } from "./admin-profile.service";
-import { AllowedIpService } from "./allowed-ip.service";
 import {
   AuditLogService,
   AuditEventType,
@@ -23,7 +21,6 @@ import {
 export class AdminProfileController {
   constructor(
     private readonly adminProfileService: AdminProfileService,
-    private readonly allowedIpService: AllowedIpService,
     private readonly auditLogService: AuditLogService,
   ) {}
 
@@ -174,174 +171,5 @@ export class AdminProfileController {
     );
 
     return user;
-  }
-
-  // IP Allowlist endpoints
-  @Get("allowed-ips")
-  async getAllowedIps(
-    @Request() req: ExpressRequest & { user?: { id: string } },
-  ) {
-    const adminUserId = req.user?.id;
-    if (!adminUserId) {
-      throw new Error("User not authenticated");
-    }
-
-    const ips = await this.allowedIpService.getAllowedIps(adminUserId);
-
-    // Log the action
-    await this.auditLogService.logEvent(
-      {
-        eventType: AuditEventType.DATA_VIEWED,
-        severity: AuditSeverity.LOW,
-        userId: adminUserId,
-        resource: "AllowedIp",
-        action: "VIEW_ALLOWED_IPS",
-        ipAddress: req.ip,
-        userAgent: req.headers["user-agent"],
-      },
-      req,
-    );
-
-    return ips;
-  }
-
-  @Post("allowed-ips")
-  @HttpCode(HttpStatus.CREATED)
-  async addAllowedIp(
-    @Request() req: ExpressRequest & { user?: { id: string } },
-    @Body()
-    data: {
-      ipAddress: string;
-      description?: string;
-    },
-  ) {
-    const adminUserId = req.user?.id;
-    if (!adminUserId) {
-      throw new Error("User not authenticated");
-    }
-
-    const allowedIp = await this.allowedIpService.addAllowedIp(
-      adminUserId,
-      data,
-    );
-
-    // Log the action
-    await this.auditLogService.logEvent(
-      {
-        eventType: AuditEventType.DATA_CREATED,
-        severity: AuditSeverity.MEDIUM,
-        userId: adminUserId,
-        resource: "AllowedIp",
-        resourceId: allowedIp.id,
-        action: "ADD_ALLOWED_IP",
-        details: { ipAddress: data.ipAddress },
-        ipAddress: req.ip,
-        userAgent: req.headers["user-agent"],
-      },
-      req,
-    );
-
-    return allowedIp;
-  }
-
-  @Put("allowed-ips/:id")
-  async updateAllowedIp(
-    @Request() req: ExpressRequest & { user?: { id: string } },
-    @Param("id") id: string,
-    @Body()
-    data: {
-      description?: string;
-      isActive?: boolean;
-    },
-  ) {
-    const adminUserId = req.user?.id;
-    if (!adminUserId) {
-      throw new Error("User not authenticated");
-    }
-
-    const allowedIp = await this.allowedIpService.updateAllowedIp(
-      id,
-      adminUserId,
-      data,
-    );
-
-    // Log the action
-    await this.auditLogService.logEvent(
-      {
-        eventType: AuditEventType.DATA_UPDATED,
-        severity: AuditSeverity.MEDIUM,
-        userId: adminUserId,
-        resource: "AllowedIp",
-        resourceId: id,
-        action: "UPDATE_ALLOWED_IP",
-        details: { fields: Object.keys(data) },
-        ipAddress: req.ip,
-        userAgent: req.headers["user-agent"],
-      },
-      req,
-    );
-
-    return allowedIp;
-  }
-
-  @Post("allowed-ips/:id/remove")
-  @HttpCode(HttpStatus.OK)
-  async removeAllowedIp(
-    @Request() req: ExpressRequest & { user?: { id: string } },
-    @Param("id") id: string,
-  ) {
-    const adminUserId = req.user?.id;
-    if (!adminUserId) {
-      throw new Error("User not authenticated");
-    }
-
-    const allowedIp = await this.allowedIpService.removeAllowedIp(
-      id,
-      adminUserId,
-    );
-
-    // Log the action
-    await this.auditLogService.logEvent(
-      {
-        eventType: AuditEventType.DATA_DELETED,
-        severity: AuditSeverity.MEDIUM,
-        userId: adminUserId,
-        resource: "AllowedIp",
-        resourceId: id,
-        action: "REMOVE_ALLOWED_IP",
-        details: { ipAddress: allowedIp.ipAddress },
-        ipAddress: req.ip,
-        userAgent: req.headers["user-agent"],
-      },
-      req,
-    );
-
-    return { message: "IP address removed successfully" };
-  }
-
-  @Get("allowed-ips/stats")
-  async getIpStats(@Request() req: ExpressRequest & { user?: { id: string } }) {
-    const adminUserId = req.user?.id;
-    if (!adminUserId) {
-      throw new Error("User not authenticated");
-    }
-
-    const stats = await this.allowedIpService.getIpStats(adminUserId);
-
-    // Log the action
-    await this.auditLogService.logEvent(
-      {
-        eventType: AuditEventType.DATA_VIEWED,
-        severity: AuditSeverity.LOW,
-        userId: adminUserId,
-        resource: "AllowedIp",
-        action: "VIEW_IP_STATS",
-        ipAddress: req.ip,
-        userAgent: req.headers["user-agent"],
-      },
-      req,
-    );
-
-    return stats;
   }
 }

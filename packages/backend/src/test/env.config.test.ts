@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { validateEnv, getEnv } from "../env.config";
 
 describe("Environment Configuration", () => {
@@ -16,8 +16,26 @@ describe("Environment Configuration", () => {
     ADMIN_PASSWORD: "test-admin-password-hash",
   });
 
+  // Suppress console output during tests
+  const originalConsole = {
+    log: console.log,
+    warn: console.warn,
+    error: console.error,
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
+    // Suppress console during tests
+    console.log = vi.fn();
+    console.warn = vi.fn();
+    console.error = vi.fn();
+  });
+
+  afterEach(() => {
+    // Restore console after each test
+    console.log = originalConsole.log;
+    console.warn = originalConsole.warn;
+    console.error = originalConsole.error;
   });
 
   describe("validateEnv function", () => {

@@ -1,6 +1,7 @@
 import path from "node:path";
 import fs from "node:fs";
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
+import process from "node:process";
 
 // Try to load .env file from project root (for local development)
 // In CI/CD, environment variables are provided directly
@@ -21,7 +22,7 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: env("DIRECT_URL"),
-    shadowDatabaseUrl: env("DATABASE_URL"),
+    url: process.env.DIRECT_URL!,
+    shadowDatabaseUrl: process.env.DATABASE_URL!,
   },
 });

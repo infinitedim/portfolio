@@ -45,9 +45,10 @@ describe("CSRFTokenService", () => {
   describe("validateToken", () => {
     it("should validate a correct token", async () => {
       const sessionId = "test-session-123";
-      const token = "valid-token-123";
+      // Use valid 64-char hex token (32 bytes)
+      const token = "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2";
       const storedToken = {
-        token: "valid-token-123",
+        token: "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
         expiresAt: Date.now() + 3600000, // 1 hour from now
       };
 
@@ -61,9 +62,10 @@ describe("CSRFTokenService", () => {
 
     it("should reject expired token", async () => {
       const sessionId = "test-session-123";
-      const token = "expired-token-123";
+      // Use valid 64-char hex token (32 bytes)
+      const token = "c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2";
       const storedToken = {
-        token: "expired-token-123",
+        token: "c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2",
         expiresAt: Date.now() - 3600000, // 1 hour ago
       };
 
@@ -81,9 +83,10 @@ describe("CSRFTokenService", () => {
 
     it("should reject invalid token", async () => {
       const sessionId = "test-session-123";
-      const token = "invalid-token-123";
+      // Use valid hex tokens of same length (64 chars = 32 bytes)
+      const token = "a".repeat(64);
       const storedToken = {
-        token: "different-token-123",
+        token: "b".repeat(64), // Different token
         expiresAt: Date.now() + 3600000,
       };
 
