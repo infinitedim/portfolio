@@ -53,6 +53,9 @@ jobs:
       - name: Generate Prisma Client
         working-directory: packages/backend
         run: bun x prisma generate
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+          DIRECT_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
       - name: Run ESLint
         run: bun run lint
@@ -119,6 +122,9 @@ jobs:
       - name: Generate Prisma Client
         working-directory: packages/backend
         run: bun x prisma generate
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/portfolio_test
+          DIRECT_URL: postgresql://test:test@localhost:5432/portfolio_test
 
       - name: Run database migrations
         working-directory: packages/backend
@@ -181,6 +187,9 @@ jobs:
         if: matrix.package == 'backend'
         working-directory: packages/backend
         run: bun x prisma generate
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+          DIRECT_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
       - name: Build ${{ matrix.package }}
         working-directory: packages/${{ matrix.package }}
@@ -259,6 +268,9 @@ jobs:
       - name: Generate Prisma Client
         working-directory: packages/backend
         run: bun x prisma generate
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/portfolio_test
+          DIRECT_URL: postgresql://test:test@localhost:5432/portfolio_test
 
       - name: Run database migrations
         working-directory: packages/backend

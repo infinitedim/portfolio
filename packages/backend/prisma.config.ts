@@ -1,12 +1,16 @@
 import path from "node:path";
+import fs from "node:fs";
 import { defineConfig, env } from "prisma/config";
 
-// Explicitly load .env file from project root
-try {
-  process.loadEnvFile(path.join(__dirname, "../../.env"));
-} catch (e) {
-  // Ignore error if .env file does not exist
-  console.log(e);
+// Try to load .env file from project root (for local development)
+// In CI/CD, environment variables are provided directly
+const envPath = path.join(__dirname, "../../.env");
+if (fs.existsSync(envPath)) {
+  try {
+    process.loadEnvFile(envPath);
+  } catch {
+    // Silently ignore - env vars should be provided by CI/CD
+  }
 }
 
 // Prisma 7 configuration
@@ -17,7 +21,7 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: env("DATABASE_URL"),
-    directUrl: env("DIRECT_URL"),
+    url: env("DIRECT_URL"),
+    shadowDatabaseUrl: env("DATABASE_URL"),
   },
 });
