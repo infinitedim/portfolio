@@ -53,7 +53,7 @@ COPY tools ./tools
 
 # Generate Prisma client
 WORKDIR /app/packages/backend
-RUN bunx prisma generate
+RUN npx prisma generate
 
 # Build NestJS application
 RUN bun run build
