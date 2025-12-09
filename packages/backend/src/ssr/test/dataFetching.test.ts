@@ -5,20 +5,35 @@ vi.mock("react", () => ({
   cache: (fn: unknown) => fn,
 }));
 
+// Mock logger to prevent actual logging and allow spying
+vi.mock("../../logging/logger", () => ({
+  logger: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+  },
+}));
+
 // Mock fetch globally
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
-// Mock console methods
-const consoleSpy = {
-  log: vi.spyOn(console, "log").mockImplementation(() => {}),
-  error: vi.spyOn(console, "error").mockImplementation(() => {}),
-};
-
 describe("dataFetching", () => {
-  beforeEach(() => {
+  let loggerMock: {
+    debug: ReturnType<typeof vi.fn>;
+    info: ReturnType<typeof vi.fn>;
+    error: ReturnType<typeof vi.fn>;
+    warn: ReturnType<typeof vi.fn>;
+  };
+
+  beforeEach(async () => {
     vi.clearAllMocks();
     mockFetch.mockReset();
+
+    // Get the mocked logger
+    const { logger } = await import("../../logging/logger");
+    loggerMock = logger as unknown as typeof loggerMock;
   });
 
   afterEach(() => {
@@ -37,8 +52,9 @@ describe("dataFetching", () => {
       const { getSkillsData } = await import("../dataFetching");
       await getSkillsData();
 
-      expect(consoleSpy.log).toHaveBeenCalledWith(
+      expect(loggerMock.debug).toHaveBeenCalledWith(
         "Build mode detected - returning empty skills array",
+        expect.any(Object),
       );
     });
   });
@@ -83,8 +99,9 @@ describe("dataFetching", () => {
       const { getProjectsData } = await import("../dataFetching");
       await getProjectsData();
 
-      expect(consoleSpy.log).toHaveBeenCalledWith(
+      expect(loggerMock.debug).toHaveBeenCalledWith(
         "Build mode detected - using static project data",
+        expect.any(Object),
       );
     });
   });
@@ -144,7 +161,7 @@ describe("dataFetching", () => {
       const result = await getExperienceData();
 
       expect(result).toEqual([]);
-      expect(consoleSpy.error).toHaveBeenCalled();
+      expect(loggerMock.error).toHaveBeenCalled();
     });
   });
 
@@ -206,7 +223,7 @@ describe("dataFetching", () => {
       const result = await getAboutData();
 
       expect(result.name).toBe("Developer Portfolio");
-      expect(consoleSpy.error).toHaveBeenCalled();
+      expect(loggerMock.error).toHaveBeenCalled();
     });
   });
 
@@ -372,21 +389,29 @@ describe("dataFetching", () => {
 
   describe("invalidateCache", () => {
     it("should log cache invalidation for specific section", async () => {
+      // Create a local spy for this specific test
+      const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
       const { invalidateCache } = await import("../dataFetching");
       await invalidateCache("skills");
 
-      expect(consoleSpy.log).toHaveBeenCalledWith(
+      expect(logSpy).toHaveBeenCalledWith(
         "Cache invalidated for section: skills",
       );
+
+      logSpy.mockRestore();
     });
 
     it("should log cache invalidation for all sections when no section specified", async () => {
+      // Create a local spy for this specific test
+      const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
       const { invalidateCache } = await import("../dataFetching");
       await invalidateCache();
 
-      expect(consoleSpy.log).toHaveBeenCalledWith(
-        "Cache invalidated for section: all",
-      );
+      expect(logSpy).toHaveBeenCalledWith("Cache invalidated for section: all");
+
+      logSpy.mockRestore();
     });
   });
 

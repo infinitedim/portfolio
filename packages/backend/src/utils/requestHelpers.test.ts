@@ -7,12 +7,23 @@ import {
 } from "./requestHelpers";
 
 describe("requestHelpers", () => {
+  let originalEnv: string | undefined;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    // Save and set TRUSTED_PROXIES for tests to allow proxy header trust
+    originalEnv = process.env.TRUSTED_PROXIES;
+    process.env.TRUSTED_PROXIES = "127.0.0.1,::1"; // Trust localhost for tests
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+    // Restore original env
+    if (originalEnv !== undefined) {
+      process.env.TRUSTED_PROXIES = originalEnv;
+    } else {
+      delete process.env.TRUSTED_PROXIES;
+    }
   });
 
   describe("getClientIP function", () => {
@@ -55,7 +66,7 @@ describe("requestHelpers", () => {
       expect(result).toBe("unknown");
     });
 
-    it("should prioritize x-forwarded-for over other headers", () => {
+    it("should prioritize cf-connecting-ip from Cloudflare", () => {
       const mockRequest = new NextRequest("http://127.0.0.1:3000", {
         headers: [
           ["x-forwarded-for", "192.168.1.100"],
@@ -65,7 +76,8 @@ describe("requestHelpers", () => {
       });
 
       const result = getClientIP(mockRequest);
-      expect(result).toBe("192.168.1.100");
+      // Cloudflare's cf-connecting-ip is most trusted and takes priority
+      expect(result).toBe("192.168.1.300");
     });
 
     it("should handle x-forwarded-for with single IP", () => {

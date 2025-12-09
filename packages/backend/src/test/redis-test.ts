@@ -42,22 +42,15 @@ async function testRedisConnection() {
     `${colors.bold}${colors.cyan}╚═══════════════════════════════════════════════════════╝${colors.reset}\n`,
   );
 
-  const redisUrl =
-    process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
-  const redisToken =
-    process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-  log(`KV_REST_API_URL: ${process.env.KV_REST_API_URL || "not set"}`, "info");
-  log(
-    `KV_REST_API_TOKEN: ${process.env.KV_REST_API_TOKEN ? process.env.KV_REST_API_TOKEN.substring(0, 20) + "..." : "not set"}`,
-    "info",
-  );
   log(
     `UPSTASH_REDIS_REST_URL: ${process.env.UPSTASH_REDIS_REST_URL || "not set"}`,
     "info",
   );
   log(
-    `UPSTASH_REDIS_REST_TOKEN: ${process.env.UPSTASH_REDIS_REST_TOKEN || "not set"}`,
+    `UPSTASH_REDIS_REST_TOKEN: ${process.env.UPSTASH_REDIS_REST_TOKEN ? process.env.UPSTASH_REDIS_REST_TOKEN.substring(0, 20) + "..." : "not set"}`,
     "info",
   );
 
@@ -99,7 +92,7 @@ async function testRedisConnection() {
 
     // Test SET
     const testKey = `test:${Date.now()}`;
-    const setResponse = await fetch(`${redisUrl}/SET/${testKey}/hello/EX/30`, {
+    const setResponse = await fetch(`${redisUrl}/set/${testKey}/hello/ex/30`, {
       headers: { Authorization: `Bearer ${redisToken}` },
     });
 
@@ -107,7 +100,7 @@ async function testRedisConnection() {
       log(`SET ${testKey} = OK`, "success");
 
       // Test GET
-      const getResponse = await fetch(`${redisUrl}/GET/${testKey}`, {
+      const getResponse = await fetch(`${redisUrl}/get/${testKey}`, {
         headers: { Authorization: `Bearer ${redisToken}` },
       });
 
@@ -115,7 +108,7 @@ async function testRedisConnection() {
       log(`GET ${testKey} = ${JSON.stringify(getValue)}`, "success");
 
       // Cleanup
-      await fetch(`${redisUrl}/DEL/${testKey}`, {
+      await fetch(`${redisUrl}/del/${testKey}`, {
         headers: { Authorization: `Bearer ${redisToken}` },
       });
       log("Test key cleaned up", "success");

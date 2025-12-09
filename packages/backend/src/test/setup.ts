@@ -15,6 +15,8 @@ process.env.ADMIN_PASSWORD = "admin";
 process.env.FRONTEND_ORIGIN = "http://127.0.0.1:3000";
 process.env.PORT = "4000";
 process.env.LOG_LEVEL = "info";
+// Trust all proxies in test environment for IP detection
+process.env.TRUSTED_PROXIES = "127.0.0.1,::1,localhost";
 
 // Mock console methods to reduce noise in tests
 global.console = {

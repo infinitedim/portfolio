@@ -45,19 +45,25 @@ describe("AiService", () => {
     const messages = [{ role: "user", content: "Hello" }];
     await service.streamChat(messages as any);
 
-    expect(streamText).toHaveBeenCalledWith(expect.objectContaining({
-      messages,
-      model: expect.anything(),
-    }));
+    expect(streamText).toHaveBeenCalledWith(
+      expect.objectContaining({
+        messages,
+        model: expect.anything(),
+      }),
+    );
     expect(mockToTextStreamResponse).toHaveBeenCalled();
   });
 
   it("should throw error if streamText fails", async () => {
-    (streamText as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => {
-      throw new Error("AI Error");
-    });
+    (streamText as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      () => {
+        throw new Error("AI Error");
+      },
+    );
 
     const messages = [{ role: "user", content: "Hello" }];
-    await expect(service.streamChat(messages as any)).rejects.toThrow("AI Error");
+    await expect(service.streamChat(messages as any)).rejects.toThrow(
+      "AI Error",
+    );
   });
 });

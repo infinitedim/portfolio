@@ -9,6 +9,13 @@ export default defineConfig({
     globals: true,
     css: true,
     passWithNoTests: true, // Don't fail if no tests are found
+    include: ["src/**/*.{test,spec}.{js,ts,tsx}"],
+    exclude: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/coverage/**",
+      "**/.{idea,git,cache,output,temp}/**",
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],

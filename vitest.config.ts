@@ -5,6 +5,13 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "jsdom",
+    exclude: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/coverage/**",
+      "**/.{idea,git,cache,output,temp}/**",
+      "**/prisma/migrations/**",
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],

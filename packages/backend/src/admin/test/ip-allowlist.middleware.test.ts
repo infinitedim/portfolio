@@ -64,17 +64,19 @@ describe("IpAllowlistMiddleware", () => {
       expect(mockNext).toHaveBeenCalledWith();
     });
 
-    it("should allow access when user is not authenticated", async () => {
+    it("should reject access when user is not authenticated", async () => {
       const request = {
         ...mockRequest,
         path: "/admin/profile",
         user: null,
       } as any;
 
-      await middleware.use(request, mockResponse as Response, mockNext);
+      await expect(
+        middleware.use(request, mockResponse as Response, mockNext),
+      ).rejects.toThrow("Authentication required to access admin routes");
 
       expect(mockAllowedIpService.isIpAllowed).not.toHaveBeenCalled();
-      expect(mockNext).toHaveBeenCalledWith();
+      expect(mockNext).not.toHaveBeenCalled();
     });
 
     it("should allow access when IP is allowed", async () => {

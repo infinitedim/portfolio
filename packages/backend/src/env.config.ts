@@ -52,13 +52,6 @@ const createEnvSchema = () => {
       .pipe(z.number().min(1000))
       .optional(),
 
-    // Supabase (optional - only if using Supabase)
-    SUPABASE_JWT_SECRET: z.string().optional(),
-    SUPABASE_URL: z.string().optional(),
-    SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
-    NEXT_PUBLIC_SUPABASE_URL: z.string().optional(),
-
     // Redis - required for caching
     UPSTASH_REDIS_REST_URL: z
       .string()
@@ -173,8 +166,8 @@ const createEnvSchema = () => {
     SPOTIFY_REDIRECT_URI: z.string().optional(),
 
     // AI Services (optional)
-    ANTHROPIC_API_KEY : z.string().optional(),
-    OPENANTHROPIC_API_KEY : z.string().optional(),
+    ANTHROPIC_API_KEY: z.string().optional(),
+    OPENANTHROPIC_API_KEY: z.string().optional(),
 
     // Additional config for flexibility
     PORT: z
@@ -195,12 +188,15 @@ const createEnvSchema = () => {
 
 /**
  * Validate environment variables
+ * @param envVars - Optional environment variables object to validate (defaults to process.env)
  * @returns {ValidatedEnv} The validated environment variables
  */
-export function validateEnv(): ValidatedEnv {
+export function validateEnv(
+  envVars: NodeJS.ProcessEnv = process.env,
+): ValidatedEnv {
   try {
     const schema = createEnvSchema();
-    const result = schema.parse(process.env);
+    const result = schema.parse(envVars);
 
     // Additional validation for production
     if (result.NODE_ENV === "production") {
@@ -264,22 +260,19 @@ export function validateEnv(): ValidatedEnv {
 export type ValidatedEnv = z.infer<ReturnType<typeof createEnvSchema>>;
 
 // Export validated environment with error handling
-let env: ValidatedEnv;
+// Initialize immediately on module load
+export const env: ValidatedEnv = (() => {
+  try {
+    return validateEnv();
+  } catch (error) {
+    console.error("Failed to load environment configuration");
+    throw error;
+  }
+})();
 
 export const getEnv = (): ValidatedEnv => {
-  if (!env) {
-    try {
-      env = validateEnv();
-    } catch (error) {
-      console.error("Failed to load environment configuration");
-      throw error;
-    }
-  }
   return env;
 };
-
-// For backward compatibility, export env but initialize it lazily
-export { env };
 
 // Helper functions
 export const isProduction = () => getEnv().NODE_ENV === "production";

@@ -9,12 +9,15 @@ try {
   console.log(e);
 }
 
+// Prisma 7 configuration
+// In Prisma 7, datasource URLs should be configured here instead of schema.prisma
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
   },
   datasource: {
-    url: env("DIRECT_URL") || env("DATABASE_URL"),
+    url: env("DATABASE_URL"),
+    directUrl: env("DIRECT_URL"),
   },
 });

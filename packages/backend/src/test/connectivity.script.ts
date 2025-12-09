@@ -134,11 +134,9 @@ async function testDatabaseConnection(): Promise<boolean> {
 async function testRedisConnection(): Promise<boolean> {
   header("Redis Connection Test (Upstash)");
 
-  // Try multiple possible env variable names
-  const redisUrl =
-    process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
-  const redisToken =
-    process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+  // Use UPSTASH_REDIS_REST variables
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
   if (!redisUrl || !redisToken) {
     log("Redis configuration missing", "error");
@@ -147,23 +145,10 @@ async function testRedisConnection(): Promise<boolean> {
       "info",
     );
     log(
-      `KV_REST_API_URL: ${process.env.KV_REST_API_URL ? "set" : "not set"}`,
-      "info",
-    );
-    log(
       `UPSTASH_REDIS_REST_TOKEN: ${process.env.UPSTASH_REDIS_REST_TOKEN ? "set" : "not set"}`,
       "info",
     );
-    log(
-      `KV_REST_API_TOKEN: ${process.env.KV_REST_API_TOKEN ? "set" : "not set"}`,
-      "info",
-    );
-
-    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
-      log("Using KV_REST_API_* environment variables instead", "warn");
-    } else {
-      return false;
-    }
+    return false;
   }
 
   log(`Redis URL: ${redisUrl}`, "info");
@@ -249,70 +234,6 @@ async function testRedisConnection(): Promise<boolean> {
   }
 }
 
-async function testSupabaseConnection(): Promise<boolean> {
-  header("Supabase Connection Test");
-
-  const supabaseUrl =
-    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey =
-    process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    log("Supabase configuration missing", "error");
-    return false;
-  }
-
-  log(`Supabase URL: ${supabaseUrl}`, "info");
-  log(`Anon Key: ${supabaseKey.substring(0, 20)}...`, "info");
-
-  try {
-    // Test Supabase REST API health
-    const healthUrl = `${supabaseUrl}/rest/v1/`;
-    const startTime = Date.now();
-
-    const response = await fetch(healthUrl, {
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-      },
-    });
-
-    const latency = Date.now() - startTime;
-
-    if (response.ok || response.status === 200) {
-      log(
-        `Supabase REST API reachable (Latency: ${latency}ms, Status: ${response.status})`,
-        "success",
-      );
-    } else {
-      log(
-        `Supabase REST API responded with status: ${response.status}`,
-        "warn",
-      );
-    }
-
-    // Test auth health
-    const authUrl = `${supabaseUrl}/auth/v1/health`;
-    const authResponse = await fetch(authUrl);
-
-    if (authResponse.ok) {
-      const authData = await authResponse.json();
-      log(`Supabase Auth service: ${JSON.stringify(authData)}`, "success");
-    } else {
-      log(`Supabase Auth status: ${authResponse.status}`, "warn");
-    }
-
-    log("Supabase connection test PASSED", "success");
-    return true;
-  } catch (error) {
-    log(
-      `Supabase connection FAILED: ${error instanceof Error ? error.message : String(error)}`,
-      "error",
-    );
-    return false;
-  }
-}
-
 async function main() {
   console.log(
     `\n${colors.bold}${colors.cyan}╔═══════════════════════════════════════════════════════╗${colors.reset}`,
@@ -321,7 +242,7 @@ async function main() {
     `${colors.bold}${colors.cyan}║     Backend Connectivity Test Suite                   ║${colors.reset}`,
   );
   console.log(
-    `${colors.bold}${colors.cyan}║     Testing: PostgreSQL, Redis (Upstash), Supabase    ║${colors.reset}`,
+    `${colors.bold}${colors.cyan}║     Testing: PostgreSQL, Redis (Upstash)              ║${colors.reset}`,
   );
   console.log(
     `${colors.bold}${colors.cyan}╚═══════════════════════════════════════════════════════╝${colors.reset}`,
@@ -336,9 +257,6 @@ async function main() {
   // Test Redis
   results.redis = await testRedisConnection();
 
-  // Test Supabase
-  results.supabase = await testSupabaseConnection();
-
   // Summary
   header("Test Results Summary");
 
@@ -347,9 +265,6 @@ async function main() {
   );
   console.log(
     `  Redis (Upstash):              ${results.redis ? colors.green + "PASS" : colors.red + "FAIL"}${colors.reset}`,
-  );
-  console.log(
-    `  Supabase:                     ${results.supabase ? colors.green + "PASS" : colors.red + "FAIL"}${colors.reset}`,
   );
 
   const allPassed = Object.values(results).every(Boolean);

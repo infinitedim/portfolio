@@ -14,8 +14,6 @@ updates:
       time: "09:00"
       timezone: "Asia/Jakarta"
     open-pull-requests-limit: 10
-    reviewers:
-      - "yourblooo"
     labels:
       - "dependencies"
       - "automated"

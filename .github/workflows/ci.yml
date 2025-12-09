@@ -127,7 +127,7 @@ jobs:
           DATABASE_URL: postgresql://test:test@localhost:5432/portfolio_test
 
       - name: Run unit tests
-        run: bun run test
+        run: bun test
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/portfolio_test
           REDIS_URL: redis://localhost:6379

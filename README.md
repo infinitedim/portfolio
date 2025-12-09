@@ -195,7 +195,7 @@ Before we dive in, make sure you have:
 
 - 📦 **Bun 1.3+** (recommended) or Node.js 18+
 - 🐙 **Git** (obviously)
-- 🗄️ **PostgreSQL** (or use Supabase/Neon)
+- 🗄️ **PostgreSQL** (local or cloud-hosted)
 - 🔴 **Redis** (or use Upstash - free tier available!)
 - ☕ **Coffee** (not required but highly recommended)
 
@@ -427,7 +427,7 @@ vercel
 1. Set all environment variables in Vercel dashboard
 2. Use `ADMIN_PASSWORD_HASH` instead of plain password
 3. Enable preview deployments for PRs
-4. Set up PostgreSQL (Supabase/Neon recommended)
+4. Set up PostgreSQL database
 5. Set up Redis (Upstash recommended - free tier!)
 
 ## 🎨 API Reference for Developers

@@ -19,6 +19,8 @@
     "type-check": "turbo type-check",
     "type-check:backend": "turbo type-check --filter=@portfolio/backend",
     "type-check:frontend": "turbo type-check --filter=@portfolio/frontend",
+    "clean:dist": "find . -type d -name 'dist' -not -path '*/node_modules/*' -exec rm -rf {} + 2>/dev/null || true",
+    "pretest": "bun run clean:dist",
     "test": "turbo test",
     "test:backend": "turbo test --filter=@portfolio/backend",
     "test:frontend": "turbo test --filter=@portfolio/frontend",
@@ -99,5 +101,11 @@
     "@types/pg": "^8.15.6",
     "pg": "^8.16.3",
     "turbo": "^2.6.1"
+  },
+  "resolutions": {
+    "csstype": "3.2.3"
+  },
+  "overrides": {
+    "csstype": "3.2.3"
   }
 }
