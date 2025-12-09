@@ -16,7 +16,7 @@ vi.mock("../../logging/logger", () => ({
 describe("CSRFMiddleware", () => {
   let middleware: CSRFMiddleware;
   let mockCSRFTokenService: any;
-  let mockRequest: Partial<Request>;
+  let mockRequest: Record<string, any>;
   let mockResponse: Partial<Response>;
   let mockNext: NextFunction;
 
@@ -31,7 +31,7 @@ describe("CSRFMiddleware", () => {
       method: "POST",
       path: "/auth/login",
       headers: {},
-    };
+    } as Record<string, any>;
 
     mockResponse = {};
 

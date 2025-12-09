@@ -18,6 +18,7 @@ export default [
       "**/out/**",
       "**/.next/**",
       "**/coverage/**",
+      "**/generated/**",
       "**/*.js",
     ],
   },

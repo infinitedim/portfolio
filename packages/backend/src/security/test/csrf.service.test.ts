@@ -46,9 +46,11 @@ describe("CSRFTokenService", () => {
     it("should validate a correct token", async () => {
       const sessionId = "test-session-123";
       // Use valid 64-char hex token (32 bytes)
-      const token = "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2";
+      const token =
+        "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2";
       const storedToken = {
-        token: "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+        token:
+          "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
         expiresAt: Date.now() + 3600000, // 1 hour from now
       };
 
@@ -63,9 +65,11 @@ describe("CSRFTokenService", () => {
     it("should reject expired token", async () => {
       const sessionId = "test-session-123";
       // Use valid 64-char hex token (32 bytes)
-      const token = "c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2";
+      const token =
+        "c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2";
       const storedToken = {
-        token: "c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2",
+        token:
+          "c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f4a5b6c1d2",
         expiresAt: Date.now() - 3600000, // 1 hour ago
       };
 
