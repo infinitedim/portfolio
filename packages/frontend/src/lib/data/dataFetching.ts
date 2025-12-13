@@ -179,11 +179,6 @@ export const getProjectsData = cache(
 );
 
 export const getExperienceData = cache(async (): Promise<Experience[]> => {
-  // MODIFICATION: Use static data during build time
-  if (process.env.NODE_ENV === "production" && !process.env.VERCEL_URL) {
-    return [];
-  }
-
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
 
   try {
@@ -205,11 +200,6 @@ export const getExperienceData = cache(async (): Promise<Experience[]> => {
 });
 
 export const getAboutData = cache(async (): Promise<AboutInfo> => {
-  // MODIFICATION: Use static data during build time
-  if (process.env.NODE_ENV === "production" && !process.env.VERCEL_URL) {
-    return getFallbackAboutData();
-  }
-
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
 
   try {
@@ -276,16 +266,8 @@ export const getGitHubData = cache(
       publicRepos: number;
     };
   }> => {
-    // MODIFICATION: Skip GitHub API during build time
-    if (process.env.NODE_ENV === "production" && !process.env.VERCEL_URL) {
-      return {
-        repositories: [],
-        profile: { followers: 0, following: 0, publicRepos: 0 },
-      };
-    }
-
-    const username = process.env.GITHUB_USERNAME || "infinitedim";
-    const token = process.env.GITHUB_TOKEN;
+    const username = process.env.GH_USERNAME || "infinitedim";
+    const token = process.env.GH_TOKEN;
 
     try {
       const headers: Record<string, string> = {

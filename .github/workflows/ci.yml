@@ -43,16 +43,16 @@ jobs:
         run: bun install
 
       - name: Generate Prisma Client
-        run: cd packages/backend && npx prisma generate
+        run: bun prisma:generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Run ESLint
-        run: bun run lint
+        run: bun lint
 
       - name: Run TypeScript type check
-        run: bun run type-check
+        run: bun type-check
   test:
     name: Tests
     runs-on: ubuntu-latest
@@ -107,13 +107,13 @@ jobs:
         run: bun install
 
       - name: Generate Prisma Client
-        run: cd packages/backend && npx prisma generate
+        run: bun prisma:generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Run database migrations
-        run: cd packages/backend && npx prisma migrate deploy
+        run: bun prisma:migrate:deploy
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
@@ -122,7 +122,8 @@ jobs:
         run: bun test
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
-          REDIS_URL: redis://localhost:6379
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
@@ -167,14 +168,14 @@ jobs:
 
       - name: Generate Prisma Client (Backend only)
         if: matrix.package == 'backend'
-        run: cd packages/backend && npx prisma generate
+        run: bun prisma:generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Build ${{ matrix.package }}
         working-directory: packages/${{ matrix.package }}
-        run: bun run build
+        run: bun build
         env:
           NEXT_PUBLIC_API_URL: https://api.example.com
           NEXT_PUBLIC_APP_URL: https://example.com
@@ -240,37 +241,38 @@ jobs:
         run: bun install
 
       - name: Install Playwright browsers
-        run: bunx playwright install --with-deps chromium
+        run: bun x playwright install --with-deps chromium
 
       - name: Generate Prisma Client
-        run: cd packages/backend && npx prisma generate
+        run: bun prisma:generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Run database migrations
-        run: cd packages/backend && npx prisma migrate deploy
+        run: bun prisma:migrate:deploy
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Build applications
-        run: bun run build
+        run: bun build
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          NEXT_PUBLIC_API_URL: http://localhost:4000
-          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
 
       - name: Run E2E tests
-        run: bun run test:e2e
+        run: bun test:e2e
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          REDIS_URL: redis://localhost:6379
-          JWT_SECRET: jwt_secret
-          REFRESH_TOKEN: REFRESH_TOKEN
-          SESSION_SECRET: session_secret
-          NEXT_PUBLIC_API_URL: http://localhost:4000
-          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v5
@@ -311,7 +313,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GH_TOKEN }}
 
       - name: Extract metadata
         id: meta

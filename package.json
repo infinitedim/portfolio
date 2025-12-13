@@ -101,7 +101,7 @@
     "@prisma/config": "^7.0.1",
     "@types/pg": "^8.15.6",
     "pg": "^8.16.3",
-    "turbo": "^2.6.1"
+    "turbo": "^2.6.3"
   },
   "resolutions": {
     "csstype": "3.2.3"

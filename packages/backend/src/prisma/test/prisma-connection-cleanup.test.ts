@@ -10,7 +10,6 @@ vi.mock("../../config/serverless.config", () => ({
       databaseUrl: "postgresql://test:test@localhost:5432/test",
       logLevel: "debug",
       isServerless: false,
-      isVercel: false,
       connectionPool: {
         pool: {
           min: 2,

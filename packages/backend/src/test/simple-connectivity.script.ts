@@ -188,7 +188,7 @@ async function testRedisConnection(): Promise<boolean> {
 async function testDatabaseDirectConnection(): Promise<boolean> {
   header("PostgreSQL Direct Connection Test");
 
-  const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+  const databaseUrl = process.env.DATABASE_URL || process.env.DIRECT_URL;
 
   if (!databaseUrl) {
     log("DATABASE_URL not configured", "error");

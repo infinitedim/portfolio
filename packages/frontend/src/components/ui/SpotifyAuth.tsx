@@ -73,9 +73,6 @@ export function SpotifyAuth({
       if (result.success && result.access_token) {
         // Store tokens in localStorage
         localStorage.setItem("spotify_access_token", result.access_token);
-        if (result.refresh_token) {
-          localStorage.setItem("spotify_refresh_token", result.refresh_token);
-        }
         if (result.expires_in) {
           const expiresAt = Date.now() + result.expires_in * 1000;
           localStorage.setItem("spotify_expires_at", expiresAt.toString());
@@ -127,7 +124,6 @@ export function SpotifyAuth({
   const handleLogout = () => {
     // Clear tokens from localStorage
     localStorage.removeItem("spotify_access_token");
-    localStorage.removeItem("spotify_refresh_token");
     localStorage.removeItem("spotify_expires_at");
 
     setIsAuthenticated(false);

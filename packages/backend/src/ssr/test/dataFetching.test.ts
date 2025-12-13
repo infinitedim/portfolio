@@ -117,17 +117,7 @@ describe("dataFetching", () => {
       process.env = originalEnv;
     });
 
-    it("should return empty array in production without VERCEL_URL", async () => {
-      process.env.NODE_ENV = "production";
-      delete process.env.VERCEL_URL;
-
-      const { getExperienceData } = await import("../dataFetching");
-      const result = await getExperienceData();
-
-      expect(result).toEqual([]);
-    });
-
-    it("should fetch experience data when not in production build", async () => {
+    it("should fetch experience data in development", async () => {
       process.env.NODE_ENV = "development";
       process.env.NEXT_PUBLIC_BASE_URL = "http://localhost:3000";
 
@@ -176,19 +166,7 @@ describe("dataFetching", () => {
       process.env = originalEnv;
     });
 
-    it("should return fallback data in production without VERCEL_URL", async () => {
-      process.env.NODE_ENV = "production";
-      delete process.env.VERCEL_URL;
-
-      const { getAboutData } = await import("../dataFetching");
-      const result = await getAboutData();
-
-      // Using the real fallback values (Dimas Saputra)
-      expect(result.name).toBe("Dimas Saputra");
-      expect(result.title).toBe("Full-Stack Developer");
-    });
-
-    it("should fetch about data when not in production build", async () => {
+    it("should fetch about data in development", async () => {
       process.env.NODE_ENV = "development";
       process.env.NEXT_PUBLIC_BASE_URL = "http://localhost:3000";
 
@@ -289,24 +267,9 @@ describe("dataFetching", () => {
       process.env = originalEnv;
     });
 
-    it("should return empty data in production without VERCEL_URL", async () => {
-      process.env.NODE_ENV = "production";
-      delete process.env.VERCEL_URL;
-
-      const { getGitHubData } = await import("../dataFetching");
-      const result = await getGitHubData();
-
-      expect(result.repositories).toEqual([]);
-      expect(result.profile).toEqual({
-        followers: 0,
-        following: 0,
-        publicRepos: 0,
-      });
-    });
-
-    it("should fetch GitHub data when not in production build", async () => {
+    it("should fetch GitHub data in development", async () => {
       process.env.NODE_ENV = "development";
-      process.env.GITHUB_USERNAME = "testuser";
+      process.env.GH_USERNAME = "testuser";
 
       const mockRepos = [
         {
@@ -343,10 +306,10 @@ describe("dataFetching", () => {
       expect(result.profile.followers).toBe(100);
     });
 
-    it("should include auth header when GITHUB_TOKEN is set", async () => {
+    it("should include auth header when GH_TOKEN is set", async () => {
       process.env.NODE_ENV = "development";
-      process.env.GITHUB_USERNAME = "testuser";
-      process.env.GITHUB_TOKEN = "test-token";
+      process.env.GH_USERNAME = "testuser";
+      process.env.GH_TOKEN = "test-token";
 
       mockFetch
         .mockResolvedValueOnce({
@@ -449,8 +412,8 @@ describe("dataFetching", () => {
 
   describe("Fallback About Data Validation", () => {
     it("should have valid contact information structure", async () => {
-      process.env.NODE_ENV = "production";
-      delete process.env.VERCEL_URL;
+      // Mock fetch to fail so fallback is used
+      vi.spyOn(global, "fetch").mockRejectedValueOnce(new Error("Network error"));
 
       const { getAboutData } = await import("../dataFetching");
       const result = await getAboutData();
@@ -461,8 +424,8 @@ describe("dataFetching", () => {
     });
 
     it("should have valid GitHub URL format", async () => {
-      process.env.NODE_ENV = "production";
-      delete process.env.VERCEL_URL;
+      // Mock fetch to fail so fallback is used
+      vi.spyOn(global, "fetch").mockRejectedValueOnce(new Error("Network error"));
 
       const { getAboutData } = await import("../dataFetching");
       const result = await getAboutData();
@@ -471,8 +434,8 @@ describe("dataFetching", () => {
     });
 
     it("should have valid LinkedIn URL format", async () => {
-      process.env.NODE_ENV = "production";
-      delete process.env.VERCEL_URL;
+      // Mock fetch to fail so fallback is used
+      vi.spyOn(global, "fetch").mockRejectedValueOnce(new Error("Network error"));
 
       const { getAboutData } = await import("../dataFetching");
       const result = await getAboutData();

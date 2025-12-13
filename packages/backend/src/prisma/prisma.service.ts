@@ -277,7 +277,7 @@ export class PrismaService
    */
   private startPeriodicHealthCheck(): void {
     // Only enable health checks in long-running environments
-    if (this.config.isServerless || this.config.isVercel) {
+    if (this.config.isServerless) {
       return;
     }
 

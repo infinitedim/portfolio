@@ -69,37 +69,75 @@ jobs:
           IMAGE_TAG=${{ steps.sha.outputs.short }}
           DOMAIN=${{ vars.DOMAIN }}
 
+          # Core Runtime
+          NODE_ENV=production
+          PORT=4000
+          FRONTEND_ORIGIN=${{ vars.CORS_ORIGIN }}
+          ALLOWED_ORIGINS=${{ vars.ALLOWED_ORIGINS }}
+          LOG_LEVEL=info
+
           # Database
-          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          DIRECT_URL=${{ secrets.DIRECT_URL }}
+          DB_POOL_MIN=2
+          DB_POOL_MAX=10
+          DB_POOL_ACQUIRE_TIMEOUT=10000
+          DB_POOL_IDLE_TIMEOUT=10000
+          DB_QUERY_TIMEOUT=8000
+          DB_TRANSACTION_TIMEOUT=15000
 
           # Redis
-          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          UPSTASH_REDIS_REST_URL=${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN=${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
 
-          # JWT
+          # Authentication & Security
           JWT_SECRET=${{ secrets.JWT_SECRET }}
+          JWT_EXPIRES_IN=15m
           REFRESH_TOKEN=${{ secrets.REFRESH_TOKEN }}
+          REFRESH_TOKEN=${{ secrets.REFRESH_TOKEN }}
+          REFRESH_TOKEN_EXPIRES_IN=7d
           SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+          COOKIE_DOMAIN=${{ vars.DOMAIN }}
+          ENABLE_STRICT_CSP=true
+          ENABLE_SECURITY_AUDIT_LOG=true
+
+          # Admin
+          ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+          ADMIN_HASH_PASSWORD=${{ secrets.ADMIN_HASH_PASSWORD }}
 
           # Application URLs
-          CORS_ORIGIN=${{ vars.CORS_ORIGIN }}
+          NEXT_PUBLIC_BASE_URL=${{ vars.NEXT_PUBLIC_APP_URL }}
           NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
-          NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }}
 
           # Spotify (optional)
           SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}
           SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}
-          SPOTIFY_REFRESH_TOKEN=${{ secrets.SPOTIFY_REFRESH_TOKEN }}
+          SPOTIFY_REDIRECT_URI=${{ vars.NEXT_PUBLIC_APP_URL }}/api/auth/spotify/callback
+          NEXT_PUBLIC_SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}
+          NEXT_PUBLIC_SPOTIFY_REDIRECT_URI=${{ vars.NEXT_PUBLIC_APP_URL }}/api/auth/spotify/callback
 
-          # Admin
-          ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
-          ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
+          # GitHub
+          GH_USERNAME=${{ vars.GH_USERNAME }}
+          GH_TOKEN=${{ secrets.GH_TOKEN }}
+
+          # Roadmap
+          ROADMAP_AUTH_TOKEN=${{ secrets.ROADMAP_AUTH_TOKEN }}
+          ROADMAP_USER_ID=${{ vars.ROADMAP_USER_ID }}
+          NEXT_PUBLIC_ROADMAP_AUTH_TOKEN=${{ secrets.ROADMAP_AUTH_TOKEN }}
+          NEXT_PUBLIC_ROADMAP_USER_ID=${{ vars.ROADMAP_USER_ID }}
+
+          # AI
+          ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}
+
+          # Monitoring
+          NEXT_PUBLIC_ANALYTICS_ENABLED=true
+          SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+          SENTRY_ENVIRONMENT=production
           EOF"
 
       - name: Login to Container Registry on VPS
         run: |
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin"
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "echo ${{ secrets.GH_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin"
 
       - name: Pull latest images
         run: |
