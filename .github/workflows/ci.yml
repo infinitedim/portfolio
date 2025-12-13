@@ -43,7 +43,7 @@ jobs:
         run: bun install
 
       - name: Generate Prisma Client
-        run: bun run prisma:generate
+        run: cd packages/backend && npx prisma generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
@@ -107,13 +107,13 @@ jobs:
         run: bun install
 
       - name: Generate Prisma Client
-        run: bun run prisma:generate
+        run: cd packages/backend && npx prisma generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Run database migrations
-        run: bun run prisma:migrate:deploy
+        run: cd packages/backend && npx prisma migrate deploy
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
@@ -167,7 +167,7 @@ jobs:
 
       - name: Generate Prisma Client (Backend only)
         if: matrix.package == 'backend'
-        run: bun run prisma:generate
+        run: cd packages/backend && npx prisma generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
@@ -243,13 +243,13 @@ jobs:
         run: bunx playwright install --with-deps chromium
 
       - name: Generate Prisma Client
-        run: bun run prisma:generate
+        run: cd packages/backend && npx prisma generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Run database migrations
-        run: bun run prisma:migrate:deploy
+        run: cd packages/backend && npx prisma migrate deploy
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
