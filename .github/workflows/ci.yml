@@ -42,11 +42,14 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      # - name: Generate Prisma Client
-      #   run: bun run prisma:generate
-      #   env:
-      #     DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      #     DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      - name: Generate Prisma Client
+        run: |
+          cd packages/backend
+          bun add @prisma/client@7.1.0 --dev
+          bun x prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Run ESLint
         run: bun run lint
@@ -106,11 +109,14 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      # - name: Generate Prisma Client
-      #   run: bun run prisma:generate
-      #   env:
-      #     DATABASE_URL: postgresql://test:test@localhost:5432/portfolio_test
-      #     DIRECT_URL: postgresql://test:test@localhost:5432/portfolio_test
+      - name: Generate Prisma Client
+        run: |
+          cd packages/backend
+          bun add @prisma/client@7.1.0 --dev
+          bun x prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Run database migrations
         working-directory: packages/backend
@@ -124,7 +130,7 @@ jobs:
           DATABASE_URL: ${{ env.DATABASE_URL }}
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          JWT_REFRESH_SECRET: ${{ secrets.REFRESH_TOKEN }}
+          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
 
       - name: Upload coverage reports
@@ -165,12 +171,15 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      # - name: Generate Prisma Client (Backend only)
-      #   if: matrix.package == 'backend'
-      #   run: bun run prisma:generate
-      #   env:
-      #     DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      #     DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      - name: Generate Prisma Client (Backend only)
+        if: matrix.package == 'backend'
+        run: |
+          cd packages/backend
+          bun add @prisma/client@7.1.0 --dev
+          bun x prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Build ${{ matrix.package }}
         working-directory: packages/${{ matrix.package }}
@@ -242,32 +251,35 @@ jobs:
       - name: Install Playwright browsers
         run: bunx playwright install --with-deps chromium
 
-      # - name: Generate Prisma Client
-      #   run: bun run prisma:generate
-      #   env:
-      #     DATABASE_URL: postgresql://test:test@localhost:5432/portfolio_test
-      #     DIRECT_URL: postgresql://test:test@localhost:5432/portfolio_test
+      - name: Generate Prisma Client
+        run: |
+          cd packages/backend
+          bun add @prisma/client@7.1.0 --dev
+          bun x prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Run database migrations
         working-directory: packages/backend
         run: bunx prisma migrate deploy
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/portfolio_test
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Build applications
         run: bun run build
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/portfolio_test
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           NEXT_PUBLIC_API_URL: http://localhost:4000
           NEXT_PUBLIC_APP_URL: http://localhost:3000
 
       - name: Run E2E tests
         run: bun run test:e2e
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/portfolio_test
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: jwt_secret
-          JWT_REFRESH_SECRET: jwt_refresh_secret
+          REFRESH_TOKEN: REFRESH_TOKEN
           SESSION_SECRET: session_secret
           NEXT_PUBLIC_API_URL: http://localhost:4000
           NEXT_PUBLIC_APP_URL: http://localhost:3000

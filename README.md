@@ -305,7 +305,7 @@ UPSTASH_REDIS_REST_TOKEN="your-token"
 
 # 🔐 Security (Required - generate strong secrets!)
 JWT_SECRET="your-super-secret-jwt-key-at-least-64-chars-long-with-special-chars!"
-REFRESH_TOKEN_SECRET="another-super-secret-key-different-from-jwt-secret-64-chars!"
+REFRESH_TOKEN="another-super-secret-key-different-from-jwt-secret-64-chars!"
 JWT_EXPIRES_IN="15m"
 REFRESH_TOKEN_EXPIRES_IN="7d"
 JWT_ISSUER="portfolio-app"

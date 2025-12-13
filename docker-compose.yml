@@ -75,7 +75,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-portfolio}:${POSTGRES_PASSWORD:-portfolio_dev_password}@postgres:5432/${POSTGRES_DB:-portfolio}
       REDIS_URL: redis://:${REDIS_PASSWORD:-redis_dev_password}@redis:6379
       JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_jwt_refresh_secret_change_in_production}
+      REFRESH_TOKEN: ${REFRESH_TOKEN:-dev_REFRESH_TOKEN_change_in_production}
       SESSION_SECRET: ${SESSION_SECRET:-dev_session_secret}
       CORS_ORIGIN: http://localhost:3000
     ports:

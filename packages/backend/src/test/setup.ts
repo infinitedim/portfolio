@@ -6,7 +6,7 @@ process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
 process.env.POSTGRES_PRISMA_URL = "postgresql://test:test@localhost:5432/test";
 process.env.JWT_SECRET =
   "test-jwt-secret-that-is-long-enough-to-meet-the-minimum-requirement-of-64-characters";
-process.env.REFRESH_TOKEN_SECRET =
+process.env.REFRESH_TOKEN =
   "test-refresh-token-secret-that-is-long-enough-to-meet-the-minimum-requirement-of-64-characters";
 process.env.UPSTASH_REDIS_REST_URL = "https://test.upstash.io";
 process.env.UPSTASH_REDIS_REST_TOKEN = "test-redis-token";
@@ -166,7 +166,7 @@ vi.mock("@portfolio/backend/src/env.config", () => ({
     POSTGRES_PRISMA_URL: "postgresql://test:test@localhost:5432/test",
     JWT_SECRET:
       "test-jwt-secret-that-is-long-enough-to-meet-the-minimum-requirement-of-64-characters",
-    REFRESH_TOKEN_SECRET:
+    REFRESH_TOKEN:
       "test-refresh-token-secret-that-is-long-enough-to-meet-the-minimum-requirement-of-64-characters",
     UPSTASH_REDIS_REST_URL: "https://test.upstash.io",
     UPSTASH_REDIS_REST_TOKEN: "test-redis-token",

@@ -10,7 +10,7 @@ describe("Environment Configuration", () => {
     UPSTASH_REDIS_REST_TOKEN: "test-token",
     JWT_SECRET:
       "test-jwt-secret-that-is-long-enough-to-meet-minimum-requirements-of-32-chars",
-    REFRESH_TOKEN_SECRET:
+    REFRESH_TOKEN:
       "test-refresh-secret-that-is-long-enough-to-meet-minimum-requirements-of-32-chars",
     ADMIN_EMAIL: "admin@test.com",
     ADMIN_PASSWORD: "test-admin-password-hash",

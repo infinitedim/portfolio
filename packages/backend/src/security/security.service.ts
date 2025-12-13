@@ -118,7 +118,7 @@ export class SecurityService {
   // JWT Configuration - using validated environment
   private readonly JWT_SECRET = getEnv().JWT_SECRET;
   private readonly JWT_EXPIRES_IN = getEnv().JWT_EXPIRES_IN;
-  private readonly REFRESH_TOKEN_SECRET = getEnv().REFRESH_TOKEN_SECRET;
+  private readonly REFRESH_TOKEN = getEnv().REFRESH_TOKEN;
   private readonly REFRESH_TOKEN_EXPIRES_IN = getEnv().REFRESH_TOKEN_EXPIRES_IN;
   private readonly JWT_ALGORITHM = "HS512"; // Stronger algorithm
   private readonly JWT_ISSUER = getEnv().JWT_ISSUER;
@@ -350,7 +350,7 @@ export class SecurityService {
       jwtid: jti,
     };
 
-    return jwt.sign(payload, this.REFRESH_TOKEN_SECRET, options);
+    return jwt.sign(payload, this.REFRESH_TOKEN, options);
   }
 
   /**
@@ -381,7 +381,7 @@ export class SecurityService {
    */
   verifyRefreshToken(token: string): RefreshTokenPayload {
     try {
-      return jwt.verify(token, this.REFRESH_TOKEN_SECRET, {
+      return jwt.verify(token, this.REFRESH_TOKEN, {
         algorithms: [this.JWT_ALGORITHM],
         issuer: this.JWT_ISSUER,
         audience: this.JWT_AUDIENCE,

@@ -79,7 +79,7 @@ jobs:
 
           # JWT
           JWT_SECRET=${{ secrets.JWT_SECRET }}
-          JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+          REFRESH_TOKEN=${{ secrets.REFRESH_TOKEN }}
           SESSION_SECRET=${{ secrets.SESSION_SECRET }}
 
           # Application URLs

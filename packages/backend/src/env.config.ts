@@ -97,12 +97,9 @@ const createEnvSchema = () => {
         },
       ),
     JWT_EXPIRES_IN: z.string().default("15m"),
-    REFRESH_TOKEN_SECRET: z
+    REFRESH_TOKEN: z
       .string()
-      .min(
-        64,
-        "REFRESH_TOKEN_SECRET must be at least 64 characters for security",
-      )
+      .min(64, "REFRESH_TOKEN must be at least 64 characters for security")
       .refine(
         (val) => {
           // Must be different from JWT_SECRET
@@ -125,7 +122,7 @@ const createEnvSchema = () => {
           // In development/test, warn but allow (with minimum length)
           if (!isComplex) {
             console.warn(
-              "⚠️  REFRESH_TOKEN_SECRET should contain numbers, lowercase, uppercase, and special characters. " +
+              "⚠️  REFRESH_TOKEN should contain numbers, lowercase, uppercase, and special characters. " +
                 "This will be enforced in production.",
             );
           }
@@ -134,7 +131,7 @@ const createEnvSchema = () => {
         },
         {
           message:
-            "REFRESH_TOKEN_SECRET must be different from JWT_SECRET and MUST contain numbers, lowercase, uppercase, and special characters in production",
+            "REFRESH_TOKEN must be different from JWT_SECRET and MUST contain numbers, lowercase, uppercase, and special characters in production",
         },
       ),
     REFRESH_TOKEN_EXPIRES_IN: z.string().default("7d"),
@@ -245,7 +242,6 @@ const createEnvSchema = () => {
       }, z.number().min(1).max(65535))
       .default(4000),
     FRONTEND_ORIGIN: z.string().optional(),
-    IP_ALLOW_LIST: z.string().optional(),
     TLS_KEY_PATH: z.string().optional(),
     TLS_CERT_PATH: z.string().optional(),
     JWT_ISSUER: z.string().default("portfolio-app"),
@@ -369,7 +365,7 @@ export const getRedisConfig = () => ({
 export const getJWTConfig = () => ({
   secret: getEnv().JWT_SECRET,
   expiresIn: getEnv().JWT_EXPIRES_IN,
-  refreshSecret: getEnv().REFRESH_TOKEN_SECRET,
+  refreshSecret: getEnv().REFRESH_TOKEN,
   refreshExpiresIn: getEnv().REFRESH_TOKEN_EXPIRES_IN,
   issuer: getEnv().JWT_ISSUER,
   audience: getEnv().JWT_AUDIENCE,
@@ -405,9 +401,9 @@ export const validateConfig = () => {
     throw new Error("JWT_SECRET must be at least 32 characters for security");
   }
 
-  if (currentEnv.REFRESH_TOKEN_SECRET.length < 32) {
+  if (currentEnv.REFRESH_TOKEN.length < 32) {
     throw new Error(
-      "REFRESH_TOKEN_SECRET must be at least 32 characters for security",
+      "REFRESH_TOKEN must be at least 32 characters for security",
     );
   }
 
