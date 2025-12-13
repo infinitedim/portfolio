@@ -22,7 +22,11 @@ describe("commandRegistry", () => {
     });
 
     it("lists available commands", async () => {
-      const help = createHelpCommand(() => [aboutCommand, projectsCommand, contactCommand]);
+      const help = createHelpCommand(() => [
+        aboutCommand,
+        projectsCommand,
+        contactCommand,
+      ]);
       const out = await help.execute([]);
       expect(out.content as string).toContain("about");
       expect(out.content as string).toContain("projects");
@@ -111,7 +115,10 @@ describe("commandRegistry", () => {
     });
 
     it("returns error for invalid theme name", async () => {
-      const out = await themeCommand.execute(["invalidthemename"], "theme invalidthemename");
+      const out = await themeCommand.execute(
+        ["invalidthemename"],
+        "theme invalidthemename",
+      );
       expect(out.type).toBe("error");
     });
   });

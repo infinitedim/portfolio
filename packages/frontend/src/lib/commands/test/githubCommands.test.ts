@@ -53,7 +53,7 @@ vi.mock("@/lib/github/githubService", () => {
         },
       ],
       getRepoLanguages: async () => ({ TypeScript: 8000, JavaScript: 2000 }),
-      searchRepos: async (q: string) => ({
+      searchRepos: async (_q: string) => ({
         total_count: 1,
         items: [
           {
@@ -131,7 +131,11 @@ describe("githubCommand", () => {
     });
 
     it("returns repo info when both params provided", async () => {
-      const out = await githubCommand.execute(["repo", "user", "test-repo"] as any);
+      const out = await githubCommand.execute([
+        "repo",
+        "user",
+        "test-repo",
+      ] as any);
       expect(out.type).toBe("success");
       expect(out.content as string).toContain("Repository");
       expect(out.content as string).toContain("user/test-repo");
@@ -145,7 +149,11 @@ describe("githubCommand", () => {
     });
 
     it("returns commits when params provided", async () => {
-      const out = await githubCommand.execute(["commits", "user", "repo"] as any);
+      const out = await githubCommand.execute([
+        "commits",
+        "user",
+        "repo",
+      ] as any);
       expect(out.type).toBe("success");
       expect(out.content as string).toContain("commits");
       expect(out.content as string).toContain("Initial commit");
@@ -159,7 +167,11 @@ describe("githubCommand", () => {
     });
 
     it("returns language stats when params provided", async () => {
-      const out = await githubCommand.execute(["languages", "user", "repo"] as any);
+      const out = await githubCommand.execute([
+        "languages",
+        "user",
+        "repo",
+      ] as any);
       expect(out.type).toBe("success");
       expect(out.content as string).toContain("Languages");
       expect(out.content as string).toContain("TypeScript");
@@ -174,7 +186,11 @@ describe("githubCommand", () => {
     });
 
     it("returns search results when query provided", async () => {
-      const out = await githubCommand.execute(["search", "typescript", "react"] as any);
+      const out = await githubCommand.execute([
+        "search",
+        "typescript",
+        "react",
+      ] as any);
       expect(out.type).toBe("success");
       expect(out.content as string).toContain("Search results");
     });

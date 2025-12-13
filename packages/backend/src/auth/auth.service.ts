@@ -30,7 +30,7 @@ function parseTimeToSeconds(timeStr: string): number {
     return 15 * 60;
   }
 
-  const value = parseInt(match[1], 10);
+  const value = parseInt(match[1] ?? "0", 10);
   const unit = match[2];
 
   switch (unit) {

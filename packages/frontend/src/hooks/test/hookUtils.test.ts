@@ -135,7 +135,9 @@ describe("hookUtils", () => {
 
     it("handles complex objects", () => {
       const { result } = renderHook(() =>
-        useLocalStorage("objKey", { name: "test" }),
+        useLocalStorage<{ name: string; value?: number }>("objKey", {
+          name: "test",
+        }),
       );
 
       act(() => {

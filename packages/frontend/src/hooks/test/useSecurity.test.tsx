@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { useSecurity, useSecurityMonitoring } from "../useSecurity";
 
 // Mock tRPC
@@ -72,9 +72,7 @@ describe("useSecurity hook", () => {
     it("should detect javascript: protocol", () => {
       const { result } = renderHook(() => useSecurity());
 
-      const validation = result.current.validateInputSync(
-        "javascript:void(0)",
-      );
+      const validation = result.current.validateInputSync("javascript:void(0)");
 
       expect(validation.isValid).toBe(false);
       expect(validation.riskLevel).toBe("high");
@@ -105,9 +103,7 @@ describe("useSecurity hook", () => {
     it("should detect document.cookie access", () => {
       const { result } = renderHook(() => useSecurity());
 
-      const validation = result.current.validateInputSync(
-        "document.cookie",
-      );
+      const validation = result.current.validateInputSync("document.cookie");
 
       expect(validation.isValid).toBe(false);
       expect(validation.riskLevel).toBe("high");
@@ -116,9 +112,7 @@ describe("useSecurity hook", () => {
     it("should detect window object access", () => {
       const { result } = renderHook(() => useSecurity());
 
-      const validation = result.current.validateInputSync(
-        "window.location",
-      );
+      const validation = result.current.validateInputSync("window.location");
 
       expect(validation.isValid).toBe(false);
       expect(validation.riskLevel).toBe("high");
@@ -172,7 +166,9 @@ describe("useSecurity hook", () => {
 
       let validation;
       await act(async () => {
-        validation = await result.current.validateInput("<script>hack()</script>");
+        validation = await result.current.validateInput(
+          "<script>hack()</script>",
+        );
       });
 
       expect(validation).toHaveProperty("isValid", false);
@@ -337,8 +333,7 @@ describe("useSecurityMonitoring hook", () => {
   });
 
   it("should work in development mode", () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "development";
+    vi.stubEnv("NODE_ENV", "development");
 
     const { result, unmount } = renderHook(() => useSecurityMonitoring());
 
@@ -346,6 +341,6 @@ describe("useSecurityMonitoring hook", () => {
 
     // Clean up
     unmount();
-    process.env.NODE_ENV = originalEnv;
+    vi.unstubAllEnvs();
   });
 });

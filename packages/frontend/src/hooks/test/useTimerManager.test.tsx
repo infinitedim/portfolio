@@ -291,7 +291,7 @@ describe("useAnimationFrame", () => {
   let mockCancelAnimationFrame: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    mockRequestAnimationFrame = vi.fn().mockImplementation((cb) => {
+    mockRequestAnimationFrame = vi.fn().mockImplementation((_cb) => {
       const id = Math.random();
       return id;
     });

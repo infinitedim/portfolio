@@ -98,7 +98,10 @@ export async function createExpressApp(): Promise<import("express").Express> {
 
   app.enableCors({
     // Secure origin validation using callback
-    origin: (origin, callback) => {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
       // Allow requests with no origin (server-to-server, curl, etc.)
       // In production, you might want to be stricter about this
       if (!origin) {

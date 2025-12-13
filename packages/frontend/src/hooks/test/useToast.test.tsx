@@ -53,7 +53,7 @@ describe("useToast", () => {
 
       act(() => {
         const t = toast({ title: "Initial" });
-        t.update({ title: "Updated Title" });
+        t.update({ id: t.id, title: "Updated Title" });
       });
     });
   });
@@ -68,7 +68,11 @@ describe("useToast", () => {
       });
 
       // Toasts should be dismissed
-      expect(result.current.toasts.every(t => t.open === false || t.open === undefined)).toBe(true);
+      expect(
+        result.current.toasts.every(
+          (t) => t.open === false || t.open === undefined,
+        ),
+      ).toBe(true);
     });
 
     it("dismisses all toasts when no id provided", () => {

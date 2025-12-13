@@ -24,13 +24,22 @@ let redisAvailable = true; // Track Redis availability to avoid repeated errors
 // Serverless logger helper
 const serverlessLog = {
   info: (message: string, context?: Record<string, unknown>) => {
-    console.log(`[serverless] ${message}`, context ? JSON.stringify(context) : "");
+    console.log(
+      `[serverless] ${message}`,
+      context ? JSON.stringify(context) : "",
+    );
   },
   warn: (message: string, context?: Record<string, unknown>) => {
-    console.warn(`[serverless] ${message}`, context ? JSON.stringify(context) : "");
+    console.warn(
+      `[serverless] ${message}`,
+      context ? JSON.stringify(context) : "",
+    );
   },
   error: (message: string, context?: Record<string, unknown>) => {
-    console.error(`[serverless] ${message}`, context ? JSON.stringify(context) : "");
+    console.error(
+      `[serverless] ${message}`,
+      context ? JSON.stringify(context) : "",
+    );
   },
 };
 
@@ -38,7 +47,8 @@ function getPrisma(): PrismaClient {
   if (!prismaClient) {
     prismaClient = new PrismaClient({
       // Serverless-optimized connection settings
-      log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+      log:
+        process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
     });
     serverlessLog.info("Prisma client initialized");
   }
@@ -114,7 +124,7 @@ function cleanupRateLimitMap() {
   if (rateLimitMap.size > MAX_RATE_LIMIT_ENTRIES) {
     const entriesToDelete = rateLimitMap.size - MAX_RATE_LIMIT_ENTRIES;
     const sortedEntries = [...rateLimitMap.entries()].sort(
-      (a, b) => a[1].timestamp - b[1].timestamp
+      (a, b) => a[1].timestamp - b[1].timestamp,
     );
 
     for (let i = 0; i < entriesToDelete; i++) {

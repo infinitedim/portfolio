@@ -101,7 +101,10 @@ describe("demoCommand", () => {
     });
 
     it("returns info when no results found", async () => {
-      const out = await demoCommand.execute(["search", "nonexistenttech"] as any);
+      const out = await demoCommand.execute([
+        "search",
+        "nonexistenttech",
+      ] as any);
       expect(out.type).toBe("info");
       expect(out.content as string).toContain("No projects found");
     });

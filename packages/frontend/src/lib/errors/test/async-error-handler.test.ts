@@ -63,7 +63,12 @@ describe("Async Error Handler", () => {
       // Use a short timeout and disable retries to prevent retry delays
       const result = await handler.execute(slowFn, {
         timeout: 50,
-        retryConfig: { maxRetries: 0 },
+        retryConfig: {
+          maxRetries: 0,
+          baseDelay: 100,
+          maxDelay: 1000,
+          backoffFactor: 2,
+        },
       });
 
       expect(result.success).toBe(false);
