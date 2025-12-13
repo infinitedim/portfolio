@@ -35,7 +35,7 @@ export function SEOHead({
     if (typeof window === "undefined") return;
 
     const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL || "https://your-domain.com";
+      process.env.NEXT_PUBLIC_BASE_URL || "https://infinitedim.site";
     const fullUrl = url ? `${baseUrl}${url}` : baseUrl;
     const fullImageUrl = image.startsWith("http")
       ? image
@@ -117,8 +117,8 @@ export function SEOHead({
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: description },
       { name: "twitter:image", content: fullImageUrl },
-      { name: "twitter:site", content: "@yourusername" },
-      { name: "twitter:creator", content: "@yourusername" },
+      { name: "twitter:site", content: "@yourblooo" },
+      { name: "twitter:creator", content: "@yourblooo" },
     ];
 
     twitterTags.forEach(({ name, content }) => {
@@ -210,12 +210,12 @@ export function ProjectSEO({
     },
     creator: {
       "@type": "Person",
-      name: "Your Name",
+      name: "Dimas Saputra",
     },
     keywords: technologies.join(", "),
     url:
       url ||
-      `https://your-domain.com/projects/${projectName.toLowerCase().replace(/\s+/g, "-")}`,
+      `https://infinitedim.site/projects/${projectName.toLowerCase().replace(/\s+/g, "-")}`,
     image: image || "/og-image.png",
   };
 
@@ -256,12 +256,12 @@ export function SkillSEO({
     description: description,
     author: {
       "@type": "Person",
-      name: "Your Name",
+      name: "Dimas Saputra",
     },
     keywords: [skillName, "development", "programming", ...relatedSkills].join(
       ", ",
     ),
-    url: `https://your-domain.com/skills/${skillName.toLowerCase()}`,
+    url: `https://infinitedim.site/skills/${skillName.toLowerCase()}`,
     publisher: {
       "@type": "Organization",
       name: "Terminal Portfolio",

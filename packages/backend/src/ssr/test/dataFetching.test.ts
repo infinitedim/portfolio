@@ -183,7 +183,8 @@ describe("dataFetching", () => {
       const { getAboutData } = await import("../dataFetching");
       const result = await getAboutData();
 
-      expect(result.name).toBe("Developer Portfolio");
+      // Using the real fallback values (Dimas Saputra)
+      expect(result.name).toBe("Dimas Saputra");
       expect(result.title).toBe("Full-Stack Developer");
     });
 
@@ -222,7 +223,8 @@ describe("dataFetching", () => {
       const { getAboutData } = await import("../dataFetching");
       const result = await getAboutData();
 
-      expect(result.name).toBe("Developer Portfolio");
+      // Using the real fallback values (Dimas Saputra)
+      expect(result.name).toBe("Dimas Saputra");
       expect(loggerMock.error).toHaveBeenCalled();
     });
   });

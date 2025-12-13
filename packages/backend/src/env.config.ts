@@ -76,18 +76,24 @@ const createEnvSchema = () => {
           const isComplex =
             hasNumbers && hasLowerCase && hasUpperCase && hasSpecialChar;
 
+          // In production, strictly enforce complexity
+          if (process.env.NODE_ENV === "production" && !isComplex) {
+            return false;
+          }
+
+          // In development/test, warn but allow (with minimum length)
           if (!isComplex) {
             console.warn(
-              "JWT_SECRET should contain numbers, lowercase, uppercase, and special characters for optimal security",
+              "⚠️  JWT_SECRET should contain numbers, lowercase, uppercase, and special characters for optimal security. " +
+                "This will be enforced in production.",
             );
           }
 
-          // Only require minimum length, but warn about complexity
           return val.length >= 64;
         },
         {
           message:
-            "JWT_SECRET must be at least 64 characters and should contain mixed case, numbers, and special characters",
+            "JWT_SECRET must be at least 64 characters and MUST contain mixed case, numbers, and special characters in production",
         },
       ),
     JWT_EXPIRES_IN: z.string().default("15m"),
@@ -103,27 +109,88 @@ const createEnvSchema = () => {
           if (val === process.env.JWT_SECRET) {
             return false;
           }
-          // Additional entropy check for production
-          if (process.env.NODE_ENV === "production") {
-            const hasNumbers = /\d/.test(val);
-            const hasLowerCase = /[a-z]/.test(val);
-            const hasUpperCase = /[A-Z]/.test(val);
-            const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(val);
-            return hasNumbers && hasLowerCase && hasUpperCase && hasSpecialChar;
+
+          const hasNumbers = /\d/.test(val);
+          const hasLowerCase = /[a-z]/.test(val);
+          const hasUpperCase = /[A-Z]/.test(val);
+          const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(val);
+          const isComplex =
+            hasNumbers && hasLowerCase && hasUpperCase && hasSpecialChar;
+
+          // In production, strictly enforce complexity
+          if (process.env.NODE_ENV === "production" && !isComplex) {
+            return false;
           }
-          return val.length >= 32; // Minimum for development
+
+          // In development/test, warn but allow (with minimum length)
+          if (!isComplex) {
+            console.warn(
+              "⚠️  REFRESH_TOKEN_SECRET should contain numbers, lowercase, uppercase, and special characters. " +
+                "This will be enforced in production.",
+            );
+          }
+
+          return val.length >= 64;
         },
         {
           message:
-            "REFRESH_TOKEN_SECRET must be different from JWT_SECRET and contain numbers, lowercase, uppercase, and special characters in production",
+            "REFRESH_TOKEN_SECRET must be different from JWT_SECRET and MUST contain numbers, lowercase, uppercase, and special characters in production",
         },
       ),
     REFRESH_TOKEN_EXPIRES_IN: z.string().default("7d"),
 
     // Admin Configuration
     ADMIN_EMAIL: z.string().email("ADMIN_EMAIL must be valid email"),
-    ADMIN_PASSWORD: z.string().optional(), // For development
-    ADMIN_HASH_PASSWORD: z.string().optional(), // For production
+    // SECURITY: Plain text passwords are deprecated and only allowed in development
+    // Use: bun run --filter backend hash-password <password> to generate hashes
+    ADMIN_PASSWORD: z
+      .string()
+      .optional()
+      .refine(
+        (val) => {
+          // In production, plain text passwords are forbidden
+          if (process.env.NODE_ENV === "production" && val) {
+            console.error(
+              "❌ ADMIN_PASSWORD (plain text) is not allowed in production!",
+            );
+            console.error(
+              "   Generate a hash with: bun run --filter backend hash-password <password>",
+            );
+            return false;
+          }
+          return true;
+        },
+        {
+          message:
+            "Plain text ADMIN_PASSWORD is forbidden in production. Use ADMIN_HASH_PASSWORD instead.",
+        },
+      ),
+    ADMIN_HASH_PASSWORD: z
+      .string()
+      .optional()
+      .refine(
+        (val) => {
+          // In production, require a proper bcrypt hash
+          if (process.env.NODE_ENV === "production") {
+            if (!val || val.length === 0) {
+              return false; // Will be validated in additional checks
+            }
+            // Validate bcrypt hash format ($2a$, $2b$, or $2y$ prefix)
+            const isBcryptHash = /^\$2[aby]?\$\d{2}\$.{53}$/.test(val);
+            if (!isBcryptHash) {
+              console.error(
+                "❌ ADMIN_HASH_PASSWORD must be a valid bcrypt hash",
+              );
+              return false;
+            }
+          }
+          return true;
+        },
+        {
+          message:
+            "ADMIN_HASH_PASSWORD must be a valid bcrypt hash (use: bun run --filter backend hash-password <password>)",
+        },
+      ),
 
     // Application Config
     ANALYZE: z
@@ -200,9 +267,19 @@ export function validateEnv(
 
     // Additional validation for production
     if (result.NODE_ENV === "production") {
-      if (!result.ADMIN_HASH_PASSWORD && !result.ADMIN_PASSWORD) {
+      // ADMIN_HASH_PASSWORD is REQUIRED in production (no plain text fallback)
+      if (!result.ADMIN_HASH_PASSWORD) {
         throw new Error(
-          "Either ADMIN_HASH_PASSWORD or ADMIN_PASSWORD is required in production",
+          "ADMIN_HASH_PASSWORD is REQUIRED in production. " +
+            "Generate a hash with: bun run --filter backend hash-password <password>",
+        );
+      }
+
+      // Ensure plain text password is not set in production
+      if (result.ADMIN_PASSWORD) {
+        throw new Error(
+          "ADMIN_PASSWORD (plain text) is NOT allowed in production. " +
+            "Remove it and use ADMIN_HASH_PASSWORD instead.",
         );
       }
     }
@@ -336,8 +413,20 @@ export const validateConfig = () => {
 
   // Production-specific checks
   if (isProduction()) {
-    if (!currentEnv.ADMIN_HASH_PASSWORD && !currentEnv.ADMIN_PASSWORD) {
-      throw new Error("Admin authentication must be configured for production");
+    // Require hashed password in production (no plain text fallback)
+    if (!currentEnv.ADMIN_HASH_PASSWORD) {
+      throw new Error(
+        "ADMIN_HASH_PASSWORD is required in production. " +
+          "Generate with: bun run --filter backend hash-password <password>",
+      );
+    }
+
+    // Forbid plain text password in production
+    if (currentEnv.ADMIN_PASSWORD) {
+      throw new Error(
+        "ADMIN_PASSWORD (plain text) is forbidden in production. " +
+          "Remove it and use only ADMIN_HASH_PASSWORD.",
+      );
     }
 
     if (currentEnv.LOG_LEVEL === "debug") {

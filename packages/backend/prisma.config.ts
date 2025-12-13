@@ -14,6 +14,24 @@ if (fs.existsSync(envPath)) {
   }
 }
 
+// Validate required environment variables
+const directUrl = process.env.DIRECT_URL;
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!directUrl) {
+  throw new Error(
+    "DIRECT_URL environment variable is required for Prisma configuration. " +
+      "Please set it in your .env file or environment.",
+  );
+}
+
+if (!databaseUrl) {
+  throw new Error(
+    "DATABASE_URL environment variable is required for Prisma configuration. " +
+      "Please set it in your .env file or environment.",
+  );
+}
+
 // Prisma 7 configuration
 // In Prisma 7, datasource URLs should be configured here instead of schema.prisma
 export default defineConfig({
@@ -22,7 +40,7 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env.DIRECT_URL!,
-    shadowDatabaseUrl: process.env.DATABASE_URL!,
+    url: directUrl,
+    shadowDatabaseUrl: databaseUrl,
   },
 });

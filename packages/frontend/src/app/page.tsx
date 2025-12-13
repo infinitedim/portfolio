@@ -109,10 +109,10 @@ export default function HomePage(): JSX.Element {
             name: "Terminal Portfolio",
             description:
               "Interactive developer portfolio with terminal interface",
-            url: "https://your-domain.com",
+            url: "https://infinitedim.site",
             mainEntity: {
               "@type": "Person",
-              name: "Your Name",
+              name: "Dimas Saputra",
               jobTitle: "Full-Stack Developer",
               description:
                 "Full-stack developer specializing in React, Next.js, TypeScript, and modern web technologies",
@@ -124,7 +124,7 @@ export default function HomePage(): JSX.Element {
                   "@type": "ListItem",
                   position: 1,
                   name: "Home",
-                  item: "https://your-domain.com",
+                  item: "https://infinitedim.site",
                 },
               ],
             },

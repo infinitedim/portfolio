@@ -147,7 +147,7 @@ We only use the good stuff around here:
 
 ## 🏗️ Architecture Overview
 
-```
+```text
 terminal-portfolio/                    # 🏠 Monorepo Root
 ├── 📦 packages/
 │   ├── 🎨 frontend/                   # Next.js 15 App
@@ -339,7 +339,7 @@ NEXT_PUBLIC_GA_ID="G-XXXXXXXXXX"
 
 ### Authentication Flow
 
-```
+```text
 ┌─────────┐     ┌─────────┐     ┌─────────┐
 │  User   │────▶│ Login   │────▶│  JWT    │
 └─────────┘     └─────────┘     └─────────┘

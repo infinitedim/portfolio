@@ -87,8 +87,8 @@ const STATIC_PROJECTS: Project[] = [
     description:
       "Interactive terminal-themed developer portfolio with command-line interface",
     technologies: ["Next.js", "TypeScript", "Tailwind CSS", "React"],
-    demoUrl: "https://your-domain.com",
-    githubUrl: "https://github.com/yourusername/terminal-portfolio",
+    demoUrl: "https://infinitedim.site",
+    githubUrl: "https://github.com/infinitedim/portfolio",
     status: "completed",
     featured: true,
   },
@@ -98,7 +98,7 @@ const STATIC_PROJECTS: Project[] = [
     description:
       "Full-stack online store with payment integration and real-time inventory",
     technologies: ["React", "Node.js", "PostgreSQL", "Stripe", "JWT"],
-    githubUrl: "https://github.com/yourusername/ecommerce",
+    githubUrl: "https://github.com/infinitedim/ecommerce",
     status: "completed",
     featured: true,
   },
@@ -300,7 +300,7 @@ export const getGitHubData = cache(
       };
     }
 
-    const username = process.env.GITHUB_USERNAME || "yourusername";
+    const username = process.env.GITHUB_USERNAME || "infinitedim";
     const token = process.env.GITHUB_TOKEN;
 
     try {
@@ -381,14 +381,14 @@ function getFallbackPortfolioData(): PortfolioData {
  */
 function getFallbackAboutData(): AboutInfo {
   return {
-    name: "Developer Portfolio",
+    name: "Dimas Saputra",
     title: "Full-Stack Developer",
     bio: "Passionate full-stack developer with expertise in modern web technologies.",
-    location: "Remote",
+    location: "Indonesia",
     contact: {
-      email: "developer@example.com",
-      github: "https://github.com/yourusername",
-      linkedin: "https://linkedin.com/in/yourusername",
+      email: "developer@infinitedim.site",
+      github: "https://github.com/infinitedim",
+      linkedin: "https://linkedin.com/in/infinitedim",
     },
   };
 }

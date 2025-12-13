@@ -8,20 +8,20 @@ export const SEO_CONFIG = {
     title: "Terminal Portfolio | Full-Stack Developer",
     description:
       "Interactive developer portfolio with terminal interface. Full-stack developer specializing in React, Next.js, TypeScript, and modern web technologies.",
-    url: process.env.NEXT_PUBLIC_BASE_URL || "https://your-domain.com",
-    author: "Your Name",
-    email: "your.email@example.com",
-    phone: "+1234567890",
-    location: "Your City, Country",
+    url: process.env.NEXT_PUBLIC_BASE_URL || "https://infinitedim.site",
+    author: "Dimas Saputra",
+    email: "developer@infinitedim.site",
+    phone: "", // Set via environment variable if needed
+    location: "Indonesia",
   },
 
   // Social media profiles
   social: {
-    twitter: "@yourusername",
-    github: "https://github.com/yourusername",
-    linkedin: "https://linkedin.com/in/yourusername",
-    instagram: "https://instagram.com/yourusername",
-    youtube: "https://youtube.com/@yourusername",
+    twitter: "@yourblooo",
+    github: "https://github.com/infinitedim",
+    linkedin: "https://linkedin.com/in/infinitedim",
+    instagram: "", // Set if available
+    youtube: "", // Set if available
   },
 
   // SEO keywords for different pages
@@ -166,20 +166,20 @@ export const SEO_CONFIG = {
       "@type": "WebSite",
       potentialAction: {
         "@type": "SearchAction",
-        target: "https://your-domain.com/search?q={search_term_string}",
+        target: "https://infinitedim.site/search?q={search_term_string}",
         "query-input": "required name=search_term_string",
       },
     },
     organization: {
       "@type": "Organization",
       name: "Terminal Portfolio",
-      url: "https://your-domain.com",
-      logo: "https://your-domain.com/logo.png",
+      url: "https://infinitedim.site",
+      logo: "https://infinitedim.site/logo.png",
       contactPoint: {
         "@type": "ContactPoint",
-        telephone: "+1234567890",
+        telephone: "",
         contactType: "customer service",
-        email: "your.email@example.com",
+        email: "developer@infinitedim.site",
       },
     },
   },

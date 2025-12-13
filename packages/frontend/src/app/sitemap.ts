@@ -6,7 +6,7 @@ import { MetadataRoute } from "next";
  * @returns {MetadataRoute.Sitemap} The sitemap
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://your-domain.com";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://infinitedim.site";
   const currentDate = new Date();
 
   // Core static pages with optimized priorities

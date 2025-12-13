@@ -3,7 +3,7 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { SecurityService } from "../security/security.service";
 import { AuditLogService, AuditEventType } from "../security/audit-log.service";
 import { RedisService } from "../redis/redis.service";
-import { env } from "../env.config";
+import { env, getJWTConfig } from "../env.config";
 import { securityLogger } from "../logging/logger";
 
 export type AuthUser = { userId: string; email: string; role: "admin" };
@@ -11,10 +11,57 @@ export type AuthUser = { userId: string; email: string; role: "admin" };
 const TOKEN_BLACKLIST_PREFIX = "token:blacklist:";
 // Token family prefix for refresh token rotation tracking
 const TOKEN_FAMILY_PREFIX = "token:family:";
-// Default blacklist TTL matches JWT expiry (15 minutes) + buffer
-const TOKEN_BLACKLIST_TTL = 20 * 60; // 20 minutes in seconds
-// Refresh token family TTL matches refresh token expiry (7 days) + buffer
-const TOKEN_FAMILY_TTL = 8 * 24 * 60 * 60; // 8 days in seconds
+
+/**
+ * Parse a time string (e.g., "15m", "1h", "7d") to seconds
+ * @param timeStr - Time string like "15m", "1h", "7d"
+ * @returns Time in seconds
+ */
+function parseTimeToSeconds(timeStr: string): number {
+  const match = timeStr.match(/^(\d+)([smhd])$/);
+  if (!match) {
+    // Default to 15 minutes if parsing fails
+    securityLogger.warn("Failed to parse time string, using default", {
+      timeStr,
+      default: "15m (900s)",
+      component: "AuthService",
+      operation: "parseTimeToSeconds",
+    });
+    return 15 * 60;
+  }
+
+  const value = parseInt(match[1], 10);
+  const unit = match[2];
+
+  switch (unit) {
+    case "s":
+      return value;
+    case "m":
+      return value * 60;
+    case "h":
+      return value * 60 * 60;
+    case "d":
+      return value * 24 * 60 * 60;
+    default:
+      return 15 * 60;
+  }
+}
+
+// Calculate TOKEN_BLACKLIST_TTL dynamically based on JWT_EXPIRES_IN + 5 minute buffer
+function getTokenBlacklistTTL(): number {
+  const jwtConfig = getJWTConfig();
+  const jwtExpirySeconds = parseTimeToSeconds(jwtConfig.expiresIn);
+  // Add 5 minute buffer to ensure token is blacklisted longer than its validity
+  return jwtExpirySeconds + 5 * 60;
+}
+
+// Refresh token family TTL matches refresh token expiry + 1 day buffer
+function getTokenFamilyTTL(): number {
+  const jwtConfig = getJWTConfig();
+  const refreshExpirySeconds = parseTimeToSeconds(jwtConfig.refreshExpiresIn);
+  // Add 1 day buffer
+  return refreshExpirySeconds + 24 * 60 * 60;
+}
 
 @Injectable()
 export class AuthService {
@@ -27,10 +74,15 @@ export class AuthService {
     private readonly redisService: RedisService,
   ) {
     this.adminEmail = env?.ADMIN_EMAIL || "";
-    this.adminPasswordHash = env?.ADMIN_PASSWORD || "";
+    // In production, use ONLY the hashed password (plain text is forbidden)
+    // In development, ADMIN_HASH_PASSWORD takes precedence if set
+    this.adminPasswordHash = env?.ADMIN_HASH_PASSWORD || "";
 
     if (!this.adminPasswordHash && env?.NODE_ENV === "production") {
-      throw new Error("ADMIN_PASSWORD_HASH must be set in production");
+      throw new Error(
+        "ADMIN_HASH_PASSWORD must be set in production. " +
+          "Generate with: bun run --filter backend hash-password <password>",
+      );
     }
   }
 
@@ -76,18 +128,27 @@ export class AuthService {
     }
 
     // Always use secure password verification
-    // In development without hash, we hash the password on-the-fly for comparison
+    // In production: ONLY hashed passwords are allowed (ADMIN_HASH_PASSWORD)
+    // In development: ADMIN_HASH_PASSWORD takes precedence, fallback to ADMIN_PASSWORD
     let isValidPassword = false;
 
     if (this.adminPasswordHash) {
-      // Production: verify against stored hash
+      // Verify against stored bcrypt hash (production and development with hash)
       isValidPassword = await this.securityService.verifyPassword(
         password,
         this.adminPasswordHash,
       );
     } else if (env?.NODE_ENV !== "production" && env?.ADMIN_PASSWORD) {
-      // Development only: hash the dev password and compare securely
+      // Development only: hash the dev password on-the-fly for comparison
       // This prevents timing attacks while still allowing dev workflow
+      // WARNING: This path is for development convenience only
+      securityLogger.warn(
+        "Using plain text ADMIN_PASSWORD - not allowed in production",
+        {
+          component: "AuthService",
+          operation: "validateCredentials",
+        },
+      );
       const devPasswordHash = await this.securityService.hashPassword(
         env.ADMIN_PASSWORD,
       );
@@ -139,7 +200,7 @@ export class AuthService {
         createdAt: Date.now(),
         updatedAt: Date.now(),
       },
-      TOKEN_FAMILY_TTL,
+      getTokenFamilyTTL(),
     );
 
     // Reset rate limit on successful login
@@ -261,7 +322,7 @@ export class AuthService {
           createdAt: familyData?.createdAt ?? Date.now(),
           updatedAt: Date.now(),
         },
-        TOKEN_FAMILY_TTL,
+        getTokenFamilyTTL(),
       );
 
       // Blacklist the old token's jti to prevent reuse
@@ -344,7 +405,7 @@ export class AuthService {
 
           // Also blacklist the refresh token's jti
           if (refreshPayload.jti) {
-            await this.blacklistToken(refreshPayload.jti, TOKEN_FAMILY_TTL);
+            await this.blacklistToken(refreshPayload.jti, getTokenFamilyTTL());
           }
 
           securityLogger.info("Token family invalidated on logout", {
@@ -391,11 +452,11 @@ export class AuthService {
   /**
    * Blacklist a token by its JWT ID (jti)
    * @param {string} jti - The JWT ID to blacklist
-   * @param {number} ttl - Time to live in seconds (default: TOKEN_BLACKLIST_TTL)
+   * @param {number} ttl - Time to live in seconds (default: computed from JWT_EXPIRES_IN + buffer)
    */
   private async blacklistToken(
     jti: string,
-    ttl: number = TOKEN_BLACKLIST_TTL,
+    ttl: number = getTokenBlacklistTTL(),
   ): Promise<void> {
     try {
       const key = `${TOKEN_BLACKLIST_PREFIX}${jti}`;

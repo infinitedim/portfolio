@@ -1,5 +1,6 @@
 import { ProjectMetadataService } from "@/lib/projects/projectMetadata";
 import type { Command, CommandOutput } from "@/types/terminal";
+import { generateId } from "@/lib/utils/utils";
 
 // Global callback for opening demos
 let globalOnOpenDemo: ((projectId: string) => void) | null = null;
@@ -40,7 +41,7 @@ export const demoCommand: Command = {
           type: "error",
           content: `Unknown demo action: ${action}. Use 'demo help' for available commands.`,
           timestamp: new Date(),
-          id: "demo-unknown-action",
+          id: generateId(),
         };
     }
   },
@@ -59,7 +60,7 @@ function listProjects(): CommandOutput {
       type: "info",
       content: "No projects found.",
       timestamp: new Date(),
-      id: "demo-no-projects",
+      id: generateId(),
     };
   }
 
@@ -75,7 +76,7 @@ function listProjects(): CommandOutput {
     type: "success",
     content: `📋 Available Projects:\n\n${projectList}\n\n💡 Use 'demo open <project-id>' to launch a demo`,
     timestamp: new Date(),
-    id: "demo-list-projects",
+    id: generateId(),
   };
 }
 
@@ -91,7 +92,7 @@ function openProject(projectId: string): CommandOutput {
       content:
         "Please provide a project ID. Use 'demo list' to see available projects.",
       timestamp: new Date(),
-      id: "demo-no-project-id",
+      id: generateId(),
     };
   }
 
@@ -103,7 +104,7 @@ function openProject(projectId: string): CommandOutput {
       type: "error",
       content: `Project '${projectId}' not found. Use 'demo list' to see available projects.`,
       timestamp: new Date(),
-      id: "demo-project-not-found",
+      id: generateId(),
     };
   }
 
@@ -112,7 +113,7 @@ function openProject(projectId: string): CommandOutput {
       type: "error",
       content: `Demo not available for project '${project.name}'.`,
       timestamp: new Date(),
-      id: "demo-not-available",
+      id: generateId(),
     };
   }
 
@@ -125,7 +126,7 @@ function openProject(projectId: string): CommandOutput {
     type: "success",
     content: `🚀 Opening demo for ${project.name}...`,
     timestamp: new Date(),
-    id: "demo-opening",
+    id: generateId(),
   };
 }
 
@@ -140,7 +141,7 @@ function searchProjects(query: string): CommandOutput {
       type: "error",
       content: "Please provide a search query. Usage: demo search <query>",
       timestamp: new Date(),
-      id: "demo-no-search-query",
+      id: generateId(),
     };
   }
 
@@ -152,7 +153,7 @@ function searchProjects(query: string): CommandOutput {
       type: "info",
       content: `No projects found matching '${query}'.`,
       timestamp: new Date(),
-      id: "demo-search-no-results",
+      id: generateId(),
     };
   }
 
@@ -167,7 +168,7 @@ function searchProjects(query: string): CommandOutput {
     type: "success",
     content: `🔍 Search Results for '${query}':\n\n${resultList}\n\n💡 Use 'demo open <project-id>' to launch a demo`,
     timestamp: new Date(),
-    id: "demo-search-results",
+    id: generateId(),
   };
 }
 
@@ -184,7 +185,7 @@ function listTechnologies(): CommandOutput {
       type: "info",
       content: "No technologies found.",
       timestamp: new Date(),
-      id: "demo-no-technologies",
+      id: generateId(),
     };
   }
 
@@ -192,7 +193,7 @@ function listTechnologies(): CommandOutput {
     type: "success",
     content: `🏷️  Technologies used in projects:\n\n${technologies.join(", ")}\n\n💡 Use 'demo search <technology>' to find projects using a specific technology`,
     timestamp: new Date(),
-    id: "demo-technologies",
+    id: generateId(),
   };
 }
 
@@ -215,7 +216,7 @@ function listCategories(): CommandOutput {
     type: "success",
     content: `📂 Project Categories:\n\n${categoryList}\n\n💡 Use 'demo search <category>' to find projects in a specific category`,
     timestamp: new Date(),
-    id: "demo-categories",
+    id: generateId(),
   };
 }
 
@@ -243,6 +244,6 @@ Examples:
 
 💡 Use 'demo list' to see all available projects with their IDs`,
     timestamp: new Date(),
-    id: "demo-help",
+    id: generateId(),
   };
 }

@@ -104,7 +104,7 @@ export function Terminal({
   useEffect(() => {
     const timer = setTimeout(() => {
       setHasMinimumLoadingTime(true);
-    }, 3000); // 3 second minimum loading time to show the enhanced progress
+    }, 800); // 800ms minimum loading time for smooth progress animation
 
     return () => clearTimeout(timer);
   }, []);

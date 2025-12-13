@@ -19,30 +19,113 @@ export const publicProcedure = t.procedure;
 // Lazy-initialized clients for serverless
 let prismaClient: PrismaClient | null = null;
 let redisClient: Redis | null = null;
+let redisAvailable = true; // Track Redis availability to avoid repeated errors
+
+// Serverless logger helper
+const serverlessLog = {
+  info: (message: string, context?: Record<string, unknown>) => {
+    console.log(`[serverless] ${message}`, context ? JSON.stringify(context) : "");
+  },
+  warn: (message: string, context?: Record<string, unknown>) => {
+    console.warn(`[serverless] ${message}`, context ? JSON.stringify(context) : "");
+  },
+  error: (message: string, context?: Record<string, unknown>) => {
+    console.error(`[serverless] ${message}`, context ? JSON.stringify(context) : "");
+  },
+};
 
 function getPrisma(): PrismaClient {
   if (!prismaClient) {
-    prismaClient = new PrismaClient();
+    prismaClient = new PrismaClient({
+      // Serverless-optimized connection settings
+      log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+    });
+    serverlessLog.info("Prisma client initialized");
   }
   return prismaClient;
 }
 
 function getRedis(): Redis | null {
+  // Skip Redis if previously marked unavailable (circuit breaker pattern)
+  if (!redisAvailable) {
+    return null;
+  }
+
   if (!redisClient && process.env.UPSTASH_REDIS_REST_URL) {
-    redisClient = new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN || "",
-    });
+    try {
+      redisClient = new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN || "",
+      });
+      serverlessLog.info("Redis client initialized");
+    } catch (error) {
+      serverlessLog.error("Failed to initialize Redis client", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      redisAvailable = false;
+      return null;
+    }
   }
   return redisClient;
 }
 
-// Rate limiting helper
-const rateLimitMap = new Map<string, number>();
+// Rate limiting helper with TTL-based cleanup for serverless
+interface RateLimitEntry {
+  timestamp: number;
+  windowMs: number;
+}
+const rateLimitMap = new Map<string, RateLimitEntry>();
+const RATE_LIMIT_CLEANUP_INTERVAL = 60000; // Cleanup every 60 seconds
+const MAX_RATE_LIMIT_ENTRIES = 10000; // Prevent unbounded growth
+let lastCleanup = Date.now();
 
 // Export function to clear rate limit map for testing
 export function clearRateLimitMap() {
   rateLimitMap.clear();
+}
+
+// Cleanup expired entries to prevent memory leak
+function cleanupRateLimitMap() {
+  const now = Date.now();
+
+  // Only cleanup if interval has passed
+  if (now - lastCleanup < RATE_LIMIT_CLEANUP_INTERVAL) {
+    return;
+  }
+
+  lastCleanup = now;
+  let cleanedCount = 0;
+
+  for (const [key, entry] of rateLimitMap.entries()) {
+    if (now - entry.timestamp > entry.windowMs) {
+      rateLimitMap.delete(key);
+      cleanedCount++;
+    }
+  }
+
+  if (cleanedCount > 0) {
+    serverlessLog.info("Rate limit map cleanup", {
+      cleaned: cleanedCount,
+      remaining: rateLimitMap.size,
+    });
+  }
+
+  // Emergency cleanup if map is too large (fail-safe)
+  if (rateLimitMap.size > MAX_RATE_LIMIT_ENTRIES) {
+    const entriesToDelete = rateLimitMap.size - MAX_RATE_LIMIT_ENTRIES;
+    const sortedEntries = [...rateLimitMap.entries()].sort(
+      (a, b) => a[1].timestamp - b[1].timestamp
+    );
+
+    for (let i = 0; i < entriesToDelete; i++) {
+      rateLimitMap.delete(sortedEntries[i][0]);
+    }
+
+    serverlessLog.warn("Rate limit map emergency cleanup", {
+      deleted: entriesToDelete,
+      remaining: rateLimitMap.size,
+    });
+  }
 }
 
 async function checkRateLimit(
@@ -59,15 +142,26 @@ async function checkRateLimit(
         ex: Math.floor(windowMs / 1000),
       });
       return true;
-    } catch {
-      // Fallback to in-memory
+    } catch (error) {
+      // Log Redis error and fallback to in-memory
+      serverlessLog.warn("Redis rate limit failed, using in-memory fallback", {
+        error: error instanceof Error ? error.message : String(error),
+        key,
+      });
     }
   }
 
+  // Perform cleanup on each rate limit check
+  cleanupRateLimitMap();
+
   const now = Date.now();
-  const last = rateLimitMap.get(key) ?? 0;
-  if (now - last < windowMs) return false;
-  rateLimitMap.set(key, now);
+  const entry = rateLimitMap.get(key);
+
+  if (entry && now - entry.timestamp < entry.windowMs) {
+    return false;
+  }
+
+  rateLimitMap.set(key, { timestamp: now, windowMs });
   return true;
 }
 

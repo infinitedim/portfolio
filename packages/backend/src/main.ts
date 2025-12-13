@@ -40,6 +40,7 @@ export async function createExpressApp(): Promise<import("express").Express> {
   }
 
   // Enhanced security headers with Helmet
+  const cspReportUri = process.env.CSP_REPORT_URI || "/api/csp-report";
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -65,6 +66,8 @@ export async function createExpressApp(): Promise<import("express").Express> {
           baseUri: ["'self'"],
           formAction: ["'self'"],
           upgradeInsecureRequests: [],
+          // Report CSP violations to the specified endpoint
+          reportUri: [cspReportUri],
         },
       },
       crossOriginOpenerPolicy: { policy: "same-origin" },
@@ -84,9 +87,38 @@ export async function createExpressApp(): Promise<import("express").Express> {
     }),
   );
 
-  const origin = process.env.FRONTEND_ORIGIN || "http://127.0.0.1:3000";
+  // CORS configuration with secure origin validation
+  const allowedOrigin = process.env.FRONTEND_ORIGIN || "http://127.0.0.1:3000";
+
+  // Parse allowed origins (support comma-separated list for multiple environments)
+  const allowedOrigins = allowedOrigin
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
+
   app.enableCors({
-    origin,
+    // Secure origin validation using callback
+    origin: (origin, callback) => {
+      // Allow requests with no origin (server-to-server, curl, etc.)
+      // In production, you might want to be stricter about this
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      // Exact match against allowed origins
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Reject disallowed origins
+      securityLogger.warn("CORS origin rejected", {
+        origin,
+        allowedOrigins,
+        component: "CORS",
+        operation: "originValidation",
+      });
+      return callback(new Error("CORS origin not allowed"), false);
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"],
@@ -149,9 +181,25 @@ export async function createExpressApp(): Promise<import("express").Express> {
     });
   }
 
-  // Graceful shutdown helper
+  // Track shutdown state to prevent multiple shutdowns
+  let isShuttingDown = false;
+  const SHUTDOWN_TIMEOUT = 10000; // 10 seconds for graceful shutdown
+
+  // Graceful shutdown helper with improved error handling
   const gracefulShutdown = async (reason?: string, error?: unknown) => {
-    securityLogger.error("Application shutdown initiated", {
+    // Prevent multiple shutdown attempts
+    if (isShuttingDown) {
+      securityLogger.debug("Shutdown already in progress, skipping duplicate", {
+        reason: reason || "Unknown",
+        component: "ApplicationLifecycle",
+        operation: "gracefulShutdown",
+      });
+      return;
+    }
+    isShuttingDown = true;
+
+    const severity = error ? "error" : "info";
+    securityLogger[severity]("Application shutdown initiated", {
       reason: reason || "Unknown",
       error: error instanceof Error ? error.message : String(error || ""),
       stack: error instanceof Error ? error.stack : undefined,
@@ -159,9 +207,31 @@ export async function createExpressApp(): Promise<import("express").Express> {
       operation: "gracefulShutdown",
     });
 
+    // Create a timeout promise to force exit if cleanup takes too long
+    const forceExitTimeout = setTimeout(() => {
+      securityLogger.error("Forced shutdown after timeout", {
+        timeoutMs: SHUTDOWN_TIMEOUT,
+        reason: reason || "Unknown",
+        component: "ApplicationLifecycle",
+        operation: "gracefulShutdown",
+      });
+      process.exit(error ? 1 : 0);
+    }, SHUTDOWN_TIMEOUT).unref();
+
     try {
+      // Stop accepting new connections first
+      securityLogger.debug("Stopping new connections", {
+        component: "ApplicationLifecycle",
+        operation: "gracefulShutdown",
+      });
+
       // attempt to close the Nest application
       await app.close();
+
+      securityLogger.debug("Nest application closed", {
+        component: "ApplicationLifecycle",
+        operation: "gracefulShutdown",
+      });
     } catch (e) {
       securityLogger.error("Failed to close Nest application", {
         error: e instanceof Error ? e.message : String(e),
@@ -175,6 +245,10 @@ export async function createExpressApp(): Promise<import("express").Express> {
       const prismaService = app.get(PrismaService, { strict: false });
       if (prismaService && typeof prismaService.$disconnect === "function") {
         await prismaService.$disconnect();
+        securityLogger.debug("Prisma disconnected", {
+          component: "ApplicationLifecycle",
+          operation: "gracefulShutdown",
+        });
       }
     } catch (e) {
       securityLogger.error("Failed to disconnect Prisma", {
@@ -204,18 +278,56 @@ export async function createExpressApp(): Promise<import("express").Express> {
       });
     }
 
+    // Clear the force exit timeout since we completed cleanup
+    clearTimeout(forceExitTimeout);
+
+    securityLogger.info("Graceful shutdown complete", {
+      reason: reason || "Unknown",
+      component: "ApplicationLifecycle",
+      operation: "gracefulShutdown",
+    });
+
     // give process a moment to flush logs, then exit
-    setTimeout(() => process.exit(error ? 1 : 0), 1000).unref();
+    setTimeout(() => process.exit(error ? 1 : 0), 500).unref();
   };
 
   // Global process handlers to ensure graceful shutdown
   process.on("SIGINT", () => gracefulShutdown("SIGINT"));
   process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+
+  // For unhandled rejections, log but don't immediately shutdown in development
+  // In production, we should fail-fast
   process.on("unhandledRejection", (reason) => {
-    // reason may be an Error or any value
-    gracefulShutdown("unhandledRejection", reason);
+    securityLogger.error("Unhandled promise rejection detected", {
+      reason: reason instanceof Error ? reason.message : String(reason),
+      stack: reason instanceof Error ? reason.stack : undefined,
+      component: "ApplicationLifecycle",
+      operation: "unhandledRejection",
+    });
+
+    // In production, trigger graceful shutdown on unhandled rejections
+    // In development, log and continue to allow debugging
+    if (process.env.NODE_ENV === "production") {
+      gracefulShutdown("unhandledRejection", reason);
+    } else {
+      securityLogger.warn(
+        "Continuing despite unhandled rejection (development mode)",
+        {
+          component: "ApplicationLifecycle",
+          operation: "unhandledRejection",
+        },
+      );
+    }
   });
+
+  // Uncaught exceptions always trigger shutdown
   process.on("uncaughtException", (err) => {
+    securityLogger.error("Uncaught exception - triggering shutdown", {
+      error: err.message,
+      stack: err.stack,
+      component: "ApplicationLifecycle",
+      operation: "uncaughtException",
+    });
     gracefulShutdown("uncaughtException", err);
   });
 

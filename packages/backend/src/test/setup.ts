@@ -84,11 +84,20 @@ const mockRedisInstance = {
   mset: vi.fn().mockResolvedValue(undefined),
   flushdb: vi.fn().mockResolvedValue(undefined),
   ping: vi.fn().mockResolvedValue("PONG"),
+  incr: vi.fn().mockResolvedValue(1),
+  expire: vi.fn().mockResolvedValue(1),
 };
+
+// Create a mock class for Redis that can be instantiated with `new`
+class MockRedis {
+  constructor() {
+    return mockRedisInstance;
+  }
+}
 
 // Mock the entire module to prevent any actual HTTP calls
 vi.mock("@upstash/redis", () => ({
-  Redis: vi.fn().mockImplementation(() => mockRedisInstance),
+  Redis: MockRedis,
   // Also mock any other exports that might exist
   createClient: vi.fn().mockImplementation(() => mockRedisInstance),
 }));
