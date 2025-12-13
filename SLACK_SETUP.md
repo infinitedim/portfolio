@@ -160,21 +160,22 @@ If successful, you should see the message appear in your Slack channel!
 ### Advanced Test with Formatting
 
 ```bash
+TIMESTAMP=$(date +%s)
 curl -X POST \
   -H 'Content-Type: application/json' \
-  -d '{
-    "text": "Portfolio Notification Test",
-    "attachments": [
+  -d "{
+    \"text\": \"Portfolio Notification Test\",
+    \"attachments\": [
       {
-        "color": "#36a64f",
-        "title": "Test Notification",
-        "text": "This is a test from your portfolio setup!",
-        "footer": "Terminal Portfolio",
-        "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
-        "ts": '$(date +%s)'
+        \"color\": \"#36a64f\",
+        \"title\": \"Test Notification\",
+        \"text\": \"This is a test from your portfolio setup!\",
+        \"footer\": \"Terminal Portfolio\",
+        \"footer_icon\": \"https://platform.slack-edge.com/img/default_application_icon.png\",
+        \"ts\": $TIMESTAMP
       }
     ]
-  }' \
+  }" \
   YOUR_WEBHOOK_URL
 ```
 
