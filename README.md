@@ -111,6 +111,14 @@ Your terminal works everywhere:
 - 🔄 **Real-time Updates**: Auto-refresh currently playing
 - 🎨 **Album Art**: Beautiful display of current track
 
+### 📢 Slack Notifications (Ready for Integration)
+
+- 📬 **Contact Alerts**: Get notified of new contact form submissions
+- 🔐 **Security Monitoring**: Real-time alerts for security events
+- 📊 **Admin Notifications**: System events and updates
+- 🎨 **Rich Formatting**: Beautiful messages with colors and emojis
+- 🔧 **Easy Setup**: Simple webhook configuration (see [SLACK_SETUP.md](./SLACK_SETUP.md))
+
 ## 🛠️ Tech Stack Hall of Fame
 
 We only use the good stuff around here:
@@ -331,8 +339,45 @@ SPOTIFY_REDIRECT_URI="http://127.0.0.1:3000/api/spotify/callback"
 ROADMAP_AUTH_TOKEN="your-roadmap-token"
 ROADMAP_USER_ID="your-user-id"
 
+# 📢 Slack Notifications (Optional)
+SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+ENABLE_SLACK_NOTIFICATIONS=true
+ENABLE_SLACK_CONTACT_ALERTS=true
+ENABLE_SLACK_SECURITY_ALERTS=true
+
 # 📊 Analytics (Optional)
 NEXT_PUBLIC_GA_ID="G-XXXXXXXXXX"
+```
+
+### 📢 Slack Integration Setup
+
+Want to receive portfolio notifications in Slack? Set up webhook integration in minutes!
+
+**Quick Setup:**
+1. Go to your Slack workspace
+2. Create an Incoming Webhook
+3. Copy the webhook URL
+4. Add it to your `.env` file
+
+**📖 [Complete Slack Setup Guide](./SLACK_SETUP.md)** - Detailed step-by-step instructions with:
+- How to find/create your webhook URL
+- Configuration options
+- Testing your integration
+- Message format examples
+- Security best practices
+- Troubleshooting tips
+
+**Notification Types:**
+- 📧 Contact form submissions
+- 🔐 Security alerts (failed logins, suspicious activity)
+- 📊 Admin notifications
+- 🐛 Error alerts (optional)
+
+```bash
+# Test your webhook
+curl -X POST -H 'Content-Type: application/json' \
+  -d '{"text": "🎉 Slack integration is working!"}' \
+  YOUR_WEBHOOK_URL
 ```
 
 ## 🔐 Security Features Deep Dive
