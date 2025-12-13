@@ -72,12 +72,6 @@ describe("SpotifyServiceBackend", () => {
         () => new SpotifyServiceBackend(mockCache, mockRedisService),
       ).not.toThrow();
     });
-
-    it("should not require SPOTIFY_REFRESH_TOKEN (removed)", () => {
-      // This test confirms that refresh token is no longer required
-      const service = new SpotifyServiceBackend(mockCache, mockRedisService);
-      expect(service).toBeDefined();
-    });
   });
 
   describe("nowPlaying method", () => {

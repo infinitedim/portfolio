@@ -413,102 +413,10 @@ const authRouter = router({
 // Spotify router
 const spotifyRouter = router({
   nowPlaying: publicProcedure.query(async () => {
-    const redis = getRedis();
-
-    // Check cache first
-    if (redis) {
-      try {
-        const cached = await redis.get<{
-          isPlaying: boolean;
-          title?: string;
-          artist?: string;
-        }>("spotify:now-playing");
-        if (cached) return cached;
-      } catch {
-        // Continue without cache
-      }
-    }
-
-    // Fetch from Spotify API
-    if (!process.env.SPOTIFY_REFRESH_TOKEN) {
-      return { isPlaying: false };
-    }
-
-    try {
-      // Get access token
-      const tokenResponse = await fetch(
-        "https://accounts.spotify.com/api/token",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Basic ${Buffer.from(
-              `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`,
-            ).toString("base64")}`,
-          },
-          body: new URLSearchParams({
-            grant_type: "refresh_token",
-            refresh_token: process.env.SPOTIFY_REFRESH_TOKEN,
-          }),
-        },
-      );
-
-      if (!tokenResponse.ok) {
-        return { isPlaying: false };
-      }
-
-      const { access_token } = (await tokenResponse.json()) as {
-        access_token: string;
-      };
-
-      // Get currently playing
-      const nowPlayingResponse = await fetch(
-        "https://api.spotify.com/v1/me/player/currently-playing",
-        {
-          headers: { Authorization: `Bearer ${access_token}` },
-        },
-      );
-
-      if (nowPlayingResponse.status === 204 || !nowPlayingResponse.ok) {
-        return { isPlaying: false };
-      }
-
-      const data = (await nowPlayingResponse.json()) as {
-        is_playing: boolean;
-        item?: {
-          name: string;
-          artists: Array<{ name: string }>;
-          album: { name: string; images: Array<{ url: string }> };
-          external_urls: { spotify: string };
-          duration_ms: number;
-        };
-        progress_ms?: number;
-      };
-
-      const result = {
-        isPlaying: data.is_playing,
-        title: data.item?.name,
-        artist: data.item?.artists?.map((a) => a.name).join(", "),
-        album: data.item?.album?.name,
-        albumArt: data.item?.album?.images?.[0]?.url,
-        songUrl: data.item?.external_urls?.spotify,
-        duration: data.item?.duration_ms,
-        progress: data.progress_ms,
-      };
-
-      // Cache for 30 seconds
-      if (redis) {
-        try {
-          await redis.set("spotify:now-playing", result, { ex: 30 });
-        } catch {
-          // Ignore cache errors
-        }
-      }
-
-      return result;
-    } catch {
-      return { isPlaying: false };
-    }
+    // Spotify "Now Playing" feature requires OAuth refresh token flow
+    // which is not implemented in serverless mode.
+    // Return not playing state as default.
+    return { isPlaying: false };
   }),
 });
 

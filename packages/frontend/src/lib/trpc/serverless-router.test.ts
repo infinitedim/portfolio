@@ -250,8 +250,6 @@ describe("Serverless tRPC Router", () => {
   describe("Spotify Router", () => {
     describe("nowPlaying", () => {
       it("should return not playing when no spotify token", async () => {
-        vi.stubEnv("SPOTIFY_REFRESH_TOKEN", "");
-
         const caller = appRouter.createCaller({});
         const result = await caller.spotify.nowPlaying();
 

@@ -332,7 +332,6 @@ PORT=4000
 # 🎵 Spotify (Optional)
 SPOTIFY_CLIENT_ID="your-spotify-client-id"
 SPOTIFY_CLIENT_SECRET="your-spotify-client-secret"
-SPOTIFY_REFRESH_TOKEN="your-refresh-token"
 SPOTIFY_REDIRECT_URI="http://127.0.0.1:3000/api/spotify/callback"
 
 # 🛣️ Roadmap.sh (Optional)

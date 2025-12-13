@@ -7,15 +7,8 @@ export class ServerlessConfig {
    * @returns {boolean} - Whether the application is running in a serverless environment
    */
   static isServerless(): boolean {
-    return process.env.NODE_ENV === "production" && !!process.env.VERCEL_URL;
-  }
-
-  /**
-   * Check if the application is running on Vercel
-   * @returns {boolean} - Whether the application is running on Vercel
-   */
-  static isVercel(): boolean {
-    return !!process.env.VERCEL_URL;
+    // No longer using Vercel - always return false for serverless mode
+    return false;
   }
 
   /**
@@ -23,19 +16,8 @@ export class ServerlessConfig {
    * @returns {string} - The appropriate database URL for the environment
    */
   static getDatabaseUrl(): string {
-    // In serverless/Vercel, prefer pooled connections for better performance
-    if (this.isServerless() || this.isVercel()) {
-      return (
-        process.env.DATABASE_URL ||
-        process.env.POSTGRES_PRISMA_URL ||
-        process.env.DATABASE_URL_NON_POOLING ||
-        ""
-      );
-    }
-    // For local development, use non-pooling URL or regular URL
-    return (
-      process.env.DATABASE_URL_NON_POOLING || process.env.DATABASE_URL || ""
-    );
+    // Use DATABASE_URL for all environments
+    return process.env.DATABASE_URL || "";
   }
 
   /**
@@ -43,7 +25,7 @@ export class ServerlessConfig {
    * @returns {object} - Connection pool settings
    */
   static getConnectionPoolConfig() {
-    const isServerlessEnv = this.isServerless() || this.isVercel();
+    const isServerlessEnv = this.isServerless();
 
     // Default values based on environment
     const defaults = {
@@ -93,11 +75,10 @@ export class ServerlessConfig {
    * @returns {object} - The serverless-specific configuration
    */
   static getConfig() {
-    const isServerlessEnv = this.isServerless() || this.isVercel();
+    const isServerlessEnv = this.isServerless();
 
     return {
       isServerless: this.isServerless(),
-      isVercel: this.isVercel(),
       databaseUrl: this.getDatabaseUrl(),
       // Enable connection pooling for all environments, with different configs
       enableConnectionPooling: true,

@@ -19,11 +19,6 @@ function getTRPCUrl(): string {
     return "/api/trpc";
   }
   // SSR: use absolute URL
-  const vercelUrl = process.env.VERCEL_URL;
-  if (vercelUrl) {
-    return `https://${vercelUrl}/api/trpc`;
-  }
-  // Fallback for local development
   return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api/trpc";
 }
 

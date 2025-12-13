@@ -74,7 +74,7 @@ export class DatabaseConnectionManager {
     }
 
     // For serverless environments, return the main connection
-    if (this.config.isServerless || this.config.isVercel) {
+    if (this.config.isServerless) {
       return this.prismaService;
     }
 
@@ -99,7 +99,7 @@ export class DatabaseConnectionManager {
    */
   async releaseConnection(connection: PrismaService): Promise<void> {
     // For serverless environments, don't pool connections
-    if (this.config.isServerless || this.config.isVercel) {
+    if (this.config.isServerless) {
       return;
     }
 
@@ -276,7 +276,7 @@ export class DatabaseConnectionManager {
 
   private startHealthMonitoring(): void {
     // Don't start monitoring in serverless environments
-    if (this.config.isServerless || this.config.isVercel) {
+    if (this.config.isServerless) {
       return;
     }
 

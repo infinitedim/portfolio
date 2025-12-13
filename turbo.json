@@ -20,17 +20,15 @@
         "NEXT_PUBLIC_ROADMAP_USER_ID",
         "NPM_PACKAGE_VERSION",
         "FIREBASE_PROJECT_ID",
-        "GITHUB_TOKEN",
-        "GITHUB_USERNAME",
-        "VERCEL_URL",
+        "GH_TOKEN",
+        "GH_USERNAME",
         "ROADMAP_AUTH_TOKEN",
         "ROADMAP_USER_ID",
         "SPOTIFY_CLIENT_SECRET",
         "SPOTIFY_CLIENT_ID",
         "UPSTASH_REDIS_REST_URL",
         "UPSTASH_REDIS_REST_TOKEN",
-        "ANTHROPIC_API_KEY",
-        "OPENANTHROPIC_API_KEY"
+        "ANTHROPIC_API_KEY"
       ],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
