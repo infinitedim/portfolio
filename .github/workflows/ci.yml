@@ -43,10 +43,7 @@ jobs:
         run: bun install
 
       - name: Generate Prisma Client
-        run: |
-          cd packages/backend
-          bun add @prisma/client@7.1.0 --dev
-          bun x prisma generate
+        run: bun run prisma:generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
@@ -110,19 +107,16 @@ jobs:
         run: bun install
 
       - name: Generate Prisma Client
-        run: |
-          cd packages/backend
-          bun add @prisma/client@7.1.0 --dev
-          bun x prisma generate
+        run: bun run prisma:generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Run database migrations
-        working-directory: packages/backend
-        run: bunx prisma migrate deploy
+        run: bun run prisma:migrate:deploy
         env:
-          DATABASE_URL: ${{ env.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Run unit tests
         run: bun test
@@ -173,10 +167,7 @@ jobs:
 
       - name: Generate Prisma Client (Backend only)
         if: matrix.package == 'backend'
-        run: |
-          cd packages/backend
-          bun add @prisma/client@7.1.0 --dev
-          bun x prisma generate
+        run: bun run prisma:generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
@@ -252,19 +243,16 @@ jobs:
         run: bunx playwright install --with-deps chromium
 
       - name: Generate Prisma Client
-        run: |
-          cd packages/backend
-          bun add @prisma/client@7.1.0 --dev
-          bun x prisma generate
+        run: bun run prisma:generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Run database migrations
-        working-directory: packages/backend
-        run: bunx prisma migrate deploy
+        run: bun run prisma:migrate:deploy
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Build applications
         run: bun run build
