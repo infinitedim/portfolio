@@ -118,6 +118,9 @@ If you're using environment validation (like Zod), add the Slack variables to yo
 
 **Backend (`packages/backend/src/env.config.ts`):**
 ```typescript
+import { z } from 'zod';
+
+// Add these to your environment schema:
 SLACK_WEBHOOK_URL: z.string().url().optional(),
 ENABLE_SLACK_NOTIFICATIONS: z
   .string()
@@ -144,23 +147,29 @@ The webhook is configured! When implemented, the service will:
 
 ### Quick Test with cURL
 
-Test your webhook URL directly:
+Test your webhook URL directly by replacing `<YOUR_WEBHOOK_URL>` with your actual webhook URL:
 
 ```bash
+# Set your webhook URL
+WEBHOOK_URL="<YOUR_WEBHOOK_URL>"
+
+# Send test message
 curl -X POST \
   -H 'Content-Type: application/json' \
   -d '{"text": "🎉 Hello from Terminal Portfolio!"}' \
-  YOUR_WEBHOOK_URL
+  "$WEBHOOK_URL"
 ```
-
-Replace `YOUR_WEBHOOK_URL` with your actual webhook URL.
 
 If successful, you should see the message appear in your Slack channel!
 
 ### Advanced Test with Formatting
 
 ```bash
+# Set your webhook URL
+WEBHOOK_URL="<YOUR_WEBHOOK_URL>"
 TIMESTAMP=$(date +%s)
+
+# Send formatted message
 curl -X POST \
   -H 'Content-Type: application/json' \
   -d "{
@@ -176,7 +185,7 @@ curl -X POST \
       }
     ]
   }" \
-  YOUR_WEBHOOK_URL
+  "$WEBHOOK_URL"
 ```
 
 ---

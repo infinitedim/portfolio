@@ -374,10 +374,10 @@ Want to receive portfolio notifications in Slack? Set up webhook integration in 
 - 🐛 Error alerts (optional)
 
 ```bash
-# Test your webhook
+# Test your webhook (replace <YOUR_WEBHOOK_URL> with your actual URL)
 curl -X POST -H 'Content-Type: application/json' \
   -d '{"text": "🎉 Slack integration is working!"}' \
-  YOUR_WEBHOOK_URL
+  "<YOUR_WEBHOOK_URL>"
 ```
 
 ## 🔐 Security Features Deep Dive
