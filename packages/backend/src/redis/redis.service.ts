@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable } from "@nestjs/common";
-import { Redis } from "@upstash/redis";
+import {Injectable} from "@nestjs/common";
+import {Redis} from "@upstash/redis";
 
 @Injectable()
 export class RedisService {
@@ -15,7 +15,7 @@ export class RedisService {
           "Upstash Redis envs missing: UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN",
         );
       }
-      this.client = new Redis({ url, token });
+      this.client = new Redis({url, token});
     }
     return this.client;
   }
@@ -30,7 +30,7 @@ export class RedisService {
     ttlSeconds?: number,
   ): Promise<void> {
     if (ttlSeconds && ttlSeconds > 0) {
-      await this.instance.set(key, value, { ex: ttlSeconds });
+      await this.instance.set(key, value, {ex: ttlSeconds});
     } else {
       await this.instance.set(key, value);
     }
@@ -72,9 +72,9 @@ export class RedisService {
   /**
    * Get Redis server information
    * Note: Upstash Redis REST API has limited INFO command support
-   * @returns {Promise<Record<string, any>>} - The Redis server information
+   * @returns {Promise<Record<string, unknown>>} - The Redis server information
    */
-  async info(): Promise<Record<string, any>> {
+  async info(): Promise<Record<string, unknown>> {
     try {
       // For Upstash Redis REST API, we'll simulate basic info
       // In a real Redis setup, you'd use: await this.instance.info()
@@ -101,9 +101,9 @@ export class RedisService {
    * Get memory usage information
    * Note: Upstash Redis REST API has limited MEMORY command support
    * @param {string} command - The command to get memory usage information
-   * @returns {Promise<any>} - The memory usage information
+   * @returns {Promise<Record<string, unknown>>} - The memory usage information
    */
-  async memory(command: string = "USAGE"): Promise<any> {
+  async memory(command: string = "USAGE"): Promise<Record<string, unknown>> {
     try {
       // For Upstash Redis REST API, we'll return basic memory info
       // In a real Redis setup, you'd use: await this.instance.memory(command)
@@ -130,9 +130,9 @@ export class RedisService {
 
   /**
    * Get Redis server statistics
-   * @returns {Promise<Record<string, any>>} - The Redis server statistics
+   * @returns {Promise<Record<string, unknown>>} - The Redis server statistics
    */
-  async stats(): Promise<Record<string, any>> {
+  async stats(): Promise<Record<string, unknown>> {
     try {
       const info = await this.info();
       const pingResult = await this.ping();

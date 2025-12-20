@@ -1,18 +1,23 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { router, publicProcedure } from "./procedures";
-import { SpotifyServiceBackend } from "../spotify/spotify.service";
-import { TRPCError } from "@trpc/server";
-import type { TrpcContext } from "./context";
+import {router, publicProcedure} from "./procedures";
+import {SpotifyServiceBackend} from "../spotify/spotify.service";
+import {TRPCError} from "@trpc/server";
+import type {TrpcContext} from "./context";
+import type {Cache} from "cache-manager";
 
 export const spotifyRouter = router({
-  nowPlaying: publicProcedure.query(async ({ ctx }) => {
+  nowPlaying: publicProcedure.query(async ({ctx}) => {
     try {
       const typedCtx = ctx as TrpcContext;
+      // Create cache wrapper that adapts redis.get return type (null -> undefined)
+      const cacheWrapper = {
+        get: async <T>(key: string): Promise<T | undefined> => {
+          const result = await typedCtx.services.redis.get<T>(key);
+          return result ?? undefined;
+        },
+        set: typedCtx.services.redis.set.bind(typedCtx.services.redis),
+      };
       const spotifyService = new SpotifyServiceBackend(
-        {
-          get: typedCtx.services.redis.get.bind(typedCtx.services.redis),
-          set: typedCtx.services.redis.set.bind(typedCtx.services.redis),
-        } as any,
+        cacheWrapper as Cache,
         typedCtx.services.redis,
       );
 
@@ -30,16 +35,16 @@ export const spotifyRouter = router({
   authCallback: publicProcedure
     .input((input: unknown) => {
       if (typeof input === "object" && input !== null && "code" in input) {
-        return { code: String(input.code) };
+        return {code: String(input.code)};
       }
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: "Invalid input: code is required",
       });
     })
-    .mutation(async ({ input }) => {
+    .mutation(async ({input}) => {
       try {
-        const { code } = input;
+        const {code} = input;
 
         // Exchange code for tokens
         const tokenResponse = await fetch(

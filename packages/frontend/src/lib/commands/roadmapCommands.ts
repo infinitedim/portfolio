@@ -1,12 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {Command} from "@/types/terminal";
 import {generateId} from "@/lib/utils/utils";
 import type {RoadmapSkill} from "@/types/roadmap";
+import type {RoadmapService as RoadmapServiceType} from "@/lib/services/roadmapService";
 
-let roadmapService: any = null;
-let roadmapServicePromise: Promise<unknown> | null = null;
+let roadmapService: RoadmapServiceType | null = null;
+let roadmapServicePromise: Promise<RoadmapServiceType | null> | null = null;
 
-const getRoadmapService = async () => {
+const getRoadmapService = async (): Promise<RoadmapServiceType | null> => {
   if (typeof window === "undefined") {
     return null;
   }
@@ -33,7 +33,11 @@ const getRoadmapService = async () => {
   return await roadmapServicePromise;
 };
 
-const getServiceOrError = async () => {
+type ServiceResult =
+  | {error: true; message: string; service?: undefined}
+  | {error: false; message: string; service: RoadmapServiceType};
+
+const getServiceOrError = async (): Promise<ServiceResult> => {
   try {
     const service = await getRoadmapService();
     if (!service) {
@@ -79,7 +83,7 @@ const getServiceOrError = async () => {
       };
     }
 
-    return {service, error: false};
+    return {service, error: false, message: ""};
   } catch (error) {
     return {
       error: true,

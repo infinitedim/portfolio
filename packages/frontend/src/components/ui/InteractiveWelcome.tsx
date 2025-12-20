@@ -12,6 +12,7 @@ import { useTheme } from "@/hooks/useTheme";
 interface InteractiveWelcomeProps {
   onCommandSelect: (command: string) => void;
   onDismiss: () => void;
+  onStartTour?: () => void;
 }
 
 /**
@@ -32,21 +33,32 @@ interface InteractiveWelcomeProps {
 export const InteractiveWelcome = memo(function InteractiveWelcome({
   onCommandSelect,
   onDismiss,
+  onStartTour,
 }: InteractiveWelcomeProps): JSX.Element {
   const { themeConfig } = useTheme();
   const [selectedCommand, setSelectedCommand] = useState<string | null>(null);
 
   const quickCommands = [
+    { command: "tour", description: "Take a guided tour", icon: "🎓", highlight: true },
     { command: "help", description: "View all available commands", icon: "❓" },
     { command: "about", description: "Learn about me", icon: "👨‍💻" },
     { command: "skills", description: "View my technical skills", icon: "🛠️" },
     { command: "projects", description: "Explore my projects", icon: "📁" },
-    { command: "themes", description: "Customize the terminal", icon: "🎨" },
     { command: "contact", description: "Get in touch", icon: "📧" },
   ];
 
   const handleCommandClick = (command: string) => {
     setSelectedCommand(command);
+
+    // Special handling for tour command
+    if (command === "tour" && onStartTour) {
+      setTimeout(() => {
+        onStartTour();
+        onDismiss();
+      }, 200);
+      return;
+    }
+
     setTimeout(() => {
       onCommandSelect(command);
       onDismiss();
@@ -80,38 +92,55 @@ export const InteractiveWelcome = memo(function InteractiveWelcome({
 
       { }
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-        {quickCommands.map((cmd) => (
-          <button
-            key={cmd.command}
-            onClick={() => handleCommandClick(cmd.command)}
-            className={`p-3 rounded-lg border transition-all duration-200 text-left hover:scale-105 ${selectedCommand === cmd.command ? "animate-pulse" : ""
-              }`}
-            style={{
-              borderColor: themeConfig.colors.border,
-              backgroundColor:
-                selectedCommand === cmd.command
-                  ? `${themeConfig.colors.accent}20`
-                  : `${themeConfig.colors.bg}20`,
-              color: themeConfig.colors.text,
-            }}
-          >
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-lg">{cmd.icon}</span>
-              <span
-                className="font-mono text-sm font-bold"
-                style={{ color: themeConfig.colors.accent }}
-              >
-                {cmd.command}
-              </span>
-            </div>
-            <div
-              className="text-xs opacity-75"
-              style={{ color: themeConfig.colors.muted }}
+        {quickCommands.map((cmd) => {
+          const isHighlighted = 'highlight' in cmd && cmd.highlight;
+          return (
+            <button
+              key={cmd.command}
+              onClick={() => handleCommandClick(cmd.command)}
+              className={`p-3 rounded-lg border transition-all duration-200 text-left hover:scale-105 ${selectedCommand === cmd.command ? "animate-pulse" : ""
+                } ${isHighlighted ? "ring-2 ring-offset-2 ring-offset-transparent" : ""}`}
+              style={{
+                borderColor: isHighlighted
+                  ? themeConfig.colors.accent
+                  : themeConfig.colors.border,
+                backgroundColor:
+                  selectedCommand === cmd.command || isHighlighted
+                    ? `${themeConfig.colors.accent}20`
+                    : `${themeConfig.colors.bg}20`,
+                color: themeConfig.colors.text,
+                ringColor: isHighlighted ? themeConfig.colors.accent : undefined,
+              }}
             >
-              {cmd.description}
-            </div>
-          </button>
-        ))}
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">{cmd.icon}</span>
+                <span
+                  className="font-mono text-sm font-bold"
+                  style={{ color: themeConfig.colors.accent }}
+                >
+                  {cmd.command}
+                </span>
+                {isHighlighted && (
+                  <span
+                    className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold"
+                    style={{
+                      backgroundColor: themeConfig.colors.accent,
+                      color: themeConfig.colors.bg
+                    }}
+                  >
+                    NEW
+                  </span>
+                )}
+              </div>
+              <div
+                className="text-xs opacity-75"
+                style={{ color: themeConfig.colors.muted }}
+              >
+                {cmd.description}
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       { }

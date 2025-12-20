@@ -35,8 +35,20 @@ import {i18n, t, type TranslationKeys} from "@/lib/i18n/i18nService";
  * ```
  */
 export function useI18n() {
-  const [currentLocale, setCurrentLocale] = useState(i18n.getCurrentLocale);
-  const [isRTL, setIsRTL] = useState(() => i18n.isRTL());
+  const [currentLocale, setCurrentLocale] = useState(() => {
+    try {
+      return i18n?.getCurrentLocale() ?? "en";
+    } catch {
+      return "en";
+    }
+  });
+  const [isRTL, setIsRTL] = useState(() => {
+    try {
+      return i18n?.isRTL() ?? false;
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
     const unsubscribe = i18n.subscribe((locale) => {

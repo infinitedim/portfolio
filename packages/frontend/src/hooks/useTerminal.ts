@@ -56,6 +56,7 @@ import {githubCommand} from "@/lib/commands/githubCommands";
 import {techStackCommand} from "@/lib/commands/techStackCommands";
 import {createNowPlayingCommand} from "@/lib/commands/nowPlayingCommands";
 import {createLocationCommand} from "@/lib/commands/locationCommands";
+import {tourCommand} from "@/lib/commands/tourCommands";
 import {
   resumeCommand,
   socialCommand,
@@ -101,6 +102,7 @@ const ALL_COMMANDS = [
   "social",
   "shortcuts",
   "easter-eggs",
+  "tour",
 ] as const;
 
 /**
@@ -502,6 +504,7 @@ export function useTerminal(
       parser.register(demoCommand);
       parser.register(githubCommand);
       parser.register(techStackCommand);
+      parser.register(tourCommand);
       parser.register(
         createNowPlayingCommand({
           onOpenNowPlaying: onOpenNowPlaying || (() => {}),

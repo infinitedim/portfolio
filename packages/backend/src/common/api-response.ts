@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Response } from "express";
 
 export interface ApiResponseData<T> {
@@ -21,7 +20,7 @@ export interface ApiErrorResponse {
   error: {
     code: string;
     message: string;
-    details?: Record<string, any>;
+    details?: Record<string, unknown>;
     timestamp: string;
     requestId?: string;
   };
@@ -32,7 +31,7 @@ export interface ApiErrorResponse {
   };
 }
 
-export class ApiResponse<T = any> {
+export class ApiResponse<T = unknown> {
   constructor(
     public success: boolean,
     public data?: T,
@@ -66,7 +65,7 @@ export class ApiResponse<T = any> {
    * Create an error response
    * @param {string} message - The message to be returned
    * @param {string} code - The code to be returned
-   * @param {Record<string, any>} details - The details to be returned
+   * @param {Record<string, unknown>} details - The details to be returned
    * @param {string} category - The category to be returned
    * @param {string} severity - The severity to be returned
    * @param {boolean} retryable - Whether the error is retryable
@@ -75,7 +74,7 @@ export class ApiResponse<T = any> {
   static error(
     message: string,
     code: string = "ERROR",
-    details?: Record<string, any>,
+    details?: Record<string, unknown>,
     category: string = "GENERAL",
     severity: string = "MEDIUM",
     retryable: boolean = false,
@@ -207,7 +206,7 @@ export class ResponseHelper {
    * @param {string} message - The message to be returned
    * @param {number} status - The status code
    * @param {string} code - The code to be returned
-   * @param {Record<string, any>} details - The details to be returned
+   * @param {Record<string, unknown>} details - The details to be returned
    * @param {string} category - The category to be returned
    * @param {string} severity - The severity to be returned
    * @param {boolean} retryable - Whether the error is retryable
@@ -218,7 +217,7 @@ export class ResponseHelper {
     message: string,
     status: number = 400,
     code?: string,
-    details?: Record<string, any>,
+    details?: Record<string, unknown>,
     category?: string,
     severity?: string,
     retryable?: boolean,
@@ -350,13 +349,13 @@ export class ResponseHelper {
    * Send unauthorized response
    * @param {Response} res - The response object
    * @param {string} message - The message to be returned
-   * @param {Record<string, any>} details - The details to be returned
+   * @param {Record<string, unknown>} details - The details to be returned
    * @returns {Response} - The response object
    */
   static unauthorized(
     res: Response,
     message: string = "Authentication required",
-    details?: Record<string, any>,
+    details?: Record<string, unknown>,
   ): Response {
     return this.error(
       res,
@@ -374,13 +373,13 @@ export class ResponseHelper {
    * Send forbidden response
    * @param {Response} res - The response object
    * @param {string} message - The message to be returned
-   * @param {Record<string, any>} details - The details to be returned
+   * @param {Record<string, unknown>} details - The details to be returned
    * @returns {Response} - The response object
    */
   static forbidden(
     res: Response,
     message: string = "Access denied",
-    details?: Record<string, any>,
+    details?: Record<string, unknown>,
   ): Response {
     return this.error(
       res,
@@ -398,13 +397,13 @@ export class ResponseHelper {
    * Send not found response
    * @param {Response} res - The response object
    * @param {string} message - The message to be returned
-   * @param {Record<string, any>} details - The details to be returned
+   * @param {Record<string, unknown>} details - The details to be returned
    * @returns {Response} - The response object
    */
   static notFound(
     res: Response,
     message: string = "Resource not found",
-    details?: Record<string, any>,
+    details?: Record<string, unknown>,
   ): Response {
     return this.error(
       res,
@@ -422,13 +421,13 @@ export class ResponseHelper {
    * Send validation error response
    * @param {Response} res - The response object
    * @param {string} message - The message to be returned
-   * @param {Record<string, any>} details - The details to be returned
+   * @param {Record<string, unknown>} details - The details to be returned
    * @returns {Response} - The response object
    */
   static validationError(
     res: Response,
     message: string = "Validation failed",
-    details?: Record<string, any>,
+    details?: Record<string, unknown>,
   ): Response {
     return this.error(
       res,
@@ -476,13 +475,13 @@ export class ResponseHelper {
    * Send internal server error response
    * @param {Response} res - The response object
    * @param {string} message - The message to be returned
-   * @param {Record<string, any>} details - The details to be returned
+   * @param {Record<string, unknown>} details - The details to be returned
    * @returns {Response} - The response object
    */
   static internalError(
     res: Response,
     message: string = "Internal server error",
-    details?: Record<string, any>,
+    details?: Record<string, unknown>,
   ): Response {
     return this.error(
       res,

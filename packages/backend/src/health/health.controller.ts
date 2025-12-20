@@ -1,12 +1,42 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Optional,
-} from "@nestjs/common";
-import { HealthService } from "./health.service";
+import {Controller, Get, HttpCode, HttpStatus, Optional} from "@nestjs/common";
+import {HealthService, type HealthCheckResult} from "./health.service";
+
+// Default health check response when service is not available
+const getDefaultHealthResponse = (): HealthCheckResult => ({
+  status: "healthy",
+  timestamp: new Date().toISOString(),
+  uptime: process.uptime(),
+  version: process.env.npm_package_version || "1.0.0",
+  environment: process.env.NODE_ENV || "development",
+  checks: {
+    database: {
+      status: "healthy",
+      responseTime: 0,
+      lastChecked: new Date().toISOString(),
+    },
+    redis: {
+      status: "healthy",
+      responseTime: 0,
+      lastChecked: new Date().toISOString(),
+    },
+    memory: {
+      status: "healthy",
+      responseTime: 0,
+      lastChecked: new Date().toISOString(),
+    },
+    disk: {
+      status: "healthy",
+      responseTime: 0,
+      lastChecked: new Date().toISOString(),
+    },
+    system: {
+      status: "healthy",
+      responseTime: 0,
+      lastChecked: new Date().toISOString(),
+    },
+  },
+  summary: {total: 5, healthy: 5, unhealthy: 0, degraded: 0},
+});
 
 @Controller("health")
 export class HealthController {
@@ -21,41 +51,7 @@ export class HealthController {
   async health() {
     const result = this.healthService
       ? await this.healthService.checkHealth()
-      : {
-          status: "healthy",
-          timestamp: new Date().toISOString(),
-          uptime: process.uptime(),
-          version: process.env.npm_package_version || "1.0.0",
-          environment: process.env.NODE_ENV || "development",
-          checks: {
-            database: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            redis: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            memory: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            disk: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            system: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-          },
-          summary: { total: 5, healthy: 5, unhealthy: 0, degraded: 0 },
-        };
+      : getDefaultHealthResponse();
 
     return {
       status: result.status,
@@ -67,9 +63,9 @@ export class HealthController {
   }
 
   // Backwards-compatible synchronous check used by tests
-  check(): { status: string; timestamp: string; uptime: number } {
+  check(): {status: string; timestamp: string; uptime: number} {
     const timestamp = new Date().toISOString();
-    return { status: "ok", timestamp, uptime: Math.floor(process.uptime()) };
+    return {status: "ok", timestamp, uptime: Math.floor(process.uptime())};
   }
 
   /**
@@ -93,7 +89,7 @@ export class HealthController {
   async ping() {
     return this.healthService
       ? this.healthService.ping()
-      : { message: "pong", timestamp: new Date().toISOString() };
+      : {message: "pong", timestamp: new Date().toISOString()};
   }
 
   /**
@@ -105,41 +101,7 @@ export class HealthController {
   async databaseHealth() {
     const result = this.healthService
       ? await this.healthService.checkHealth()
-      : await Promise.resolve({
-          status: "healthy",
-          timestamp: new Date().toISOString(),
-          uptime: process.uptime(),
-          version: process.env.npm_package_version || "1.0.0",
-          environment: process.env.NODE_ENV || "development",
-          checks: {
-            database: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            redis: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            memory: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            disk: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            system: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-          },
-          summary: { total: 5, healthy: 5, unhealthy: 0, degraded: 0 },
-        } as any);
+      : getDefaultHealthResponse();
     return {
       status: result.checks.database.status,
       timestamp: result.timestamp,
@@ -151,48 +113,14 @@ export class HealthController {
 
   /**
    * Redis health check endpoint
-   * @returns {Promise<HealthCheckResult>} - The Redis health check result
+   * @returns {Promise<object>} - The Redis health check result
    */
   @Get("redis")
   @HttpCode(HttpStatus.OK)
   async redisHealth() {
     const result = this.healthService
       ? await this.healthService.checkHealth()
-      : await Promise.resolve({
-          status: "healthy",
-          timestamp: new Date().toISOString(),
-          uptime: process.uptime(),
-          version: process.env.npm_package_version || "1.0.0",
-          environment: process.env.NODE_ENV || "development",
-          checks: {
-            database: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            redis: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            memory: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            disk: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            system: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-          },
-          summary: { total: 5, healthy: 5, unhealthy: 0, degraded: 0 },
-        } as any);
+      : getDefaultHealthResponse();
     return {
       status: result.checks.redis.status,
       timestamp: result.timestamp,
@@ -204,48 +132,14 @@ export class HealthController {
 
   /**
    * Memory health check endpoint
-   * @returns {Promise<HealthCheckResult>} - The memory health check result
+   * @returns {Promise<object>} - The memory health check result
    */
   @Get("memory")
   @HttpCode(HttpStatus.OK)
   async memoryHealth() {
     const result = this.healthService
       ? await this.healthService.checkHealth()
-      : await Promise.resolve({
-          status: "healthy",
-          timestamp: new Date().toISOString(),
-          uptime: process.uptime(),
-          version: process.env.npm_package_version || "1.0.0",
-          environment: process.env.NODE_ENV || "development",
-          checks: {
-            database: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            redis: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            memory: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            disk: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            system: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-          },
-          summary: { total: 5, healthy: 5, unhealthy: 0, degraded: 0 },
-        } as any);
+      : getDefaultHealthResponse();
     return {
       status: result.checks.memory.status,
       timestamp: result.timestamp,
@@ -257,48 +151,14 @@ export class HealthController {
 
   /**
    * System health check endpoint
-   * @returns {Promise<HealthCheckResult>} - The system health check result
+   * @returns {Promise<object>} - The system health check result
    */
   @Get("system")
   @HttpCode(HttpStatus.OK)
   async systemHealth() {
     const result = this.healthService
       ? await this.healthService.checkHealth()
-      : await Promise.resolve({
-          status: "healthy",
-          timestamp: new Date().toISOString(),
-          uptime: process.uptime(),
-          version: process.env.npm_package_version || "1.0.0",
-          environment: process.env.NODE_ENV || "development",
-          checks: {
-            database: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            redis: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            memory: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            disk: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            system: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-          },
-          summary: { total: 5, healthy: 5, unhealthy: 0, degraded: 0 },
-        } as any);
+      : getDefaultHealthResponse();
     return {
       status: result.checks.system.status,
       timestamp: result.timestamp,
@@ -310,48 +170,14 @@ export class HealthController {
 
   /**
    * Readiness probe endpoint
-   * @returns {Promise<HealthCheckResult>} - The readiness probe result
+   * @returns {Promise<object>} - The readiness probe result
    */
   @Get("ready")
   @HttpCode(HttpStatus.OK)
   async readiness() {
     const result = this.healthService
       ? await this.healthService.checkHealth()
-      : await Promise.resolve({
-          status: "healthy",
-          timestamp: new Date().toISOString(),
-          uptime: process.uptime(),
-          version: process.env.npm_package_version || "1.0.0",
-          environment: process.env.NODE_ENV || "development",
-          checks: {
-            database: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            redis: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            memory: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            disk: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            system: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-          },
-          summary: { total: 5, healthy: 5, unhealthy: 0, degraded: 0 },
-        } as any);
+      : getDefaultHealthResponse();
 
     // Service is ready if database and Redis are healthy
     const isReady =
@@ -379,48 +205,14 @@ export class HealthController {
 
   /**
    * Liveness probe endpoint
-   * @returns {Promise<HealthCheckResult>} - The liveness probe result
+   * @returns {Promise<object>} - The liveness probe result
    */
   @Get("live")
   @HttpCode(HttpStatus.OK)
   async liveness() {
     const result = this.healthService
       ? await this.healthService.checkHealth()
-      : await Promise.resolve({
-          status: "healthy",
-          timestamp: new Date().toISOString(),
-          uptime: process.uptime(),
-          version: process.env.npm_package_version || "1.0.0",
-          environment: process.env.NODE_ENV || "development",
-          checks: {
-            database: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            redis: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            memory: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            disk: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-            system: {
-              status: "healthy",
-              responseTime: 0,
-              lastChecked: new Date().toISOString(),
-            },
-          },
-          summary: { total: 5, healthy: 5, unhealthy: 0, degraded: 0 },
-        } as any);
+      : getDefaultHealthResponse();
 
     // Service is alive if it can respond and basic checks pass
     const isAlive = result.status !== "unhealthy";

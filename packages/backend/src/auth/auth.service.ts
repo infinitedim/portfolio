@@ -1,12 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { SecurityService } from "../security/security.service";
-import { AuditLogService, AuditEventType } from "../security/audit-log.service";
-import { RedisService } from "../redis/redis.service";
-import { env, getJWTConfig } from "../env.config";
-import { securityLogger } from "../logging/logger";
+import {Injectable, UnauthorizedException} from "@nestjs/common";
+import type {Request} from "express";
+import {SecurityService} from "../security/security.service";
+import {AuditLogService, AuditEventType} from "../security/audit-log.service";
+import {RedisService} from "../redis/redis.service";
+import {env, getJWTConfig} from "../env.config";
+import {securityLogger} from "../logging/logger";
 
-export type AuthUser = { userId: string; email: string; role: "admin" };
+export type AuthUser = {userId: string; email: string; role: "admin"};
 
 const TOKEN_BLACKLIST_PREFIX = "token:blacklist:";
 const TOKEN_FAMILY_PREFIX = "token:family:";
@@ -82,8 +82,8 @@ export class AuthService {
     email: string,
     password: string,
     clientIp: string,
-    request?: any,
-  ): Promise<{ user: AuthUser; accessToken: string; refreshToken: string }> {
+    request?: Request,
+  ): Promise<{user: AuthUser; accessToken: string; refreshToken: string}> {
     const validatedEmail = this.securityService.validateEmail(email);
     this.securityService.validatePassword(password);
 
@@ -199,17 +199,17 @@ export class AuthService {
       operation: "validateCredentials",
     });
 
-    return { user, accessToken, refreshToken: newRefreshToken };
+    return {user, accessToken, refreshToken: newRefreshToken};
   }
 
   async refreshToken(
     refreshToken: string,
     clientIp: string,
-    request?: any,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+    request?: Request,
+  ): Promise<{accessToken: string; refreshToken: string}> {
     try {
       const payload = this.securityService.verifyRefreshToken(refreshToken);
-      const { userId, tokenId, familyId, jti } = payload;
+      const {userId, tokenId, familyId, jti} = payload;
 
       const rateLimitResult = await this.securityService.checkRateLimit(
         clientIp,
@@ -304,7 +304,7 @@ export class AuthService {
         operation: "refreshToken",
       });
 
-      return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+      return {accessToken: newAccessToken, refreshToken: newRefreshToken};
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         throw error;
@@ -342,7 +342,7 @@ export class AuthService {
   async logout(
     token: string,
     clientIp: string,
-    request?: any,
+    request?: Request,
     refreshToken?: string,
   ): Promise<void> {
     try {
@@ -417,7 +417,7 @@ export class AuthService {
   ): Promise<void> {
     try {
       const key = `${TOKEN_BLACKLIST_PREFIX}${jti}`;
-      await this.redisService.set(key, { blacklistedAt: Date.now() }, ttl);
+      await this.redisService.set(key, {blacklistedAt: Date.now()}, ttl);
     } catch (error) {
       securityLogger.error("Failed to blacklist token", {
         error: error instanceof Error ? error.message : String(error),
@@ -448,7 +448,7 @@ export class AuthService {
     }
   }
 
-  async validateToken(token: string, request?: any): Promise<AuthUser> {
+  async validateToken(token: string, request?: Request): Promise<AuthUser> {
     try {
       const jti = this.securityService.extractJWTId(token);
       if (jti) {
