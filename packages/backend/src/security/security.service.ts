@@ -1,14 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { Injectable, BadRequestException } from "@nestjs/common";
-import type { Request, Response } from "express";
+import {Injectable, BadRequestException} from "@nestjs/common";
+import type {Request, Response} from "express";
 import crypto from "crypto";
-import { z } from "zod";
-import jwt, { type SignOptions } from "jsonwebtoken";
+import {z} from "zod";
+import jwt, {type Algorithm, type SignOptions} from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { RedisService } from "../redis/redis.service";
-import { getEnv } from "../env.config";
-import { securityLogger } from "../logging/logger";
+import {RedisService} from "../redis/redis.service";
+import {getEnv} from "../env.config";
+import {securityLogger} from "../logging/logger";
 
 export interface RateLimitConfig {
   windowMs: number;
@@ -100,7 +98,7 @@ export interface RefreshTokenPayload {
 
 const inMemoryRateLimits = new Map<
   string,
-  { count: number; resetTime: number }
+  {count: number; resetTime: number}
 >();
 
 @Injectable()
@@ -109,7 +107,7 @@ export class SecurityService {
   private readonly JWT_EXPIRES_IN = getEnv().JWT_EXPIRES_IN;
   private readonly REFRESH_TOKEN = getEnv().REFRESH_TOKEN;
   private readonly REFRESH_TOKEN_EXPIRES_IN = getEnv().REFRESH_TOKEN_EXPIRES_IN;
-  private readonly JWT_ALGORITHM = "HS512";
+  private readonly JWT_ALGORITHM: Algorithm = "HS512";
   private readonly JWT_ISSUER = getEnv().JWT_ISSUER;
   private readonly JWT_AUDIENCE = getEnv().JWT_AUDIENCE;
 
@@ -290,8 +288,8 @@ export class SecurityService {
   ): string {
     const jti = crypto.randomUUID();
     const options: SignOptions = {
-      expiresIn: this.JWT_EXPIRES_IN as any,
-      algorithm: this.JWT_ALGORITHM as any,
+      expiresIn: this.JWT_EXPIRES_IN as SignOptions["expiresIn"],
+      algorithm: this.JWT_ALGORITHM,
       issuer: this.JWT_ISSUER,
       audience: this.JWT_AUDIENCE,
       jwtid: jti,
@@ -320,8 +318,8 @@ export class SecurityService {
     };
 
     const options: SignOptions = {
-      expiresIn: this.REFRESH_TOKEN_EXPIRES_IN as any,
-      algorithm: this.JWT_ALGORITHM as any,
+      expiresIn: this.REFRESH_TOKEN_EXPIRES_IN as SignOptions["expiresIn"],
+      algorithm: this.JWT_ALGORITHM,
       issuer: this.JWT_ISSUER,
       audience: this.JWT_AUDIENCE,
       jwtid: jti,
@@ -1307,7 +1305,7 @@ export class SecurityService {
 
       validateSession: (
         encryptedSession: string,
-      ): { userId: string; data: Record<string, unknown> } | null => {
+      ): {userId: string; data: Record<string, unknown>} | null => {
         try {
           const sessionData = this.decryptObject<{
             userId: string;
@@ -1320,8 +1318,8 @@ export class SecurityService {
             return null;
           }
 
-          const { userId, ...data } = sessionData;
-          return { userId, data };
+          const {userId, ...data} = sessionData;
+          return {userId, data};
         } catch (error) {
           this.securityLogger.error("Failed to validate session", {
             error: error instanceof Error ? error.message : String(error),

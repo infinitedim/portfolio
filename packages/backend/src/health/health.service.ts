@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable, Logger } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
-import { RedisService } from "../redis/redis.service";
-import { DatabaseConnectionManager } from "../prisma/database-connection-manager.service";
+import {Injectable, Logger} from "@nestjs/common";
+import {PrismaService} from "../prisma/prisma.service";
+import {RedisService} from "../redis/redis.service";
+import {DatabaseConnectionManager} from "../prisma/database-connection-manager.service";
 
 export interface HealthCheckResult {
   status: "healthy" | "unhealthy" | "degraded";
@@ -29,7 +28,7 @@ export interface HealthCheck {
   status: "healthy" | "unhealthy" | "degraded";
   responseTime: number;
   lastChecked: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   error?: string;
 }
 
@@ -350,7 +349,7 @@ export class HealthService {
     ).length;
     const degraded = checkValues.filter((c) => c.status === "degraded").length;
 
-    return { total, healthy, unhealthy, degraded };
+    return {total, healthy, unhealthy, degraded};
   }
 
   /**
@@ -389,7 +388,7 @@ export class HealthService {
    * Simple ping check
    * @returns {Promise<{ message: string; timestamp: string }>} - The ping result
    */
-  async ping(): Promise<{ message: string; timestamp: string }> {
+  async ping(): Promise<{message: string; timestamp: string}> {
     return {
       message: "pong",
       timestamp: new Date().toISOString(),

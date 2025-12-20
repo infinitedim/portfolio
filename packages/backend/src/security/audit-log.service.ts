@@ -1,9 +1,14 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable } from "@nestjs/common";
-import type { Request } from "express";
-import { PrismaService } from "../prisma/prisma.service";
-import { RedisService } from "../redis/redis.service";
-import { securityLogger } from "../logging/logger";
+import {Injectable} from "@nestjs/common";
+import type {Request} from "express";
+import {PrismaService} from "../prisma/prisma.service";
+import {RedisService} from "../redis/redis.service";
+import {securityLogger} from "../logging/logger";
+
+/** Extended Request interface for audit logging with optional session and status code */
+interface ExtendedRequest extends Request {
+  statusCode?: number;
+  session?: {id?: string};
+}
 
 export enum AuditEventType {
   LOGIN_SUCCESS = "LOGIN_SUCCESS",
@@ -59,6 +64,24 @@ export interface AuditLogEntry {
   statusCode?: number;
   sessionId?: string;
   metadata?: Record<string, unknown>;
+}
+
+/** Prisma AuditLog record type for type safety */
+interface AuditLogRecord {
+  id: string;
+  action: string;
+  adminUserId: string | null;
+  resource: string | null;
+  resourceId: string | null;
+  details: unknown;
+  ipAddress: string | null;
+  userAgent: string | null;
+  url: string | null;
+  method: string | null;
+  statusCode: number | null;
+  sessionId: string | null;
+  metadata: unknown;
+  createdAt: Date;
 }
 
 export interface AuditLogQuery {
@@ -163,7 +186,7 @@ export class AuditLogService {
         severity: success ? AuditSeverity.LOW : AuditSeverity.MEDIUM,
         userId,
         action: "AUTHENTICATION",
-        details: { success },
+        details: {success},
       },
       request,
     );
@@ -240,12 +263,12 @@ export class AuditLogService {
 
       const logs = await this.prisma.auditLog.findMany({
         where,
-        orderBy: { createdAt: "desc" },
+        orderBy: {createdAt: "desc"},
         take: query.limit || 100,
         skip: query.offset || 0,
       });
 
-      return logs.map((log) => ({
+      return logs.map((log: AuditLogRecord) => ({
         eventType: log.action as AuditEventType,
         severity: this.mapSeverity(log.action),
         userId: log.adminUserId || undefined,
@@ -296,7 +319,7 @@ export class AuditLogService {
       });
 
       const stats: Record<string, number> = {};
-      logs.forEach((log) => {
+      logs.forEach((log: {action: string; _count: {action: number}}) => {
         stats[log.action] = log._count.action;
       });
 
@@ -358,7 +381,7 @@ export class AuditLogService {
             lte: endDate,
           },
         },
-        orderBy: { createdAt: "asc" },
+        orderBy: {createdAt: "asc"},
       });
 
       return JSON.stringify(logs, null, 2);
@@ -385,7 +408,7 @@ export class AuditLogService {
       userAgent: request.headers["user-agent"] || undefined,
       url: request.url,
       method: request.method,
-      statusCode: (request as any).statusCode,
+      statusCode: (request as ExtendedRequest).statusCode,
       sessionId: this.getSessionId(request),
     };
   }
@@ -401,7 +424,7 @@ export class AuditLogService {
   }
 
   private getSessionId(request: Request): string {
-    return (request as any).session?.id || "unknown";
+    return (request as ExtendedRequest).session?.id || "unknown";
   }
 
   private async cacheAuditEntry(entry: AuditLogEntry): Promise<void> {
@@ -477,7 +500,7 @@ export class AuditLogService {
           : undefined,
       }));
 
-      await this.prisma.auditLog.createMany({ data: prismaAuditLogs });
+      await this.prisma.auditLog.createMany({data: prismaAuditLogs});
     } catch (error) {
       securityLogger.error("Failed to batch insert audit logs", {
         error: error instanceof Error ? error.message : String(error),

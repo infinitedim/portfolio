@@ -4,7 +4,10 @@
   "private": true,
   "type": "module",
   "packageManager": "bun@1.3.3",
-  "workspaces": ["packages/*", "tools/*"],
+  "workspaces": [
+    "packages/*",
+    "tools/*"
+  ],
   "scripts": {
     "build": "turbo build",
     "build:frontend": "turbo build --filter=@portfolio/frontend",
@@ -59,6 +62,8 @@
     "@vitest/ui": "^4.0.14",
     "autoprefixer": "^10.4.22",
     "axe-core": "^4.11.0",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "baseline-browser-mapping": "^2.9.11",
     "class-variance-authority": "^0.7.1",
     "concurrently": "^9.2.1",
     "cssnano": "^7.1.2",
@@ -93,8 +98,13 @@
     "webpack-bundle-analyzer": "^5.0.1"
   },
   "lint-staged": {
-    "**/*.{ts,tsx,js,jsx}": ["bun x eslint --fix", "bun x prettier --write"],
-    "**/*.{css,html,json,md}": ["bun x prettier --write"]
+    "**/*.{ts,tsx,js,jsx}": [
+      "bun x eslint --fix",
+      "bun x prettier --write"
+    ],
+    "**/*.{css,html,json,md}": [
+      "bun x prettier --write"
+    ]
   },
   "dependencies": {
     "@prisma/client": "7.1.0",

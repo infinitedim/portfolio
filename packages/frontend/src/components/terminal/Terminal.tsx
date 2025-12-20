@@ -25,6 +25,8 @@ import { NowPlayingWidget } from "../ui/NowPlayingWidget";
 import { LetterGlitch } from "../ui/LetterGlitch";
 import { isThemeName } from "@/types/theme";
 import { isFontName } from "@/types/font";
+import { GuidedTour } from "@/components/onboarding";
+import { useTour } from "@/hooks/useTour";
 
 /**
  * Props for the Terminal component
@@ -62,6 +64,12 @@ export function Terminal({
   const { t } = useI18n();
 
   const [hasMinimumLoadingTime, setHasMinimumLoadingTime] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Track component mount
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const themePerformance = useMemo(
     () => ({
@@ -98,6 +106,42 @@ export function Terminal({
     message: string;
     type: "info" | "success" | "warning" | "error";
   } | null>(null);
+
+  // Guided tour hook
+  const {
+    isActive: isTourActive,
+    currentStep,
+    currentStepIndex,
+    totalSteps,
+    progress: tourProgress,
+    hasCompletedTour,
+    isFirstVisit,
+    startTour,
+    nextStep,
+    prevStep,
+    skipTour,
+  } = useTour();
+
+  // Auto-start tour for first-time visitors
+  useEffect(() => {
+    if (isMounted && !hasCompletedTour && isFirstVisit && history.length === 0) {
+      // Delay tour start to let the UI settle
+      const timer = setTimeout(() => {
+        startTour();
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [isMounted, hasCompletedTour, isFirstVisit, history.length, startTour]);
+
+  // Handle demo command from tour
+  const handleTourDemoCommand = (command: string) => {
+    setCurrentInput(command);
+    skipTour();
+    // Focus the input after a short delay
+    setTimeout(() => {
+      commandInputRef.current?.focus();
+    }, 100);
+  };
 
   const customizationService = CustomizationService.getInstance();
 
@@ -266,6 +310,20 @@ export function Terminal({
     const output = await executeCommand(command);
 
     if (output) {
+      // Handle tour command
+      if (
+        typeof output.content === "string" &&
+        output.content === "START_GUIDED_TOUR"
+      ) {
+        startTour();
+        addToHistory(command, {
+          ...output,
+          content: "🚀 Starting guided tour...",
+          type: "success",
+        });
+        return;
+      }
+
       if (
         typeof output.content === "string" &&
         output.content === "OPEN_CUSTOMIZATION_MANAGER"
@@ -541,10 +599,14 @@ export function Terminal({
               </div>
 
               { }
-              {showWelcome && history.length === 0 && (
+              {showWelcome && history.length === 0 && !isTourActive && (
                 <InteractiveWelcome
                   onCommandSelect={handleWelcomeCommandSelect}
                   onDismiss={() => setShowWelcome(false)}
+                  onStartTour={() => {
+                    setShowWelcome(false);
+                    startTour();
+                  }}
                 />
               )}
 
@@ -609,6 +671,7 @@ export function Terminal({
                     "shortcuts",
                     "easter-eggs",
                     "pwa",
+                    "tour",
                   ]}
                   inputRef={commandInputRef}
                   getCommandSuggestions={getCommandSuggestions}
@@ -673,6 +736,20 @@ export function Terminal({
             message={notification.message}
             type={notification.type}
             onClose={() => setNotification(null)}
+          />
+        )}
+
+        {/* Guided Tour Overlay */}
+        {isTourActive && currentStep && (
+          <GuidedTour
+            step={currentStep}
+            stepIndex={currentStepIndex}
+            totalSteps={totalSteps}
+            progress={tourProgress}
+            onNext={nextStep}
+            onPrev={prevStep}
+            onSkip={skipTour}
+            onDemoCommand={handleTourDemoCommand}
           />
         )}
       </MobileTerminal>

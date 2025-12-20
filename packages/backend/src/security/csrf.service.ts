@@ -1,9 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable } from "@nestjs/common";
-import type { Request, Response } from "express";
+import {Injectable} from "@nestjs/common";
+import type {Request, Response} from "express";
 import crypto from "crypto";
-import { RedisService } from "../redis/redis.service";
-import { securityLogger } from "../logging/logger";
+import {RedisService} from "../redis/redis.service";
+import {securityLogger} from "../logging/logger";
+
+/** Extended Request interface with optional session property */
+interface ExtendedRequest extends Request {
+  session?: {id?: string};
+}
 
 export interface CSRFToken {
   token: string;
@@ -109,7 +113,7 @@ export class CSRFTokenService {
         };
       }
 
-      return { isValid: true };
+      return {isValid: true};
     } catch (error) {
       securityLogger.error("CSRF token validation failed", {
         error: error instanceof Error ? error.message : String(error),
@@ -178,7 +182,7 @@ export class CSRFTokenService {
    */
   getSessionId(request: Request): string {
     // Try to get from session
-    const sessionId = (request as any).session?.id;
+    const sessionId = (request as ExtendedRequest).session?.id;
     if (sessionId) {
       return sessionId;
     }
@@ -248,7 +252,7 @@ export class CSRFTokenService {
    * Get CSRF token statistics
    * @returns {Promise<{ total: number; expired: number }>} - CSRF token statistics
    */
-  async getTokenStats(): Promise<{ total: number; expired: number }> {
+  async getTokenStats(): Promise<{total: number; expired: number}> {
     try {
       const keys = await this.redisService.keys(`${this.SESSION_PREFIX}*`);
       let expired = 0;
@@ -271,7 +275,7 @@ export class CSRFTokenService {
         component: "CSRFTokenService",
         operation: "getTokenStats",
       });
-      return { total: 0, expired: 0 };
+      return {total: 0, expired: 0};
     }
   }
 }

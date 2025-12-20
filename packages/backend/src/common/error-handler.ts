@@ -1,7 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable, Logger, HttpException, HttpStatus } from "@nestjs/common";
-import type { Request } from "express";
-import { AuditLogService, AuditEventType } from "../security/audit-log.service";
+import {Injectable, Logger, HttpException, HttpStatus} from "@nestjs/common";
+import type {Request} from "express";
+import {AuditLogService, AuditEventType} from "../security/audit-log.service";
+
+/** Get user ID from request object safely */
+function getUserIdFromRequest(request?: Request): string | undefined {
+  if (!request) return undefined;
+  const user = request.user as {id?: string} | undefined;
+  return user?.id;
+}
 
 export enum ErrorCategory {
   VALIDATION = "VALIDATION",
@@ -31,7 +37,7 @@ export interface StructuredError {
   error: {
     code: string;
     message: string;
-    details?: Record<string, any>;
+    details?: Record<string, unknown>;
     timestamp: string;
     requestId?: string;
   };
@@ -99,7 +105,7 @@ export class GlobalErrorHandler {
 
     return {
       requestId: request?.headers["x-request-id"] as string,
-      userId: (request as any)?.user?.id,
+      userId: getUserIdFromRequest(request),
       ip: request?.ip,
       userAgent: request?.headers["user-agent"],
       path: request?.path,
@@ -406,12 +412,12 @@ export class GlobalErrorHandler {
    * Get error details for debugging (only in development)
    * @param {Error | HttpException} error - The error to get details for
    * @param {ErrorContext} context - The error context
-   * @returns {Record<string, any> | undefined} - The error details
+   * @returns {Record<string, unknown> | undefined} - The error details
    */
   private getErrorDetails(
     error: Error | HttpException,
     context: ErrorContext,
-  ): Record<string, any> | undefined {
+  ): Record<string, unknown> | undefined {
     if (process.env.NODE_ENV === "production") {
       return undefined;
     }
@@ -478,12 +484,12 @@ export class GlobalErrorHandler {
    * Create sanitized log data that's safe for production logging
    * @param {Error | HttpException} error - The error to log
    * @param {ErrorContext} context - The error context
-   * @returns {Record<string, any>} - The sanitized log data
+   * @returns {Record<string, unknown>} - The sanitized log data
    */
   private createSanitizedLogData(
     error: Error | HttpException,
     context: ErrorContext,
-  ): Record<string, any> {
+  ): Record<string, unknown> {
     const baseLogData = {
       category: context.category,
       severity: context.severity,
@@ -556,8 +562,8 @@ export class GlobalErrorHandler {
         : typeof reason === "object" &&
             reason !== null &&
             "message" in reason &&
-            typeof (reason as { message: unknown }).message === "string"
-          ? (reason as { message: string }).message
+            typeof (reason as {message: unknown}).message === "string"
+          ? (reason as {message: string}).message
           : String(reason);
 
     const sanitizedReason =
