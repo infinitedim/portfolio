@@ -10,6 +10,15 @@ import React, {
 } from "react";
 import type { ThemeConfig } from "@/types/theme";
 
+/**
+ * Represents performance metrics at a specific point in time
+ * @interface PerformanceData
+ * @property {number} timestamp - Unix timestamp when metrics were captured
+ * @property {number} cpu - CPU usage percentage (0-100)
+ * @property {number} memory - Memory usage percentage (0-100)
+ * @property {number} network - Network throughput in MB/s
+ * @property {number} disk - Disk I/O usage percentage (0-100)
+ */
 interface PerformanceData {
   timestamp: number;
   cpu: number;
@@ -18,14 +27,26 @@ interface PerformanceData {
   disk: number;
 }
 
+/**
+ * Props for the PerformanceMonitor component
+ * @interface PerformanceMonitorProps
+ * @property {ThemeConfig} themeConfig - Theme configuration for styling
+ */
 interface PerformanceMonitorProps {
   themeConfig: ThemeConfig;
 }
 
 /**
- * Performance Monitor Component - Optimized with memoization
- * @param root0
- * @param root0.themeConfig
+ * Real-time performance monitoring component with visual graphs
+ * Displays CPU, memory, network, and disk metrics with live updating canvas visualization
+ * Optimized with memoization and efficient rendering for smooth performance
+ * @param {PerformanceMonitorProps} props - Component props
+ * @param {ThemeConfig} props.themeConfig - Theme configuration for styling
+ * @returns {JSX.Element} The performance monitor component
+ * @example
+ * ```tsx
+ * <PerformanceMonitor themeConfig={themeConfig} />
+ * ```
  */
 function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
   const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
@@ -34,7 +55,6 @@ function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | null>(null);
 
-  // Memoized data generation function for better performance
   const generateMockData = useCallback(
     (): PerformanceData => ({
       timestamp: Date.now(),
@@ -46,7 +66,6 @@ function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
     [],
   );
 
-  // Memoized statistics calculations to avoid re-computation
   const performanceStats = useMemo(() => {
     if (performanceData.length === 0) {
       return {
@@ -76,13 +95,11 @@ function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
     };
   }, [performanceData]);
 
-  // Initialize performance data
   useEffect(() => {
     const initialData = Array.from({ length: 60 }, () => generateMockData());
     setPerformanceData(initialData);
   }, [generateMockData]);
 
-  // Update performance data
   useEffect(() => {
     if (isPaused) return;
 
@@ -98,22 +115,17 @@ function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
 
     const interval = setInterval(updateData, refreshRate);
 
-    // Cleanup function to prevent memory leaks
     return () => clearInterval(interval);
   }, [isPaused, refreshRate, generateMockData]);
 
-  // Enhanced animation frame cleanup with better tracking
   useEffect(() => {
     const currentAnimationId = animationRef.current;
 
-    // Cleanup function with comprehensive resource management
     return () => {
-      // Cancel current animation frame if it exists
       if (currentAnimationId) {
         cancelAnimationFrame(currentAnimationId);
       }
 
-      // Also cancel any animation frame stored in ref during execution
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
         animationRef.current = null;
@@ -121,7 +133,6 @@ function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
     };
   }, []);
 
-  // Draw performance charts
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -132,16 +143,13 @@ function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
     const width = canvas.width;
     const height = canvas.height;
 
-    // Clear canvas
     ctx.fillStyle = themeConfig.colors.bg;
     ctx.fillRect(0, 0, width, height);
 
-    // Draw grid
     ctx.strokeStyle = themeConfig.colors.border;
     ctx.lineWidth = 1;
     ctx.setLineDash([2, 2]);
 
-    // Vertical grid lines
     for (let i = 0; i <= 10; i++) {
       const x = (width / 10) * i;
       ctx.beginPath();
@@ -150,7 +158,6 @@ function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
       ctx.stroke();
     }
 
-    // Horizontal grid lines
     for (let i = 0; i <= 5; i++) {
       const y = (height / 5) * i;
       ctx.beginPath();
@@ -161,7 +168,6 @@ function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
 
     ctx.setLineDash([]);
 
-    // Draw CPU line
     if (performanceData.length > 1) {
       ctx.strokeStyle = themeConfig.colors.success || "#00ff00";
       ctx.lineWidth = 2;
@@ -178,7 +184,6 @@ function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
       ctx.stroke();
     }
 
-    // Draw Memory line
     if (performanceData.length > 1) {
       ctx.strokeStyle = themeConfig.colors.warning || "#ffaa00";
       ctx.lineWidth = 2;
@@ -195,7 +200,6 @@ function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
       ctx.stroke();
     }
 
-    // Draw Network line
     if (performanceData.length > 1) {
       ctx.strokeStyle = themeConfig.colors.info || "#00aaff";
       ctx.lineWidth = 2;
@@ -212,7 +216,6 @@ function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
       ctx.stroke();
     }
 
-    // Draw legend
     ctx.font = "12px JetBrains Mono";
     ctx.fillStyle = themeConfig.colors.text;
 
@@ -235,7 +238,7 @@ function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
 
   return (
     <div className="space-y-6">
-      {/* Controls */}
+      { }
       <div
         className="p-4 border rounded"
         style={{
@@ -285,7 +288,7 @@ function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
           </div>
         </div>
 
-        {/* Current Metrics */}
+        { }
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
             <div
@@ -326,7 +329,7 @@ function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
         </div>
       </div>
 
-      {/* Performance Chart */}
+      { }
       <div
         className="p-4 border rounded"
         style={{
@@ -349,7 +352,7 @@ function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
         />
       </div>
 
-      {/* Performance Stats */}
+      { }
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div
           className="p-4 border rounded"
@@ -427,5 +430,4 @@ function PerformanceMonitorComponent({ themeConfig }: PerformanceMonitorProps) {
   );
 }
 
-// Export memoized component for better performance
 export const PerformanceMonitor = memo(PerformanceMonitorComponent);

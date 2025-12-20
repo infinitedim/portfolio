@@ -10,18 +10,15 @@ import { PrismaClient } from "@prisma/client";
 import { randomBytes, createHash } from "crypto";
 import bcrypt from "bcryptjs";
 
-// Initialize tRPC
 const t = initTRPC.create();
 
 export const router = t.router;
 export const publicProcedure = t.procedure;
 
-// Lazy-initialized clients for serverless
 let prismaClient: PrismaClient | null = null;
 let redisClient: Redis | null = null;
-let redisAvailable = true; // Track Redis availability to avoid repeated errors
+let redisAvailable = true;
 
-// Serverless logger helper
 const serverlessLog = {
   info: (message: string, context?: Record<string, unknown>) => {
     console.log(
@@ -43,10 +40,14 @@ const serverlessLog = {
   },
 };
 
+/**
+ * Gets or creates a singleton Prisma client instance
+ * Lazy initialization ensures client is only created when needed
+ * @returns Prisma client instance
+ */
 function getPrisma(): PrismaClient {
   if (!prismaClient) {
     prismaClient = new PrismaClient({
-      // Serverless-optimized connection settings
       log:
         process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
     });
@@ -55,8 +56,12 @@ function getPrisma(): PrismaClient {
   return prismaClient;
 }
 
+/**
+ * Gets or creates a Redis client instance for caching
+ * Returns null if Redis is unavailable or not configured
+ * @returns Redis client instance or null
+ */
 function getRedis(): Redis | null {
-  // Skip Redis if previously marked unavailable (circuit breaker pattern)
   if (!redisAvailable) {
     return null;
   }
@@ -79,26 +84,26 @@ function getRedis(): Redis | null {
   return redisClient;
 }
 
-// Rate limiting helper with TTL-based cleanup for serverless
 interface RateLimitEntry {
   timestamp: number;
   windowMs: number;
 }
 const rateLimitMap = new Map<string, RateLimitEntry>();
-const RATE_LIMIT_CLEANUP_INTERVAL = 60000; // Cleanup every 60 seconds
-const MAX_RATE_LIMIT_ENTRIES = 10000; // Prevent unbounded growth
+const RATE_LIMIT_CLEANUP_INTERVAL = 60000;
+const MAX_RATE_LIMIT_ENTRIES = 10000;
 let lastCleanup = Date.now();
 
-// Export function to clear rate limit map for testing
+/**
+ * Clears the in-memory rate limit map
+ * Useful for testing or manual cleanup
+ */
 export function clearRateLimitMap() {
   rateLimitMap.clear();
 }
 
-// Cleanup expired entries to prevent memory leak
 function cleanupRateLimitMap() {
   const now = Date.now();
 
-  // Only cleanup if interval has passed
   if (now - lastCleanup < RATE_LIMIT_CLEANUP_INTERVAL) {
     return;
   }
@@ -120,7 +125,6 @@ function cleanupRateLimitMap() {
     });
   }
 
-  // Emergency cleanup if map is too large (fail-safe)
   if (rateLimitMap.size > MAX_RATE_LIMIT_ENTRIES) {
     const entriesToDelete = rateLimitMap.size - MAX_RATE_LIMIT_ENTRIES;
     const sortedEntries = [...rateLimitMap.entries()].sort(
@@ -153,7 +157,6 @@ async function checkRateLimit(
       });
       return true;
     } catch (error) {
-      // Log Redis error and fallback to in-memory
       serverlessLog.warn("Redis rate limit failed, using in-memory fallback", {
         error: error instanceof Error ? error.message : String(error),
         key,
@@ -161,7 +164,6 @@ async function checkRateLimit(
     }
   }
 
-  // Perform cleanup on each rate limit check
   cleanupRateLimitMap();
 
   const now = Date.now();
@@ -175,7 +177,6 @@ async function checkRateLimit(
   return true;
 }
 
-// Health router
 const healthRouter = router({
   check: publicProcedure.query(async () => {
     return { status: "ok", timestamp: new Date().toISOString() };
@@ -184,7 +185,6 @@ const healthRouter = router({
   detailed: publicProcedure.query(async () => {
     const checks: Record<string, { status: string; error?: string }> = {};
 
-    // Check database
     try {
       await getPrisma().$queryRaw`SELECT 1`;
       checks.database = { status: "healthy" };
@@ -195,7 +195,6 @@ const healthRouter = router({
       };
     }
 
-    // Check Redis
     try {
       const redis = getRedis();
       if (redis) {
@@ -223,14 +222,12 @@ const healthRouter = router({
   }),
 });
 
-// Auth types
 interface AuthUser {
   userId: string;
   email: string;
   role: "admin";
 }
 
-// Auth router (simplified for serverless)
 const authRouter = router({
   login: publicProcedure
     .input(z.object({ email: z.string().email(), password: z.string().min(1) }))
@@ -254,7 +251,6 @@ const authRouter = router({
           });
         }
 
-        // Check admin credentials from environment
         const adminEmail = process.env.ADMIN_EMAIL;
         const adminPassword = process.env.ADMIN_PASSWORD;
 
@@ -265,7 +261,6 @@ const authRouter = router({
           };
         }
 
-        // Use constant-time comparison to prevent timing attacks for email
         const emailBuffer = Buffer.from(input.email.padEnd(256, "\0"));
         const adminEmailBuffer = Buffer.from(adminEmail.padEnd(256, "\0"));
         const emailMatch =
@@ -273,19 +268,15 @@ const authRouter = router({
           createHash("sha256").update(emailBuffer).digest("hex") ===
             createHash("sha256").update(adminEmailBuffer).digest("hex");
 
-        // Check if ADMIN_PASSWORD_HASH exists for bcrypt comparison
         const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
         let passwordMatch = false;
 
         if (adminPasswordHash) {
-          // Production: use bcrypt to compare hashed password (already timing-safe)
           passwordMatch = await bcrypt.compare(
             input.password,
             adminPasswordHash,
           );
         } else if (process.env.NODE_ENV !== "production") {
-          // Development only: use timing-safe comparison even in dev for consistency
-          // Hash the password first to make comparison secure
           const devHash = await bcrypt.hash(adminPassword, 10);
           passwordMatch = await bcrypt.compare(input.password, devHash);
         }
@@ -297,17 +288,15 @@ const authRouter = router({
           };
         }
 
-        // Generate cryptographically secure tokens
         const accessToken = randomBytes(32).toString("hex");
         const refreshToken = randomBytes(32).toString("hex");
 
-        // Store tokens in Redis if available
         const redis = getRedis();
         if (redis) {
-          await redis.set(`token:${accessToken}`, input.email, { ex: 3600 }); // 1 hour
+          await redis.set(`token:${accessToken}`, input.email, { ex: 3600 });
           await redis.set(`refresh:${refreshToken}`, input.email, {
             ex: 86400 * 7,
-          }); // 7 days
+          });
         }
 
         return {
@@ -348,7 +337,6 @@ const authRouter = router({
           };
         }
 
-        // Generate cryptographically secure tokens
         const accessToken = randomBytes(32).toString("hex");
         const refreshToken = randomBytes(32).toString("hex");
 
@@ -410,22 +398,16 @@ const authRouter = router({
     ),
 });
 
-// Spotify router
 const spotifyRouter = router({
   nowPlaying: publicProcedure.query(async () => {
-    // Spotify "Now Playing" feature requires OAuth refresh token flow
-    // which is not implemented in serverless mode.
-    // Return not playing state as default.
     return { isPlaying: false };
   }),
 });
 
-// Security router
 const securityRouter = router({
   validateInput: publicProcedure
     .input(z.object({ input: z.string() }))
     .mutation(({ input }) => {
-      // Basic XSS and SQL injection detection
       const dangerousPatterns = [
         /<script/i,
         /javascript:/i,
@@ -458,7 +440,6 @@ const securityRouter = router({
     }),
 });
 
-// Projects router
 const projectsRouter = router({
   get: publicProcedure
     .input(
@@ -470,11 +451,9 @@ const projectsRouter = router({
         .optional(),
     )
     .query(async ({ input }) => {
-      // Fetch from database using safe Prisma methods (no raw SQL with user input)
       try {
         const prisma = getPrisma();
 
-        // Use Prisma's type-safe query builder to prevent SQL injection
         const projects = await prisma.project.findMany({
           take: input?.limit ?? 20,
           orderBy: { createdAt: "desc" },
@@ -500,7 +479,6 @@ const projectsRouter = router({
     }),
 });
 
-// Main app router
 export const appRouter = router({
   health: healthRouter.check,
   healthDetailed: healthRouter.detailed,

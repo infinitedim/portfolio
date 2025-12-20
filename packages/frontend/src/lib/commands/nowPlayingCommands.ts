@@ -53,7 +53,6 @@ export function createNowPlayingCommand(
 
         default:
           if (!action) {
-            // Fetch and display now playing data directly
             return await getNowPlaying();
           }
           return {
@@ -74,7 +73,6 @@ export function createNowPlayingCommand(
 async function getNowPlaying(): Promise<CommandOutput> {
   try {
     const data = await (async () => {
-      // Call backend via tRPC (placeholder until spotify router returns full shape)
       return { isPlaying: false } as SpotifyData;
     })();
 
@@ -97,7 +95,6 @@ async function getNowPlaying(): Promise<CommandOutput> {
       };
     }
 
-    // Format the now playing output
     const progressBar =
       data.progress && data.duration
         ? formatProgressBar(data.progress, data.duration)
@@ -164,7 +161,6 @@ function formatTime(ms: number): string {
  */
 async function getRecentlyPlayed(): Promise<CommandOutput> {
   try {
-    // For now, return a placeholder since we need to implement this API endpoint
     return {
       type: "info",
       content:
@@ -188,7 +184,6 @@ async function getRecentlyPlayed(): Promise<CommandOutput> {
  */
 async function getTopTracks(): Promise<CommandOutput> {
   try {
-    // For now, return a placeholder since we need to implement this API endpoint
     return {
       type: "info",
       content:

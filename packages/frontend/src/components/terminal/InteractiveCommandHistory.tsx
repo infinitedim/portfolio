@@ -5,7 +5,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { useCommandHistory } from "@/hooks/useCommandHistory";
 
-// Interactive timeline data structure
 interface TimelineEntry {
   id: string;
   command: string;
@@ -18,7 +17,6 @@ interface TimelineEntry {
   context?: string;
 }
 
-// Visual timeline configurations
 interface TimelineConfig {
   groupBy: "hour" | "day" | "week" | "month";
   showDetails: boolean;
@@ -27,7 +25,6 @@ interface TimelineConfig {
   enableFiltering: boolean;
 }
 
-// Command execution patterns
 interface ExecutionPattern {
   sequence: string[];
   frequency: number;
@@ -77,11 +74,9 @@ export function InteractiveCommandHistory({
   const [replayMode, setReplayMode] = useState(false);
   const [replaySpeed, setReplaySpeed] = useState(1);
 
-  // Get command history data
   const { history, analytics, toggleFavorite, removeCommand, exportHistory } =
     useCommandHistory();
 
-  // Filter and process timeline entries
   const timelineEntries = useCallback((): TimelineEntry[] => {
     const filtered = history.filter((entry) => {
       if (searchQuery) {
@@ -93,20 +88,17 @@ export function InteractiveCommandHistory({
       return true;
     });
 
-    // Group by time periods
     return filtered.map((entry) => ({
       ...entry,
       expanded: selectedEntry === entry.id,
     }));
   }, [history, searchQuery, selectedEntry]);
 
-  // Detect command patterns
   const commandPatterns = useCallback((): ExecutionPattern[] => {
     if (!showPatterns || history.length < 3) return [];
 
     const patterns: Map<string, ExecutionPattern> = new Map();
 
-    // Analyze command sequences (sliding window of 3)
     for (let i = 0; i <= history.length - 3; i++) {
       const sequence = history.slice(i, i + 3).map((entry) => entry.command);
       const key = sequence.join(" → ");
@@ -147,7 +139,6 @@ export function InteractiveCommandHistory({
       .slice(0, 10);
   }, [history, showPatterns]);
 
-  // Format relative time
   const formatRelativeTime = (timestamp: Date): string => {
     const now = new Date();
     const diffMs = now.getTime() - timestamp.getTime();
@@ -162,7 +153,6 @@ export function InteractiveCommandHistory({
     return timestamp.toLocaleDateString();
   };
 
-  // Get category color
   const getCategoryColor = (category: string): string => {
     const categoryColors: Record<string, string> = {
       info: themeConfig.colors.info || "#3B82F6",
@@ -174,7 +164,6 @@ export function InteractiveCommandHistory({
     return categoryColors[category] || themeConfig.colors.muted || "#6B7280";
   };
 
-  // Handle command replay
   const handleReplay = useCallback(
     async (commands: string[]) => {
       if (!enableReplay) return;
@@ -185,7 +174,6 @@ export function InteractiveCommandHistory({
         await new Promise((resolve) => setTimeout(resolve, 1000 / replaySpeed));
         onCommandSelect(commands[i]);
 
-        // Visual feedback during replay
         setSelectedEntry(`replay-${i}`);
       }
 
@@ -195,7 +183,6 @@ export function InteractiveCommandHistory({
     [enableReplay, replaySpeed, onCommandSelect],
   );
 
-  // Handle entry click
   const handleEntryClick = (entry: TimelineEntry) => {
     if (selectedEntry === entry.id) {
       setSelectedEntry(null);
@@ -204,7 +191,6 @@ export function InteractiveCommandHistory({
     }
   };
 
-  // Handle pattern selection
   const handlePatternSelect = (pattern: ExecutionPattern) => {
     setSelectedPattern(pattern.sequence.join(" → "));
     if (enableReplay) {
@@ -212,7 +198,6 @@ export function InteractiveCommandHistory({
     }
   };
 
-  // Keyboard shortcuts
   useEffect(() => {
     if (!isVisible) return;
 
@@ -256,7 +241,7 @@ export function InteractiveCommandHistory({
           maxHeight,
         }}
       >
-        {/* Header */}
+        {}
         <div
           className="px-6 py-4 border-b flex items-center justify-between"
           style={{
@@ -286,7 +271,7 @@ export function InteractiveCommandHistory({
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Timeline controls */}
+            {}
             <select
               value={timelineConfig.groupBy}
               onChange={(e) =>
@@ -344,9 +329,9 @@ export function InteractiveCommandHistory({
         </div>
 
         <div className="flex h-full">
-          {/* Main Timeline */}
+          {}
           <div className="flex-1 overflow-y-auto p-6">
-            {/* Search */}
+            {}
             <div className="mb-6">
               <input
                 type="text"
@@ -362,7 +347,7 @@ export function InteractiveCommandHistory({
               />
             </div>
 
-            {/* Timeline Entries */}
+            {}
             <div className="space-y-3">
               {entries.map((entry, index) => (
                 <div
@@ -392,7 +377,7 @@ export function InteractiveCommandHistory({
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
-                        {/* Status indicator */}
+                        {}
                         <div
                           className="w-3 h-3 rounded-full shrink-0"
                           style={{
@@ -402,7 +387,7 @@ export function InteractiveCommandHistory({
                           }}
                         />
 
-                        {/* Command */}
+                        {}
                         <code
                           className="font-mono text-sm font-medium truncate"
                           style={{ color: themeConfig.colors.text }}
@@ -410,7 +395,7 @@ export function InteractiveCommandHistory({
                           {entry.command}
                         </code>
 
-                        {/* Category badge */}
+                        {}
                         <span
                           className="px-2 py-1 text-xs rounded-full"
                           style={{
@@ -421,7 +406,7 @@ export function InteractiveCommandHistory({
                           {entry.category}
                         </span>
 
-                        {/* Favorite indicator */}
+                        {}
                         {entry.favorite && (
                           <span style={{ color: themeConfig.colors.warning }}>
                             ⭐
@@ -441,7 +426,7 @@ export function InteractiveCommandHistory({
                         )}
                       </div>
 
-                      {/* Expanded details */}
+                      {}
                       {entry.expanded && (
                         <div className="mt-4 pt-4 border-t space-y-3">
                           <div className="grid grid-cols-2 gap-4 text-sm">
@@ -497,7 +482,7 @@ export function InteractiveCommandHistory({
                             </div>
                           )}
 
-                          {/* Actions */}
+                          {}
                           <div className="flex items-center gap-3 pt-2">
                             <button
                               onClick={(e) => {
@@ -545,7 +530,7 @@ export function InteractiveCommandHistory({
                       )}
                     </div>
 
-                    {/* Timeline connector */}
+                    {}
                     {index < entries.length - 1 && (
                       <div
                         className="w-px h-8 mt-6 ml-4"
@@ -581,7 +566,7 @@ export function InteractiveCommandHistory({
             </div>
           </div>
 
-          {/* Sidebar - Patterns & Analytics */}
+          {}
           {showPatterns && patterns.length > 0 && (
             <div
               className="w-80 border-l overflow-y-auto p-6"
@@ -670,7 +655,7 @@ export function InteractiveCommandHistory({
                 ))}
               </div>
 
-              {/* Quick Stats */}
+              {}
               <div className="mt-6 pt-6 border-t">
                 <h5
                   className="font-medium mb-3"
@@ -712,7 +697,7 @@ export function InteractiveCommandHistory({
           )}
         </div>
 
-        {/* Footer */}
+        {}
         <div
           className="px-6 py-3 border-t text-sm"
           style={{

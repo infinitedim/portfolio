@@ -6,26 +6,22 @@ import { RedisService } from "../redis/redis.service";
 import { securityLogger } from "../logging/logger";
 
 export enum AuditEventType {
-  // Authentication events
   LOGIN_SUCCESS = "LOGIN_SUCCESS",
   LOGIN_FAILED = "LOGIN_FAILED",
   LOGOUT = "LOGOUT",
   PASSWORD_CHANGE = "PASSWORD_CHANGE",
   PASSWORD_RESET = "PASSWORD_RESET",
 
-  // Authorization events
   ACCESS_DENIED = "ACCESS_DENIED",
   PERMISSION_GRANTED = "PERMISSION_GRANTED",
   PERMISSION_REVOKED = "PERMISSION_REVOKED",
 
-  // Data events
   DATA_CREATED = "DATA_CREATED",
   DATA_UPDATED = "DATA_UPDATED",
   DATA_DELETED = "DATA_DELETED",
   DATA_VIEWED = "DATA_VIEWED",
   DATA_EXPORTED = "DATA_EXPORTED",
 
-  // Security events
   SUSPICIOUS_ACTIVITY = "SUSPICIOUS_ACTIVITY",
   RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED",
   CSRF_VIOLATION = "CSRF_VIOLATION",
@@ -34,7 +30,6 @@ export enum AuditEventType {
   XSS_ATTEMPT = "XSS_ATTEMPT",
   BRUTE_FORCE_ATTEMPT = "BRUTE_FORCE_ATTEMPT",
 
-  // System events
   CONFIGURATION_CHANGE = "CONFIGURATION_CHANGE",
   SYSTEM_ERROR = "SYSTEM_ERROR",
   ERROR_OCCURRED = "ERROR_OCCURRED",
@@ -87,7 +82,6 @@ export class AuditLogService {
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
   ) {
-    // Start periodic flush of cached audit logs
     this.startPeriodicFlush();
   }
 
@@ -103,15 +97,12 @@ export class AuditLogService {
         ? this.enhanceEntryWithRequest(entry, request)
         : entry;
 
-      // Cache the entry for batch processing
       await this.cacheAuditEntry(enhancedEntry);
 
-      // For critical events, log immediately
       if (enhancedEntry.severity === AuditSeverity.CRITICAL) {
         await this.flushAuditCache();
       }
 
-      // Log for development and monitoring
       if (process.env.NODE_ENV === "development") {
         securityLogger.info("Audit log entry", {
           timestamp: new Date().toISOString(),
@@ -128,7 +119,6 @@ export class AuditLogService {
         component: "AuditLogService",
         operation: "logEvent",
       });
-      // Don't throw - audit logging should not break the application
     }
   }
 
@@ -385,8 +375,6 @@ export class AuditLogService {
     }
   }
 
-  // Private helper methods
-
   private enhanceEntryWithRequest(
     entry: AuditLogEntry,
     request: Request,
@@ -464,7 +452,6 @@ export class AuditLogService {
         metadata: entry.metadata || {},
       }));
 
-      // Fix: Ensure all fields match the AuditLog model and Prisma input types
       const sanitizedAuditLogs = auditLogs.map((log) => ({
         adminUserId: log.adminUserId ?? undefined,
         action: log.action,
@@ -480,7 +467,6 @@ export class AuditLogService {
         metadata: log.metadata ?? undefined,
       }));
 
-      // Convert details and metadata to JSON-compatible values for Prisma
       const prismaAuditLogs = sanitizedAuditLogs.map((log) => ({
         ...log,
         details: log.details

@@ -120,7 +120,6 @@ async function getTimezoneInfo(timezone?: string): Promise<CommandOutput> {
     const timeInfo = locationService.getTimeInfo(targetTimezone);
     const offsetFormatted = locationService.formatOffset(timeInfo.offset);
 
-    // Get time in different major timezones
     const majorTimezones = [
       "UTC",
       "America/New_York",

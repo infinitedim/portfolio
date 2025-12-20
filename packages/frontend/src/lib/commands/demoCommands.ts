@@ -2,7 +2,6 @@ import { ProjectMetadataService } from "@/lib/projects/projectMetadata";
 import type { Command, CommandOutput } from "@/types/terminal";
 import { generateId } from "@/lib/utils/utils";
 
-// Global callback for opening demos
 let globalOnOpenDemo: ((projectId: string) => void) | null = null;
 
 /**
@@ -117,7 +116,6 @@ function openProject(projectId: string): CommandOutput {
     };
   }
 
-  // Call the global callback if available
   if (globalOnOpenDemo) {
     globalOnOpenDemo(projectId);
   }

@@ -3,7 +3,6 @@
 import { lazy, Suspense, type ComponentType, type JSX } from "react";
 import { useTheme } from "@/hooks/useTheme";
 
-// Lazy load heavy components for better performance
 export const LazyCustomizationManager = lazy(() =>
   import("../customization/CustomizationManager").then((module) => ({
     default: module.CustomizationManager,
@@ -34,7 +33,6 @@ export const LazyHistorySearchPanel = lazy(() =>
   })),
 );
 
-// Loading fallback component
 interface LoadingFallbackProps {
   text?: string;
   size?: "sm" | "md" | "lg";
@@ -59,7 +57,6 @@ function LoadingFallback({
     lg: "w-8 h-8 text-base",
   };
 
-  // Fallback colors if theme isn't loaded
   const fallbackColors = {
     bg: "#000000",
     text: "#ffffff",
@@ -90,7 +87,6 @@ function LoadingFallback({
   );
 }
 
-// Higher-order component for lazy loading with custom fallback
 /**
  *
  * @param {ComponentType<P>} LazyComponent - The component to load
@@ -119,7 +115,6 @@ export function withLazyLoading<P extends object>(
   };
 }
 
-// Pre-configured lazy components with loading states
 export const CustomizationManager = withLazyLoading(
   LazyCustomizationManager,
   "Loading customization panel...",

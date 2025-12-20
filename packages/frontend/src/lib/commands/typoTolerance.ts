@@ -1,4 +1,26 @@
+/**
+ * Utility class for handling command typos and fuzzy matching
+ * Uses Levenshtein distance algorithm for command suggestions
+ *
+ * @example
+ * ```ts
+ * const suggestion = TypoTolerance.findSimilarCommand('hlep', ['help', 'clear', 'exit']);
+ * console.log(suggestion); // 'help'
+ * ```
+ */
 export class TypoTolerance {
+  /**
+   * Calculates the Levenshtein distance between two strings
+   * Measures the minimum number of single-character edits needed to change one string into another
+   * @param a - First string to compare
+   * @param b - Second string to compare
+   * @returns Number of edits required (lower is more similar)
+   * @example
+   * ```ts
+   * const distance = TypoTolerance.levenshteinDistance('kitten', 'sitting');
+   * console.log(distance); // 3
+   * ```
+   */
   public static levenshteinDistance(a: string, b: string): number {
     const matrix = Array(b.length + 1)
       .fill(null)
@@ -21,6 +43,18 @@ export class TypoTolerance {
     return matrix[b.length][a.length];
   }
 
+  /**
+   * Finds the most similar command to the input within a distance threshold
+   * @param input - The user's input string
+   * @param availableCommands - List of valid command names
+   * @param threshold - Maximum edit distance to consider (default: 2)
+   * @returns Best matching command name, or null if none found within threshold
+   * @example
+   * ```ts
+   * const match = TypoTolerance.findSimilarCommand('hlep', ['help', 'clear'], 2);
+   * console.log(match); // 'help'
+   * ```
+   */
   static findSimilarCommand(
     input: string,
     availableCommands: string[],
@@ -30,20 +64,31 @@ export class TypoTolerance {
     let bestDistance = Number.POSITIVE_INFINITY;
 
     for (const command of availableCommands) {
-      // Iterate through available commands
       const distance = this.levenshteinDistance(
         input.toLowerCase(),
         command.toLowerCase(),
       );
       if (distance <= threshold && distance < bestDistance) {
-        bestDistance = distance; // Update best distance
-        bestMatch = command; // Update best match
+        bestDistance = distance;
+        bestMatch = command;
       }
     }
 
     return bestMatch;
   }
 
+  /**
+   * Performs fuzzy matching to find all commands similar to the input
+   * Returns matches sorted by similarity (closest first)
+   * @param input - The user's input string
+   * @param commands - List of command names to match against
+   * @returns Array of matching commands, sorted by similarity
+   * @example
+   * ```ts
+   * const matches = TypoTolerance.fuzzyMatch('the', ['theme', 'help', 'then']);
+   * console.log(matches); // ['theme', 'then']
+   * ```
+   */
   static fuzzyMatch(input: string, commands: string[]): string[] {
     const matches = commands.filter((command) => {
       const distance = this.levenshteinDistance(
@@ -66,21 +111,30 @@ export class TypoTolerance {
     });
   }
 
+  /**
+   * Calculates a similarity score between input and command (0-100)
+   * Higher scores indicate better matches
+   * @param input - The user's input string
+   * @param command - Command name to score against
+   * @returns Similarity score (100 = exact match, 0 = no match)
+   * @example
+   * ```ts
+   * const score = TypoTolerance.getSuggestionScore('hel', 'help');
+   * console.log(score); // ~80 (prefix match)
+   * ```
+   */
   static getSuggestionScore(input: string, command: string): number {
     const lowerInput = input.toLowerCase();
     const lowerCommand = command.toLowerCase();
 
-    // Exact match
     if (lowerCommand === lowerInput) {
       return 100;
     }
 
-    // Prefix match
     if (lowerCommand.startsWith(lowerInput)) {
       return 80 + (lowerInput.length / lowerCommand.length) * 15;
     }
 
-    // Contains match
     if (lowerCommand.includes(lowerInput)) {
       const position = lowerCommand.indexOf(lowerInput);
       return Math.max(
@@ -89,7 +143,6 @@ export class TypoTolerance {
       );
     }
 
-    // Typo tolerance match
     const distance = this.levenshteinDistance(lowerInput, lowerCommand);
     const maxDistance = Math.max(2, Math.floor(lowerCommand.length * 0.4));
 
@@ -100,6 +153,17 @@ export class TypoTolerance {
     return 0;
   }
 
+  /**
+   * Determines the type of match between input and command
+   * @param input - The user's input string
+   * @param command - Command name to match against
+   * @returns Match type: "exact", "prefix", "fuzzy", or "typo"
+   * @example
+   * ```ts
+   * const type = TypoTolerance.getSuggestionType('hel', 'help');
+   * console.log(type); // 'prefix'
+   * ```
+   */
   static getSuggestionType(
     input: string,
     command: string,

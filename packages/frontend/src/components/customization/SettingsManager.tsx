@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, type JSX } from "react";
-// Correctly use your custom theme hook
 import { useTheme } from "@/hooks/useTheme";
 import { CustomizationService } from "@/lib/services/customizationService";
 import type { CustomizationSettings } from "@/types/customization";
@@ -13,17 +12,12 @@ import { TerminalLoadingProgress } from "@/components/ui/TerminalLoadingProgress
  * @returns {JSX.Element} - The settings management interface.
  */
 export function SettingsManager(): JSX.Element {
-  // MODIFICATION: Correctly destructure the theme hook.
-  // Removed `appliedTheme`, `subscribeToThemeChanges`, and the `renderKey` state.
   const { themeConfig, theme } = useTheme();
 
   const [settings, setSettings] = useState<CustomizationSettings | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
 
   const customizationService = CustomizationService.getInstance();
-
-  // MODIFICATION: Removed the two `useEffect` hooks that tried to force re-renders.
-  // The component will automatically update when `theme` or `themeConfig` changes.
 
   useEffect(() => {
     const currentSettings = customizationService.getSettings();
@@ -40,7 +34,6 @@ export function SettingsManager(): JSX.Element {
     setSettings(newSettings);
     setHasChanges(true);
 
-    // Auto-save if enabled
     if (settings.autoSave) {
       customizationService.saveSettings({ [key]: value });
       setHasChanges(false);
@@ -84,12 +77,11 @@ export function SettingsManager(): JSX.Element {
   }
 
   return (
-    // MODIFICATION: Removed `renderKey` from the key prop.
     <div
       key={`settings-manager-${theme}`}
       className="h-full flex flex-col"
     >
-      {/* Header */}
+      {}
       <div
         className="p-4 border-b transition-colors duration-300"
         style={{ borderColor: themeConfig.colors.border }}
@@ -140,10 +132,10 @@ export function SettingsManager(): JSX.Element {
         </div>
       </div>
 
-      {/* Settings Content */}
+      {}
       <div className="flex-1 p-4 overflow-y-auto">
         <div className="max-w-2xl space-y-6">
-          {/* General Settings */}
+          {}
           <div>
             <h4
               className="font-medium mb-4 transition-colors duration-300"
@@ -152,7 +144,7 @@ export function SettingsManager(): JSX.Element {
               General
             </h4>
             <div className="space-y-4">
-              {/* Auto-save Toggle */}
+              {}
               <div className="flex items-center justify-between">
                 <label
                   htmlFor="autoSaveCheckbox"
@@ -168,14 +160,13 @@ export function SettingsManager(): JSX.Element {
                   onChange={(e) =>
                     handleSettingChange("autoSave", e.target.checked)
                   }
-                  // Simplified toggle styling for clarity
                 />
               </div>
-              {/* Other settings toggles would follow a similar pattern... */}
+              {}
             </div>
           </div>
 
-          {/* Typography Settings */}
+          {}
           <div>
             <h4
               className="font-medium mb-4"
@@ -184,7 +175,7 @@ export function SettingsManager(): JSX.Element {
               Typography & Display
             </h4>
             <div className="space-y-4">
-              {/* Font Size Slider */}
+              {}
               <div>
                 <label
                   htmlFor="fontSizeRange"
@@ -208,11 +199,11 @@ export function SettingsManager(): JSX.Element {
                   className="w-full"
                 />
               </div>
-              {/* Other typography sliders... */}
+              {}
             </div>
           </div>
 
-          {/* Preview Section */}
+          {}
           <div>
             <h4
               className="font-medium mb-4"

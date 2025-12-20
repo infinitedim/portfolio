@@ -43,7 +43,6 @@ export function ErrorHandler({
     setLastError(null);
 
     try {
-      // Check backend connectivity
       const backendResponse = await fetch("http://localhost:4000/health", {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -53,7 +52,6 @@ export function ErrorHandler({
         backend: backendResponse.ok ? "connected" : "disconnected",
       }));
 
-      // Check tRPC connectivity
       const trpcResponse = await fetch(
         "http://localhost:4000/trpc/health.health",
         {
@@ -66,7 +64,6 @@ export function ErrorHandler({
         tRPC: trpcResponse.ok ? "connected" : "disconnected",
       }));
 
-      // Check database health
       const dbResponse = await fetch(
         "http://localhost:4000/trpc/health.healthDatabase",
         {
@@ -84,7 +81,6 @@ export function ErrorHandler({
         setServiceStatus((prev) => ({ ...prev, database: "disconnected" }));
       }
 
-      // Check Redis health
       const redisResponse = await fetch(
         "http://localhost:4000/trpc/health.healthRedis",
         {
@@ -102,7 +98,6 @@ export function ErrorHandler({
         setServiceStatus((prev) => ({ ...prev, redis: "disconnected" }));
       }
 
-      // Check if all services are healthy
       const allConnected = Object.values(serviceStatus).every(
         (status) => status === "connected",
       );
@@ -186,7 +181,7 @@ export function ErrorHandler({
         </button>
       </div>
 
-      {/* Service Status Grid */}
+      {}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
         {Object.entries(serviceStatus).map(([service, status]) => (
           <div
@@ -205,7 +200,7 @@ export function ErrorHandler({
         ))}
       </div>
 
-      {/* Error Details */}
+      {}
       {lastError && (
         <div className="mb-4 p-3 rounded border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20">
           <div className="text-sm font-mono text-red-700 dark:text-red-300">
@@ -214,7 +209,7 @@ export function ErrorHandler({
         </div>
       )}
 
-      {/* Troubleshooting Guide */}
+      {}
       <div className="space-y-2">
         <h4
           className="text-sm font-semibold"
@@ -260,7 +255,7 @@ export function ErrorHandler({
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {}
       <div className="mt-4 flex flex-wrap gap-2">
         <button
           onClick={() => window.open("http://localhost:4000/health", "_blank")}

@@ -8,7 +8,7 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     css: true,
-    passWithNoTests: true, // Don't fail if no tests are found
+    passWithNoTests: true,
     include: ["src/**/*.{test,spec}.{js,ts,tsx}"],
     exclude: [
       "**/node_modules/**",

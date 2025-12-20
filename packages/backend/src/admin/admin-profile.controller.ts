@@ -33,7 +33,6 @@ export class AdminProfileController {
 
     const profile = await this.adminProfileService.getProfile(adminUserId);
 
-    // Log the action
     await this.auditLogService.logEvent(
       {
         eventType: AuditEventType.DATA_VIEWED,
@@ -74,7 +73,6 @@ export class AdminProfileController {
       data,
     );
 
-    // Log the action
     await this.auditLogService.logEvent(
       {
         eventType: AuditEventType.DATA_CREATED,
@@ -115,7 +113,6 @@ export class AdminProfileController {
       data,
     );
 
-    // Log the action
     await this.auditLogService.logEvent(
       {
         eventType: AuditEventType.DATA_UPDATED,
@@ -154,7 +151,6 @@ export class AdminProfileController {
       data,
     );
 
-    // Log the action
     await this.auditLogService.logEvent(
       {
         eventType: AuditEventType.DATA_UPDATED,

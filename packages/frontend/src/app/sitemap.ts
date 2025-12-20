@@ -1,16 +1,23 @@
 import { MetadataRoute } from "next";
 
 /**
- * Enhanced sitemap for the application
- * Optimized for Google indexing and SEO
- * @returns {MetadataRoute.Sitemap} The sitemap
+ * Generates dynamic sitemap for the application
+ * @returns Sitemap configuration for search engine indexing
+ * @remarks
+ * Optimized for Google indexing and SEO with:
+ * - Static routes (home, projects, skills, about, contact, etc.)
+ * - Dynamic project routes with individual priorities
+ * - Technology-specific pages
+ * - Service offering pages
+ * - Blog post routes
+ * - Legal pages (privacy, terms)
+ * - Proper change frequencies and priorities for each route type
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL || "https://infinitedim.site";
   const currentDate = new Date();
 
-  // Core static pages with optimized priorities
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
@@ -56,7 +63,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Dynamic project routes with detailed metadata
   const dynamicProjectRoutes: MetadataRoute.Sitemap = [
     {
       url: `${baseUrl}/projects/terminal-portfolio`,
@@ -96,7 +102,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Technology-specific pages for better SEO
   const technologyRoutes: MetadataRoute.Sitemap = [
     {
       url: `${baseUrl}/skills/react`,
@@ -136,7 +141,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Service pages for better SEO targeting
   const serviceRoutes: MetadataRoute.Sitemap = [
     {
       url: `${baseUrl}/services/web-development`,
@@ -176,7 +180,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Blog/Content pages (if you have a blog)
   const blogRoutes: MetadataRoute.Sitemap = [
     {
       url: `${baseUrl}/blog/web-development-tips`,
@@ -204,7 +207,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Legal/Info pages
   const legalRoutes: MetadataRoute.Sitemap = [
     {
       url: `${baseUrl}/privacy-policy`,

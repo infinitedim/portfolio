@@ -3,6 +3,19 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useDebouncedValue } from "./useDebouncedValue";
 
+/**
+ * Represents a single command suggestion with scoring and metadata
+ * @interface SuggestionItem
+ * @property {string} command - The suggested command
+ * @property {number} score - Relevance score (0-100+)
+ * @property {"exact" | "prefix" | "fuzzy" | "contextual" | "recent" | "popular"} type - Type of match
+ * @property {string} [description] - Command description
+ * @property {string} [usage] - Usage syntax
+ * @property {string} [category] - Command category
+ * @property {number} [frequency] - Usage frequency count
+ * @property {Date} [lastUsed] - Last usage timestamp
+ * @property {"start" | "middle" | "end" | "any"} [matchType] - Where the match occurred
+ */
 export interface SuggestionItem {
   command: string;
   score: number;
@@ -15,7 +28,6 @@ export interface SuggestionItem {
   matchType?: "start" | "middle" | "end" | "any";
 }
 
-// Command metadata with enhanced information
 interface CommandMetadata {
   description: string;
   category: string;
@@ -28,7 +40,6 @@ interface CommandMetadata {
   tags?: string[];
 }
 
-// User behavior tracking for personalized suggestions
 interface UserContext {
   recentCommands: string[];
   frequentCommands: Map<string, number>;
@@ -37,7 +48,6 @@ interface UserContext {
   totalCommands: number;
 }
 
-// Enhanced command database with better categorization
 const COMMAND_METADATA: Record<string, CommandMetadata> = {
   help: {
     description: "Show all available commands and usage information",
@@ -137,7 +147,6 @@ const COMMAND_METADATA: Record<string, CommandMetadata> = {
   },
 };
 
-// Advanced fuzzy matching with better scoring
 class FuzzyMatcher {
   private static readonly WEIGHTS = {
     EXACT_MATCH: 100,
@@ -171,7 +180,6 @@ class FuzzyMatcher {
       }
     }
 
-    // Sequential character match
     let queryIndex = 0;
     let targetIndex = 0;
     let consecutiveMatches = 0;
@@ -230,17 +238,15 @@ class FuzzyMatcher {
   }
 }
 
-// Enhanced suggestion cache with TTL and smart invalidation
 class SuggestionCache {
   private cache = new Map<
     string,
     { suggestions: SuggestionItem[]; timestamp: number; hits: number }
   >();
-  private readonly TTL = 5 * 60 * 1000; // 5 minutes
+  private readonly TTL = 5 * 60 * 1000;
   private readonly MAX_SIZE = 100;
 
   set(key: string, suggestions: SuggestionItem[]): void {
-    // Cleanup old entries if cache is full
     if (this.cache.size >= this.MAX_SIZE) {
       const oldestKey = this.findOldestEntry();
       if (oldestKey) {
@@ -259,13 +265,11 @@ class SuggestionCache {
     const entry = this.cache.get(key);
     if (!entry) return null;
 
-    // Check TTL
     if (Date.now() - entry.timestamp > this.TTL) {
       this.cache.delete(key);
       return null;
     }
 
-    // Update hit count for LRU-like behavior
     entry.hits++;
     return entry.suggestions;
   }
@@ -292,8 +296,48 @@ class SuggestionCache {
 }
 
 /**
- * Enhanced command suggestions hook with real-time performance optimization,
- * fuzzy matching, user context awareness, and intelligent caching.
+ * Enhanced command suggestions hook with fuzzy matching, caching, and user context awareness
+ *
+ * Provides intelligent command suggestions based on:
+ * - Fuzzy string matching with scoring
+ * - User command history and frequency
+ * - Recent command usage
+ * - Contextual command sequences
+ * - Performance-optimized caching
+ *
+ * @param {string} input - Current user input to generate suggestions for
+ * @param {string[]} availableCommands - List of all available commands
+ * @param {object} options - Configuration options
+ * @param {number} [options.maxSuggestions=8] - Maximum number of suggestions to return
+ * @param {number} [options.debounceMs=50] - Debounce delay for input processing
+ * @param {boolean} [options.showOnEmpty=true] - Show suggestions when input is empty
+ * @param {boolean} [options.enableCache=true] - Enable suggestion caching
+ * @param {boolean} [options.enableLearning=true] - Enable learning from user behavior
+ * @param {number} [options.minQueryLength=1] - Minimum query length to show suggestions
+ *
+ * @returns {object} Suggestion state and methods
+ * @property {SuggestionItem[]} suggestions - Array of suggestion items with scores
+ * @property {boolean} isLoading - Whether suggestions are being generated
+ * @property {Function} updateCommandUsage - Record a command usage for learning
+ * @property {Function} clearCache - Clear the suggestion cache
+ * @property {Function} getUserContext - Get current user context data
+ * @property {Function} setUserContext - Update user context data
+ *
+ * @example
+ * ```tsx
+ * const {
+ *   suggestions,
+ *   isLoading,
+ *   updateCommandUsage
+ * } = useCommandSuggestions(
+ *   input,
+ *   ["help", "about", "skills", "projects"],
+ *   { maxSuggestions: 5, enableLearning: true }
+ * );
+ *
+ * // When user executes a command
+ * updateCommandUsage("help");
+ * ```
  */
 export function useCommandSuggestions(
   input: string,
@@ -309,7 +353,7 @@ export function useCommandSuggestions(
 ) {
   const {
     maxSuggestions = 8,
-    debounceMs = 50, // Reduced for more responsive feel
+    debounceMs = 50,
     showOnEmpty = true,
     enableCache = true,
     enableLearning = true,
@@ -326,15 +370,12 @@ export function useCommandSuggestions(
     totalCommands: 0,
   }));
 
-  // Refs for persistent data
   const cacheRef = useRef(new SuggestionCache());
   const commandMetadataRef = useRef(new Map(Object.entries(COMMAND_METADATA)));
   const lastQueryRef = useRef("");
 
-  // Debounced input for performance
   const debouncedInput = useDebouncedValue(input.trim(), debounceMs);
 
-  // Update command metadata with usage frequency
   const updateCommandUsage = useCallback(
     (command: string) => {
       if (!enableLearning) return;
@@ -342,23 +383,19 @@ export function useCommandSuggestions(
       setUserContext((prev) => {
         const newContext = { ...prev };
 
-        // Update recent commands
         newContext.recentCommands = [
           command,
           ...prev.recentCommands.filter((c) => c !== command),
         ].slice(0, 10);
 
-        // Update frequency
         const currentFreq = prev.frequentCommands.get(command) || 0;
         newContext.frequentCommands.set(command, currentFreq + 1);
 
-        // Update total commands
         newContext.totalCommands++;
 
         return newContext;
       });
 
-      // Update metadata
       const metadata = commandMetadataRef.current.get(command);
       if (metadata) {
         metadata.frequency++;
@@ -368,7 +405,6 @@ export function useCommandSuggestions(
     [enableLearning],
   );
 
-  // Generate contextual suggestions based on user behavior
   const generateContextualSuggestions = useCallback(
     (query: string): SuggestionItem[] => {
       console.log("generateContextualSuggestions called:", {
@@ -380,11 +416,9 @@ export function useCommandSuggestions(
 
       const results: SuggestionItem[] = [];
 
-      // If query is empty, show popular/recent commands
       if (!query && showOnEmpty) {
         console.log("Generating empty query suggestions...");
 
-        // Recent commands
         userContext.recentCommands.forEach((cmd, index) => {
           if (availableCommands.includes(cmd)) {
             const metadata = commandMetadataRef.current.get(cmd);
@@ -400,7 +434,6 @@ export function useCommandSuggestions(
           }
         });
 
-        // Popular commands
         const popularCommands = [
           "help",
           "about",
@@ -428,7 +461,6 @@ export function useCommandSuggestions(
         return results.slice(0, maxSuggestions);
       }
 
-      // Generate suggestions for non-empty query
       const uniqueCommands = Array.from(new Set(availableCommands));
 
       for (const command of uniqueCommands) {
@@ -439,7 +471,6 @@ export function useCommandSuggestions(
           const isRecent = userContext.recentCommands.includes(command);
           const frequency = userContext.frequentCommands.get(command) || 0;
 
-          // Apply context-based scoring bonuses
           let adjustedScore = score;
           if (isRecent) adjustedScore += 15;
           if (frequency > 0) adjustedScore += Math.min(frequency * 2, 20);
@@ -468,16 +499,13 @@ export function useCommandSuggestions(
         }
       }
 
-      // Sort by score and return top results
       return results.sort((a, b) => b.score - a.score).slice(0, maxSuggestions);
     },
     [availableCommands, userContext, showOnEmpty, maxSuggestions],
   );
 
-  // Memoized suggestion generation with caching
   const generateSuggestions = useMemo(() => {
     return (query: string): SuggestionItem[] => {
-      // Check cache first
       if (enableCache) {
         const cached = cacheRef.current.get(query);
         if (cached) {
@@ -488,7 +516,6 @@ export function useCommandSuggestions(
       setIsLoading(true);
       const suggestions = generateContextualSuggestions(query);
 
-      // Cache the results
       if (enableCache) {
         cacheRef.current.set(query, suggestions);
       }
@@ -498,7 +525,6 @@ export function useCommandSuggestions(
     };
   }, [generateContextualSuggestions, enableCache]);
 
-  // Update suggestions when debounced input changes
   useEffect(() => {
     console.log("useCommandSuggestions effect:", {
       debouncedInput,
@@ -522,7 +548,6 @@ export function useCommandSuggestions(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedInput, generateSuggestions, minQueryLength, showOnEmpty]);
 
-  // Public API
   return {
     suggestions,
     isLoading,

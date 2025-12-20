@@ -1,9 +1,17 @@
 import { MetadataRoute } from "next";
 
 /**
- * Robots.txt for the application
- * Optimized for Google indexing and SEO
- * @returns {MetadataRoute.Robots} The robots.txt
+ * Generates robots.txt configuration for the application
+ * @returns Robots.txt rules for search engine crawlers
+ * @remarks
+ * Comprehensive crawler management with:
+ * - Universal rules for all crawlers with allowed/disallowed paths
+ * - Specific rules for major search engines (Google, Bing, DuckDuckGo)
+ * - Bot-specific configurations (Googlebot, Bingbot, etc.)
+ * - API and admin route protection
+ * - Crawl delay settings to prevent server overload
+ * - GPTBot blocking for AI training prevention
+ * - Sitemap reference for better indexing
  */
 export default function robots(): MetadataRoute.Robots {
   const baseUrl =
@@ -83,7 +91,7 @@ export default function robots(): MetadataRoute.Robots {
         crawlDelay: 1,
       },
       {
-        userAgent: "Slurp", // Yahoo
+        userAgent: "Slurp",
         allow: ["/", "/projects", "/skills", "/about", "/contact"],
         disallow: [
           "/api/",
@@ -109,11 +117,11 @@ export default function robots(): MetadataRoute.Robots {
         crawlDelay: 1,
       },
       {
-        userAgent: "GPTBot", // OpenAI's web crawler
+        userAgent: "GPTBot",
         disallow: "/",
       },
       {
-        userAgent: "CCBot", // Common Crawl
+        userAgent: "CCBot",
         allow: ["/", "/projects", "/skills", "/about", "/contact"],
         disallow: [
           "/api/",

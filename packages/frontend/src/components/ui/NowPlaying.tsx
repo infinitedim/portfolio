@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, JSX } from "react";
 import { Music, Play, Pause, ExternalLink, Clock } from "lucide-react";
 
-// Conditional tRPC import to avoid SSR issues
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let trpc: any = null;
 if (typeof window !== "undefined") {
@@ -31,7 +30,6 @@ export function NowPlaying({ onClose }: NowPlayingProps): JSX.Element {
   const [progress, setProgress] = useState(0);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Use tRPC query for now playing data (with fallback)
   const fallbackData = {
     data: null,
     refetch: () => Promise.resolve(),
@@ -43,7 +41,7 @@ export function NowPlaying({ onClose }: NowPlayingProps): JSX.Element {
     refetch,
     isLoading: isFetching,
   } = trpc?.spotify?.nowPlaying?.useQuery?.(undefined, {
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 30000,
     refetchOnWindowFocus: true,
     retry: 3,
     retryDelay: 1000,
@@ -53,7 +51,6 @@ export function NowPlaying({ onClose }: NowPlayingProps): JSX.Element {
     setIsLoading(isFetching);
     setError(null);
 
-    // Set up progress updates every second
     progressIntervalRef.current = setInterval(() => {
       if (nowPlaying?.isPlaying && nowPlaying.progress && nowPlaying.duration) {
         const elapsed = nowPlaying.progress + (Date.now() - Date.now());
@@ -195,7 +192,7 @@ export function NowPlaying({ onClose }: NowPlayingProps): JSX.Element {
         </button>
 
         <div className="text-center">
-          {/* Album Art */}
+          {}
           <div className="relative mx-auto mb-4">
             {nowPlaying.albumArt ? (
               <img
@@ -209,7 +206,7 @@ export function NowPlaying({ onClose }: NowPlayingProps): JSX.Element {
               </div>
             )}
 
-            {/* Play/Pause overlay */}
+            {}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-12 h-12 bg-black/50 rounded-full flex items-center justify-center">
                 {nowPlaying.isPlaying ? (
@@ -221,13 +218,13 @@ export function NowPlaying({ onClose }: NowPlayingProps): JSX.Element {
             </div>
           </div>
 
-          {/* Track Info */}
+          {}
           <h3 className="text-lg font-semibold text-white mb-1 line-clamp-2">
             {nowPlaying.title}
           </h3>
           <p className="text-gray-400 mb-4 line-clamp-1">{nowPlaying.artist}</p>
 
-          {/* Progress Bar */}
+          {}
           <div className="mb-4">
             <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
               <div
@@ -240,7 +237,7 @@ export function NowPlaying({ onClose }: NowPlayingProps): JSX.Element {
             </div>
           </div>
 
-          {/* Controls */}
+          {}
           <div className="flex gap-3">
             <button
               onClick={handleRefresh}
@@ -258,7 +255,7 @@ export function NowPlaying({ onClose }: NowPlayingProps): JSX.Element {
             </button>
           </div>
 
-          {/* Additional Info */}
+          {}
           {nowPlaying.album && (
             <div className="mt-4 text-sm text-gray-400">
               <p>Album: {nowPlaying.album}</p>

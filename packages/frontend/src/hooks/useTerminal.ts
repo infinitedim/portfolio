@@ -22,7 +22,6 @@ import {
 import { useCommandHistory } from "./useCommandHistory";
 import { generateId } from "@/lib/utils/utils";
 
-// Lazy load commands that depend on RoadmapService to avoid SSR issues
 const getSkillsCommand = async () => {
   if (typeof window === "undefined") return null;
   try {
@@ -77,25 +76,68 @@ const SPECIAL_COMMANDS = {
 } as const;
 
 /**
- * A custom React hook to manage the state and logic of the terminal interface.
+ * Comprehensive terminal management hook with command execution and history
  *
- * This hook encapsulates the entire terminal functionality, including:
- * - Managing command history (both for display and for navigation).
- * - Parsing and executing commands.
- * - Handling the input state and processing status.
- * @param {Function} onOpenDemo - The function to open a demo.
- * @param {Function} onOpenNowPlaying - The function to open the now playing.
- * @param {Function} onOpenAuth - The function to open the auth.
- * @returns {object} An object containing the terminal's state and functions to interact with it.
- * @property {TerminalHistory[]} history The list of past commands and their outputs.
- * @property {string} currentInput The current value of the terminal input field.
- * @property {Dispatch<SetStateAction<string>>} setCurrentInput Function to update the current input value.
- * @property {boolean} isProcessing A boolean flag indicating if a command is currently being executed.
- * @property {(input: string) => Promise<CommandOutput | null>} executeCommand Function to parse and execute a command string.
- * @property {(input: string, output: CommandOutput) => void} addToHistory Function to add a new entry to the visible terminal history.
- * @property {(direction: "up" | "down") => string} navigateHistory Function to navigate through the command history for the input field.
- * @property {() => void} clearHistory Function to clear all entries from the visible terminal history.
- * @property {string[]} commandHistory The list of previously executed command strings.
+ * This hook encapsulates the entire terminal functionality including:
+ * - Command parsing and execution
+ * - History management (display and navigation)
+ * - Command suggestions and autocompletion
+ * - Performance metrics and analytics
+ * - Error handling and recovery
+ * - localStorage persistence
+ * - Special command handling (clear, theme, font)
+ *
+ * @param {Function} [onOpenDemo] - Callback to open project demos
+ * @param {Function} [onOpenNowPlaying] - Callback to open Spotify now playing
+ * @param {Function} [onOpenAuth] - Callback to open authentication
+ * @param {object} [themePerformance] - Theme performance metrics object
+ * @param {Function} [themePerformance.getPerformanceReport] - Get theme performance report
+ * @param {object} [themePerformance.themeMetrics] - Theme metrics data
+ * @param {Function} [themePerformance.resetMetrics] - Reset performance metrics
+ *
+ * @returns {object} Terminal state and functions
+ * @property {TerminalHistory[]} history - Array of command inputs and outputs
+ * @property {string} currentInput - Current value in the input field
+ * @property {Function} setCurrentInput - Update the current input value
+ * @property {boolean} isProcessing - Whether a command is currently executing
+ * @property {Function} executeCommand - Execute a command string
+ * @property {Function} addToHistory - Add an entry to the visible history
+ * @property {Function} navigateHistory - Navigate through command history (up/down)
+ * @property {Function} clearHistory - Clear all terminal history
+ * @property {string[]} commandHistory - Array of previously executed commands
+ * @property {string | null} lastError - Last error message or null
+ * @property {Function} clearError - Clear the last error
+ * @property {Function} getCommandSuggestions - Get command suggestions for input
+ * @property {Function} getFrequentCommands - Get most frequently used commands
+ * @property {HistoryAnalytics} commandAnalytics - Usage analytics and statistics
+ * @property {CommandHistoryEntry[]} favoriteCommands - User's favorite commands
+ * @property {CommandHistoryEntry[]} enhancedHistory - Full enhanced history entries
+ *
+ * @example
+ * ```tsx
+ * const {
+ *   history,
+ *   currentInput,
+ *   setCurrentInput,
+ *   executeCommand,
+ *   navigateHistory,
+ *   getCommandSuggestions
+ * } = useTerminal(
+ *   (id) => openDemo(id),
+ *   () => openNowPlaying(),
+ *   () => openAuth()
+ * );
+ *
+ * // Execute a command
+ * const output = await executeCommand("help");
+ *
+ * // Navigate history
+ * const previousCmd = navigateHistory("up");
+ * setCurrentInput(previousCmd);
+ *
+ * // Get suggestions
+ * const suggestions = getCommandSuggestions("hel");
+ * ```
  */
 export function useTerminal(
   onOpenDemo?: (projectId: string) => void,
@@ -125,7 +167,6 @@ export function useTerminal(
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastError, setLastError] = useState<string | null>(null);
 
-  // Enhanced command history with advanced features
   const {
     addCommand: addToAdvancedHistory,
     analytics,
@@ -139,7 +180,6 @@ export function useTerminal(
     autoCategories: true,
   });
 
-  // Legacy command history for backward compatibility
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
@@ -664,7 +704,6 @@ export function useTerminal(
 
     clearAdvancedHistory();
 
-    // Clear legacy localStorage
     try {
       localStorage.removeItem(STORAGE_KEYS.COMMAND_HISTORY);
     } catch (error) {
@@ -680,7 +719,6 @@ export function useTerminal(
     (input: string, limit: number = 8) => {
       if (!input.trim()) return [];
 
-      // Get all available commands from the CommandParser
       const allCommands = [
         "help",
         "skills",
@@ -713,17 +751,14 @@ export function useTerminal(
       const suggestions = allCommands
         .filter((command) => command.toLowerCase().includes(query))
         .sort((a, b) => {
-          // Exact match first
           if (a.toLowerCase() === query) return -1;
           if (b.toLowerCase() === query) return 1;
 
-          // Prefix matches
           const aStartsWith = a.toLowerCase().startsWith(query);
           const bStartsWith = b.toLowerCase().startsWith(query);
           if (aStartsWith && !bStartsWith) return -1;
           if (!aStartsWith && bStartsWith) return 1;
 
-          // Alphabetical order for same type matches
           return a.localeCompare(b);
         })
         .slice(0, limit);

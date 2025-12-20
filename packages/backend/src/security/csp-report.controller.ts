@@ -42,7 +42,6 @@ export class CSPReportController {
       return;
     }
 
-    // Log CSP violation for monitoring and analysis
     securityLogger.warn("CSP Violation Detected", {
       component: "CSPReportController",
       operation: "handleCSPReport",
@@ -54,12 +53,7 @@ export class CSPReportController {
       lineNumber: cspReport["line-number"],
       columnNumber: cspReport["column-number"],
       disposition: cspReport.disposition || "enforce",
-      scriptSample: cspReport["script-sample"]?.substring(0, 100), // Limit sample size
+      scriptSample: cspReport["script-sample"]?.substring(0, 100),
     });
-
-    // In production, you might want to:
-    // 1. Send alerts for certain violation patterns
-    // 2. Store reports in a database for trend analysis
-    // 3. Rate limit to prevent report flooding attacks
   }
 }

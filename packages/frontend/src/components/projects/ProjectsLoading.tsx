@@ -21,21 +21,21 @@ export function ProjectsLoading(): JSX.Element {
 function ProjectCardSkeleton(): JSX.Element {
   return (
     <div className="bg-terminal-bg border border-terminal-border rounded-lg overflow-hidden animate-pulse">
-      {/* Image Skeleton */}
+      {}
       <div className="h-48 bg-terminal-muted/10">
         <div className="w-full h-full bg-gradient-to-r from-terminal-muted/5 via-terminal-muted/10 to-terminal-muted/5 bg-[length:200%_100%] animate-shimmer" />
       </div>
 
-      {/* Content Skeleton */}
+      {}
       <div className="p-6 space-y-4">
-        {/* Title */}
+        {}
         <div className="space-y-2">
           <div className="h-6 bg-terminal-muted/20 rounded w-3/4" />
           <div className="h-4 bg-terminal-muted/10 rounded w-full" />
           <div className="h-4 bg-terminal-muted/10 rounded w-2/3" />
         </div>
 
-        {/* Technologies */}
+        {}
         <div className="space-y-2">
           <div className="h-3 bg-terminal-muted/15 rounded w-24" />
           <div className="flex gap-2">
@@ -45,7 +45,7 @@ function ProjectCardSkeleton(): JSX.Element {
           </div>
         </div>
 
-        {/* Buttons */}
+        {}
         <div className="flex gap-3">
           <div className="flex-1 h-10 bg-terminal-accent/30 rounded" />
           <div className="flex-1 h-10 bg-terminal-border rounded" />

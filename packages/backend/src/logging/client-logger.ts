@@ -7,7 +7,6 @@ import {
   logAPICall,
 } from "@portfolio/logger";
 
-// Create a client-specific logger instance
 const clientLogger = new Logger({
   level: process.env.NODE_ENV === "production" ? "warn" : "debug",
   enableConsole: true,
@@ -17,13 +16,10 @@ const clientLogger = new Logger({
   includeMetadata: true,
 });
 
-// Export the client logger as the main logger
 export const logger = clientLogger;
 
-// Export utility functions for specialized logging
 export { logSecurity, logPerformance, logAPICall };
 
-// Re-export the utility functions with client-specific implementations
 export const logSecurityEvent = (
   event: string,
   details: Record<string, unknown>,

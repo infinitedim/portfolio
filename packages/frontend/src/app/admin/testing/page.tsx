@@ -16,7 +16,16 @@ type DashboardView =
   | "testing";
 
 /**
- *
+ * Admin testing dashboard page component
+ * @returns Testing dashboard for backend system testing and monitoring
+ * @remarks
+ * Provides interface for:
+ * - Backend API testing and validation
+ * - System health monitoring
+ * - Test execution and results viewing
+ * - Protected route requiring admin authentication
+ * - Terminal-themed UI with sidebar navigation
+ * - Real-time test status updates
  */
 export default function TestingDashboard() {
   const router = useRouter();
@@ -26,7 +35,6 @@ export default function TestingDashboard() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Only run on client side
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("adminToken");
       if (!token) {
@@ -38,6 +46,10 @@ export default function TestingDashboard() {
     setIsLoading(false);
   }, [router]);
 
+  /**
+   * Handles user logout
+   * Clears authentication token and redirects to login page
+   */
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     router.push("/admin/login");
@@ -60,22 +72,22 @@ export default function TestingDashboard() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      {/* Header */}
+      { }
       <TerminalHeader
         onLogout={handleLogout}
         themeConfig={themeConfig}
       />
 
-      {/* Main Content */}
+      { }
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
+        { }
         <TerminalSidebar
           currentView={currentView}
           onViewChange={setCurrentView}
           themeConfig={themeConfig}
         />
 
-        {/* Main Content Area */}
+        { }
         <div className="flex-1 overflow-auto">
           <div className="p-6">
             <BackendTestingDashboard themeConfig={themeConfig} />

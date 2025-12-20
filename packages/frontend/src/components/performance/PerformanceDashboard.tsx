@@ -27,7 +27,6 @@ export function PerformanceDashboard({
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // Refresh report periodically
   useEffect(() => {
     if (!autoRefresh || !isOpen) return;
 
@@ -38,7 +37,6 @@ export function PerformanceDashboard({
     return () => clearInterval(interval);
   }, [autoRefresh, isOpen]);
 
-  // Refresh on open
   useEffect(() => {
     if (isOpen) {
       setReport(PerformanceMonitor.getInstance().getReport());
@@ -88,7 +86,7 @@ export function PerformanceDashboard({
           color: themeConfig.colors.text,
         }}
       >
-        {/* Header */}
+        {}
         <div
           className="flex items-center justify-between p-6 border-b"
           style={{ borderColor: themeConfig.colors.border }}
@@ -141,7 +139,7 @@ export function PerformanceDashboard({
         </div>
 
         <div className="flex h-[calc(90vh-100px)]">
-          {/* Sidebar */}
+          {}
           <div
             className="w-48 border-r p-4 overflow-y-auto"
             style={{ borderColor: themeConfig.colors.border }}
@@ -184,7 +182,7 @@ export function PerformanceDashboard({
               ))}
             </div>
 
-            {/* Quick Actions */}
+            {}
             <div className="mt-6">
               <h3
                 className="font-semibold mb-3"
@@ -235,9 +233,9 @@ export function PerformanceDashboard({
             </div>
           </div>
 
-          {/* Main Content */}
+          {}
           <div className="flex-1 p-6 overflow-y-auto">
-            {/* Summary Cards */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <div
                 className="p-4 rounded border"
@@ -316,7 +314,7 @@ export function PerformanceDashboard({
               </div>
             </div>
 
-            {/* Recommendations */}
+            {}
             {report.recommendations.length > 0 && (
               <div className="mb-6">
                 <h3
@@ -342,7 +340,7 @@ export function PerformanceDashboard({
               </div>
             )}
 
-            {/* Metrics Table */}
+            {}
             <div>
               <h3
                 className="font-semibold mb-3"

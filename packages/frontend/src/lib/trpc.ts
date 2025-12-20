@@ -2,10 +2,8 @@ import { createTRPCReact } from "@trpc/react-query";
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import type { AppRouter } from "@/lib/trpc/serverless-router";
 
-// Create tRPC React hooks with proper typing
 export const trpc = createTRPCReact<AppRouter>();
 
-// Create tRPC client for direct calls (non-hook usage) - only on client side
 let trpcClient: ReturnType<typeof createTRPCProxyClient<AppRouter>> | null =
   null;
 
@@ -15,14 +13,11 @@ let trpcClient: ReturnType<typeof createTRPCProxyClient<AppRouter>> | null =
  */
 function getTRPCUrl(): string {
   if (typeof window !== "undefined") {
-    // Browser: use relative URL for internal API route
     return "/api/trpc";
   }
-  // SSR: use absolute URL
   return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api/trpc";
 }
 
-// Only create the client on the client side
 if (typeof window !== "undefined") {
   try {
     trpcClient = createTRPCProxyClient<AppRouter>({
@@ -31,9 +26,6 @@ if (typeof window !== "undefined") {
           url: getTRPCUrl(),
           headers: async () => {
             try {
-              // Import authService dynamically to get current in-memory token
-              // This aligns with the secure token storage pattern used by AuthService
-              // which keeps access tokens in memory only (not localStorage)
               const { authService } = await import("./auth/authService");
               const memoryToken = authService.getAccessToken();
               if (memoryToken) {
@@ -53,7 +45,6 @@ if (typeof window !== "undefined") {
   }
 }
 
-// Export a function to get the client safely
 /**
  *
  */

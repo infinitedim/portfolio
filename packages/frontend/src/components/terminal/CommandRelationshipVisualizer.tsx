@@ -171,7 +171,7 @@ export function CommandRelationshipVisualizer({
           borderColor: themeConfig.colors.border,
         }}
       >
-        {/* Header */}
+        {}
         <div
           className="px-6 py-4 border-b flex items-center justify-between"
           style={{
@@ -239,7 +239,7 @@ export function CommandRelationshipVisualizer({
           </div>
         </div>
 
-        {/* Content */}
+        {}
         <div className="flex h-full">
           <div className="flex-1 overflow-hidden">
             {viewMode === "network" && (
@@ -435,7 +435,7 @@ export function CommandRelationshipVisualizer({
             )}
           </div>
 
-          {/* Sidebar */}
+          {}
           <div
             className="w-80 border-l p-6 overflow-y-auto"
             style={{
@@ -586,7 +586,7 @@ export function CommandRelationshipVisualizer({
           </div>
         </div>
 
-        {/* Footer */}
+        {}
         <div
           className="px-6 py-3 border-t text-sm"
           style={{

@@ -8,7 +8,16 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/lib/auth/AuthContext";
 
 /**
- *
+ * Admin login page component
+ * @returns Login page with terminal-themed authentication form
+ * @remarks
+ * Handles admin authentication with:
+ * - Automatic redirect if already authenticated
+ * - Terminal-styled login form
+ * - Back button to return to home page
+ * - Theme configuration support
+ * - Loading state management
+ * - Success callback for post-login navigation
  */
 export default function AdminLoginPage() {
   const { themeConfig } = useTheme();
@@ -16,16 +25,22 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const [isBackHovered, setIsBackHovered] = useState(false);
 
-  // Redirect if already authenticated
   if (!isLoading && isAuthenticated) {
     router.push("/admin");
     return null;
   }
 
+  /**
+   * Navigates back to the home page
+   */
   const handleBack = () => {
     router.push("/");
   };
 
+  /**
+   * Handles successful login
+   * Redirects to admin dashboard after authentication
+   */
   const handleLoginSuccess = () => {
     router.push("/admin");
   };
@@ -38,10 +53,10 @@ export default function AdminLoginPage() {
         color: themeConfig.colors.text,
       }}
     >
-      {/* Terminal Header */}
+      { }
       <TerminalHeader />
 
-      {/* Main Content */}
+      { }
       <div className="flex-1 flex items-center justify-center p-4">
         <div
           className="w-full max-w-md"
@@ -52,7 +67,7 @@ export default function AdminLoginPage() {
             boxShadow: `0 4px 20px ${themeConfig.colors.border}20`,
           }}
         >
-          {/* Terminal Window Header */}
+          { }
           <div
             className="flex items-center justify-between p-3 border-b"
             style={{ borderColor: themeConfig.colors.border }}
@@ -80,14 +95,13 @@ export default function AdminLoginPage() {
               </span>
             </div>
 
-            {/* Back Button */}
+            { }
             <button
               onClick={handleBack}
               onMouseEnter={() => setIsBackHovered(true)}
               onMouseLeave={() => setIsBackHovered(false)}
-              className={`px-3 py-1 text-xs font-mono rounded transition-all duration-200 ${
-                isBackHovered ? "scale-105" : "scale-100"
-              }`}
+              className={`px-3 py-1 text-xs font-mono rounded transition-all duration-200 ${isBackHovered ? "scale-105" : "scale-100"
+                }`}
               style={{
                 backgroundColor: isBackHovered
                   ? themeConfig.colors.accent
@@ -105,7 +119,7 @@ export default function AdminLoginPage() {
             </button>
           </div>
 
-          {/* Terminal Content */}
+          { }
           <div className="p-6">
             <div className="mb-6">
               <h1
@@ -128,7 +142,7 @@ export default function AdminLoginPage() {
             />
           </div>
 
-          {/* Terminal Footer */}
+          { }
           <div
             className="p-3 border-t text-xs text-center"
             style={{ borderColor: themeConfig.colors.border }}

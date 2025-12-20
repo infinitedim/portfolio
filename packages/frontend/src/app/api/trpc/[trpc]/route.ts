@@ -3,8 +3,16 @@ import { appRouter } from "@/lib/trpc/serverless-router";
 import type { NextRequest } from "next/server";
 
 /**
- * tRPC handler for Next.js App Router
- * This enables the tRPC router to work as serverless functions
+ * tRPC API route handler for Next.js App Router
+ * @param req - Next.js request object
+ * @returns Fetch handler response
+ * @remarks
+ * Configures tRPC to work as serverless functions with:
+ * - Dynamic route handling for all tRPC procedures
+ * - Empty context creation (can be extended for auth)
+ * - Development error logging
+ * - Both GET and POST method support
+ * - Serverless-optimized router configuration
  */
 const handler = (req: NextRequest) =>
   fetchRequestHandler({
@@ -12,7 +20,6 @@ const handler = (req: NextRequest) =>
     req,
     router: appRouter,
     createContext: async () => {
-      // Create minimal context for serverless
       return {};
     },
     onError:
@@ -25,4 +32,14 @@ const handler = (req: NextRequest) =>
         : undefined,
   });
 
-export { handler as GET, handler as POST };
+/**
+ * GET handler for tRPC API routes
+ * Handles tRPC query procedures via GET requests
+ */
+export { handler as GET };
+
+/**
+ * POST handler for tRPC API routes
+ * Handles tRPC mutation procedures via POST requests
+ */
+export { handler as POST };

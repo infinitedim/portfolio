@@ -94,7 +94,7 @@ export function AdvancedTerminalFeaturesIntegration({
 
   return (
     <div className={`space-y-6 p-6 ${className}`}>
-      {/* Header */}
+      {}
       <div className="text-center">
         <h2
           className="text-3xl font-bold mb-2"
@@ -111,7 +111,7 @@ export function AdvancedTerminalFeaturesIntegration({
         </p>
       </div>
 
-      {/* Quick Stats */}
+      {}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div
           className="p-4 rounded border text-center"
@@ -188,9 +188,9 @@ export function AdvancedTerminalFeaturesIntegration({
         </div>
       </div>
 
-      {/* Feature Panels */}
+      {}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Command History */}
+        {}
         <div
           className="p-6 rounded border"
           style={{ borderColor: themeConfig.colors.border }}
@@ -280,7 +280,7 @@ export function AdvancedTerminalFeaturesIntegration({
           </div>
         </div>
 
-        {/* Keyboard Shortcuts */}
+        {}
         <div
           className="p-6 rounded border"
           style={{ borderColor: themeConfig.colors.border }}
@@ -390,7 +390,7 @@ export function AdvancedTerminalFeaturesIntegration({
         </div>
       </div>
 
-      {/* Interactive Demo */}
+      {}
       <div
         className="p-6 rounded border"
         style={{ borderColor: themeConfig.colors.accent }}
@@ -489,7 +489,7 @@ export function AdvancedTerminalFeaturesIntegration({
         </div>
       </div>
 
-      {/* Feature Highlights */}
+      {}
       <div
         className="p-4 rounded border bg-opacity-5"
         style={{
@@ -550,7 +550,7 @@ export function AdvancedTerminalFeaturesIntegration({
         </div>
       </div>
 
-      {/* Panels */}
+      {}
       <HistorySearchPanel
         isOpen={showHistoryPanel}
         onClose={() => setShowHistoryPanel(false)}

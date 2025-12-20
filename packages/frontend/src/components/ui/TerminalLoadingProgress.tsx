@@ -3,6 +3,18 @@
 import { useState, useEffect, useRef, type JSX } from "react";
 import { useTheme } from "@/hooks/useTheme";
 
+/**
+ * Props for the TerminalLoadingProgress component
+ * @interface TerminalLoadingProgressProps
+ * @property {number} [duration] - Total animation duration in milliseconds
+ * @property {Array<string | {path: string, size?: string}>} [files] - Files to simulate loading
+ * @property {string} [completionText] - Text to display on completion
+ * @property {() => void} [onComplete] - Completion callback
+ * @property {boolean} [autoStart] - Whether to start automatically
+ * @property {boolean} [showSystemInfo] - Show system information
+ * @property {boolean} [showProgressBar] - Show progress bar
+ * @property {boolean} [enableTypewriter] - Enable typewriter effect
+ */
 interface TerminalLoadingProgressProps {
   duration?: number;
   files?: Array<string | { path: string; size?: string }>;
@@ -52,23 +64,23 @@ const DEFAULT_FILES = [
 ];
 
 /**
- * A React component that renders a terminal-style loading animation.
- * This component simulates the loading or processing progress of a list of files one by one,
- * similar to what you might see during package installations (`npm install`) or system updates (`apt update`).
- * @param {object} props - The props for the TerminalLoadingProgress component.
- * @param {string[]} props.files - An array of strings containing the names of files or items to simulate loading.
- * @param {number} [props.duration] - The total duration in milliseconds for the entire loading animation to complete. Defaults to 5000.
- * @param {string} [props.completionText] - The text to display after all files have finished processing. Defaults to "Complete!".
- * @param {() => void} [props.onComplete] - An optional callback function to execute when the loading animation is finished.
- * @param {boolean} [props.autoStart] - If `true`, the animation starts automatically when the component is first rendered. Defaults to `true`.
- * @returns {JSX.Element} The rendered terminal loading progress component.
+ * Terminal-style loading animation with file loading simulation
+ * Mimics npm install or system update style loading sequences
+ * @param {TerminalLoadingProgressProps} props - Component props
+ * @param {number} [props.duration=3000] - Animation duration in ms
+ * @param {Array<string | {path: string, size?: string}>} [props.files] - Files to load
+ * @param {string} [props.completionText] - Completion message
+ * @param {() => void} [props.onComplete] - Completion callback
+ * @param {boolean} [props.autoStart=true] - Auto-start animation
+ * @param {boolean} [props.showSystemInfo=true] - Show system info
+ * @returns {JSX.Element} The terminal loading progress component
  * @example
- * ```jsx
+ * ```tsx
  * <TerminalLoadingProgress
- *   files={['package.json', 'index.js', 'styles.css', 'README.md']}
  *   duration={3000}
- *   completionText="All files loaded successfully."
- *   onComplete={() => console.log('Loading complete!')}
+ *   completionText="Build complete!"
+ *   onComplete={() => console.log('Done')}
+ *   files={['package.json', 'index.tsx']}
  * />
  * ```
  */
@@ -90,7 +102,6 @@ export function TerminalLoadingProgress({
   const [completionTime, setCompletionTime] = useState<number | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Initialize files
   useEffect(() => {
     if (!mounted) return;
 
@@ -113,7 +124,6 @@ export function TerminalLoadingProgress({
     }
   }, [files, autoStart, showSystemInfo, mounted]);
 
-  // Enhanced loading effect with realistic timing
   useEffect(() => {
     if (!startTime || isComplete) return;
 
@@ -136,7 +146,6 @@ export function TerminalLoadingProgress({
       setCurrentFileIndex(currentIndex);
       const fileStartTime = Date.now();
 
-      // Update system info based on current file
       if (showSystemInfo) {
         const currentFile =
           typeof files[currentIndex] === "string"
@@ -165,10 +174,8 @@ export function TerminalLoadingProgress({
         }),
       );
 
-      // Update global progress
       setGlobalProgress(Math.round((currentIndex / files.length) * 100));
 
-      // Complete the file after a realistic delay
       setTimeout(() => {
         const loadTime = Date.now() - fileStartTime;
         setLoadingFiles((prev) =>
@@ -187,7 +194,6 @@ export function TerminalLoadingProgress({
     return () => clearInterval(interval);
   }, [startTime, duration, files, isComplete, onComplete, showSystemInfo]);
 
-  // Auto-scroll to keep current file visible
   useEffect(() => {
     if (currentFileIndex >= 0 && scrollContainerRef.current) {
       const currentElement = scrollContainerRef.current.querySelector(
@@ -259,7 +265,7 @@ export function TerminalLoadingProgress({
       aria-label="Loading files"
       suppressHydrationWarning={true}
     >
-      {/* Header with animated logo and progress */}
+      { }
       <div
         className="text-center border-b pb-3 mb-4"
         style={{
@@ -274,7 +280,7 @@ export function TerminalLoadingProgress({
           <span className="text-lg font-bold">Terminal Portfolio</span>
         </div>
 
-        {/* Progress bar */}
+        { }
         <div className="w-full bg-gray-800 rounded-full h-2 mb-2">
           <div
             className="h-2 rounded-full transition-all duration-300 ease-out"
@@ -286,7 +292,7 @@ export function TerminalLoadingProgress({
           />
         </div>
 
-        {/* Status info */}
+        { }
         <div className="flex items-center justify-between text-xs">
           <span style={{ color: themeConfig.colors.muted }}>
             {systemInfo || "Initializing..."}
@@ -298,7 +304,7 @@ export function TerminalLoadingProgress({
         </div>
       </div>
 
-      {/* File loading list */}
+      { }
       <div className="space-y-1">
         {loadingFiles.map((file, index) => {
           const isCurrentFile = index === currentFileIndex;
@@ -367,7 +373,7 @@ export function TerminalLoadingProgress({
         })}
       </div>
 
-      {/* Completion message */}
+      { }
       {isComplete && (
         <div
           className="mt-6 pt-4 border-t"

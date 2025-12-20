@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import type { FontName } from "@/types/font";
 import { fonts, defaultFont } from "@/lib/fonts/fontConfig";
 
-// Constants
 const STORAGE_KEY = "terminal-font" as const;
 
 /**
@@ -23,7 +22,6 @@ export function useFont() {
   const [mounted, setMounted] = useState(false);
   const isMountedRef = useRef(false);
 
-  // Handle mounting
   useEffect(() => {
     setMounted(true);
     isMountedRef.current = true;
@@ -33,7 +31,6 @@ export function useFont() {
     };
   }, []);
 
-  // Load font from localStorage
   useEffect(() => {
     if (!mounted || typeof window === "undefined") return;
 
@@ -47,14 +44,12 @@ export function useFont() {
     }
   }, [mounted]);
 
-  // Apply font CSS custom properties
   useEffect(() => {
     if (!mounted || typeof window === "undefined") return;
 
     try {
       localStorage.setItem(STORAGE_KEY, font);
 
-      // Apply font CSS custom properties
       const root = document.documentElement;
       const fontConfig = fonts[font];
 
@@ -66,13 +61,11 @@ export function useFont() {
       root.style.setProperty("--terminal-font-family", fontConfig.family);
       root.style.setProperty("--terminal-font-weight", fontConfig.weight);
 
-      // Enable/disable font ligatures
       root.style.setProperty(
         "--terminal-font-ligatures",
         fontConfig.ligatures ? "normal" : "none",
       );
 
-      // Apply font class to body
       document.body.className = document.body.className.replace(
         /font-\w+/g,
         "",

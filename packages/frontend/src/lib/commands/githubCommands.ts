@@ -107,7 +107,7 @@ async function getUserRepos(username: string): Promise<CommandOutput> {
     }
 
     const repoList = repos
-      .slice(0, 10) // Show only first 10 repos
+      .slice(0, 10)
       .map((repo) => {
         const language = repo.language || "Unknown";
         const stars = repo.stargazers_count;
@@ -211,7 +211,7 @@ async function getRepoCommits(
     }
 
     const commitList = commits
-      .slice(0, 5) // Show only first 5 commits
+      .slice(0, 5)
       .map((commit) => {
         const date = new Date(commit.commit.author.date).toLocaleDateString();
         return `🔨 ${commit.commit.message.split("\n")[0]}\n   👤 ${commit.commit.author.name}\n   📅 ${date}\n   🔗 ${commit.commit}`;
@@ -329,7 +329,7 @@ async function searchRepos(query: string): Promise<CommandOutput> {
     }
 
     const repoList = repos.items
-      .slice(0, 5) // Show only first 5 results
+      .slice(0, 5)
       .map((repo) => {
         const language = repo.language || "Unknown";
         const stars = repo.stargazers_count;
@@ -387,7 +387,7 @@ async function getStarredRepos(username: string): Promise<CommandOutput> {
     }
 
     const repoList = repos
-      .slice(0, 5) // Show only first 5 starred repos
+      .slice(0, 5)
       .map((repo) => {
         const language = repo.language || "Unknown";
         const stars = repo.stargazers_count;
@@ -450,7 +450,7 @@ async function getUserGists(username: string): Promise<CommandOutput> {
     }
 
     const gistList = gists
-      .slice(0, 5) // Show only first 5 gists
+      .slice(0, 5)
       .map(
         (gist: {
           description: string | null;

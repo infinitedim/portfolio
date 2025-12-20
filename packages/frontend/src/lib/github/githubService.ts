@@ -59,7 +59,7 @@ export class GitHubService {
   private static instance: GitHubService;
   private baseUrl = "https://api.github.com";
   private cache = new Map<string, { data: unknown; timestamp: number }>();
-  private cacheTimeout = 5 * 60 * 1000; // 5 minutes
+  private cacheTimeout = 5 * 60 * 1000;
 
   private constructor() {}
 
@@ -97,7 +97,6 @@ export class GitHubService {
 
     const data = await response.json();
 
-    // Cache the response
     this.cache.set(cacheKey, {
       data,
       timestamp: Date.now(),
@@ -193,7 +192,6 @@ export class GitHubService {
     );
   }
 
-  // Helper methods
   async getAllUserRepos(username: string): Promise<GitHubRepo[]> {
     const allRepos: GitHubRepo[] = [];
     let page = 1;
@@ -248,7 +246,6 @@ export class GitHubService {
     return reposWithTopics;
   }
 
-  // Cache management
   clearCache(): void {
     this.cache.clear();
   }

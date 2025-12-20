@@ -3,6 +3,10 @@
 import type { ThemeConfig } from "@/types/theme";
 import { useI18n } from "@/hooks/useI18n";
 
+/**
+ * Available views in the admin dashboard
+ * @typedef {"overview" | "performance" | "logs" | "blog" | "settings" | "testing"} DashboardView
+ */
 type DashboardView =
   | "overview"
   | "performance"
@@ -11,6 +15,13 @@ type DashboardView =
   | "settings"
   | "testing";
 
+/**
+ * Props for the TerminalSidebar component
+ * @interface TerminalSidebarProps
+ * @property {DashboardView} currentView - The currently active view
+ * @property {(view: DashboardView) => void} onViewChange - Callback when view changes
+ * @property {ThemeConfig} themeConfig - Theme configuration for styling
+ */
 interface TerminalSidebarProps {
   currentView: DashboardView;
   onViewChange: (view: DashboardView) => void;
@@ -31,40 +42,50 @@ const navigationItems: {
   command: string;
   icon: string;
 }[] = [
-  {
-    id: "overview",
-    labelKey: "adminOverview",
-    command: "overview",
-    icon: "🏠",
-  },
-  {
-    id: "performance",
-    labelKey: "adminPerformance",
-    command: "performance",
-    icon: "📊",
-  },
-  { id: "logs", labelKey: "adminLogs", command: "logs", icon: "📋" },
-  { id: "blog", labelKey: "adminBlogEditor", command: "blog", icon: "✏️" },
-  {
-    id: "testing",
-    labelKey: "adminBackendTesting",
-    command: "testing",
-    icon: "🧪",
-  },
-  {
-    id: "settings",
-    labelKey: "adminSettings",
-    command: "settings",
-    icon: "⚙️",
-  },
-];
+    {
+      id: "overview",
+      labelKey: "adminOverview",
+      command: "overview",
+      icon: "🏠",
+    },
+    {
+      id: "performance",
+      labelKey: "adminPerformance",
+      command: "performance",
+      icon: "📊",
+    },
+    { id: "logs", labelKey: "adminLogs", command: "logs", icon: "📋" },
+    { id: "blog", labelKey: "adminBlogEditor", command: "blog", icon: "✏️" },
+    {
+      id: "testing",
+      labelKey: "adminBackendTesting",
+      command: "testing",
+      icon: "🧪",
+    },
+    {
+      id: "settings",
+      labelKey: "adminSettings",
+      command: "settings",
+      icon: "⚙️",
+    },
+  ];
 
 /**
- *
- * @param root0
- * @param root0.currentView
- * @param root0.onViewChange
- * @param root0.themeConfig
+ * Terminal-themed navigation sidebar for admin dashboard
+ * Provides command-line style navigation with animated transitions and system status
+ * @param {TerminalSidebarProps} props - Component props
+ * @param {DashboardView} props.currentView - The currently active view
+ * @param {(view: DashboardView) => void} props.onViewChange - Callback when view changes
+ * @param {ThemeConfig} props.themeConfig - Theme configuration for styling
+ * @returns {JSX.Element} The terminal sidebar component
+ * @example
+ * ```tsx
+ * <TerminalSidebar
+ *   currentView="overview"
+ *   onViewChange={handleViewChange}
+ *   themeConfig={themeConfig}
+ * />
+ * ```
  */
 export function TerminalSidebar({
   currentView,
@@ -81,7 +102,7 @@ export function TerminalSidebar({
         backgroundColor: themeConfig.colors.bg,
       }}
     >
-      {/* Sidebar Header */}
+      { }
       <div
         className="p-4 border-b"
         style={{ borderColor: themeConfig.colors.border }}
@@ -106,17 +127,16 @@ export function TerminalSidebar({
         </div>
       </div>
 
-      {/* Navigation Menu */}
+      { }
       <div className="flex-1 p-4 space-y-2">
         {navigationItems.map((item) => (
           <button
             key={item.id}
             onClick={() => onViewChange(item.id as DashboardView)}
-            className={`w-full p-3 text-left border rounded transition-all duration-200 font-mono text-sm ${
-              currentView === item.id
+            className={`w-full p-3 text-left border rounded transition-all duration-200 font-mono text-sm ${currentView === item.id
                 ? "scale-105"
                 : "hover:scale-102 hover:opacity-80"
-            }`}
+              }`}
             style={{
               borderColor:
                 currentView === item.id
@@ -146,7 +166,7 @@ export function TerminalSidebar({
         ))}
       </div>
 
-      {/* System Status */}
+      { }
       <div
         className="p-4 border-t"
         style={{ borderColor: themeConfig.colors.border }}
@@ -176,7 +196,7 @@ export function TerminalSidebar({
           </div>
         </div>
 
-        {/* Quick Commands */}
+        { }
         <div
           className="mt-4 pt-4 border-t"
           style={{ borderColor: themeConfig.colors.border }}

@@ -1,5 +1,15 @@
 import type { ThemeConfig, ThemeName, ThemeRegistry } from "../../types/theme";
 
+/**
+ * Registry of all available terminal themes
+ * Each theme defines colors for various UI elements
+ * @example
+ * ```ts
+ * import { themes } from '@/lib/themes/themeConfig';
+ * const draculaTheme = themes.dracula;
+ * console.log(draculaTheme.colors.bg); // '#282a36'
+ * ```
+ */
 export const themes: ThemeRegistry = {
   default: {
     name: "Default Dark",
@@ -339,20 +349,65 @@ export const themes: ThemeRegistry = {
   },
 };
 
+/**
+ * Default theme identifier used on initial load
+ */
 export const defaultTheme: ThemeName = "default";
 
+/**
+ * Gets all theme names sorted alphabetically
+ * @returns Sorted array of theme names
+ * @example
+ * ```ts
+ * const themes = getSortedThemeNames();
+ * console.log(themes); // ['cyberpunk', 'default', 'dracula', ...]
+ * ```
+ */
 export const getSortedThemeNames = (): ThemeName[] => {
   return Object.keys(themes).sort() as ThemeName[];
 };
 
+/**
+ * Retrieves theme configuration by name
+ * Falls back to default theme if specified theme doesn't exist
+ * @param themeName - Name of the theme to retrieve
+ * @returns Theme configuration object
+ * @example
+ * ```ts
+ * const config = getThemeConfig('dracula');
+ * console.log(config.colors.bg); // '#282a36'
+ * ```
+ */
 export const getThemeConfig = (themeName: ThemeName): ThemeConfig => {
   return themes[themeName] || themes[defaultTheme];
 };
 
+/**
+ * Validates if a theme name exists in the registry
+ * Type guard function that narrows string to ThemeName
+ * @param themeName - Theme name to validate
+ * @returns True if theme exists, false otherwise
+ * @example
+ * ```ts
+ * if (validateTheme('dracula')) {
+ *   // themeName is now typed as ThemeName
+ * }
+ * ```
+ */
 export const validateTheme = (themeName: string): themeName is ThemeName => {
   return Object.keys(themes).includes(themeName);
 };
 
+/**
+ * Generates a text preview of theme colors
+ * @param themeName - Name of theme to preview
+ * @returns Formatted string with theme color information
+ * @example
+ * ```ts
+ * const preview = getThemePreview('dracula');
+ * console.log(preview);
+ * ```
+ */
 export const getThemePreview = (themeName: ThemeName): string => {
   const config = themes[themeName];
   if (!config) return "";

@@ -3,21 +3,44 @@
 import Link from "next/link";
 import { type JSX } from "react";
 
+/**
+ * Represents a single breadcrumb item in the navigation trail
+ * @interface BreadcrumbItem
+ * @property {string} label - Display text for the breadcrumb
+ * @property {string} href - URL path for the breadcrumb link
+ * @property {boolean} [current] - Whether this is the current page
+ */
 interface BreadcrumbItem {
   label: string;
   href: string;
   current?: boolean;
 }
 
+/**
+ * Props for the Breadcrumb component
+ * @interface BreadcrumbProps
+ * @property {BreadcrumbItem[]} items - Array of breadcrumb items to display
+ * @property {string} [className] - Additional CSS classes
+ */
 interface BreadcrumbProps {
   items: BreadcrumbItem[];
   className?: string;
 }
 
 /**
- * Breadcrumb component for better SEO and navigation
- * @param {BreadcrumbProps} props - Breadcrumb properties
- * @returns {JSX.Element} The breadcrumb component
+ * Breadcrumb navigation component with structured data for SEO
+ * Displays navigation trail and includes schema.org markup for search engines
+ * @param {BreadcrumbProps} props - Component props
+ * @param {BreadcrumbItem[]} props.items - Array of breadcrumb items to display
+ * @param {string} [props.className] - Additional CSS classes
+ * @returns {JSX.Element} The breadcrumb navigation component
+ * @example
+ * ```tsx
+ * <Breadcrumb items={[
+ *   { label: 'Home', href: '/' },
+ *   { label: 'Projects', href: '/projects', current: true }
+ * ]} />
+ * ```
  */
 export function Breadcrumb({
   items,
@@ -26,7 +49,6 @@ export function Breadcrumb({
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL || "https://infinitedim.site";
 
-  // Generate structured data for breadcrumbs
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -40,7 +62,7 @@ export function Breadcrumb({
 
   return (
     <>
-      {/* Structured data for SEO */}
+      { }
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -48,7 +70,7 @@ export function Breadcrumb({
         }}
       />
 
-      {/* Visual breadcrumb */}
+      { }
       <nav
         aria-label="Breadcrumb"
         className={`flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 ${className}`}

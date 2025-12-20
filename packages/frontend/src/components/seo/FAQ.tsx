@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type JSX } from "react";
-// Simple chevron icons without external dependency
 const ChevronDownIcon = () => (
   <svg
     className="w-5 h-5 text-gray-500"
@@ -30,11 +29,24 @@ const ChevronUpIcon = () => (
   </svg>
 );
 
+/**
+ * Represents a single FAQ item with question and answer
+ * @interface FAQItem
+ * @property {string} question - The question text
+ * @property {string} answer - The answer text
+ */
 interface FAQItem {
   question: string;
   answer: string;
 }
 
+/**
+ * Props for the FAQ component
+ * @interface FAQProps
+ * @property {FAQItem[]} items - Array of FAQ items to display
+ * @property {string} [title] - Optional title for the FAQ section
+ * @property {string} [className] - Additional CSS classes
+ */
 interface FAQProps {
   items: FAQItem[];
   title?: string;
@@ -42,9 +54,22 @@ interface FAQProps {
 }
 
 /**
- * FAQ component with structured data for SEO
- * @param {FAQProps} props - FAQ properties
- * @returns {JSX.Element} The FAQ component
+ * FAQ component with collapsible items and structured data for SEO
+ * Implements schema.org FAQPage markup for enhanced search engine visibility
+ * @param {FAQProps} props - Component props
+ * @param {FAQItem[]} props.items - Array of FAQ items to display
+ * @param {string} [props.title] - Optional title for the FAQ section (default: "Frequently Asked Questions")
+ * @param {string} [props.className] - Additional CSS classes
+ * @returns {JSX.Element} The FAQ component with expandable items
+ * @example
+ * ```tsx
+ * <FAQ
+ *   title="Common Questions"
+ *   items={[
+ *     { question: "What is this?", answer: "This is an FAQ." }
+ *   ]}
+ * />
+ * ```
  */
 export function FAQ({
   items,
@@ -63,7 +88,6 @@ export function FAQ({
     setOpenItems(newOpenItems);
   };
 
-  // Generate structured data for FAQ
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -79,7 +103,7 @@ export function FAQ({
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* Structured data for SEO */}
+      { }
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -87,12 +111,12 @@ export function FAQ({
         }}
       />
 
-      {/* FAQ Title */}
+      { }
       <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
         {title}
       </h2>
 
-      {/* FAQ Items */}
+      { }
       <div className="space-y-2">
         {items.map((item, index) => (
           <div

@@ -25,7 +25,6 @@ async function assertLoginRate(ctx: TrpcContext): Promise<void> {
     if (error instanceof TRPCError) {
       throw error;
     }
-    // Redis failed, use in-memory fallback via security service
     const rateLimitResult = await ctx.services.security.checkRateLimit(
       ip,
       "login",
@@ -125,7 +124,6 @@ export const authRouter = router({
           component: "AuthRouter",
           operation: "logout",
         });
-        // Logout should always succeed, even if there's an error
         return { success: true } as const;
       }
     }),
@@ -154,7 +152,6 @@ export const authRouter = router({
       }
     }),
 
-  // Spotify OAuth login
   spotifyLogin: publicProcedure
     .input(z.object({ code: z.string().min(1) }))
     .mutation(async ({ input, ctx }) => {
@@ -164,7 +161,6 @@ export const authRouter = router({
       try {
         const { code } = input;
 
-        // Exchange code for tokens
         const tokenResponse = await fetch(
           "https://accounts.spotify.com/api/token",
           {

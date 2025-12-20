@@ -5,6 +5,12 @@ import { type JSX, Suspense } from "react";
 import { TerminalLoadingProgress } from "../components/ui/TerminalLoadingProgress";
 import { HomeTerminalHeader } from "../components/ui/HomeTerminalHeader";
 
+/**
+ * Metadata for the home page
+ * Includes SEO optimization with keywords, Open Graph, and Twitter Card data
+ * @remarks
+ * Canonical URL set to root for SEO best practices
+ */
 export const metadata: Metadata = {
   title: "Terminal Portfolio | Full-Stack Developer",
   description:
@@ -51,13 +57,19 @@ export const metadata: Metadata = {
 };
 
 /**
- * Homepage with SSR optimizations and streaming content
- * @returns {JSX.Element} The homepage
+ * Home page component displaying the terminal portfolio interface
+ * @returns The home page with terminal component and SSR optimizations
+ * @remarks
+ * This is the main landing page using Next.js App Router with:
+ * - Server-side rendering for initial content
+ * - Suspense boundaries for progressive enhancement
+ * - Screen reader accessibility with semantic HTML
+ * - Structured data for SEO
  */
 export default function HomePage(): JSX.Element {
   return (
     <>
-      {/* SEO-friendly static content for search engines */}
+      { }
       <div className="sr-only">
         <h1>Terminal Portfolio - Full-Stack Developer</h1>
         <p>
@@ -99,7 +111,7 @@ export default function HomePage(): JSX.Element {
         </Suspense>
       </main>
 
-      {/* Structured data for the homepage */}
+      { }
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

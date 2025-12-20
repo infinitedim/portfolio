@@ -69,7 +69,7 @@ export function RoadmapOverview({
         color: themeConfig.colors.text,
       }}
     >
-      {/* Header */}
+      {}
       <div className="flex items-center justify-between">
         <h2
           className={`${compact ? "text-base" : "text-lg"} font-bold`}
@@ -88,14 +88,14 @@ export function RoadmapOverview({
         </div>
       </div>
 
-      {/* Progress Bar */}
+      {}
       <ProgressBar
         progress={overallProgress}
         height={compact ? "h-2" : "h-3"}
         animated
       />
 
-      {/* Stats Grid */}
+      {}
       <div
         className={`grid ${compact ? "grid-cols-2" : "grid-cols-4"} gap-3 text-center`}
       >
@@ -115,7 +115,7 @@ export function RoadmapOverview({
         ))}
       </div>
 
-      {/* Additional Info */}
+      {}
       {!compact && (
         <div
           className="pt-3 border-t text-xs opacity-75"

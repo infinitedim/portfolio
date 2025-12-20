@@ -3,6 +3,13 @@
 import { useState, useEffect, type JSX } from "react";
 import { useTheme } from "@/hooks/useTheme";
 
+/**
+ * Props for the CommandLoadingIndicator component
+ * @interface CommandLoadingIndicatorProps
+ * @property {string} [command] - The command being processed
+ * @property {boolean} [visible] - Whether indicator is visible
+ * @property {string[]} [messages] - Custom loading messages
+ */
 interface CommandLoadingIndicatorProps {
   command?: string;
   visible?: boolean;
@@ -18,7 +25,21 @@ const DEFAULT_MESSAGES = [
 ];
 
 /**
- * A loading indicator that shows when commands are being processed
+ * Loading indicator for command processing
+ * Shows animated spinner and cycling messages while commands execute
+ * @param {CommandLoadingIndicatorProps} props - Component props
+ * @param {string} [props.command] - Command being processed
+ * @param {boolean} [props.visible=false] - Visibility state
+ * @param {string[]} [props.messages] - Custom messages (defaults to DEFAULT_MESSAGES)
+ * @returns {JSX.Element | null} The loading indicator or null
+ * @example
+ * ```tsx
+ * <CommandLoadingIndicator
+ *   command="help"
+ *   visible={isLoading}
+ *   messages={['Processing...', 'Almost done...']}
+ * />
+ * ```
  */
 export function CommandLoadingIndicator({
   command,
@@ -29,7 +50,6 @@ export function CommandLoadingIndicator({
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [dots, setDots] = useState("");
 
-  // Cycle through messages
   useEffect(() => {
     if (!visible) return;
 
@@ -40,7 +60,6 @@ export function CommandLoadingIndicator({
     return () => clearInterval(messageInterval);
   }, [visible, messages.length]);
 
-  // Animate dots
   useEffect(() => {
     if (!visible) return;
 
@@ -54,7 +73,6 @@ export function CommandLoadingIndicator({
     return () => clearInterval(dotInterval);
   }, [visible]);
 
-  // Reset when becoming visible
   useEffect(() => {
     if (visible) {
       setCurrentMessageIndex(0);
@@ -75,13 +93,13 @@ export function CommandLoadingIndicator({
         color: themeConfig.colors.text,
       }}
     >
-      {/* Spinning indicator */}
+      { }
       <div
         className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"
         style={{ borderColor: `${themeConfig.colors.accent} transparent` }}
       />
 
-      {/* Message */}
+      { }
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           {command && (
@@ -102,7 +120,7 @@ export function CommandLoadingIndicator({
         </div>
       </div>
 
-      {/* Pulse animation bars */}
+      { }
       <div className="flex gap-1">
         {[0, 1, 2].map((bar) => (
           <div

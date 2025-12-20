@@ -69,13 +69,11 @@ export function ThemeManager({
     console.log(`🎨 ThemeManager: Applying theme ${themeId}`);
 
     try {
-      // Apply theme immediately using the hook
       const success = changeTheme(themeId as ThemeName);
 
       if (success) {
         console.log(`✅ Successfully applied theme: ${themeId}`);
 
-        // Call parent callback if provided
         if (onApplyTheme) {
           onApplyTheme(themeId);
         }
@@ -122,10 +120,8 @@ export function ThemeManager({
     themeData: Omit<CustomTheme, "id" | "createdAt">,
   ) => {
     if (selectedTheme) {
-      // Update existing theme
       customizationService.updateCustomTheme(selectedTheme.id, themeData);
     } else {
-      // Create new theme
       customizationService.saveCustomTheme(themeData);
     }
 
@@ -135,7 +131,6 @@ export function ThemeManager({
   };
 
   if (isEditing) {
-    // Create a default theme for new theme creation
     const defaultTheme: CustomTheme = {
       id: "",
       name: "New Theme",
@@ -168,7 +163,7 @@ export function ThemeManager({
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
+      {}
       <div
         className="p-4 border-b"
         style={{ borderColor: themeConfig.colors.border }}
@@ -198,7 +193,7 @@ export function ThemeManager({
           </button>
         </div>
 
-        {/* Search and Filter Controls */}
+        {}
         <div className="flex flex-col sm:flex-row gap-4">
           <input
             type="text"
@@ -246,7 +241,7 @@ export function ThemeManager({
         </div>
       </div>
 
-      {/* Theme Grid */}
+      {}
       <div className="flex-1 overflow-auto p-4">
         {filteredThemes.length === 0 ? (
           <div className="text-center py-12">
@@ -309,7 +304,7 @@ export function ThemeManager({
                       : "none",
                   }}
                 >
-                  {/* Theme Preview */}
+                  {}
                   <div className="mb-3">
                     <div className="flex gap-1 mb-2">
                       {Object.entries(theme.colors)
@@ -328,7 +323,7 @@ export function ThemeManager({
                     </div>
                   </div>
 
-                  {/* Theme Info */}
+                  {}
                   <div className="mb-3">
                     <div className="flex items-center justify-between mb-1">
                       <h4
@@ -379,7 +374,7 @@ export function ThemeManager({
                     )}
                   </div>
 
-                  {/* Actions */}
+                  {}
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleApplyTheme(theme.id)}

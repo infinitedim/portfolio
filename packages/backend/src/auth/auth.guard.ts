@@ -15,16 +15,13 @@ export class AuthGuard implements CanActivate {
     const token = header.startsWith("Bearer ") ? header.slice(7) : header;
 
     try {
-      // Use validateToken which checks both signature AND blacklist
       const user = await this.auth.validateToken(token, req);
 
-      // Attach user onto request in a typed-safe manner
       (req as unknown as { user?: ReturnType<AuthService["verify"]> }).user =
         user ?? undefined;
 
       return Boolean(user);
     } catch {
-      // Token is invalid, expired, or blacklisted
       return false;
     }
   }

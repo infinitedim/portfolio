@@ -29,12 +29,62 @@ interface SerializedHistoryItem {
 }
 
 /**
- *  command history hook with search, favorites, and categorization
- * @param {UseHistoryOptions} options - The options for the hook
- * @param {number} options.maxHistorySize - The maximum number of history items to store
- * @param {string} options.persistKey - The key to use for localStorage
- * @param {boolean} options.categorizeCommands - Whether to categorize commands
- * @returns {object} The  history hook
+ * Command history management hook with search, favorites, and categorization
+ *
+ * Provides a simpler alternative to useCommandHistory with essential features:
+ * - Command history storage with localStorage persistence
+ * - Search and filtering capabilities
+ * - Favorite commands management
+ * - Automatic command categorization
+ * - Sort by recent, frequency, or alphabetical
+ * - Import/export functionality
+ *
+ * @param {UseHistoryOptions} [options] - Configuration options
+ * @param {number} [options.maxHistorySize=200] - Maximum number of history items to store
+ * @param {string} [options.persistKey="-terminal-history"] - localStorage key for persistence
+ * @param {boolean} [options.categorizeCommands=true] - Whether to auto-categorize commands
+ *
+ * @returns {object} History state and management functions
+ * @property {HistoryItem[]} history - Filtered and sorted history items
+ * @property {HistoryItem[]} favorites - Favorite commands (max 10)
+ * @property {Array<{command: string, count: number}>} frequentCommands - Top 10 most frequent commands
+ * @property {string[]} categories - Available categories including 'all'
+ * @property {Record<string, number>} commandFrequency - Map of command to usage count
+ * @property {string} searchQuery - Current search query
+ * @property {Function} setSearchQuery - Update search query
+ * @property {string} selectedCategory - Currently selected category filter
+ * @property {Function} setSelectedCategory - Update category filter
+ * @property {"recent" | "frequency" | "alphabetical"} sortBy - Current sort mode
+ * @property {Function} setSortBy - Update sort mode
+ * @property {Function} addToHistory - Add a command to history
+ * @property {Function} toggleFavorite - Toggle favorite status
+ * @property {Function} clearHistory - Clear all history
+ * @property {Function} exportHistory - Export as JSON file
+ * @property {Function} importHistory - Import from JSON file
+ * @property {Function} getSuggestions - Get command suggestions
+ * @property {number} totalCommands - Total commands in history
+ * @property {number} successRate - Percentage of successful commands
+ *
+ * @example
+ * ```tsx
+ * const {
+ *   history,
+ *   addToHistory,
+ *   favorites,
+ *   toggleFavorite,
+ *   searchQuery,
+ *   setSearchQuery
+ * } = useHistory({ maxHistorySize: 200 });
+ *
+ * // Add a command
+ * addToHistory("help", true, 45);
+ *
+ * // Search history
+ * setSearchQuery("theme");
+ *
+ * // Toggle favorite
+ * toggleFavorite("help");
+ * ```
  */
 export function useHistory({
   maxHistorySize = 200,
@@ -48,10 +98,8 @@ export function useHistory({
     "recent",
   );
 
-  // Debounce search query for better performance
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 200);
 
-  // Load history from localStorage on mount
   useEffect(() => {
     try {
       const savedHistory = localStorage.getItem(persistKey);
@@ -82,7 +130,6 @@ export function useHistory({
     }
   }, [persistKey]);
 
-  // Save history to localStorage when it changes
   useEffect(() => {
     try {
       localStorage.setItem(persistKey, JSON.stringify(history));
@@ -91,7 +138,6 @@ export function useHistory({
     }
   }, [history, persistKey]);
 
-  // Categorize command automatically
   const categorizeCommand = (command: string): string => {
     if (!categorizeCommands) return "general";
 
@@ -108,7 +154,6 @@ export function useHistory({
     return "general";
   };
 
-  // Add command to history
   const addToHistory = (
     command: string,
     success: boolean = true,
@@ -123,16 +168,13 @@ export function useHistory({
     };
 
     setHistory((prev) => {
-      // Remove duplicates and add new item
       const filtered = prev.filter((item) => item.command !== newItem.command);
       const updated = [newItem, ...filtered];
 
-      // Limit history size
       return updated.slice(0, maxHistorySize);
     });
   };
 
-  // Toggle favorite status
   const toggleFavorite = (command: string) => {
     setHistory((prev) =>
       prev.map((item) =>
@@ -141,7 +183,6 @@ export function useHistory({
     );
   };
 
-  // Get command frequency
   const getCommandFrequency = useMemo(() => {
     const frequency: Record<string, number> = {};
     history.forEach((item) => {
@@ -150,29 +191,24 @@ export function useHistory({
     return frequency;
   }, [history]);
 
-  // Get available categories
   const categories = useMemo(() => {
     const cats = new Set(history.map((item) => item.category || "general"));
     return ["all", ...Array.from(cats)].sort();
   }, [history]);
 
-  // Filter and sort history
   const filteredHistory = useMemo(() => {
     let filtered = history;
 
-    // Filter by search query
     if (debouncedSearchQuery.trim()) {
       filtered = filtered.filter((item) =>
         item.command.toLowerCase().includes(debouncedSearchQuery.toLowerCase()),
       );
     }
 
-    // Filter by category
     if (selectedCategory !== "all") {
       filtered = filtered.filter((item) => item.category === selectedCategory);
     }
 
-    // Sort
     switch (sortBy) {
       case "frequency":
         filtered = filtered.sort(
@@ -201,13 +237,11 @@ export function useHistory({
     getCommandFrequency,
   ]);
 
-  // Get favorites
   const favorites = useMemo(
     () => history.filter((item) => item.favorite).slice(0, 10),
     [history],
   );
 
-  // Get most frequent commands
   const frequentCommands = useMemo(() => {
     return Object.entries(getCommandFrequency)
       .sort(([, a], [, b]) => b - a)
@@ -215,13 +249,11 @@ export function useHistory({
       .map(([command, count]) => ({ command, count }));
   }, [getCommandFrequency]);
 
-  // Clear history
   const clearHistory = () => {
     setHistory([]);
     localStorage.removeItem(persistKey);
   };
 
-  // Export history
   const exportHistory = () => {
     const dataStr = JSON.stringify(history, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
@@ -233,7 +265,6 @@ export function useHistory({
     URL.revokeObjectURL(url);
   };
 
-  // Import history
   const importHistory = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -258,7 +289,6 @@ export function useHistory({
     reader.readAsText(file);
   };
 
-  // Get suggestions based on partial input
   const getSuggestions = (partialCommand: string, limit: number = 5) => {
     return history
       .filter((item) =>
@@ -269,14 +299,12 @@ export function useHistory({
   };
 
   return {
-    // Data
     history: filteredHistory,
     favorites,
     frequentCommands,
     categories,
     commandFrequency: getCommandFrequency,
 
-    // Search & Filter
     searchQuery,
     setSearchQuery,
     selectedCategory,
@@ -284,7 +312,6 @@ export function useHistory({
     sortBy,
     setSortBy,
 
-    // Actions
     addToHistory,
     toggleFavorite,
     clearHistory,
@@ -292,7 +319,6 @@ export function useHistory({
     importHistory,
     getSuggestions,
 
-    // Stats
     totalCommands: history.length,
     successRate:
       history.length > 0

@@ -27,7 +27,6 @@ export const spotifyRouter = router({
     }
   }),
 
-  // Spotify OAuth callback handler
   authCallback: publicProcedure
     .input((input: unknown) => {
       if (typeof input === "object" && input !== null && "code" in input) {

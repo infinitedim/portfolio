@@ -5,13 +5,28 @@ import { useTheme } from "@/hooks/useTheme";
 import { useI18n } from "@/hooks/useI18n";
 import { ThemeConfig } from "../../types/theme";
 
+/**
+ * Props for the TerminalHeader component
+ * @typedef {Object} TerminalHeaderProps
+ * @property {() => void} [onLogout] - Callback function when user logs out
+ * @property {ThemeConfig} [themeConfig] - Optional theme configuration override
+ */
 type TerminalHeaderProps = {
   onLogout?: () => void;
   themeConfig?: ThemeConfig;
 };
 
 /**
- *
+ * Terminal-style header for admin dashboard
+ * Displays system metrics, uptime, and status information in a terminal-themed UI
+ * @param {TerminalHeaderProps} props - Component props
+ * @param {() => void} [props.onLogout] - Callback function when user logs out
+ * @param {ThemeConfig} [props.themeConfig] - Optional theme configuration override
+ * @returns {JSX.Element} The terminal header component
+ * @example
+ * ```tsx
+ * <TerminalHeader onLogout={handleLogout} themeConfig={customTheme} />
+ * ```
  */
 export function TerminalHeader({
   onLogout: _onLogout,
@@ -32,13 +47,11 @@ export function TerminalHeader({
     diskUsage: 0,
   });
 
-  // Set client flag to prevent hydration mismatch
   useEffect(() => {
     setIsClient(true);
     setCurrentTime(new Date());
   }, []);
 
-  // Update time and system metrics every second
   useEffect(() => {
     if (!isClient) return;
 
@@ -48,32 +61,26 @@ export function TerminalHeader({
       const now = new Date();
       setCurrentTime(now);
 
-      // Calculate real uptime (time since component mounted)
       const uptimeSeconds = Math.floor((Date.now() - startTime) / 1000);
       const hours = Math.floor(uptimeSeconds / 3600);
       const minutes = Math.floor((uptimeSeconds % 3600) / 60);
       const seconds = uptimeSeconds % 60;
       const uptime = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 
-      // Simulate realistic CPU load (1min, 5min, 15min averages)
-      const baseLoad = 0.1 + Math.random() * 0.3; // Base load between 0.1-0.4
+      const baseLoad = 0.1 + Math.random() * 0.3;
       const cpuLoad = [
-        Math.round((baseLoad + Math.random() * 0.2) * 100) / 100, // 1min
-        Math.round((baseLoad + Math.random() * 0.15) * 100) / 100, // 5min
-        Math.round((baseLoad + Math.random() * 0.1) * 100) / 100, // 15min
+        Math.round((baseLoad + Math.random() * 0.2) * 100) / 100,
+        Math.round((baseLoad + Math.random() * 0.15) * 100) / 100,
+        Math.round((baseLoad + Math.random() * 0.1) * 100) / 100,
       ];
 
-      // Simulate realistic memory usage
-      const memoryUsage = Math.round(30 + Math.random() * 40); // 30-70%
+      const memoryUsage = Math.round(30 + Math.random() * 40);
 
-      // Simulate network speed
-      const networkSpeed = Math.round(0.5 + Math.random() * 2.5); // 0.5-3.0 MB/s
+      const networkSpeed = Math.round(0.5 + Math.random() * 2.5);
 
-      // Simulate process count
-      const processCount = Math.round(80 + Math.random() * 40); // 80-120 processes
+      const processCount = Math.round(80 + Math.random() * 40);
 
-      // Simulate disk usage
-      const diskUsage = Math.round(45 + Math.random() * 25); // 45-70%
+      const diskUsage = Math.round(45 + Math.random() * 25);
 
       setSystemMetrics({
         uptime,
@@ -89,7 +96,6 @@ export function TerminalHeader({
     return () => clearInterval(interval);
   }, [isClient]);
 
-  // Format time consistently
   const formatTime = (date: Date | null) => {
     if (!date) return "--:--:--";
 
@@ -100,7 +106,6 @@ export function TerminalHeader({
     return `${hours}:${minutes}:${seconds}`;
   };
 
-  // Get status color based on metrics
   const getStatusColor = (
     metric: number,
     thresholds: { warning: number; critical: number },
@@ -121,7 +126,7 @@ export function TerminalHeader({
         color: resolvedTheme.colors.text,
       }}
     >
-      {/* Left side - System info */}
+      { }
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-2">
           <span
@@ -177,7 +182,7 @@ export function TerminalHeader({
         </div>
       </div>
 
-      {/* Center - Title */}
+      { }
       <div className="flex items-center space-x-2">
         <span
           className="font-bold"
@@ -188,7 +193,7 @@ export function TerminalHeader({
         <span className="opacity-50">v1.0.0</span>
       </div>
 
-      {/* Right side - Time and status */}
+      { }
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-2">
           <span className="opacity-70">{t("adminCPU")}:</span>

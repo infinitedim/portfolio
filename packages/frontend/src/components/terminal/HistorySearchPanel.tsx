@@ -53,7 +53,6 @@ export function HistorySearchPanel({
     getSuggestions: _getSuggestions,
   } = useCommandHistory();
 
-  // Focus search input when panel opens
   useEffect(() => {
     if (isOpen && searchInputRef.current) {
       setTimeout(() => {
@@ -62,12 +61,10 @@ export function HistorySearchPanel({
     }
   }, [isOpen]);
 
-  // Reset selection when search changes
   useEffect(() => {
     setSelectedIndex(0);
   }, [searchOptions.query, searchOptions.category, searchOptions.sortBy]);
 
-  // Handle keyboard navigation
   const handleKeyDown = (e: KeyboardEvent) => {
     const visibleEntries = activeTab === "search" ? history : favorites;
 
@@ -286,7 +283,7 @@ export function HistorySearchPanel({
 
   const renderAnalytics = () => (
     <div className="space-y-4">
-      {/* Summary Stats */}
+      {}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div
           className="p-3 rounded border text-center"
@@ -363,7 +360,7 @@ export function HistorySearchPanel({
         </div>
       </div>
 
-      {/* Top Commands */}
+      {}
       <div
         className="p-4 rounded border"
         style={{ borderColor: themeConfig.colors.border }}
@@ -401,7 +398,7 @@ export function HistorySearchPanel({
         </div>
       </div>
 
-      {/* Categories Distribution */}
+      {}
       <div
         className="p-4 rounded border"
         style={{ borderColor: themeConfig.colors.border }}
@@ -464,7 +461,7 @@ export function HistorySearchPanel({
         aria-labelledby="history-panel-title"
         tabIndex={-1}
       >
-        {/* Header */}
+        {}
         <div
           className="flex items-center justify-between p-4 border-b"
           style={{ borderColor: themeConfig.colors.border }}
@@ -478,7 +475,7 @@ export function HistorySearchPanel({
               🔍 Command History
             </h3>
 
-            {/* Tab Navigation */}
+            {}
             <div className="flex gap-1">
               {[
                 { id: "search", label: "Search", icon: "🔍" },
@@ -552,13 +549,13 @@ export function HistorySearchPanel({
           </div>
         </div>
 
-        {/* Search and Filters */}
+        {}
         {activeTab === "search" && (
           <div
             className="p-4 border-b space-y-3"
             style={{ borderColor: themeConfig.colors.border }}
           >
-            {/* Search Input */}
+            {}
             <input
               ref={searchInputRef}
               type="text"
@@ -572,7 +569,7 @@ export function HistorySearchPanel({
               }}
             />
 
-            {/* Filters */}
+            {}
             <div className="flex flex-wrap gap-3">
               <select
                 value={searchOptions.category || ""}
@@ -644,7 +641,7 @@ export function HistorySearchPanel({
           </div>
         )}
 
-        {/* Content */}
+        {}
         <div className="flex-1 overflow-y-auto p-4">
           {activeTab === "search" && (
             <div className="space-y-2">
@@ -681,7 +678,7 @@ export function HistorySearchPanel({
           {activeTab === "analytics" && renderAnalytics()}
         </div>
 
-        {/* Footer */}
+        {}
         <div
           className="px-4 py-3 border-t text-xs flex items-center justify-between"
           style={{

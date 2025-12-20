@@ -11,6 +11,15 @@ import {
   ErrorUtils,
 } from "./error-types";
 
+/**
+ * Configuration for retry behavior in async operations
+ * @property maxRetries - Maximum number of retry attempts
+ * @property baseDelay - Initial delay between retries in milliseconds
+ * @property maxDelay - Maximum delay between retries in milliseconds
+ * @property backoffFactor - Multiplier for exponential backoff (delay *= backoffFactor)
+ * @property retryCondition - Optional function to determine if error should be retried
+ * @property onRetry - Optional callback invoked on each retry attempt
+ */
 export interface RetryConfig {
   maxRetries: number;
   baseDelay: number;
@@ -20,6 +29,14 @@ export interface RetryConfig {
   onRetry?: (error: Error, attempt: number) => void;
 }
 
+/**
+ * Configuration for async error handler
+ * @property timeout - Optional timeout in milliseconds for the operation
+ * @property retryConfig - Optional retry configuration
+ * @property fallbackValue - Optional fallback value to return on failure
+ * @property onError - Optional callback invoked when error occurs
+ * @property onSuccess - Optional callback invoked on successful execution
+ */
 export interface AsyncErrorHandlerConfig {
   timeout?: number;
   retryConfig?: RetryConfig;
@@ -28,6 +45,14 @@ export interface AsyncErrorHandlerConfig {
   onSuccess?: (result: unknown) => void;
 }
 
+/**
+ * Result of an async operation with error handling
+ * @property success - Whether the operation succeeded
+ * @property data - Result data if successful
+ * @property error - Enhanced error if operation failed
+ * @property retryCount - Number of retry attempts made
+ * @property duration - Total duration of operation in milliseconds
+ */
 export interface AsyncResult<T> {
   success: boolean;
   data?: T;
@@ -49,10 +74,23 @@ const DEFAULT_RETRY_CONFIG: RetryConfig = {
 
 /**
  * Enhanced async error handler with retry logic and comprehensive error management
+ * Implements singleton pattern for consistent error handling across the application
+ * @example
+ * ```ts
+ * const handler = AsyncErrorHandler.getInstance();
+ * const result = await handler.execute(() => fetchData(), {
+ *   retryConfig: { maxRetries: 3 },
+ *   timeout: 5000
+ * });
+ * ```
  */
 export class AsyncErrorHandler {
   private static instance: AsyncErrorHandler;
 
+  /**
+   * Gets the singleton instance of AsyncErrorHandler
+   * @returns The singleton handler instance
+   */
   static getInstance(): AsyncErrorHandler {
     if (!AsyncErrorHandler.instance) {
       AsyncErrorHandler.instance = new AsyncErrorHandler();
@@ -75,14 +113,12 @@ export class AsyncErrorHandler {
 
     while (retryCount <= retryConfig.maxRetries) {
       try {
-        // Apply timeout if configured
         const result = config.timeout
           ? await this.withTimeout(fn(), config.timeout)
           : await fn();
 
         const duration = Date.now() - startTime;
 
-        // Call success callback
         config.onSuccess?.(result);
 
         return {
@@ -95,10 +131,8 @@ export class AsyncErrorHandler {
         const enhancedError = ErrorUtils.enhance(error as Error);
         lastError = enhancedError;
 
-        // Call error callback
         config.onError?.(enhancedError);
 
-        // Check if we should retry
         const shouldRetry =
           retryCount < retryConfig.maxRetries &&
           (retryConfig.retryCondition?.(enhancedError, retryCount) ??
@@ -110,17 +144,14 @@ export class AsyncErrorHandler {
 
         retryCount++;
 
-        // Call retry callback
         retryConfig.onRetry?.(enhancedError, retryCount - 1);
 
-        // Calculate delay for next retry
         const delay = Math.min(
           retryConfig.baseDelay *
             Math.pow(retryConfig.backoffFactor, retryCount - 1),
           retryConfig.maxDelay,
         );
 
-        // Wait before retrying
         await this.delay(delay);
       }
     }
@@ -160,7 +191,6 @@ export class AsyncErrorHandler {
           errors.push(result.error);
         }
 
-        // Fail fast if configured
         if (config.failFast) {
           break;
         }
@@ -313,12 +343,10 @@ export class AsyncUtils {
     return async (): Promise<T> => {
       const now = Date.now();
 
-      // Reset failures after monitoring period
       if (now - lastFailureTime > config.monitoringPeriod) {
         failures = 0;
       }
 
-      // Check circuit breaker state
       if (state === "OPEN") {
         if (now - lastFailureTime > config.resetTimeout) {
           state = "HALF_OPEN";
@@ -337,7 +365,6 @@ export class AsyncUtils {
       try {
         const result = await fn();
 
-        // Success - reset state
         if (state === "HALF_OPEN") {
           state = "CLOSED";
           failures = 0;
@@ -391,11 +418,9 @@ export class AsyncUtils {
     }> = [];
     const errors: EnhancedError[] = [];
 
-    // Process in batches
     for (let i = 0; i < items.length; i += batchSize) {
       const batch = items.slice(i, i + batchSize);
 
-      // Process batch with limited concurrency
       const batchPromises = batch.map(async (item) => {
         const { data, error } = await AsyncUtils.safe(() => processor(item));
 
@@ -417,13 +442,11 @@ export class AsyncUtils {
         return result;
       });
 
-      // Limit concurrency
       const batchResults = await Promise.all(
         batchPromises.slice(0, concurrency),
       );
       results.push(...batchResults);
 
-      // Process remaining items in batch if any
       if (batch.length > concurrency) {
         const remainingPromises = batchPromises.slice(concurrency);
         const remainingResults = await Promise.all(remainingPromises);

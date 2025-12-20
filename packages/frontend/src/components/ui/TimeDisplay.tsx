@@ -8,15 +8,25 @@ import {
 } from "@/lib/location/locationService";
 import { Clock, MapPin, Globe, Wifi, RefreshCw } from "lucide-react";
 
+/**
+ * Props for the TimeDisplay component
+ * @interface TimeDisplayProps
+ * @property {() => void} onClose - Callback function to close the component
+ */
 interface TimeDisplayProps {
   onClose: () => void;
 }
 
 /**
- * TimeDisplay component
- * @param {TimeDisplayProps} props - The props for the TimeDisplay component
- * @param {Function} props.onClose - The function to close the TimeDisplay component
- * @returns {JSX.Element} The TimeDisplay component
+ * Time display component showing current time and location information
+ * Fetches and displays user's location, timezone, and local time with weather emoji
+ * @param {TimeDisplayProps} props - Component props
+ * @param {() => void} props.onClose - Function to close the modal
+ * @returns {JSX.Element} The time display modal
+ * @example
+ * ```tsx
+ * <TimeDisplay onClose={handleClose} />
+ * ```
  */
 export function TimeDisplay({ onClose }: TimeDisplayProps): JSX.Element {
   const [location, setLocation] = useState<LocationInfo | null>(null);
@@ -49,7 +59,6 @@ export function TimeDisplay({ onClose }: TimeDisplayProps): JSX.Element {
 
   useEffect(() => {
     fetchLocation();
-    // Update time every second
     const timeInterval = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
@@ -168,7 +177,7 @@ export function TimeDisplay({ onClose }: TimeDisplayProps): JSX.Element {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
       <div className="relative w-full max-w-md mx-4 bg-gray-900 rounded-lg border border-gray-700 shadow-2xl overflow-hidden">
-        {/* Header */}
+        { }
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-blue-400" />
@@ -194,9 +203,9 @@ export function TimeDisplay({ onClose }: TimeDisplayProps): JSX.Element {
           </div>
         </div>
 
-        {/* Content */}
+        { }
         <div className="p-6">
-          {/* Current Time */}
+          { }
           <div className="text-center mb-6">
             <div className="text-3xl font-mono font-bold text-white mb-2">
               {currentLocalTime}
@@ -209,7 +218,7 @@ export function TimeDisplay({ onClose }: TimeDisplayProps): JSX.Element {
             )}
           </div>
 
-          {/* Location Info */}
+          { }
           <div className="space-y-4">
             <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
               <MapPin className="w-5 h-5 text-green-400 shrink-0" />
@@ -259,7 +268,7 @@ export function TimeDisplay({ onClose }: TimeDisplayProps): JSX.Element {
             </div>
           </div>
 
-          {/* UTC Time */}
+          { }
           <div className="mt-6 p-3 bg-gray-800/30 rounded-lg">
             <div className="text-center">
               <div className="text-sm text-gray-400 mb-1">UTC Time</div>

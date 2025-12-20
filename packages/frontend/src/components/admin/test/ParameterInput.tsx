@@ -106,7 +106,7 @@ export function ParameterInput({
           />
         );
 
-      default: // string
+      default:
         return (
           <input
             type="text"

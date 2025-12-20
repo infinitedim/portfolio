@@ -1,21 +1,16 @@
-/* eslint-disable no-undef */
 import bundleAnalyzer from "@next/bundle-analyzer";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Transpile monorepo packages (only UI and shared packages)
+  reactCompiler: true,
+  typedRoutes: true,
   transpilePackages: ["@portfolio/ui"],
   serverExternalPackages: ["@prisma/client", "bcryptjs"],
-  // Temporarily disable experimental flags while diagnosing module factory error
   experimental: {
-    // optimizePackageImports: ["@/components", "@/hooks", "@/lib"],
-    // webpackBuildWorker: true,
     serverActions: { bodySizeLimit: "2mb" },
   },
   turbopack: {},
-
-  // Image optimization with Vercel
   images: {
     loader: "default",
     formats: ["image/webp"],
@@ -31,47 +26,25 @@ const nextConfig = {
       },
     ],
   },
-
-  // Compression and performance
   compress: true,
   poweredByHeader: false,
   generateEtags: true,
-
-  // Environment variables
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
-
-
-  // Compiler options
   compiler: {
-    // Remove console logs in production
     removeConsole:
       process.env.NODE_ENV === "production"
         ? {
             exclude: ["error", "warn"],
           }
         : false,
-
-    // React refresh for development
     reactRemoveProperties: process.env.NODE_ENV === "production",
-
-    // Styled components support if needed
     styledComponents: false,
   },
-
-  // Output configuration for static export if needed
-  // output: 'export', // Uncomment for static export
-  // trailingSlash: true, // Uncomment for static export
-  // distDir: 'out', // Uncomment for static export
-
-
-  // TypeScript configuration
   typescript: {
     ignoreBuildErrors: false,
   },
-
-  // Headers for security and performance
   async headers() {
     const isDevelopment = process.env.NODE_ENV === "development";
 
@@ -116,7 +89,6 @@ const nextConfig = {
             key: "X-Permitted-Cross-Domain-Policies",
             value: "none",
           },
-          // CSP will be handled by middleware with nonce
           ...(isDevelopment
             ? []
             : [
@@ -152,7 +124,6 @@ const nextConfig = {
     ];
   },
 
-  // Redirects
   async redirects() {
     return [
       {
@@ -167,8 +138,6 @@ const nextConfig = {
       },
     ];
   },
-
-  // Rewrites
   async rewrites() {
     return [
       {
@@ -182,8 +151,6 @@ const nextConfig = {
     ];
   },
 };
-
-// Bundle analyzer configuration
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
   openAnalyzer: process.env.ANALYZE === "true",

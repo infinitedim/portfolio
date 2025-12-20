@@ -93,7 +93,6 @@ export function CustomizationManager({
       console.log(`🎨 CustomizationManager: Applying theme ${themeId}`);
 
       try {
-        // For built-in themes, use the theme ID directly
         const success = changeTheme(themeId as any);
 
         if (success) {
@@ -103,10 +102,8 @@ export function CustomizationManager({
             "success",
           );
 
-          // Close the customization manager popup
           onClose();
 
-          // Force page reload for proper theme application
           setTimeout(() => {
             window.location.reload();
           }, 200);
@@ -122,7 +119,6 @@ export function CustomizationManager({
     [changeTheme, showNotification, onClose],
   );
 
-  // Handle escape key to close
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
@@ -175,7 +171,7 @@ export function CustomizationManager({
           color: themeConfig.colors.text,
         }}
       >
-        {/* Header */}
+        {}
         <div
           className="flex items-center justify-between p-4 border-b"
           style={{ borderColor: themeConfig.colors.border }}
@@ -206,7 +202,7 @@ export function CustomizationManager({
           </button>
         </div>
 
-        {/* Tabs */}
+        {}
         <div
           className="flex border-b overflow-x-auto"
           style={{ borderColor: themeConfig.colors.border }}
@@ -248,7 +244,7 @@ export function CustomizationManager({
           ))}
         </div>
 
-        {/* Content */}
+        {}
         <div className="flex-1 overflow-hidden">
           {isLoading ? (
             <div className="flex items-center justify-center h-full p-6">
@@ -300,7 +296,7 @@ export function CustomizationManager({
           )}
         </div>
 
-        {/* Notification */}
+        {}
         {notification && (
           <div
             className="absolute bottom-4 right-4 p-3 rounded-lg shadow-lg animate-in slide-in-from-right duration-300"

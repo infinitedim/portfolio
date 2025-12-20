@@ -8,7 +8,7 @@ import { JSX } from "react";
 export function StaticContent(): JSX.Element {
   return (
     <div className="static-content">
-      {/* Hidden content for SEO and screen readers */}
+      {}
       <div className="sr-only">
         <h1>Terminal Portfolio - Interactive Developer Portfolio</h1>
         <p>
@@ -48,7 +48,7 @@ export function StaticContent(): JSX.Element {
         </ul>
       </div>
 
-      {/* Preloaded ASCII banner for immediate display */}
+      {}
       <div
         className="hidden ascii-preload"
         aria-hidden="true"
@@ -72,7 +72,7 @@ export function StaticContent(): JSX.Element {
         </pre>
       </div>
 
-      {/* Static meta content for better crawling */}
+      {}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

@@ -19,8 +19,19 @@ type DashboardView =
   | "testing";
 
 /**
- * Admin Dashboard Page
- * @returns {JSX.Element} - Admin Dashboard Page
+ * Full-featured admin dashboard page component
+ * @returns Complete admin dashboard with multiple view modes
+ * @remarks
+ * Comprehensive admin interface featuring:
+ * - Overview dashboard with system metrics and quick actions
+ * - Performance monitoring view
+ * - Logging and error monitoring
+ * - Blog post editor
+ * - Backend testing dashboard
+ * - System settings configuration
+ * - Protected route requiring admin authentication
+ * - Sidebar navigation for view switching
+ * - Terminal-themed UI throughout
  */
 export default function AdminDashboard(): JSX.Element {
   const router = useRouter();
@@ -30,7 +41,6 @@ export default function AdminDashboard(): JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Only run on client side
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("adminToken");
       if (!token) {
@@ -42,6 +52,10 @@ export default function AdminDashboard(): JSX.Element {
     setIsLoading(false);
   }, [router]);
 
+  /**
+   * Handles user logout
+   * Clears authentication token and redirects to login page
+   */
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     router.push("/admin/login");
@@ -62,6 +76,10 @@ export default function AdminDashboard(): JSX.Element {
     return <></>;
   }
 
+  /**
+   * Renders the appropriate view based on current selection
+   * @returns JSX for the selected dashboard view
+   */
   const renderCurrentView = () => {
     switch (currentView) {
       case "overview":
@@ -228,22 +246,22 @@ export default function AdminDashboard(): JSX.Element {
         fontFamily: "JetBrains Mono, Consolas, Monaco, monospace",
       }}
     >
-      {/* Terminal Header */}
+      { }
       <TerminalHeader />
 
-      {/* Main Dashboard Layout */}
+      { }
       <div className="flex-1 flex">
-        {/* Terminal Sidebar */}
+        { }
         <TerminalSidebar
           currentView={currentView}
           onViewChange={setCurrentView}
           themeConfig={themeConfig}
         />
 
-        {/* Main Content Area */}
+        { }
         <div className="flex-1 p-6 overflow-auto">
           <div className="max-w-6xl mx-auto">
-            {/* View Header */}
+            { }
             <div className="mb-6">
               <div className="flex items-center space-x-2 mb-2">
                 <span
@@ -264,7 +282,7 @@ export default function AdminDashboard(): JSX.Element {
               </div>
             </div>
 
-            {/* View Content */}
+            { }
             {renderCurrentView()}
           </div>
         </div>

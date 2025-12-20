@@ -31,7 +31,6 @@ function generateCriticalCSS(theme: string): string {
   const themeColors = getThemeColors(theme);
 
   return `
-    /* Critical CSS for immediate rendering */
     :root {
       ${Object.entries(themeColors)
         .map(([prop, value]) => `${prop}: ${value};`)
@@ -66,7 +65,6 @@ function generateCriticalCSS(theme: string): string {
       color: var(--terminal-text);
     }
     
-    /* Loading screen critical styles */
     .min-h-screen {
       min-height: 100vh;
       min-height: -webkit-fill-available;
@@ -110,7 +108,6 @@ function generateCriticalCSS(theme: string): string {
       }
     }
     
-    /* Terminal specific styles */
     .terminal-container {
       background-color: var(--terminal-bg);
       color: var(--terminal-text);
@@ -130,7 +127,6 @@ function generateCriticalCSS(theme: string): string {
       }
     }
     
-    /* Accessibility improvements */
     @media (prefers-reduced-motion: reduce) {
       * {
         animation-duration: 0.01ms !important;
@@ -147,13 +143,11 @@ function generateCriticalCSS(theme: string): string {
       }
     }
     
-    /* Focus indicators */
     .focus-mode *:focus {
       outline: 3px solid var(--terminal-accent) !important;
       outline-offset: 2px !important;
     }
     
-    /* Skip to content link */
     .skip-to-content:focus {
       position: fixed !important;
       top: 1rem !important;

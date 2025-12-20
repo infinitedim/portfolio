@@ -12,7 +12,6 @@ interface MobileState {
   isAndroid: boolean;
 }
 
-// Constants
 const BREAKPOINTS = {
   MOBILE: 768,
   TABLET: 1024,
@@ -36,7 +35,6 @@ const KEYBOARD_THRESHOLD = 0.75;
 export function useMobile() {
   const isMountedRef = useMountRef();
 
-  // MODIFICATION: Initialize with SSR-safe defaults to prevent hydration issues
   const [mobileState, setMobileState] = useState<MobileState>({
     isMobile: false,
     isTablet: false,
@@ -46,7 +44,6 @@ export function useMobile() {
     isAndroid: false,
   });
 
-  // Cached device info to avoid redundant calculations
   const deviceInfoRef = useRef<{ isIOS: boolean; isAndroid: boolean } | null>(
     null,
   );
@@ -81,7 +78,6 @@ export function useMobile() {
       const { isIOS, isAndroid } = getDeviceInfo();
 
       setMobileState((prev) => {
-        // Only update if values have actually changed
         if (
           prev.isMobile === isMobile &&
           prev.isTablet === isTablet &&
@@ -130,28 +126,22 @@ export function useMobile() {
     }
   }, [isMountedRef]);
 
-  // Create debounced versions with proper cleanup
   const debouncedCheckDevice = useRef(debounce(checkDevice, 100));
   const throttledCheckKeyboard = useRef(throttle(checkKeyboard, 100));
 
-  // Update debounced functions when dependencies change
   useEffect(() => {
     debouncedCheckDevice.current = debounce(checkDevice, 100);
     throttledCheckKeyboard.current = throttle(checkKeyboard, 100);
   }, [checkDevice, checkKeyboard]);
 
   useEffect(() => {
-    // Only run on client side to avoid hydration mismatch
     if (typeof window === "undefined" || !isMountedRef.current) return;
 
-    // Initial check
     checkDevice();
     checkKeyboard();
 
-    // Event listeners with optimized handlers
     const handleResize = debouncedCheckDevice.current;
     const handleOrientationChange = () => {
-      // Small delay to ensure viewport has updated
       setTimeout(checkDevice, 100);
     };
     const handleKeyboardResize = throttledCheckKeyboard.current;

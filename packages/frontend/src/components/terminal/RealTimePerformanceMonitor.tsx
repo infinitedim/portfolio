@@ -4,6 +4,18 @@
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "@/hooks/useTheme";
 
+/**
+ * Performance metrics data structure
+ * @interface PerformanceMetrics
+ * @property {number} responseTime - Response time in milliseconds
+ * @property {number} cacheHitRate - Cache hit rate percentage
+ * @property {number} suggestionAccuracy - Suggestion accuracy percentage
+ * @property {number} typingSpeed - Typing speed in characters per second
+ * @property {number} queriesPerSecond - Queries processed per second
+ * @property {number} memoryUsage - Memory usage in MB
+ * @property {number} renderTime - Render time in milliseconds
+ * @property {number} streamingLatency - Streaming latency in milliseconds
+ */
 interface PerformanceMetrics {
   responseTime: number;
   cacheHitRate: number;
@@ -15,6 +27,14 @@ interface PerformanceMetrics {
   streamingLatency: number;
 }
 
+/**
+ * Props for the RealTimePerformanceMonitor component
+ * @interface PerformanceMonitorProps
+ * @property {PerformanceMetrics} metrics - Current performance metrics
+ * @property {boolean} isActive - Whether monitor is active
+ * @property {(active: boolean) => void} [onToggle] - Toggle callback
+ * @property {string} [className] - Additional CSS classes
+ */
 interface PerformanceMonitorProps {
   metrics: PerformanceMetrics;
   isActive: boolean;
@@ -22,6 +42,24 @@ interface PerformanceMonitorProps {
   className?: string;
 }
 
+/**
+ * Real-time performance monitoring component
+ * Displays live performance metrics with history tracking and grading
+ * @param {PerformanceMonitorProps} props - Component props
+ * @param {PerformanceMetrics} props.metrics - Current metrics
+ * @param {boolean} props.isActive - Active state
+ * @param {(active: boolean) => void} [props.onToggle] - Toggle callback
+ * @param {string} [props.className] - Additional classes
+ * @returns {JSX.Element} The performance monitor component
+ * @example
+ * ```tsx
+ * <RealTimePerformanceMonitor
+ *   metrics={currentMetrics}
+ *   isActive={true}
+ *   onToggle={handleToggle}
+ * />
+ * ```
+ */
 export function RealTimePerformanceMonitor({
   metrics,
   isActive,
@@ -33,10 +71,9 @@ export function RealTimePerformanceMonitor({
   const [isExpanded, setIsExpanded] = useState(false);
   const historyRef = useRef<PerformanceMetrics[]>([]);
 
-  // Track metrics history
   useEffect(() => {
     if (isActive) {
-      const newHistory = [...historyRef.current, metrics].slice(-60); // Keep last 60 measurements
+      const newHistory = [...historyRef.current, metrics].slice(-60);
       historyRef.current = newHistory;
       setHistory(newHistory);
     }
@@ -102,7 +139,7 @@ export function RealTimePerformanceMonitor({
         borderColor: themeConfig.colors.border,
       }}
     >
-      {/* Header */}
+      { }
       <div
         className="px-4 py-3 border-b flex items-center justify-between"
         style={{
@@ -146,9 +183,9 @@ export function RealTimePerformanceMonitor({
         </div>
       </div>
 
-      {/* Metrics Grid */}
+      { }
       <div className="p-4 space-y-3">
-        {/* Response Time */}
+        { }
         <div className="flex items-center justify-between">
           <span
             className="text-xs font-medium"
@@ -180,7 +217,7 @@ export function RealTimePerformanceMonitor({
           </div>
         </div>
 
-        {/* Cache Hit Rate */}
+        { }
         <div className="flex items-center justify-between">
           <span
             className="text-xs font-medium"
@@ -218,7 +255,7 @@ export function RealTimePerformanceMonitor({
           </div>
         </div>
 
-        {/* Suggestion Accuracy */}
+        { }
         <div className="flex items-center justify-between">
           <span
             className="text-xs font-medium"
@@ -241,7 +278,7 @@ export function RealTimePerformanceMonitor({
           </div>
         </div>
 
-        {/* Typing Speed */}
+        { }
         <div className="flex items-center justify-between">
           <span
             className="text-xs font-medium"
@@ -259,7 +296,7 @@ export function RealTimePerformanceMonitor({
 
         {isExpanded && (
           <>
-            {/* Render Time */}
+            { }
             <div className="flex items-center justify-between">
               <span
                 className="text-xs font-medium"
@@ -280,7 +317,7 @@ export function RealTimePerformanceMonitor({
               </span>
             </div>
 
-            {/* Queries Per Second */}
+            { }
             <div className="flex items-center justify-between">
               <span
                 className="text-xs font-medium"
@@ -296,7 +333,7 @@ export function RealTimePerformanceMonitor({
               </span>
             </div>
 
-            {/* Streaming Latency */}
+            { }
             <div className="flex items-center justify-between">
               <span
                 className="text-xs font-medium"
@@ -354,7 +391,7 @@ export function RealTimePerformanceMonitor({
         </div>
       )}
 
-      {/* Footer */}
+      { }
       <div
         className="px-4 py-2 text-xs border-t"
         style={{

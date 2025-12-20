@@ -80,9 +80,9 @@ export function RoadmapVisualizer({
       className="space-y-6 font-mono"
       style={{ color: themeConfig.colors.text }}
     >
-      {/* Controls */}
+      {}
       <div className="flex flex-wrap gap-4 items-center justify-between">
-        {/* View Mode Selector */}
+        {}
         <div className="flex gap-2">
           <ViewModeButton
             mode="grid"
@@ -101,7 +101,7 @@ export function RoadmapVisualizer({
           />
         </div>
 
-        {/* Status Filter */}
+        {}
         <div className="flex gap-2 text-sm">
           {statusFilters.map((filter) => (
             <button
@@ -131,7 +131,7 @@ export function RoadmapVisualizer({
         </div>
       </div>
 
-      {/* Content */}
+      {}
       <div className="space-y-4">
         {viewMode === "grid" && (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

@@ -4,13 +4,18 @@ import { memo, useMemo, JSX } from "react";
 import { useTheme } from "@/hooks/useTheme";
 
 /**
- * A clean ASCII banner component for the terminal portfolio
- * Features a simple, readable design without complex box characters
+ * ASCII banner component for the terminal portfolio
+ * Displays a stylized terminal portfolio logo in ASCII art with responsive sizing
+ * Features both desktop and mobile-optimized versions
+ * @returns {JSX.Element} The ASCII banner component
+ * @example
+ * ```tsx
+ * <ASCIIBanner />
+ * ```
  */
 export const ASCIIBanner = memo(function ASCIIBanner(): JSX.Element {
   const { themeConfig, theme } = useTheme();
 
-  // Simple, clean ASCII art
   const banner = useMemo(
     () => `
   ████████╗███████╗██████╗ ███╗   ███╗██╗███╗   ██╗ █████╗ ██╗
@@ -68,7 +73,7 @@ export const ASCIIBanner = memo(function ASCIIBanner(): JSX.Element {
       className="select-none mb-6 w-full overflow-hidden"
       key={`ascii-banner-${theme}`}
     >
-      {/* Main Banner - Hide on very small screens */}
+      { }
       <div className="hidden sm:block">
         <pre
           style={bannerStyles}
@@ -78,7 +83,7 @@ export const ASCIIBanner = memo(function ASCIIBanner(): JSX.Element {
         </pre>
       </div>
 
-      {/* Simple Banner for Mobile */}
+      { }
       <div className="block sm:hidden">
         <pre
           style={{ ...bannerStyles, fontSize: "7px" }}
@@ -88,7 +93,7 @@ export const ASCIIBanner = memo(function ASCIIBanner(): JSX.Element {
         </pre>
       </div>
 
-      {/* Subtitle */}
+      { }
       <div className="text-center mt-6 space-y-2 px-4">
         <div
           style={{ color: themeConfig.colors.accent }}
@@ -104,7 +109,7 @@ export const ASCIIBanner = memo(function ASCIIBanner(): JSX.Element {
         </div>
       </div>
 
-      {/* Separator Line */}
+      { }
       <div className="mt-6 mb-4 px-4">
         <div
           className="h-px w-full opacity-30"

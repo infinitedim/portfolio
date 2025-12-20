@@ -18,7 +18,6 @@ export abstract class AppError extends Error {
     this.timestamp = new Date();
     this.context = context;
 
-    // Maintains proper stack trace for where error was thrown
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, this.constructor);
     }

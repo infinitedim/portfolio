@@ -39,12 +39,10 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
   const callbackRef = useRef<T>(callback);
   const timerRef = useRef<NodeJS.Timeout>(null);
 
-  // Update callback ref when dependencies change
   useEffect(() => {
     callbackRef.current = callback;
   }, [callback]);
 
-  // Create the debounced function
   const debouncedCallback = useCallback(
     (...args: Parameters<T>) => {
       if (timerRef.current) {
@@ -58,7 +56,6 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
     [delay],
   ) as T;
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) {

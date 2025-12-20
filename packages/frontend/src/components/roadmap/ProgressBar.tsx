@@ -4,7 +4,7 @@ import { useTheme } from "@/hooks/useTheme";
 import type { JSX } from "react";
 
 interface ProgressBarProps {
-  progress: number; // 0-100
+  progress: number;
   height?: string;
   className?: string;
   showPercentage?: boolean;

@@ -4,6 +4,18 @@ import { JSX, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils/utils";
 
+/**
+ * Props for the OptimizedImage component
+ * @interface OptimizedImageProps
+ * @property {string} src - Image source URL
+ * @property {string} alt - Alternative text for accessibility
+ * @property {number} [width] - Image width in pixels
+ * @property {number} [height] - Image height in pixels
+ * @property {boolean} [fill] - Whether image should fill container
+ * @property {boolean} [priority] - Priority loading flag
+ * @property {string} [className] - Additional CSS classes
+ * @property {string} [sizes] - Responsive sizes attribute
+ */
 interface OptimizedImageProps {
   src: string;
   alt: string;
@@ -35,19 +47,28 @@ const toBase64 = (str: string) =>
     : window.btoa(str);
 
 /**
-/**
-OptimizedImage is a React component that renders an optimized Next.js Image
-with a shimmer placeholder and graceful error handling.
- * @param {object} props - The props for the OptimizedImage component.
- * @param {string} props.src - The source URL of the image.
- * @param {string} props.alt - The alt text for the image.
- * @param {number} [props.width] - The width of the image (ignored if fill is true).
- * @param {number} [props.height] - The height of the image (ignored if fill is true).
- * @param {boolean} [props.fill] - Whether the image should fill its parent container.
- * @param {boolean} [props.priority] - Whether the image should be prioritized for loading.
- * @param {string} [props.className] - Additional CSS classes for the image container.
- * @param {string} [props.sizes] - The sizes attribute for responsive images.
- * @returns {JSX.Element} The rendered image or a fallback if loading fails.
+ * Optimized Next.js Image component with shimmer placeholder and error handling
+ * Provides automatic loading states and graceful fallback for failed images
+ * @param {OptimizedImageProps} props - Component props
+ * @param {string} props.src - Image source URL
+ * @param {string} props.alt - Alt text
+ * @param {number} [props.width=400] - Width in pixels
+ * @param {number} [props.height=300] - Height in pixels
+ * @param {boolean} [props.fill=false] - Fill container
+ * @param {boolean} [props.priority=false] - Priority loading
+ * @param {string} [props.className] - Additional classes
+ * @param {string} [props.sizes] - Responsive sizes
+ * @returns {JSX.Element} The optimized image component
+ * @example
+ * ```tsx
+ * <OptimizedImage
+ *   src="/images/hero.jpg"
+ *   alt="Hero image"
+ *   width={800}
+ *   height={600}
+ *   priority
+ * />
+ * ```
  */
 export function OptimizedImage({
   src,

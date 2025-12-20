@@ -19,7 +19,7 @@ export interface TimeInfo {
 export class LocationService {
   private static instance: LocationService;
   private cachedLocation: LocationInfo | null = null;
-  private cacheTimeout = 30 * 60 * 1000; // 30 minutes
+  private cacheTimeout = 30 * 60 * 1000;
   private lastFetch = 0;
 
   private constructor() {}
@@ -32,7 +32,6 @@ export class LocationService {
   }
 
   async getLocation(): Promise<LocationInfo | null> {
-    // Check cache
     if (
       this.cachedLocation &&
       Date.now() - this.lastFetch < this.cacheTimeout
@@ -41,7 +40,6 @@ export class LocationService {
     }
 
     try {
-      // Try multiple location services for better reliability
       const location = await this.fetchLocationFromService();
 
       if (location) {
@@ -57,7 +55,6 @@ export class LocationService {
   }
 
   private async fetchLocationFromService(): Promise<LocationInfo | null> {
-    // Try ipapi.co first
     try {
       const response = await fetch("https://ipapi.co/json/");
       if (response.ok) {
@@ -99,7 +96,6 @@ export class LocationService {
       console.warn("ipapi.co failed, trying fallback...");
     }
 
-    // Fallback to ip-api.com
     try {
       const response = await fetch("http://ip-api.com/json/");
       if (response.ok) {
@@ -154,7 +150,6 @@ export class LocationService {
     const now = new Date();
     const utcTime = now.toISOString();
 
-    // Create a date in the specified timezone
     const localDate = new Date(
       now.toLocaleString("en-US", { timeZone: timezone }),
     );
@@ -169,12 +164,10 @@ export class LocationService {
       hour12: false,
     });
 
-    // Get timezone offset
     const utcOffset = now.getTimezoneOffset();
     const targetOffset = this.getTimezoneOffset(timezone);
     const offset = targetOffset - utcOffset;
 
-    // Check if DST is in effect (simplified check)
     const jan = new Date(now.getFullYear(), 0, 1);
     const jul = new Date(now.getFullYear(), 6, 1);
     const janOffset = this.getTimezoneOffset(timezone, jan);
@@ -196,7 +189,7 @@ export class LocationService {
       const target = new Date(
         date.toLocaleString("en-US", { timeZone: timezone }),
       );
-      return (target.getTime() - utc.getTime()) / (1000 * 60); // Convert to minutes
+      return (target.getTime() - utc.getTime()) / (1000 * 60);
     } catch {
       return 0;
     }
@@ -214,15 +207,12 @@ export class LocationService {
     const hour = now.getHours();
     const month = now.getMonth();
 
-    // Day/Night
     if (hour >= 6 && hour < 18) {
-      // Day
-      if (month >= 11 || month <= 1) return "❄️"; // Winter
-      if (month >= 2 && month <= 4) return "🌸"; // Spring
-      if (month >= 5 && month <= 7) return "☀️"; // Summer
-      return "🍂"; // Fall
+      if (month >= 11 || month <= 1) return "❄️";
+      if (month >= 2 && month <= 4) return "🌸";
+      if (month >= 5 && month <= 7) return "☀️";
+      return "🍂";
     } else {
-      // Night
       return "🌙";
     }
   }

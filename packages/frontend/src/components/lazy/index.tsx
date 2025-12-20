@@ -2,7 +2,6 @@
 
 import { lazy } from "react";
 
-// Lazy load heavy components that are not immediately needed
 export const LazyCustomizationManager = lazy(() =>
   import("../customization/CustomizationManager").then((module) => ({
     default: module.CustomizationManager,
@@ -27,7 +26,6 @@ export const LazyRoadmapVisualizer = lazy(() =>
   })),
 );
 
-// Loading fallback component
 export const LazyLoadingFallback = () => (
   <div className="flex items-center justify-center p-8">
     <div className="flex items-center gap-2 text-sm">

@@ -4,6 +4,13 @@
 import { useTheme } from "@/hooks/useTheme";
 import type { JSX } from "react";
 
+/**
+ * Props for the LoadingSpinner component
+ * @interface LoadingSpinnerProps
+ * @property {"sm" | "md" | "lg"} [size] - Size of the spinner
+ * @property {string} [text] - Optional text to display
+ * @property {string} [className] - Additional CSS classes
+ */
 interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg";
   text?: string;
@@ -12,18 +19,17 @@ interface LoadingSpinnerProps {
 }
 
 /**
- * A loading spinner component to indicate background activity.
- *
- * This component displays a spinning indicator and optional text label,
- * with size variations and theme-based styling. It supports accessibility
- * via ARIA roles and works well for async or loading states.
- * @param {object} props - Props object
- * @param {"sm" | "md" | "lg"} [props.size] - Size of the spinner and text
- * @param {string} [props.text] - Optional text to display next to the spinner.
- * @param {string} [props.className] - Additional classes to apply to the container
- * @example
- * <LoadingSpinner text="Loading..." size="lg" />
+ * Loading spinner component for indicating background activity
+ * Displays an animated spinner with optional text and size variations
+ * @param {LoadingSpinnerProps} props - Component props
+ * @param {"sm" | "md" | "lg"} [props.size="md"] - Spinner size
+ * @param {string} [props.text] - Optional loading text
+ * @param {string} [props.className] - Additional classes
  * @returns {JSX.Element} The rendered loading spinner
+ * @example
+ * ```tsx
+ * <LoadingSpinner size="lg" text="Loading..." />
+ * ```
  */
 export function LoadingSpinner({
   size = "md",

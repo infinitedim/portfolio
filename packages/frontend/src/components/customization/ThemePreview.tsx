@@ -37,7 +37,7 @@ export function ThemePreview({
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
+      {}
       <div
         className="p-4 border-b"
         style={{ borderColor: themeConfig.colors.border }}
@@ -82,7 +82,7 @@ export function ThemePreview({
           </div>
         </div>
 
-        {/* Theme Metadata */}
+        {}
         <div className="flex gap-4 text-xs opacity-75">
           <span>Source: {theme.source}</span>
           <span>Created: {theme.createdAt.toLocaleDateString()}</span>
@@ -92,10 +92,10 @@ export function ThemePreview({
         </div>
       </div>
 
-      {/* Preview Content */}
+      {}
       <div className="flex-1 p-4 overflow-y-auto">
         <div className="space-y-6">
-          {/* Color Palette */}
+          {}
           <div>
             <h4
               className="font-medium mb-3"
@@ -130,7 +130,7 @@ export function ThemePreview({
             </div>
           </div>
 
-          {/* Terminal Preview */}
+          {}
           <div>
             <h4
               className="font-medium mb-3"
@@ -185,7 +185,7 @@ export function ThemePreview({
             </div>
           </div>
 
-          {/* Accessibility Info */}
+          {}
           <div
             className="p-3 rounded border"
             style={{
@@ -203,14 +203,14 @@ export function ThemePreview({
               <div>
                 Contrast Ratio (Text/Background):
                 <span className="ml-2 font-mono">
-                  {/* This would calculate actual contrast ratio */}
+                  {}
                   Good ✅
                 </span>
               </div>
               <div>
                 Color Blind Friendly:
                 <span className="ml-2">
-                  {/* This would check color blind accessibility */}
+                  {}
                   Checking... 🔍
                 </span>
               </div>

@@ -1,3 +1,19 @@
+/**
+ * Metadata for a portfolio project
+ * @property id - Unique project identifier
+ * @property name - Project name/title
+ * @property description - Detailed project description
+ * @property demoUrl - Optional live demo URL
+ * @property githubUrl - Optional GitHub repository URL
+ * @property liveUrl - Optional production URL
+ * @property technologies - Array of technologies/frameworks used
+ * @property category - Project classification
+ * @property featured - Whether to feature on homepage
+ * @property createdAt - Project creation date (ISO string)
+ * @property updatedAt - Last update date (ISO string)
+ * @property image - Optional project image path
+ * @property tags - Array of descriptive tags
+ */
 export interface ProjectMetadata {
   id: string;
   name: string;
@@ -14,6 +30,10 @@ export interface ProjectMetadata {
   tags: string[];
 }
 
+/**
+ * Categories for classifying projects
+ * @typedef {string} ProjectCategory
+ */
 export type ProjectCategory =
   | "web-app"
   | "mobile-app"
@@ -24,6 +44,10 @@ export type ProjectCategory =
   | "game"
   | "other";
 
+/**
+ * Human-readable labels for project categories
+ * Maps category keys to display names
+ */
 export const PROJECT_CATEGORIES: Record<ProjectCategory, string> = {
   "web-app": "Web Application",
   "mobile-app": "Mobile Application",
@@ -54,12 +78,26 @@ export const SAMPLE_PROJECTS: ProjectMetadata[] = [
   },
 ];
 
+/**
+ * Service for managing and querying project metadata
+ * Provides methods to retrieve, filter, and search projects
+ * Implements singleton pattern for consistent state
+ * @example
+ * ```ts
+ * const service = ProjectMetadataService.getInstance();
+ * const featured = service.getFeaturedProjects();
+ * ```
+ */
 export class ProjectMetadataService {
   private static instance: ProjectMetadataService;
   private projects: ProjectMetadata[] = SAMPLE_PROJECTS;
 
   private constructor() {}
 
+  /**
+   * Gets the singleton instance of ProjectMetadataService
+   * @returns The singleton service instance
+   */
   static getInstance(): ProjectMetadataService {
     if (!ProjectMetadataService.instance) {
       ProjectMetadataService.instance = new ProjectMetadataService();
@@ -67,22 +105,45 @@ export class ProjectMetadataService {
     return ProjectMetadataService.instance;
   }
 
+  /**
+   * Retrieves all projects
+   * @returns Array of all project metadata
+   */
   getAllProjects(): ProjectMetadata[] {
     return [...this.projects];
   }
 
+  /**
+   * Finds a project by its unique identifier
+   * @param id - Project ID to search for
+   * @returns Project metadata if found, undefined otherwise
+   */
   getProjectById(id: string): ProjectMetadata | undefined {
     return this.projects.find((project) => project.id === id);
   }
 
+  /**
+   * Retrieves all featured projects
+   * @returns Array of featured project metadata
+   */
   getFeaturedProjects(): ProjectMetadata[] {
     return this.projects.filter((project) => project.featured);
   }
 
+  /**
+   * Filters projects by category
+   * @param category - Category to filter by
+   * @returns Array of projects in the specified category
+   */
   getProjectsByCategory(category: ProjectCategory): ProjectMetadata[] {
     return this.projects.filter((project) => project.category === category);
   }
 
+  /**
+   * Filters projects by technology/framework
+   * @param technology - Technology name to search for (case-insensitive)
+   * @returns Array of projects using the specified technology
+   */
   getProjectsByTechnology(technology: string): ProjectMetadata[] {
     const tech = technology.toLowerCase();
     return this.projects.filter((project) =>
@@ -90,6 +151,11 @@ export class ProjectMetadataService {
     );
   }
 
+  /**
+   * Searches projects by name, description, technologies, or tags
+   * @param query - Search query string (case-insensitive)
+   * @returns Array of matching projects
+   */
   searchProjects(query: string): ProjectMetadata[] {
     const searchTerm = query.toLowerCase();
     return this.projects.filter(
@@ -103,6 +169,10 @@ export class ProjectMetadataService {
     );
   }
 
+  /**
+   * Gets a sorted list of all unique technologies used across projects
+   * @returns Sorted array of technology names
+   */
   getTechnologies(): string[] {
     const techSet = new Set<string>();
     this.projects.forEach((project) => {
@@ -111,6 +181,10 @@ export class ProjectMetadataService {
     return Array.from(techSet).sort();
   }
 
+  /**
+   * Gets all available project categories
+   * @returns Array of project category keys
+   */
   getCategories(): ProjectCategory[] {
     return Object.keys(PROJECT_CATEGORIES) as ProjectCategory[];
   }

@@ -10,10 +10,6 @@ import { RedisService } from "../redis/redis.service";
 import { getEnv } from "../env.config";
 import { securityLogger } from "../logging/logger";
 
-// ============================================================================
-// INTERFACES AND TYPES
-// ============================================================================
-
 export interface RateLimitConfig {
   windowMs: number;
   max: number;
@@ -79,16 +75,15 @@ export enum SecurityEventType {
   PATH_TRAVERSAL_ATTEMPT = "path_traversal_attempt",
 }
 
-// JWT Interfaces
 export interface JWTPayload {
   userId: string;
   email?: string;
   role: "admin";
   iat?: number;
   exp?: number;
-  iss?: string; // issuer
-  aud?: string; // audience
-  jti?: string; // JWT ID for token tracking
+  iss?: string;
+  aud?: string;
+  jti?: string;
 }
 
 export interface RefreshTokenPayload {
@@ -103,11 +98,6 @@ export interface RefreshTokenPayload {
   jti?: string;
 }
 
-// ============================================================================
-// SECURITY SERVICE
-// ============================================================================
-
-// In-memory fallback rate limiter for when Redis is unavailable
 const inMemoryRateLimits = new Map<
   string,
   { count: number; resetTime: number }
@@ -115,12 +105,11 @@ const inMemoryRateLimits = new Map<
 
 @Injectable()
 export class SecurityService {
-  // JWT Configuration - using validated environment
   private readonly JWT_SECRET = getEnv().JWT_SECRET;
   private readonly JWT_EXPIRES_IN = getEnv().JWT_EXPIRES_IN;
   private readonly REFRESH_TOKEN = getEnv().REFRESH_TOKEN;
   private readonly REFRESH_TOKEN_EXPIRES_IN = getEnv().REFRESH_TOKEN_EXPIRES_IN;
-  private readonly JWT_ALGORITHM = "HS512"; // Stronger algorithm
+  private readonly JWT_ALGORITHM = "HS512";
   private readonly JWT_ISSUER = getEnv().JWT_ISSUER;
   private readonly JWT_AUDIENCE = getEnv().JWT_AUDIENCE;
 
@@ -130,72 +119,70 @@ export class SecurityService {
       max: 5,
       message: "Too many login attempts. Please try again later.",
       statusCode: 429,
-      blockDuration: 30 * 60 * 1000, // 30 minutes
+      blockDuration: 30 * 60 * 1000,
     },
     register: {
       windowMs: 60 * 60 * 1000,
       max: 3,
       message: "Too many registration attempts. Please try again later.",
       statusCode: 429,
-      blockDuration: 60 * 60 * 1000, // 1 hour
+      blockDuration: 60 * 60 * 1000,
     },
     passwordReset: {
       windowMs: 60 * 60 * 1000,
       max: 3,
       message: "Too many password reset attempts. Please try again later.",
       statusCode: 429,
-      blockDuration: 60 * 60 * 1000, // 1 hour
+      blockDuration: 60 * 60 * 1000,
     },
     api: {
       windowMs: 15 * 60 * 1000,
       max: 100,
       message: "Too many API requests. Please try again later.",
       statusCode: 429,
-      blockDuration: 15 * 60 * 1000, // 15 minutes
+      blockDuration: 15 * 60 * 1000,
     },
     admin: {
       windowMs: 15 * 60 * 1000,
       max: 10,
       message: "Too many admin requests. Please try again later.",
       statusCode: 429,
-      blockDuration: 30 * 60 * 1000, // 30 minutes
+      blockDuration: 30 * 60 * 1000,
     },
     public: {
       windowMs: 15 * 60 * 1000,
       max: 300,
       message: "Too many requests. Please try again later.",
       statusCode: 429,
-      blockDuration: 15 * 60 * 1000, // 15 minutes
+      blockDuration: 15 * 60 * 1000,
     },
     upload: {
       windowMs: 60 * 60 * 1000,
       max: 10,
       message: "Too many file uploads. Please try again later.",
       statusCode: 429,
-      blockDuration: 60 * 60 * 1000, // 1 hour
+      blockDuration: 60 * 60 * 1000,
     },
-    // Medium priority: Additional rate limits
     email: {
       windowMs: 60 * 60 * 1000,
       max: 5,
       message: "Too many email requests. Please try again later.",
       statusCode: 429,
-      blockDuration: 60 * 60 * 1000, // 1 hour
+      blockDuration: 60 * 60 * 1000,
     },
     search: {
       windowMs: 5 * 60 * 1000,
       max: 50,
       message: "Too many search requests. Please try again later.",
       statusCode: 429,
-      blockDuration: 10 * 60 * 1000, // 10 minutes
+      blockDuration: 10 * 60 * 1000,
     },
-    // Low priority: Strict rate limits for sensitive operations
     sensitive: {
       windowMs: 5 * 60 * 1000,
       max: 2,
       message: "Too many sensitive operations. Please try again later.",
       statusCode: 429,
-      blockDuration: 60 * 60 * 1000, // 1 hour
+      blockDuration: 60 * 60 * 1000,
     },
   };
 
@@ -244,22 +231,18 @@ export class SecurityService {
       /XMLHttpRequest/i,
       /\.innerHTML/i,
       /\.outerHTML/i,
-      // SQL Injection patterns
       /union\s+select/i,
       /drop\s+table/i,
       /delete\s+from/i,
       /insert\s+into/i,
       /update\s+set/i,
-      // Command injection patterns
       /;\s*rm\s/i,
       /;\s*curl\s/i,
       /;\s*wget\s/i,
       /&&\s*(rm|curl|wget)/i,
       /\|\s*(rm|curl|wget)/i,
-      // Path traversal patterns
       /\.\.\//,
       /\.\.\\/,
-      // Other dangerous patterns
       /base64_decode/i,
       /system\s*\(/i,
       /exec\s*\(/i,
@@ -268,7 +251,6 @@ export class SecurityService {
     rateLimitThreshold: 10,
   };
 
-  // Zod schemas for validation
   private readonly schemas = {
     email: z
       .string()
@@ -298,10 +280,6 @@ export class SecurityService {
 
   private readonly securityLogger = securityLogger;
 
-  // ============================================================================
-  // JWT AUTHENTICATION
-  // ============================================================================
-
   /**
    * Generate JWT access token with enhanced security
    * @param {Omit<JWTPayload, "iat" | "exp" | "iss" | "aud" | "jti">} payload - The payload for the JWT
@@ -310,7 +288,7 @@ export class SecurityService {
   generateAccessToken(
     payload: Omit<JWTPayload, "iat" | "exp" | "iss" | "aud" | "jti">,
   ): string {
-    const jti = crypto.randomUUID(); // Unique token identifier
+    const jti = crypto.randomUUID();
     const options: SignOptions = {
       expiresIn: this.JWT_EXPIRES_IN as any,
       algorithm: this.JWT_ALGORITHM as any,
@@ -331,7 +309,6 @@ export class SecurityService {
   generateRefreshToken(userId: string, familyId?: string): string {
     const tokenId = crypto.randomUUID();
     const jti = crypto.randomUUID();
-    // Use provided familyId (for rotation) or create new family (for fresh login)
     const tokenFamilyId = familyId ?? crypto.randomUUID();
     const payload: Omit<
       RefreshTokenPayload,
@@ -401,7 +378,7 @@ export class SecurityService {
    * @returns {Promise<string>} The hashed password
    */
   async hashPassword(password: string): Promise<string> {
-    const saltRounds = 14; // Increased from 12 for better security
+    const saltRounds = 14;
     return bcrypt.hash(password, saltRounds);
   }
 
@@ -421,7 +398,7 @@ export class SecurityService {
    */
   generateApiKey(): string {
     const timestamp = Date.now().toString();
-    const randomBytes = crypto.randomBytes(32).toString("hex"); // Increased entropy
+    const randomBytes = crypto.randomBytes(32).toString("hex");
     const combined = `${timestamp}-${randomBytes}`;
 
     return crypto
@@ -461,7 +438,7 @@ export class SecurityService {
    * @returns {string} The generated CSRF token
    */
   generateCSRFToken(): string {
-    return crypto.randomBytes(64).toString("hex"); // Increased entropy
+    return crypto.randomBytes(64).toString("hex");
   }
 
   /**
@@ -471,7 +448,6 @@ export class SecurityService {
    * @returns {boolean} True if the CSRF token is valid, false otherwise
    */
   verifyCSRFToken(token: string, sessionToken: string): boolean {
-    // Ensure both tokens are valid hex strings
     if (!/^[0-9a-fA-F]+$/.test(token) || !/^[0-9a-fA-F]+$/.test(sessionToken)) {
       return false;
     }
@@ -496,10 +472,6 @@ export class SecurityService {
     }
   }
 
-  // ============================================================================
-  // RATE LIMITING
-  // ============================================================================
-
   async checkRateLimit(key: string, type: string): Promise<RateLimitResult> {
     const config = this.rateLimitConfigs[type] || this.rateLimitConfigs.public;
     if (!config) {
@@ -511,7 +483,6 @@ export class SecurityService {
     const blockKey = `blocked:${type}:${key}`;
 
     try {
-      // Check if key is blocked
       const isBlocked = await this.isKeyBlocked(blockKey);
       if (isBlocked) {
         const retryAfter = Math.ceil((config.blockDuration || 0) / 1000);
@@ -525,7 +496,6 @@ export class SecurityService {
         };
       }
 
-      // Increment request count
       const current = await this.redisService.incr(windowKey);
       if (current === 1) {
         await this.redisService.expire(
@@ -538,9 +508,7 @@ export class SecurityService {
       const resetTime =
         (Math.floor(now / config.windowMs) + 1) * config.windowMs;
 
-      // Check if limit exceeded
       if (current > config.max) {
-        // Block the key if block duration is configured
         if (config.blockDuration) {
           await this.blockKey(blockKey, config.blockDuration);
         }
@@ -569,12 +537,10 @@ export class SecurityService {
         stack: error instanceof Error ? error.stack : undefined,
       });
 
-      // Fail closed with in-memory fallback for security-critical rate limits
       const fallbackKey = `${type}:${key}`;
       const now = Date.now();
       const fallbackData = inMemoryRateLimits.get(fallbackKey);
 
-      // Clean up expired entries periodically
       if (inMemoryRateLimits.size > 10000) {
         for (const [k, v] of inMemoryRateLimits.entries()) {
           if (v.resetTime < now) inMemoryRateLimits.delete(k);
@@ -599,7 +565,6 @@ export class SecurityService {
           resetTime: fallbackData.resetTime,
         };
       } else {
-        // Create new window
         inMemoryRateLimits.set(fallbackKey, {
           count: 1,
           resetTime: now + config.windowMs,
@@ -759,12 +724,10 @@ export class SecurityService {
         return 0;
       }
 
-      // Batch operation to get all TTLs at once (more efficient than individual calls)
       const pipeline = Array.isArray(keys) ? keys : [];
       const ttlPromises = pipeline.map((key) => this.redisService.ttl(key));
       const ttls = await Promise.all(ttlPromises);
 
-      // Identify keys that need to be deleted (TTL = -1 means no expiry set)
       const keysToDelete: string[] = [];
       ttls.forEach((ttl, index) => {
         if (ttl === -1 && keys[index]) {
@@ -772,7 +735,6 @@ export class SecurityService {
         }
       });
 
-      // Batch delete operations for better performance
       if (keysToDelete.length > 0) {
         const deletePromises = keysToDelete.map((key) =>
           this.redisService.del(key),
@@ -791,10 +753,6 @@ export class SecurityService {
       return 0;
     }
   }
-
-  // ============================================================================
-  // INPUT VALIDATION
-  // ============================================================================
 
   validate<T>(schema: z.ZodSchema<T>, data: unknown): T {
     try {
@@ -934,10 +892,6 @@ export class SecurityService {
       riskLevel: "low",
     };
   }
-
-  // ============================================================================
-  // ENCRYPTION & HASHING
-  // ============================================================================
 
   private readonly ALGORITHM = "aes-256-gcm";
   private readonly KEY_LENGTH = 32;
@@ -1113,10 +1067,6 @@ export class SecurityService {
     return JSON.parse(jsonString) as T;
   }
 
-  // ============================================================================
-  // SECURITY HEADERS & CSP
-  // ============================================================================
-
   generateNonce(): string {
     return crypto.randomBytes(16).toString("base64");
   }
@@ -1210,15 +1160,11 @@ export class SecurityService {
       "X-RateLimit-Remaining": remaining.toString(),
       "X-RateLimit-Reset": resetTimeSeconds.toString(),
       "X-RateLimit-Reset-Date": resetTimeDate,
-      "X-RateLimit-Window": "60", // 60 seconds window
+      "X-RateLimit-Window": "60",
       "X-RateLimit-Policy": "fixed-window",
       "Retry-After": remaining === 0 ? resetTimeSeconds.toString() : "0",
     };
   }
-
-  // ============================================================================
-  // SECURITY MONITORING & LOGGING
-  // ============================================================================
 
   logSecurityEvent(
     type: SecurityEventType,
@@ -1236,7 +1182,6 @@ export class SecurityService {
     };
 
     if (getEnv().NODE_ENV === "production") {
-      // Send to monitoring service and structured logging
       this.securityLogger.error("Security event detected", {
         type: event.type,
         timestamp: event.timestamp,
@@ -1298,10 +1243,6 @@ export class SecurityService {
     return sanitized;
   }
 
-  // ============================================================================
-  // UTILITY METHODS
-  // ============================================================================
-
   getClientIp(request: Request): string {
     return (
       (request.headers["x-forwarded-for"] as string)?.split(",")[0] ||
@@ -1339,10 +1280,6 @@ export class SecurityService {
     }
   }
 
-  // ============================================================================
-  // SECURE STORAGE WRAPPER
-  // ============================================================================
-
   createSecureStorage(password?: string) {
     const storagePassword = password || this.JWT_SECRET;
 
@@ -1362,7 +1299,7 @@ export class SecurityService {
         const sessionData = {
           userId,
           createdAt: Date.now(),
-          expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+          expiresAt: Date.now() + 24 * 60 * 60 * 1000,
           ...data,
         };
         return this.encryptObject(sessionData, storagePassword);
@@ -1380,7 +1317,7 @@ export class SecurityService {
           }>(encryptedSession, storagePassword);
 
           if (Date.now() > sessionData.expiresAt) {
-            return null; // Session expired
+            return null;
           }
 
           const { userId, ...data } = sessionData;
@@ -1392,7 +1329,7 @@ export class SecurityService {
             component: "SecurityService",
             operation: "validateSession",
           });
-          return null; // Invalid session
+          return null;
         }
       },
     };

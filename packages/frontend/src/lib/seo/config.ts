@@ -1,8 +1,14 @@
-// SEO Configuration for the application
-// Centralized settings for consistent SEO across all pages
-
+/**
+ * SEO configuration for the portfolio site
+ * Contains metadata, social links, keywords, and page-specific settings
+ * Used for generating meta tags, Open Graph data, and structured data
+ * @example
+ * ```ts
+ * import { SEO_CONFIG } from '@/lib/seo/config';
+ * const title = SEO_CONFIG.site.title;
+ * ```
+ */
 export const SEO_CONFIG = {
-  // Basic site information
   site: {
     name: "Terminal Portfolio",
     title: "Terminal Portfolio | Full-Stack Developer",
@@ -11,20 +17,18 @@ export const SEO_CONFIG = {
     url: process.env.NEXT_PUBLIC_BASE_URL || "https://infinitedim.site",
     author: "Dimas Saputra",
     email: "developer@infinitedim.site",
-    phone: "", // Set via environment variable if needed
+    phone: "",
     location: "Indonesia",
   },
 
-  // Social media profiles
   social: {
     twitter: "@yourblooo",
     github: "https://github.com/infinitedim",
     linkedin: "https://linkedin.com/in/infinitedim",
-    instagram: "", // Set if available
-    youtube: "", // Set if available
+    instagram: "",
+    youtube: "",
   },
 
-  // SEO keywords for different pages
   keywords: {
     home: [
       "full-stack developer",
@@ -88,7 +92,6 @@ export const SEO_CONFIG = {
     ],
   },
 
-  // Open Graph images
   images: {
     default: "/og-image.png",
     projects: "/og-projects.png",
@@ -98,7 +101,6 @@ export const SEO_CONFIG = {
     services: "/og-services.png",
   },
 
-  // Page-specific metadata
   pages: {
     home: {
       title: "Terminal Portfolio | Full-Stack Developer",
@@ -144,7 +146,6 @@ export const SEO_CONFIG = {
     },
   },
 
-  // Structured data templates
   structuredData: {
     person: {
       "@type": "Person",
@@ -184,7 +185,6 @@ export const SEO_CONFIG = {
     },
   },
 
-  // Robots.txt configuration
   robots: {
     userAgents: {
       googlebot: {
@@ -200,7 +200,6 @@ export const SEO_CONFIG = {
     },
   },
 
-  // Sitemap configuration
   sitemap: {
     staticPages: [
       { url: "/", priority: 1.0, changeFreq: "weekly" },
@@ -227,9 +226,7 @@ export const SEO_CONFIG = {
   },
 } as const;
 
-// Helper functions for SEO
 export const SEO_HELPERS = {
-  // Generate page title
   getPageTitle: (page: string, customTitle?: string): string => {
     if (customTitle) return customTitle;
     return (
@@ -238,7 +235,6 @@ export const SEO_HELPERS = {
     );
   },
 
-  // Generate page description
   getPageDescription: (page: string, customDescription?: string): string => {
     if (customDescription) return customDescription;
     return (
@@ -247,7 +243,6 @@ export const SEO_HELPERS = {
     );
   },
 
-  // Generate page keywords
   getPageKeywords: (page: string, customKeywords?: string[]): string[] => {
     if (customKeywords) return customKeywords;
     const keywords =
@@ -256,12 +251,10 @@ export const SEO_HELPERS = {
     return Array.from(keywords);
   },
 
-  // Generate canonical URL
   getCanonicalUrl: (path: string): string => {
     return `${SEO_CONFIG.site.url}${path}`;
   },
 
-  // Generate Open Graph image URL
   getOGImage: (page: string): string => {
     const image = SEO_CONFIG.images[page as keyof typeof SEO_CONFIG.images];
     return image

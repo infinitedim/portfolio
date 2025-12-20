@@ -25,32 +25,43 @@ import { SpotifyAuth } from "../ui/SpotifyAuth";
 import { NowPlayingWidget } from "../ui/NowPlayingWidget";
 import { LetterGlitch } from "../ui/LetterGlitch";
 
+/**
+ * Props for the Terminal component
+ * @interface TerminalProps
+ * @property {(theme: string) => void} [onThemeChange] - Callback when theme changes
+ * @property {(font: string) => void} [onFontChange] - Callback when font changes
+ */
 interface TerminalProps {
   onThemeChange?: (theme: string) => void;
   onFontChange?: (font: string) => void;
 }
 
 /**
- * The main terminal component that integrates all parts of the terminal application.
- * @param {TerminalProps} props - The properties for the Terminal component.
- * @param {(theme: string) => void} [props.onThemeChange] - A callback executed when the theme changes.
- * @param {(font: string) => void} [props.onFontChange] - A callback executed when the font changes.
- * @returns {JSX.Element | null} - The complete terminal interface component.
+ * Main terminal component that integrates all terminal features
+ * Provides a complete terminal interface with command execution, history, and customization
+ * @param {TerminalProps} props - Component props
+ * @param {(theme: string) => void} [props.onThemeChange] - Theme change callback
+ * @param {(font: string) => void} [props.onFontChange] - Font change callback
+ * @returns {JSX.Element | null} The complete terminal interface or null during initialization
+ * @example
+ * ```tsx
+ * <Terminal
+ *   onThemeChange={handleThemeChange}
+ *   onFontChange={handleFontChange}
+ * />
+ * ```
  */
 export function Terminal({
   onThemeChange,
   onFontChange,
 }: TerminalProps): JSX.Element | null {
-  // MODIFICATION: Add hook safety guards before destructuring
   const themeHookResult = useTheme();
   const fontHookResult = useFont();
   const { announceMessage, isReducedMotion } = useAccessibility();
   const { t } = useI18n();
 
-  // Add minimum loading time to ensure progress bar animation runs
   const [hasMinimumLoadingTime, setHasMinimumLoadingTime] = useState(false);
 
-  // Create theme performance interface for useTerminal
   const themePerformance = useMemo(
     () => ({
       getPerformanceReport: themeHookResult.getPerformanceReport,
@@ -74,10 +85,10 @@ export function Terminal({
     commandAnalytics,
     favoriteCommands,
   } = useTerminal(
-    undefined, // onOpenDemo
-    () => setShowNowPlaying(true), // onOpenNowPlaying
-    () => setShowSpotifyAuth(true), // onOpenAuth
-    themePerformance, // theme performance metrics
+    undefined,
+    () => setShowNowPlaying(true),
+    () => setShowSpotifyAuth(true),
+    themePerformance,
   );
   const [showCustomizationManager, setShowCustomizationManager] =
     useState(false);
@@ -100,16 +111,14 @@ export function Terminal({
     announceMessage("Terminal portfolio loaded", "polite");
   }, [announceMessage, customizationService]);
 
-  // Ensure minimum loading time for progress bar animation
   useEffect(() => {
     const timer = setTimeout(() => {
       setHasMinimumLoadingTime(true);
-    }, 800); // 800ms minimum loading time for smooth progress animation
+    }, 800);
 
     return () => clearTimeout(timer);
   }, []);
 
-  // Auto-scroll to bottom when new content is added
   useEffect(() => {
     if (bottomRef.current && !isReducedMotion) {
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
@@ -118,7 +127,6 @@ export function Terminal({
     }
   }, [history, isReducedMotion]);
 
-  // Enhanced global keyboard listener that respects tab navigation
   useEffect(() => {
     const handleGlobalKeydown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
@@ -126,7 +134,6 @@ export function Terminal({
 
       const tagName = target.tagName.toLowerCase();
 
-      // Don't interfere with inputs, textareas, or when modifiers are pressed
       if (
         tagName === "input" ||
         tagName === "textarea" ||
@@ -135,37 +142,34 @@ export function Terminal({
         e.ctrlKey ||
         e.altKey ||
         e.metaKey ||
-        e.key === "Tab" || // IMPORTANT: Don't interfere with Tab navigation
+        e.key === "Tab" ||
         e.key === "Escape" ||
         e.key === "Enter" ||
-        e.key === "ArrowUp" || // Don't interfere with arrow navigation
+        e.key === "ArrowUp" ||
         e.key === "ArrowDown" ||
         e.key === "ArrowLeft" ||
         e.key === "ArrowRight" ||
-        showCustomizationManager // Don't interfere when customization manager is open
+        showCustomizationManager
       ) {
         return;
       }
 
-      // Additional check: Don't interfere if user is navigating with focus
       if (document.activeElement && document.activeElement !== document.body) {
         const activeElement = document.activeElement as HTMLElement;
         if (
           activeElement.tagName.toLowerCase() !== "body" &&
           activeElement !== commandInputRef.current
         ) {
-          return; // User is focused on another element, don't interfere
+          return;
         }
       }
 
-      // Only handle printable characters for command input
       if (
         commandInputRef.current &&
         e.key.length === 1 &&
         /^[a-zA-Z0-9\s!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]$/.test(e.key)
       ) {
         commandInputRef.current.focus();
-        // Add the typed character to current input
         setCurrentInput((prev) => prev + e.key);
         e.preventDefault();
       }
@@ -175,7 +179,6 @@ export function Terminal({
     return () => document.removeEventListener("keydown", handleGlobalKeydown);
   }, [showCustomizationManager, setCurrentInput]);
 
-  // Focus terminal on click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
@@ -202,21 +205,19 @@ export function Terminal({
     }
   }, []);
 
-  // Hide welcome after first command
   useEffect(() => {
     if (history.length > 0) {
       setShowWelcome(false);
     }
   }, [history.length]);
 
-  // Early return if hooks are not properly initialized
   if (!themeHookResult || !fontHookResult) {
     return (
       <div
         className="min-h-screen w-full flex items-center justify-center bg-black text-white relative overflow-hidden"
         suppressHydrationWarning={true}
       >
-        {/* Background effect for loading screen */}
+        { }
         <div className="absolute inset-0 bg-linear-to-br from-gray-900 via-black to-gray-800" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20" />
 
@@ -237,7 +238,6 @@ export function Terminal({
     );
   }
 
-  // Safe destructuring after validation
   const {
     themeConfig,
     changeTheme,
@@ -265,7 +265,6 @@ export function Terminal({
     const output = await executeCommand(command);
 
     if (output) {
-      // Handle customization manager command
       if (
         typeof output.content === "string" &&
         output.content === "OPEN_CUSTOMIZATION_MANAGER"
@@ -280,7 +279,6 @@ export function Terminal({
         return;
       }
 
-      // Handle theme change commands with enhanced feedback
       if (
         typeof output.content === "string" &&
         output.content.startsWith("CHANGE_THEME:")
@@ -288,7 +286,6 @@ export function Terminal({
         const themeName = output.content.split(":")[1];
         console.log(`🎨 Terminal: Attempting to change theme to ${themeName}`);
 
-        // MODIFICATION: Add function existence check before calling
         if (typeof changeTheme === "function") {
           const success = changeTheme(themeName as any);
 
@@ -297,7 +294,6 @@ export function Terminal({
             showNotification(`Theme changed to "${themeName}"`, "success");
             announceMessage(`Theme changed to ${themeName}`, "polite");
 
-            // Add success message to history without clearing
             addToHistory(command, {
               ...output,
               content: [
@@ -308,10 +304,7 @@ export function Terminal({
               type: "success",
             });
 
-            // Theme change is handled by useTheme hook automatically
-            // No need to reload the page or clear history
           } else {
-            // MODIFICATION: Use the `themeError` state from the hook for a more precise error message.
             const errorMsg =
               themeError || `Theme "${themeName}" may not exist or be invalid.`;
             showNotification(`Failed to change theme: ${errorMsg}`, "error");
@@ -330,14 +323,12 @@ export function Terminal({
           showNotification("Theme change function not available", "error");
         }
       }
-      // Handle font change commands
       else if (
         typeof output.content === "string" &&
         output.content.startsWith("CHANGE_FONT:")
       ) {
         const fontName = output.content.split(":")[1];
 
-        // MODIFICATION: Add function existence check before calling
         if (typeof changeFont === "function") {
           changeFont(fontName as any);
           onFontChange?.(fontName);
@@ -368,7 +359,6 @@ export function Terminal({
           showNotification("Font change function not available", "error");
         }
       }
-      // Handle status command with enhanced info
       else if (
         typeof output.content === "string" &&
         output.content === "SHOW_STATUS"
@@ -377,7 +367,6 @@ export function Terminal({
         const customThemes = customizationService.getCustomThemes().length;
         const customFonts = customizationService.getCustomFonts().length;
 
-        // Enhanced status with command analytics and performance metrics
         const analytics = commandAnalytics || {
           totalCommands: 0,
           uniqueCommands: 0,
@@ -385,7 +374,6 @@ export function Terminal({
           topCommands: [],
         };
 
-        // Get performance metrics
         const performanceReport = themeHookResult.getPerformanceReport();
         const currentMetrics = themeHookResult.themeMetrics;
 
@@ -450,14 +438,13 @@ export function Terminal({
     setCurrentInput("");
   };
 
-  // MODIFICATION: Use mounted state to prevent hydration issues and ensure minimum loading time
   if (!mounted || !themeConfig || !fontConfig || !hasMinimumLoadingTime) {
     return (
       <div
         className="min-h-screen w-full flex items-center justify-center bg-black text-white relative overflow-hidden"
         suppressHydrationWarning={true}
       >
-        {/* Background effect for loading screen */}
+        { }
         <div className="absolute inset-0 bg-linear-to-br from-gray-900 via-black to-gray-800" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20" />
 
@@ -517,7 +504,7 @@ export function Terminal({
         <DevelopmentBanner />
         <AccessibilityMenu />
 
-        {/* Full Viewport Background Letter Glitch Effect */}
+        { }
         <LetterGlitch
           glitchColors={["#2b4539", "#61dca3", "#61b3dc"]}
           glitchSpeed={50}
@@ -531,12 +518,9 @@ export function Terminal({
         <div
           ref={terminalRef}
           id="main-content"
-          // MODIFICATION: Removed `appliedTheme` from the key. `theme` is the correct state to use.
           key={`terminal-${theme}`}
           className={`min-h-screen w-full pt-4 px-2 pb-4 sm:pt-16 sm:px-6 lg:px-8 cursor-text terminal-container relative z-10 ${!isReducedMotion ? "transition-all duration-300" : ""}`}
           style={{
-            // MODIFICATION: Add deep property guards with fallbacks
-            // Make background transparent to show glitch effect
             backgroundColor: "transparent",
             color: themeConfig?.colors?.text || "#ffffff",
             fontFamily: fontConfig?.family || "monospace",
@@ -550,13 +534,12 @@ export function Terminal({
           aria-label="Terminal interface"
         >
           {
-            /* Terminal Content */
             <div className="relative z-10 w-full max-w-4xl mx-auto space-y-4 sm:space-y-8 mt-2 sm:mt-10">
               <div className="mb-4 sm:mb-8">
                 <ASCIIBanner />
               </div>
 
-              {/* Interactive Welcome */}
+              { }
               {showWelcome && history.length === 0 && (
                 <InteractiveWelcome
                   onCommandSelect={handleWelcomeCommandSelect}
@@ -564,10 +547,10 @@ export function Terminal({
                 />
               )}
 
-              {/* Terminal History */}
+              { }
               <TerminalHistory history={history} />
 
-              {/* Command Loading Indicator */}
+              { }
               {isProcessing && (
                 <CommandLoadingIndicator
                   command={currentInput}
@@ -633,12 +616,12 @@ export function Terminal({
                 />
               </div>
 
-              {/* Auto-scroll anchor */}
+              { }
               <div ref={bottomRef} />
             </div>
           }
 
-          {/* Customization Button */}
+          { }
           <div
             id="customization"
             tabIndex={-1}
@@ -646,13 +629,13 @@ export function Terminal({
             <CustomizationButton />
           </div>
         </div>
-        {/* Customization Manager */}
+        { }
         <CustomizationManager
           isOpen={showCustomizationManager}
           onClose={() => setShowCustomizationManager(false)}
         />
 
-        {/* Spotify Auth Modal */}
+        { }
         {showSpotifyAuth && (
           <SpotifyAuth
             onClose={() => setShowSpotifyAuth(false)}
@@ -663,7 +646,7 @@ export function Terminal({
           />
         )}
 
-        {/* Now Playing Widget */}
+        { }
         {showNowPlaying && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
             <div className="relative w-full max-w-md mx-4 bg-gray-900 rounded-lg border border-gray-700 shadow-2xl p-6">
@@ -683,7 +666,7 @@ export function Terminal({
           </div>
         )}
 
-        {/* Notification Toast */}
+        { }
         {notification && (
           <NotificationToast
             message={notification.message}

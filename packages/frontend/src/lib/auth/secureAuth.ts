@@ -1,32 +1,57 @@
 import { useState, useEffect, useCallback } from "react";
 
 /**
- * Secure authentication utilities for managing tokens via httpOnly cookies
+ * Configuration options for secure cookie management
+ * @property secure - Whether to require HTTPS for cookie transmission
+ * @property sameSite - Cookie same-site policy for CSRF protection
+ * @property maxAge - Cookie expiration time in seconds
+ * @property path - Cookie path scope
  */
-
 export interface AuthConfig {
   secure?: boolean;
   sameSite?: "strict" | "lax" | "none";
-  maxAge?: number; // in seconds
+  maxAge?: number;
   path?: string;
 }
 
 /**
- * Client-side cookie management utilities
- * Note: These work with regular cookies, not httpOnly cookies
- * httpOnly cookies should be managed server-side
+ * Utility class for secure authentication using httpOnly cookies and client-side cookie management
+ *
+ * This class provides methods for:
+ * - Managing non-httpOnly cookies on the client side
+ * - Verifying authentication via server requests (works with httpOnly cookies)
+ * - Login and logout operations
+ *
+ * @remarks
+ * httpOnly cookies should be managed server-side for maximum security.
+ * This class provides client-side utilities that work alongside server-side cookie management.
+ *
+ * @example
+ * ```ts
+ * // Verify authentication
+ * const { isValid, user } = await SecureAuth.verifyAuthentication();
+ *
+ * // Login
+ * const result = await SecureAuth.login('user@example.com', 'password');
+ * ```
  */
 export class SecureAuth {
   private static readonly DEFAULT_CONFIG: Required<AuthConfig> = {
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
-    maxAge: 15 * 60, // 15 minutes
+    maxAge: 15 * 60,
     path: "/",
   };
 
   /**
-   * Get cookie value (for non-httpOnly cookies only)
-   * @param name
+   * Retrieves a cookie value by name (for non-httpOnly cookies only)
+   * @param name - Name of the cookie to retrieve
+   * @returns Cookie value if found, null otherwise
+   * @remarks Cannot access httpOnly cookies as they are not exposed to JavaScript
+   * @example
+   * ```ts
+   * const theme = SecureAuth.getCookie('theme');
+   * ```
    */
   static getCookie(name: string): string | null {
     if (typeof document === "undefined") return null;
@@ -43,10 +68,18 @@ export class SecureAuth {
   }
 
   /**
-   * Set cookie (for non-httpOnly cookies only)
-   * @param name
-   * @param value
-   * @param config
+   * Sets a cookie with specified name, value, and configuration (for non-httpOnly cookies only)
+   * @param name - Name of the cookie
+   * @param value - Value to store in the cookie
+   * @param config - Optional cookie configuration (secure, sameSite, maxAge, path)
+   * @example
+   * ```ts
+   * SecureAuth.setCookie('theme', 'dark', {
+   *   maxAge: 30 * 24 * 60 * 60, // 30 days
+   *   secure: true,
+   *   sameSite: 'strict'
+   * });
+   * ```
    */
   static setCookie(
     name: string,
@@ -68,9 +101,13 @@ export class SecureAuth {
   }
 
   /**
-   * Remove cookie
-   * @param name
-   * @param path
+   * Removes a cookie by setting its expiration to the past
+   * @param name - Name of the cookie to remove
+   * @param path - Cookie path (default: "/")
+   * @example
+   * ```ts
+   * SecureAuth.removeCookie('sessionId');
+   * ```
    */
   static removeCookie(name: string, path: string = "/"): void {
     if (typeof document === "undefined") return;
@@ -79,8 +116,16 @@ export class SecureAuth {
   }
 
   /**
-   * Check if user is authenticated by making request to server
-   * This works with httpOnly cookies automatically sent by browser
+   * Verifies user authentication by making a request to the server
+   * Works with httpOnly cookies automatically sent by the browser
+   * @returns Promise resolving to an object with isValid boolean and optional user data
+   * @example
+   * ```ts
+   * const { isValid, user } = await SecureAuth.verifyAuthentication();
+   * if (isValid) {
+   *   console.log('User is authenticated:', user);
+   * }
+   * ```
    */
   static async verifyAuthentication(): Promise<{
     isValid: boolean;
@@ -92,7 +137,7 @@ export class SecureAuth {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // Include httpOnly cookies
+        credentials: "include",
       });
 
       if (response.ok) {
@@ -108,9 +153,20 @@ export class SecureAuth {
   }
 
   /**
-   * Login with credentials
-   * @param email
-   * @param password
+   * Authenticates a user with email and password
+   * Server sets httpOnly cookies on successful login
+   * @param email - User's email address
+   * @param password - User's password
+   * @returns Promise resolving to success status and optional error message
+   * @example
+   * ```ts
+   * const result = await SecureAuth.login('user@example.com', 'password');
+   * if (result.success) {
+   *   console.log('Login successful');
+   * } else {
+   *   console.error('Login failed:', result.error);
+   * }
+   * ```
    */
   static async login(
     email: string,
@@ -122,7 +178,7 @@ export class SecureAuth {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // Allow setting httpOnly cookies
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
@@ -140,7 +196,13 @@ export class SecureAuth {
   }
 
   /**
-   * Logout user
+   * Logs out the current user by clearing server-side httpOnly cookies
+   * @returns Promise that resolves when logout is complete
+   * @example
+   * ```ts
+   * await SecureAuth.logout();
+   * console.log('User logged out');
+   * ```
    */
   static async logout(): Promise<void> {
     try {
@@ -155,7 +217,25 @@ export class SecureAuth {
 }
 
 /**
- * React hook for authentication state management
+ * React hook for managing authentication state with httpOnly cookies
+ *
+ * Provides:
+ * - Authentication status
+ * - Current user data
+ * - Login, logout, and auth check functions
+ *
+ * @returns Object containing authentication state and methods
+ * @example
+ * ```tsx
+ * function MyComponent() {
+ *   const { isAuthenticated, user, login, logout } = useSecureAuth();
+ *
+ *   if (isAuthenticated) {
+ *     return <div>Welcome {user?.email}</div>;
+ *   }
+ *   return <LoginForm onSubmit={login} />;
+ * }
+ * ```
  */
 export function useSecureAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);

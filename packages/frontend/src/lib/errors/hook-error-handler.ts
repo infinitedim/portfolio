@@ -7,6 +7,13 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { EnhancedError, ErrorUtils } from "./error-types";
 import { AsyncErrorHandler, AsyncResult } from "./async-error-handler";
 
+/**
+ * State object for error handling in React components
+ * @property error - Current error if any
+ * @property isLoading - Whether an async operation is in progress
+ * @property retryCount - Number of retry attempts made
+ * @property lastRetryAt - Timestamp of last retry attempt
+ */
 export interface ErrorState {
   error: EnhancedError | null;
   isLoading: boolean;
@@ -14,6 +21,15 @@ export interface ErrorState {
   lastRetryAt: Date | null;
 }
 
+/**
+ * Configuration options for useErrorHandler hook
+ * @property maxRetries - Maximum number of retry attempts (default: 3)
+ * @property retryDelay - Delay between retries in milliseconds (default: 1000)
+ * @property onError - Callback invoked when error occurs
+ * @property onRetry - Callback invoked on each retry attempt
+ * @property onSuccess - Callback invoked on successful execution
+ * @property resetOnSuccess - Whether to reset error state on success (default: true)
+ */
 export interface UseErrorHandlerOptions {
   maxRetries?: number;
   retryDelay?: number;
@@ -24,7 +40,31 @@ export interface UseErrorHandlerOptions {
 }
 
 /**
- * Hook for comprehensive error handling with retry logic
+ * React hook for comprehensive error handling with retry logic
+ * Manages error state and provides utilities for executing async operations safely
+ * @param options - Configuration options for error handling behavior
+ * @returns Object containing error state and execution utilities
+ * @example
+ * ```tsx
+ * function MyComponent() {
+ *   const { execute, errorState, retry, clearError } = useErrorHandler({
+ *     maxRetries: 3,
+ *     onError: (error) => console.error(error)
+ *   });
+ *
+ *   const handleFetch = () => execute(async () => {
+ *     const data = await fetchData();
+ *     return data;
+ *   });
+ *
+ *   return (
+ *     <div>
+ *       {errorState.error && <ErrorMessage error={errorState.error} />}
+ *       <button onClick={handleFetch}>Fetch Data</button>
+ *     </div>
+ *   );
+ * }
+ * ```
  */
 export function useErrorHandler(options: UseErrorHandlerOptions = {}) {
   const [errorState, setErrorState] = useState<ErrorState>({
@@ -384,7 +424,6 @@ export function useTimerWithErrorHandling() {
     setState((prev) => ({ ...prev, error: null }));
   }, []);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       stop();
@@ -422,7 +461,6 @@ export function useEnhancedTimerManager() {
     ): string => {
       const timerId = id || generateId();
 
-      // Clear existing timeout with same id
       const existingTimeout = timeoutsRef.current.get(timerId);
       if (existingTimeout) {
         global.clearTimeout(existingTimeout);
@@ -458,7 +496,6 @@ export function useEnhancedTimerManager() {
     ): string => {
       const timerId = id || generateId();
 
-      // Clear existing interval with same id
       const existingInterval = intervalsRef.current.get(timerId);
       if (existingInterval) {
         global.clearInterval(existingInterval);
@@ -476,7 +513,6 @@ export function useEnhancedTimerManager() {
           const enhancedError = ErrorUtils.enhance(error as Error);
           setErrors((prev) => new Map(prev).set(timerId, enhancedError));
 
-          // Optionally stop interval on error
           if (enhancedError.severity === "CRITICAL") {
             const intervalToStop = intervalsRef.current.get(timerId);
             if (intervalToStop) {
@@ -533,7 +569,6 @@ export function useEnhancedTimerManager() {
 
   const hasErrors = errors.size > 0;
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       clearAll();

@@ -43,7 +43,6 @@ function listTechnologies(): CommandOutput {
   const projectService = ProjectMetadataService.getInstance();
   const technologies = projectService.getTechnologies();
 
-  // Ensure technologies is an array
   if (!Array.isArray(technologies)) {
     console.error(
       "Technologies is not an array in listTechnologies:",
@@ -101,7 +100,6 @@ function getProjectsByTech(technology: string): CommandOutput {
   const projectService = ProjectMetadataService.getInstance();
   const projects = projectService.getProjectsByTechnology(technology);
 
-  // Ensure projects is an array
   if (!Array.isArray(projects)) {
     console.error("Projects is not an array in getProjectsByTech:", projects);
     return {
@@ -145,7 +143,6 @@ function getTechStats(): CommandOutput {
   const technologies = projectService.getTechnologies();
   const projects = projectService.getAllProjects();
 
-  // Ensure technologies is an array
   if (!Array.isArray(technologies)) {
     console.error(
       "Technologies is not an array in getTechStats:",
@@ -159,7 +156,6 @@ function getTechStats(): CommandOutput {
     };
   }
 
-  // Ensure projects is an array
   if (!Array.isArray(projects)) {
     console.error("Projects is not an array in getTechStats:", projects);
     return {
@@ -177,7 +173,7 @@ function getTechStats(): CommandOutput {
 
   const sortedTechs = Object.entries(techUsage)
     .sort(([, a], [, b]) => b - a)
-    .slice(0, 10); // Top 10 most used technologies
+    .slice(0, 10);
 
   const statsList = sortedTechs
     .map(([tech, count]) => {
@@ -202,7 +198,6 @@ function categorizeTechnologiesData(): Record<string, string[]> {
   const projectService = ProjectMetadataService.getInstance();
   const technologies = projectService.getTechnologies();
 
-  // Ensure technologies is an array
   if (!Array.isArray(technologies)) {
     console.error("Technologies is not an array:", technologies);
     return {};
@@ -241,7 +236,6 @@ function categorizeTechnologiesData(): Record<string, string[]> {
 
   const categorized: Record<string, string[]> = {};
   Object.entries(categories).forEach(([category, techs]) => {
-    // Ensure techs is an array
     if (!Array.isArray(techs)) {
       console.error(`Techs for category ${category} is not an array:`, techs);
       return;
@@ -301,7 +295,6 @@ function searchTechnologies(query: string): CommandOutput {
   const projectService = ProjectMetadataService.getInstance();
   const technologies = projectService.getTechnologies();
 
-  // Ensure technologies is an array
   if (!Array.isArray(technologies)) {
     console.error(
       "Technologies is not an array in searchTechnologies:",

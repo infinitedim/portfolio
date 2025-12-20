@@ -8,15 +8,19 @@ import {
 import { ProjectCard } from "@/components/projects/ProjectCard";
 import { ProjectsLoading } from "@/components/projects/ProjectsLoading";
 
-// Route segment config for optimization
-export const revalidate = 3600; // Revalidate every hour
-export const dynamic = "force-static"; // Generate statically at build time
+export const revalidate = 3600;
+export const dynamic = "force-static";
 export const fetchCache = "default-cache";
 
-// Generate metadata dynamically
 /**
- * Generate metadata for the projects page
- * @returns {Promise<Metadata>} The metadata
+ * Generates dynamic metadata for the projects page
+ * @returns Metadata object with SEO optimization
+ * @remarks
+ * Dynamically generates metadata including:
+ * - Project count and featured project names in description
+ * - Keywords extracted from all project technologies
+ * - Open Graph and Twitter Card data
+ * - Canonical URL for SEO
  */
 export async function generateMetadata(): Promise<Metadata> {
   const projects = await getProjectsData();
@@ -59,13 +63,20 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// Server component for projects page
 /**
- * Projects page
- * @returns {Promise<JSX.Element>} The projects page
+ * Projects page component displaying portfolio projects
+ * @returns Projects page with featured and all projects sections
+ * @remarks
+ * Server-side rendered page featuring:
+ * - Static generation with revalidation every hour
+ * - Featured projects showcase section
+ * - Complete projects grid with filtering capabilities
+ * - Project statistics (total, featured, technologies, completed)
+ * - Structured data for SEO with ItemList schema
+ * - Technology tags from all projects
+ * - Suspense boundaries for progressive loading
  */
 export default async function ProjectsPage(): Promise<JSX.Element> {
-  // Pre-fetch data at build time / request time
   const [allProjects, featuredProjects] = await Promise.all([
     getProjectsData(),
     getFeaturedProjects(),
@@ -73,7 +84,7 @@ export default async function ProjectsPage(): Promise<JSX.Element> {
 
   return (
     <main className="min-h-screen bg-terminal-bg text-terminal-text">
-      {/* Hero Section with Server-Rendered Content */}
+      { }
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
@@ -100,7 +111,7 @@ export default async function ProjectsPage(): Promise<JSX.Element> {
         </div>
       </section>
 
-      {/* Featured Projects Section */}
+      { }
       {featuredProjects.length > 0 && (
         <section className="py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
@@ -120,7 +131,7 @@ export default async function ProjectsPage(): Promise<JSX.Element> {
         </section>
       )}
 
-      {/* All Projects Section with Streaming */}
+      { }
       <section className="py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold font-mono mb-8 text-terminal-text">
@@ -133,7 +144,7 @@ export default async function ProjectsPage(): Promise<JSX.Element> {
         </div>
       </section>
 
-      {/* Stats Section */}
+      { }
       <section className="py-12 px-4 sm:px-6 lg:px-8 border-t border-terminal-border">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
@@ -169,7 +180,7 @@ export default async function ProjectsPage(): Promise<JSX.Element> {
         </div>
       </section>
 
-      {/* Structured Data for SEO */}
+      { }
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -190,7 +201,7 @@ export default async function ProjectsPage(): Promise<JSX.Element> {
                 name: "Developer Portfolio",
               },
               programmingLanguage: project.technologies,
-              dateCreated: "2024-01-01", // You'd want actual dates
+              dateCreated: "2024-01-01",
               creativeWorkStatus: project.status,
             })),
           }),
@@ -200,11 +211,16 @@ export default async function ProjectsPage(): Promise<JSX.Element> {
   );
 }
 
-// Server component for projects list
 /**
- * Projects list
- * @param {Project[]} projects - The projects to display
- * @returns {Promise<JSX.Element>} The projects list
+ * Projects list component rendering project cards in a grid
+ * @param props - Component props
+ * @param props.projects - Array of projects to display
+ * @returns Grid layout of project cards
+ * @remarks
+ * Renders projects in a responsive grid:
+ * - 1 column on mobile
+ * - 2 columns on tablet
+ * - 3 columns on desktop
  */
 async function ProjectsList({
   projects,

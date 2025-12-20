@@ -6,6 +6,13 @@ import type { TerminalHistory } from "@/types/terminal";
 import { CommandOutput } from "./CommandOutput";
 import { useTheme } from "@/hooks/useTheme";
 
+/**
+ * Props for the VirtualizedHistory component
+ * @interface VirtualizedHistoryProps
+ * @property {TerminalHistory[]} history - Array of history entries
+ * @property {string} [prompt] - Command prompt string
+ * @property {number} [maxVisibleItems] - Maximum items to render
+ */
 interface VirtualizedHistoryProps {
   history: TerminalHistory[];
   prompt?: string;
@@ -13,12 +20,21 @@ interface VirtualizedHistoryProps {
 }
 
 /**
- * Renders the terminal command history using virtualization for improved performance.
- * @param {VirtualizedHistoryProps} props - The properties for the VirtualizedHistory component.
- * @param {TerminalHistory[]} props.history - The list of terminal history entries.
- * @param {string} [props.prompt] - The prompt to display next to each command.
- * @param {number} [props.maxVisibleItems] - The maximum number of history items to render at once.
- * @returns {JSX.Element} - A component that renders the terminal history.
+ * Virtualized terminal history component for performance optimization
+ * Renders only visible history items to handle large command histories efficiently
+ * @param {VirtualizedHistoryProps} props - Component props
+ * @param {TerminalHistory[]} props.history - History entries
+ * @param {string} [props.prompt="$"] - Command prompt
+ * @param {number} [props.maxVisibleItems=50] - Max visible items
+ * @returns {JSX.Element} The virtualized history display
+ * @example
+ * ```tsx
+ * <VirtualizedHistory
+ *   history={commandHistory}
+ *   prompt=">"
+ *   maxVisibleItems={100}
+ * />
+ * ```
  */
 export function VirtualizedHistory({
   history,
@@ -32,7 +48,6 @@ export function VirtualizedHistory({
     end: maxVisibleItems,
   });
 
-  // Only show recent items for performance
   const visibleHistory = useMemo(() => {
     if (history.length <= maxVisibleItems) return history;
 
@@ -40,7 +55,6 @@ export function VirtualizedHistory({
     return history.slice(start);
   }, [history, maxVisibleItems]);
 
-  // Auto-scroll optimization
   useEffect(() => {
     if (containerRef.current) {
       const container = containerRef.current;
@@ -82,7 +96,7 @@ export function VirtualizedHistory({
           key={`${entry.timestamp.getTime()}-${index}`}
           className="space-y-2"
         >
-          {/* Command input display */}
+          { }
           <div className="flex items-center gap-2 font-mono">
             <span style={{ color: themeConfig.colors.prompt }}>{prompt}</span>
             <span style={{ color: themeConfig.colors.text }}>
@@ -90,7 +104,7 @@ export function VirtualizedHistory({
             </span>
           </div>
 
-          {/* Command output */}
+          { }
           <div className="ml-4">
             <CommandOutput output={entry.output} />
           </div>

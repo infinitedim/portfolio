@@ -43,16 +43,13 @@ class PerformanceOptimizedDB {
     queryFn: () => Promise<T>,
     ttl: number = this.DEFAULT_CACHE_TTL,
   ): Promise<T> {
-    // Check cache first
     const cached = this.queryCache.get(key);
     if (cached && Date.now() - cached.timestamp < cached.ttl) {
       return cached.data as T;
     }
 
-    // Execute query
     const result = await queryFn();
 
-    // Cache result
     this.queryCache.set(key, {
       data: result,
       timestamp: Date.now(),
@@ -71,7 +68,6 @@ class PerformanceOptimizedDB {
     queryFn: () => Promise<T>,
   ): Promise<T> {
     return new Promise((resolve, reject) => {
-      // Add to batch
       if (!this.batchedQueries.has(batchKey)) {
         this.batchedQueries.set(batchKey, []);
       }
@@ -83,7 +79,6 @@ class PerformanceOptimizedDB {
         reject,
       });
 
-      // Schedule batch execution
       if (!this.batchTimeout) {
         this.batchTimeout = setTimeout(
           () => this.executeBatch(),
@@ -101,7 +96,6 @@ class PerformanceOptimizedDB {
     this.batchedQueries.clear();
     this.batchTimeout = null;
 
-    // Execute all batches in parallel
     await Promise.all(
       allBatches.map(async ([_batchKey, queries]) => {
         const results = await Promise.allSettled(queries.map((q) => q.query()));
@@ -212,7 +206,6 @@ class PerformanceOptimizedDB {
       memoryUsage: 0,
     };
 
-    // Calculate approximate memory usage
     for (const [key, value] of this.queryCache.entries()) {
       stats.memoryUsage += key.length + JSON.stringify(value.data).length;
     }

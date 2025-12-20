@@ -13,8 +13,8 @@ export default defineConfig({
     exclude: [
       "**/node_modules/**",
       "**/dist/**",
-      "**/e2e/**", // Exclude Playwright e2e tests
-      "**/*.spec.ts", // Exclude all .spec.ts files (Playwright convention)
+      "**/e2e/**",
+      "**/*.spec.ts",
       "**/coverage/**",
       "**/.{idea,git,cache,output,temp}/**",
     ],
