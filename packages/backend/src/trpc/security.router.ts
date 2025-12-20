@@ -3,7 +3,6 @@ import { z } from "zod";
 import type { TrpcContext } from "./context";
 
 export const securityRouter = router({
-  // CSRF token generation - call this after login to get a token for mutations
   getCsrfToken: publicProcedure.query(async ({ ctx }) => {
     const typedCtx = ctx as TrpcContext;
     const sessionId = typedCtx.services.csrf.getSessionId(typedCtx.req);
@@ -14,7 +13,6 @@ export const securityRouter = router({
     };
   }),
 
-  // Input validation
   validateInput: publicProcedure
     .input(
       z.object({
@@ -32,7 +30,6 @@ export const securityRouter = router({
       };
     }),
 
-  // Rate limiting
   checkRateLimit: publicProcedure
     .input(
       z.object({
@@ -76,7 +73,6 @@ export const securityRouter = router({
       return { success: true };
     }),
 
-  // Security metrics
   getRateLimitStats: publicProcedure.query(async ({ ctx }) => {
     const typedCtx = ctx as TrpcContext;
     return await typedCtx.services.security.getRateLimitStats();
@@ -105,7 +101,6 @@ export const securityRouter = router({
       return { success: true };
     }),
 
-  // Input sanitization
   sanitizeText: publicProcedure
     .input(
       z.object({
@@ -117,7 +112,6 @@ export const securityRouter = router({
       return typedCtx.services.security.sanitizeText(input.text);
     }),
 
-  // Security checks
   hasSqlInjectionPatterns: publicProcedure
     .input(
       z.object({
@@ -140,7 +134,6 @@ export const securityRouter = router({
       return typedCtx.services.security.hasXssPatterns(input.input);
     }),
 
-  // Token generation
   generateSecureToken: publicProcedure
     .input(
       z.object({
@@ -152,7 +145,6 @@ export const securityRouter = router({
       return typedCtx.services.security.generateSecureToken(input.length);
     }),
 
-  // Validation schemas
   validateEmail: publicProcedure
     .input(
       z.object({
@@ -214,7 +206,6 @@ export const securityRouter = router({
       }
     }),
 
-  // Security recommendations
   getSecurityRecommendations: publicProcedure
     .input(
       z.object({

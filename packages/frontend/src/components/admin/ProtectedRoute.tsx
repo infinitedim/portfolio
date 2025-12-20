@@ -4,16 +4,30 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
 
+/**
+ * Props for the ProtectedRoute component
+ * @interface ProtectedRouteProps
+ * @property {React.ReactNode} children - The content to display when authenticated
+ * @property {React.ReactNode} [fallback] - Optional loading fallback component
+ */
 interface ProtectedRouteProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
 }
 
 /**
- *
- * @param root0
- * @param root0.children
- * @param root0.fallback
+ * Protected route wrapper that requires authentication
+ * Redirects to login page if user is not authenticated
+ * @param {ProtectedRouteProps} props - Component props
+ * @param {React.ReactNode} props.children - The content to display when authenticated
+ * @param {React.ReactNode} [props.fallback] - Optional loading fallback component
+ * @returns {JSX.Element | null} The protected content or null if not authenticated
+ * @example
+ * ```tsx
+ * <ProtectedRoute>
+ *   <AdminDashboard />
+ * </ProtectedRoute>
+ * ```
  */
 export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -25,7 +39,6 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  // Show loading state while checking authentication
   if (isLoading) {
     return (
       fallback || (
@@ -39,11 +52,9 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
     );
   }
 
-  // Don't render anything if not authenticated (will redirect)
   if (!isAuthenticated) {
     return null;
   }
 
-  // Render children if authenticated
   return <>{children}</>;
 }

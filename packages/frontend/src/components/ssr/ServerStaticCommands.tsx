@@ -6,7 +6,6 @@ import { JSX } from "react";
  * @returns {JSX.Element} The ServerStaticCommands component
  */
 export async function ServerStaticCommands(): Promise<JSX.Element> {
-  // Pre-rendered command outputs
   const helpOutput = await generateHelpOutput();
   const aboutOutput = await generateAboutOutput();
   const projectsOutput = await generateProjectsOutput();

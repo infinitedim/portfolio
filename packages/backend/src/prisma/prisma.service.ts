@@ -26,12 +26,8 @@ export class PrismaService
   constructor() {
     const config = ServerlessConfig.getConfig();
 
-    // Prisma 7+ configuration
-    // datasourceUrl is now the standard way to override the database URL
     super({
-      // Override database URL if provided
       ...(config.databaseUrl && { datasourceUrl: config.databaseUrl }),
-      // Enhanced logging configuration - Prisma 7 uses log array
       log:
         config.logLevel === "debug"
           ? [
@@ -40,12 +36,8 @@ export class PrismaService
               { emit: "stdout", level: "warn" },
             ]
           : [{ emit: "stdout", level: "error" }],
-      // Error handling configuration
       errorFormat: "pretty",
     });
-
-    // Note: In Prisma 7, event handling is done differently
-    // Error events are handled through the log configuration above
   }
 
   async onModuleInit(): Promise<void> {
@@ -61,12 +53,10 @@ export class PrismaService
    * Connect to database with retry logic and proper cleanup
    */
   private async connectWithRetry(): Promise<void> {
-    // If already connecting, wait for existing connection attempt
     if (this.isConnecting && this.connectionPromise) {
       return this.connectionPromise;
     }
 
-    // If already connected, return immediately
     if (this.isConnected) {
       return;
     }
@@ -111,7 +101,6 @@ export class PrismaService
           );
         }
 
-        // Exponential backoff with jitter
         const baseDelay = 1000 * Math.pow(2, this.connectionAttempts - 1);
         const jitter = Math.random() * 1000;
         const delay = Math.min(baseDelay + jitter, 5000);
@@ -135,14 +124,11 @@ export class PrismaService
   private async cleanupAndDisconnect(): Promise<void> {
     this.logger.log("Starting comprehensive database cleanup...");
 
-    // Clear all timers first
     this.clearAllTimers();
 
-    // Mark as disconnected to prevent new operations
     this.isConnected = false;
 
     try {
-      // Wait for any pending queries to complete (with timeout)
       const disconnectPromise = this.performGracefulDisconnect();
       const timeoutPromise = new Promise<void>((_resolve, reject) =>
         setTimeout(
@@ -155,10 +141,8 @@ export class PrismaService
       this.logger.log("Successfully disconnected from database");
     } catch (error) {
       this.logger.error("Error during database disconnect:", error);
-      // Force disconnect if graceful disconnect fails
       await this.performForceDisconnect();
     } finally {
-      // Reset all connection state
       this.resetConnectionState();
     }
   }
@@ -182,7 +166,6 @@ export class PrismaService
       this.logger.log("Force disconnect successful");
     } catch (forceError) {
       this.logger.error("Force disconnect also failed:", forceError);
-      // At this point, we've done everything we can
     }
   }
 
@@ -200,7 +183,6 @@ export class PrismaService
       this.healthCheckInterval = null;
     }
 
-    // Clear any pending reconnection timers
     this.clearReconnectionTimer();
   }
 
@@ -224,7 +206,6 @@ export class PrismaService
     this.lastConnectionTime = null;
     this.resetConnectionAttempts();
 
-    // Clear any cached queries or transactions
     this.clearQueryCache();
   }
 
@@ -232,13 +213,10 @@ export class PrismaService
    * Clear query cache to prevent memory accumulation
    */
   private clearQueryCache(): void {
-    // Force garbage collection of any cached queries
     if (typeof global.gc === "function") {
       try {
         global.gc();
-      } catch (_error) {
-        // GC not available, that's fine
-      }
+      } catch (_error) {}
     }
   }
 
@@ -249,7 +227,6 @@ export class PrismaService
     this.logger.error("Connection error detected, initiating cleanup:", error);
     this.isConnected = false;
 
-    // Attempt reconnection after a delay if not shutting down
     if (!this.disconnectTimeout) {
       this.scheduleReconnection();
     }
@@ -276,7 +253,6 @@ export class PrismaService
    * Start periodic health check
    */
   private startPeriodicHealthCheck(): void {
-    // Only enable health checks in long-running environments
     if (this.config.isServerless) {
       return;
     }
@@ -336,7 +312,6 @@ export class PrismaService
     operation: () => Promise<T>,
     maxRetries: number = 2,
   ): Promise<T> {
-    // Ensure we're connected before attempting operation
     if (!this.isConnected && !this.isConnecting) {
       await this.connectWithRetry();
     }
@@ -349,11 +324,9 @@ export class PrismaService
       } catch (error) {
         lastError = error as Error;
 
-        // Check if error is retryable (connection issues, timeouts, etc.)
         const isRetryable = this.isRetryableError(error as Error);
 
         if (!isRetryable || attempt === maxRetries) {
-          // If it's a connection error, mark as disconnected
           if (this.isConnectionError(error as Error)) {
             this.isConnected = false;
             this.handleConnectionError(error as Error);
@@ -361,7 +334,6 @@ export class PrismaService
           throw error;
         }
 
-        // For connection errors, attempt to reconnect
         if (this.isConnectionError(error as Error)) {
           this.isConnected = false;
           this.logger.warn(
@@ -372,11 +344,9 @@ export class PrismaService
             await this.connectWithRetry();
           } catch (reconnectError) {
             this.logger.error("Reconnection failed:", reconnectError);
-            // Continue with retry logic
           }
         }
 
-        // Exponential backoff for retries with jitter
         const baseDelay = 500 * Math.pow(2, attempt);
         const jitter = Math.random() * 500;
         const delay = Math.min(baseDelay + jitter, 3000);
@@ -459,10 +429,6 @@ export class PrismaService
    * Enable shutdown hooks with comprehensive cleanup
    */
   async enableShutdownHooks(app: INestApplication): Promise<void> {
-    // In Prisma 7, beforeExit is handled via process events
-    // The old $on('beforeExit') is deprecated
-
-    // Handle process termination signals with proper cleanup
     const gracefulShutdown = async (signal: string) => {
       this.logger.log(`Received ${signal}, gracefully shutting down...`);
 
@@ -481,7 +447,6 @@ export class PrismaService
     process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
     process.on("beforeExit", () => gracefulShutdown("beforeExit"));
 
-    // Handle uncaught exceptions and unhandled rejections
     process.on("uncaughtException", async (error) => {
       this.logger.error(
         "Uncaught exception, performing emergency cleanup:",

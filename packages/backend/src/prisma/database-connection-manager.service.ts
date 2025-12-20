@@ -25,7 +25,6 @@ export class DatabaseConnectionManager {
   private connectionPool: PrismaService[] = [];
   private isInitialized = false;
 
-  // Connection pool configuration
   private readonly poolConfig = {
     min: this.config.connectionPool.pool.min,
     max: this.config.connectionPool.pool.max,
@@ -46,7 +45,6 @@ export class DatabaseConnectionManager {
     this.logger.log("Initializing database connection pool...");
 
     try {
-      // Create minimum number of connections
       for (let i = 0; i < this.poolConfig.min; i++) {
         const connection = await this.createConnection();
         this.connectionPool.push(connection);
@@ -57,7 +55,6 @@ export class DatabaseConnectionManager {
         `Database connection pool initialized with ${this.poolConfig.min} connections`,
       );
 
-      // Start connection health monitoring
       this.startHealthMonitoring();
     } catch (error) {
       this.logger.error("Failed to initialize connection pool:", error);
@@ -73,23 +70,19 @@ export class DatabaseConnectionManager {
       await this.initialize();
     }
 
-    // For serverless environments, return the main connection
     if (this.config.isServerless) {
       return this.prismaService;
     }
 
-    // Try to get an idle connection from the pool
     if (this.connectionPool.length > 0) {
       return this.connectionPool.pop()!;
     }
 
-    // If pool is empty and we haven't reached max, create a new connection
     if (this.connections.size < this.poolConfig.max) {
       this.logger.debug("Creating new connection for pool");
       return await this.createConnection();
     }
 
-    // Wait for a connection to become available
     return await this.waitForConnection();
   }
 
@@ -98,13 +91,11 @@ export class DatabaseConnectionManager {
    * @param connection
    */
   async releaseConnection(connection: PrismaService): Promise<void> {
-    // For serverless environments, don't pool connections
     if (this.config.isServerless) {
       return;
     }
 
     try {
-      // Check if connection is still healthy
       const healthStatus = await this.checkConnectionHealth(connection);
 
       if (
@@ -114,13 +105,11 @@ export class DatabaseConnectionManager {
         this.connectionPool.push(connection);
         this.logger.debug("Connection returned to pool");
       } else {
-        // Close unhealthy or excess connections
         await this.closeConnection(connection);
         this.logger.debug("Connection closed (unhealthy or excess)");
       }
     } catch (error) {
       this.logger.error("Error releasing connection:", error);
-      // Ensure connection is cleaned up even if there's an error
       await this.closeConnection(connection);
     }
   }
@@ -168,12 +157,10 @@ export class DatabaseConnectionManager {
   async shutdown(): Promise<void> {
     this.logger.log("Shutting down database connection pool...");
 
-    // Close all pooled connections
     await Promise.all(
       this.connectionPool.map((connection) => this.closeConnection(connection)),
     );
 
-    // Close all tracked connections
     await Promise.all(
       Array.from(this.connections.values()).map((connection) =>
         this.closeConnection(connection),
@@ -203,13 +190,9 @@ export class DatabaseConnectionManager {
     }
   }
 
-  // Private methods
-
   private async createConnection(): Promise<PrismaService> {
     const connectionId = `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    // Note: In a real implementation, you might want to create separate PrismaClient instances
-    // For now, we'll reuse the main service but track it
     this.connections.set(connectionId, this.prismaService);
 
     return this.prismaService;
@@ -217,16 +200,12 @@ export class DatabaseConnectionManager {
 
   private async closeConnection(connection: PrismaService): Promise<void> {
     try {
-      // Remove from connections map
       for (const [id, conn] of this.connections.entries()) {
         if (conn === connection) {
           this.connections.delete(id);
           break;
         }
       }
-
-      // Note: Don't actually disconnect the main service
-      // In a real pool implementation, you'd have separate instances
     } catch (error) {
       this.logger.error("Error closing connection:", error);
     }
@@ -238,7 +217,6 @@ export class DatabaseConnectionManager {
         reject(new Error("Connection acquisition timeout"));
       }, this.poolConfig.acquireTimeoutMs);
 
-      // Simple retry mechanism
       const checkForConnection = () => {
         if (this.connectionPool.length > 0) {
           clearTimeout(timeout);
@@ -275,18 +253,15 @@ export class DatabaseConnectionManager {
   }
 
   private startHealthMonitoring(): void {
-    // Don't start monitoring in serverless environments
     if (this.config.isServerless) {
       return;
     }
 
-    // Run health checks every 30 seconds
     setInterval(async () => {
       try {
         const healthStatus = await this.checkDatabaseHealth();
         if (!healthStatus.isHealthy) {
           this.logger.warn("Database health check failed:", healthStatus.error);
-          // Trigger connection pool cleanup on health failure
           await this.cleanupUnhealthyConnections();
         }
       } catch (error) {
@@ -294,7 +269,6 @@ export class DatabaseConnectionManager {
       }
     }, 30000);
 
-    // Clean up idle connections every 60 seconds
     setInterval(() => {
       this.cleanupIdleConnections();
     }, 60000);
@@ -303,7 +277,6 @@ export class DatabaseConnectionManager {
   private cleanupIdleConnections(): void {
     const stats = this.getPoolStats();
 
-    // If we have too many idle connections, close some
     if (stats.idleConnections > this.poolConfig.min) {
       const connectionsToClose = stats.idleConnections - this.poolConfig.min;
 
@@ -324,7 +297,6 @@ export class DatabaseConnectionManager {
   private async cleanupUnhealthyConnections(): Promise<void> {
     const connectionsToRemove: PrismaService[] = [];
 
-    // Check each connection in the pool
     for (const connection of this.connectionPool) {
       const health = await this.checkConnectionHealth(connection);
       if (!health.isHealthy) {
@@ -332,7 +304,6 @@ export class DatabaseConnectionManager {
       }
     }
 
-    // Remove unhealthy connections
     for (const connection of connectionsToRemove) {
       const index = this.connectionPool.indexOf(connection);
       if (index > -1) {
@@ -355,7 +326,6 @@ export class DatabaseConnectionManager {
     this.logger.log("Starting database connection manager cleanup...");
 
     try {
-      // Close all pooled connections
       const poolConnections = [...this.connectionPool];
       this.connectionPool.length = 0;
 
@@ -363,7 +333,6 @@ export class DatabaseConnectionManager {
         await this.closeConnection(connection);
       }
 
-      // Clear all connection tracking
       this.connections.clear();
 
       this.logger.log(

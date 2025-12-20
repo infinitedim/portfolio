@@ -2,15 +2,32 @@
 
 import { type JSX } from "react";
 
+/**
+ * Props for the JsonLd component
+ * @interface JsonLdProps
+ * @property {Record<string, unknown>} data - The structured data object to be rendered as JSON-LD
+ * @property {"application/ld+json" | "application/json"} [type] - MIME type for the script tag
+ */
 interface JsonLdProps {
   data: Record<string, unknown>;
   type?: "application/ld+json" | "application/json";
 }
 
 /**
- * JSON-LD component for structured data
- * @param {JsonLdProps} props - JSON-LD properties
- * @returns {JSX.Element} The JSON-LD script element
+ * JSON-LD component for embedding structured data
+ * Renders schema.org structured data for search engine optimization
+ * @param {JsonLdProps} props - Component props
+ * @param {Record<string, unknown>} props.data - The structured data object
+ * @param {"application/ld+json" | "application/json"} [props.type] - MIME type (default: "application/ld+json")
+ * @returns {JSX.Element} A script tag containing the JSON-LD structured data
+ * @example
+ * ```tsx
+ * <JsonLd data={{
+ *   "@context": "https://schema.org",
+ *   "@type": "Person",
+ *   "name": "John Doe"
+ * }} />
+ * ```
  */
 export function JsonLd({
   data,

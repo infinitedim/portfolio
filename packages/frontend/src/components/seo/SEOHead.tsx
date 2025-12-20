@@ -2,6 +2,19 @@
 
 import { useEffect, type JSX } from "react";
 
+/**
+ * Props for the SEOHead component
+ * @interface SEOHeadProps
+ * @property {string} [title] - Page title
+ * @property {string} [description] - Page description for meta tags
+ * @property {string[]} [keywords] - SEO keywords
+ * @property {string} [image] - Open Graph image URL
+ * @property {string} [url] - Page URL for canonical and OG tags
+ * @property {"website" | "article" | "profile"} [type] - Open Graph type
+ * @property {Record<string, unknown>} [structuredData] - Additional structured data
+ * @property {boolean} [noindex] - Whether to prevent indexing
+ * @property {string} [canonical] - Canonical URL override
+ */
 interface SEOHeadProps {
   title?: string;
   description?: string;
@@ -15,10 +28,27 @@ interface SEOHeadProps {
 }
 
 /**
- * SEO Head component for dynamic meta tags
- * This component handles client-side SEO updates
- * @param {SEOHeadProps} props - SEO properties
- * @returns {null} This component doesn't render anything
+ * SEO Head component for dynamic meta tags and structured data
+ * Handles client-side updates of meta tags, Open Graph, Twitter Cards, and JSON-LD
+ * @param {SEOHeadProps} props - Component props
+ * @param {string} [props.title] - Page title
+ * @param {string} [props.description] - Page description
+ * @param {string[]} [props.keywords] - SEO keywords
+ * @param {string} [props.image] - OG image (default: "/og-image.png")
+ * @param {string} [props.url] - Page URL
+ * @param {"website" | "article" | "profile"} [props.type] - OG type (default: "website")
+ * @param {Record<string, unknown>} [props.structuredData] - JSON-LD data
+ * @param {boolean} [props.noindex] - Prevent indexing (default: false)
+ * @param {string} [props.canonical] - Canonical URL
+ * @returns {null} This component doesn't render anything visible
+ * @example
+ * ```tsx
+ * <SEOHead
+ *   title="My Portfolio"
+ *   description="Welcome to my portfolio"
+ *   keywords={['developer', 'portfolio']}
+ * />
+ * ```
  */
 export function SEOHead({
   title,
@@ -41,12 +71,10 @@ export function SEOHead({
       ? image
       : `${baseUrl}${image}`;
 
-    // Update title
     if (title) {
       document.title = title;
     }
 
-    // Update meta description
     let metaDescription = document.querySelector('meta[name="description"]');
     if (!metaDescription) {
       metaDescription = document.createElement("meta");
@@ -57,7 +85,6 @@ export function SEOHead({
       metaDescription.setAttribute("content", description);
     }
 
-    // Update keywords
     let metaKeywords = document.querySelector('meta[name="keywords"]');
     if (!metaKeywords) {
       metaKeywords = document.createElement("meta");
@@ -68,7 +95,6 @@ export function SEOHead({
       metaKeywords.setAttribute("content", keywords.join(", "));
     }
 
-    // Update robots
     let metaRobots = document.querySelector('meta[name="robots"]');
     if (!metaRobots) {
       metaRobots = document.createElement("meta");
@@ -80,7 +106,6 @@ export function SEOHead({
       noindex ? "noindex, nofollow" : "index, follow",
     );
 
-    // Update canonical
     let linkCanonical = document.querySelector('link[rel="canonical"]');
     if (!linkCanonical) {
       linkCanonical = document.createElement("link");
@@ -89,7 +114,6 @@ export function SEOHead({
     }
     linkCanonical.setAttribute("href", canonical || fullUrl);
 
-    // Update Open Graph tags
     const ogTags = [
       { property: "og:title", content: title },
       { property: "og:description", content: description },
@@ -111,7 +135,6 @@ export function SEOHead({
       metaTag.setAttribute("content", content);
     });
 
-    // Update Twitter Card tags
     const twitterTags = [
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: title },
@@ -133,7 +156,6 @@ export function SEOHead({
       metaTag.setAttribute("content", content);
     });
 
-    // Add structured data
     if (structuredData) {
       let scriptTag = document.querySelector(
         'script[type="application/ld+json"]',
@@ -146,9 +168,7 @@ export function SEOHead({
       scriptTag.textContent = JSON.stringify(structuredData);
     }
 
-    // Cleanup function
     return () => {
-      // Remove dynamically added meta tags on unmount
       const dynamicTags = document.querySelectorAll(
         'meta[data-dynamic="true"]',
       );

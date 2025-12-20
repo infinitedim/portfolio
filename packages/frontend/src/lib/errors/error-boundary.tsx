@@ -87,15 +87,12 @@ export class EnhancedErrorBoundary extends Component<
       errorInfo,
     });
 
-    // Report error
     if (this.props.reportErrors !== false) {
       this.reportError(enhancedError, errorInfo);
     }
 
-    // Call custom error handler
     this.props.onError?.(enhancedError, errorInfo);
 
-    // Auto-retry for retryable errors
     if (this.props.enableRecovery && enhancedError.isRetryable) {
       this.scheduleRetry();
     }
@@ -103,7 +100,6 @@ export class EnhancedErrorBoundary extends Component<
 
   private reportError = (error: EnhancedError, errorInfo: ErrorInfo) => {
     try {
-      // Log to console in development
       if (process.env.NODE_ENV === "development") {
         console.group(`🚨 Error Boundary: ${error.category}`);
         console.error("Error:", error);
@@ -112,7 +108,6 @@ export class EnhancedErrorBoundary extends Component<
         console.groupEnd();
       }
 
-      // Store error for potential reporting
       const errorReport = {
         id: error.id,
         message: error.message,
@@ -125,13 +120,11 @@ export class EnhancedErrorBoundary extends Component<
         userAgent: navigator.userAgent,
       };
 
-      // Store in session storage for debugging
       try {
         const existingReports = JSON.parse(
           sessionStorage.getItem("errorReports") || "[]",
         );
         existingReports.push(errorReport);
-        // Keep only last 10 reports
         if (existingReports.length > 10) {
           existingReports.splice(0, existingReports.length - 10);
         }
@@ -169,7 +162,6 @@ export class EnhancedErrorBoundary extends Component<
 
     this.props.onRetry?.(this.state.error!, this.state.retryCount + 1);
 
-    // Reset error state to retry
     setTimeout(() => {
       this.setState({
         hasError: false,
@@ -182,7 +174,6 @@ export class EnhancedErrorBoundary extends Component<
   };
 
   private reset = () => {
-    // Clear any pending retries
     this.retryTimeouts.forEach(clearTimeout);
     this.retryTimeouts = [];
 
@@ -196,13 +187,11 @@ export class EnhancedErrorBoundary extends Component<
   };
 
   componentWillUnmount() {
-    // Clear any pending retries
     this.retryTimeouts.forEach(clearTimeout);
   }
 
   render() {
     if (this.state.hasError && this.state.error) {
-      // Use custom fallback if provided
       if (this.props.fallback) {
         return this.props.fallback(
           this.state.error,
@@ -212,7 +201,6 @@ export class EnhancedErrorBoundary extends Component<
         );
       }
 
-      // Default error UI
       return (
         <DefaultErrorFallback
           error={this.state.error}
@@ -313,7 +301,7 @@ function DefaultErrorFallback({
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <div className="max-w-md w-full space-y-6">
-        {/* Error Header */}
+        {}
         <div
           className={`p-4 rounded-lg border ${getSeverityColor(error.severity)}`}
         >
@@ -326,7 +314,7 @@ function DefaultErrorFallback({
           </div>
         </div>
 
-        {/* Error Message */}
+        {}
         <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="font-medium text-gray-900 mb-2">Error Details</h3>
           <p className="text-sm text-gray-600 mb-3">{error.message}</p>
@@ -338,7 +326,7 @@ function DefaultErrorFallback({
           )}
         </div>
 
-        {/* Suggestions */}
+        {}
         {error.suggestions.length > 0 && (
           <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
             <h3 className="font-medium text-gray-900 mb-2">💡 Suggestions</h3>
@@ -356,7 +344,7 @@ function DefaultErrorFallback({
           </div>
         )}
 
-        {/* Actions */}
+        {}
         <div className="flex flex-col space-y-2">
           {getRecoveryActions(error.recoveryStrategy)}
 
@@ -370,7 +358,7 @@ function DefaultErrorFallback({
           )}
         </div>
 
-        {/* Debug Info (Development only) */}
+        {}
         {process.env.NODE_ENV === "development" && errorInfo && (
           <details className="bg-gray-100 p-3 rounded text-xs">
             <summary className="cursor-pointer font-medium">

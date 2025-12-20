@@ -23,7 +23,6 @@ export class CustomizationService {
     return CustomizationService.instance;
   }
 
-  // Theme Management
   getCustomThemes(): CustomTheme[] {
     try {
       const stored = localStorage.getItem(this.THEMES_KEY);
@@ -118,7 +117,6 @@ export class CustomizationService {
 
     return duplicatedTheme;
   }
-  // Font Management
   getCustomFonts(): CustomFont[] {
     try {
       const stored = localStorage.getItem(this.FONTS_KEY);
@@ -141,7 +139,6 @@ export class CustomizationService {
   }
 
   getAllFonts(): CustomFont[] {
-    // Combine built-in and custom fonts
     const builtInFonts: CustomFont[] = Object.entries(fonts).map(
       ([id, config]) => ({
         id,
@@ -189,7 +186,6 @@ export class CustomizationService {
             size: fontFile.size,
           };
 
-          // Load font into CSS
           this.loadCustomFontCSS(newFont);
 
           const existingFonts = this.getCustomFonts();
@@ -220,7 +216,6 @@ export class CustomizationService {
       }
     `;
 
-    // Check if style already exists
     const existingStyle = document.getElementById(`custom-font-${font.id}`);
     if (existingStyle) {
       existingStyle.remove();
@@ -238,7 +233,6 @@ export class CustomizationService {
 
     if (filteredFonts.length === fonts.length) return false;
 
-    // Remove CSS
     const styleElement = document.getElementById(`custom-font-${id}`);
     if (styleElement) {
       styleElement.remove();
@@ -248,13 +242,11 @@ export class CustomizationService {
     return true;
   }
 
-  // Load all custom fonts on initialization
   loadAllCustomFonts() {
     const customFonts = this.getCustomFonts();
     customFonts.forEach((font) => this.loadCustomFontCSS(font));
   }
 
-  // Settings Management
   getSettings(): CustomizationSettings {
     try {
       const stored = localStorage.getItem(this.SETTINGS_KEY);
@@ -293,7 +285,6 @@ export class CustomizationService {
     };
   }
 
-  // Import/Export
   exportThemes(themeIds?: string[]): ThemeExport {
     const allThemes = this.getAllThemes();
     const themesToExport = themeIds
@@ -322,27 +313,23 @@ export class CustomizationService {
 
           data.themes.forEach((theme) => {
             try {
-              // Validate theme structure
               if (!this.validateTheme(theme)) {
                 errors.push(`Invalid theme structure: ${theme.name}`);
                 return;
               }
 
-              // Check for duplicates
               const existingThemes = this.getCustomThemes();
               const duplicate = existingThemes.find(
                 (t) => t.name === theme.name,
               );
 
               if (duplicate) {
-                // Update existing theme
                 this.updateCustomTheme(duplicate.id, {
                   ...theme,
                   id: duplicate.id,
                   source: "imported" as const,
                 });
               } else {
-                // Create new theme
                 this.saveCustomTheme({
                   ...theme,
                   source: "imported" as const,
@@ -383,12 +370,10 @@ export class CustomizationService {
     );
   }
 
-  // Utility
   private generateId(): string {
     return `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  // Reset to defaults
   resetToDefaults() {
     localStorage.removeItem(this.THEMES_KEY);
     localStorage.removeItem(this.FONTS_KEY);
@@ -398,7 +383,6 @@ export class CustomizationService {
     customStyles.forEach((style) => style.remove());
   }
 
-  // Search and filter
   searchThemes(query: string, tags?: string[]): CustomTheme[] {
     const allThemes = this.getAllThemes();
     const lowerQuery = query.toLowerCase();

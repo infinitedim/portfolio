@@ -14,7 +14,55 @@ interface UseTerminalShortcutsOptions {
 }
 
 /**
- * Enhanced terminal shortcuts hook with history integration
+ * Enhanced terminal shortcuts management hook with customization and persistence
+ *
+ * Provides comprehensive keyboard shortcut functionality:
+ * - Pre-defined terminal shortcuts (clear, help, history, etc.)
+ * - Customizable shortcut keys
+ * - Import/export shortcut configurations
+ * - Search and suggestion features
+ * - localStorage persistence
+ * - Global keyboard event handling
+ *
+ * @param {UseTerminalShortcutsOptions} [options] - Configuration callbacks
+ * @param {Function} [options.onClear] - Callback for clear shortcut
+ * @param {Function} [options.onHelp] - Callback for help shortcut
+ * @param {Function} [options.onThemeToggle] - Callback for theme toggle
+ * @param {Function} [options.onHistoryOpen] - Callback for history panel
+ * @param {Function} [options.onShortcutsOpen] - Callback for shortcuts panel
+ * @param {Function} [options.onCommandExecute] - Callback to execute commands
+ *
+ * @returns {object} Shortcuts state and management functions
+ * @property {KeyboardShortcut[]} shortcuts - Array of all shortcut definitions
+ * @property {Function} updateShortcutKeys - Update keys for a specific shortcut
+ * @property {Function} getShortcutSuggestions - Search shortcuts by query
+ * @property {Function} resetToDefaults - Reset all shortcuts to defaults
+ * @property {Function} exportShortcuts - Export config as JSON file
+ * @property {Function} importShortcuts - Import config from JSON file
+ * @property {Record<string, string[]>} customShortcuts - Current custom key mappings
+ *
+ * @example
+ * ```tsx
+ * const {
+ *   shortcuts,
+ *   updateShortcutKeys,
+ *   exportShortcuts,
+ *   resetToDefaults
+ * } = useTerminalShortcuts({
+ *   onClear: () => terminal.clear(),
+ *   onHelp: () => terminal.execute('help'),
+ *   onCommandExecute: (cmd) => terminal.execute(cmd)
+ * });
+ *
+ * // Customize a shortcut
+ * updateShortcutKeys('clear-terminal', ['Ctrl', 'K']);
+ *
+ * // Export configuration
+ * exportShortcuts();
+ *
+ * // Reset to defaults
+ * resetToDefaults();
+ * ```
  */
 export function useTerminalShortcuts({
   onClear,
@@ -30,7 +78,6 @@ export function useTerminalShortcuts({
     Record<string, string[]>
   >({});
 
-  // Load custom shortcuts from localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem("terminal-custom-shortcuts");
@@ -42,7 +89,6 @@ export function useTerminalShortcuts({
     }
   }, []);
 
-  // Save custom shortcuts to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(
@@ -54,10 +100,8 @@ export function useTerminalShortcuts({
     }
   }, [customShortcuts]);
 
-  // Initialize default shortcuts
   useEffect(() => {
     const defaultShortcuts: KeyboardShortcut[] = [
-      // Navigation
       {
         id: "clear-terminal",
         keys: customShortcuts["clear-terminal"] || ["Ctrl", "L"],
@@ -86,7 +130,6 @@ export function useTerminalShortcuts({
         customizable: true,
       },
 
-      // Terminal
       {
         id: "open-history",
         keys: customShortcuts["open-history"] || ["Ctrl", "R"],
@@ -124,7 +167,6 @@ export function useTerminalShortcuts({
         customizable: true,
       },
 
-      // Customization
       {
         id: "toggle-theme",
         keys: customShortcuts["toggle-theme"] || ["Ctrl", "T"],
@@ -135,7 +177,6 @@ export function useTerminalShortcuts({
         customizable: true,
       },
 
-      // System
       {
         id: "quick-about",
         keys: customShortcuts["quick-about"] || ["Ctrl", "I"],
@@ -164,13 +205,12 @@ export function useTerminalShortcuts({
         customizable: true,
       },
 
-      // Help shortcuts
       {
         id: "escape-close",
         keys: ["Escape"],
         description: "Close panels/cancel operations",
         category: "help",
-        action: () => {}, // Handled by individual components
+        action: () => {},
         enabled: true,
         customizable: false,
       },
@@ -179,7 +219,7 @@ export function useTerminalShortcuts({
         keys: ["↑", "↓"],
         description: "Navigate through lists",
         category: "help",
-        action: () => {}, // Handled by individual components
+        action: () => {},
         enabled: true,
         customizable: false,
       },
@@ -188,7 +228,7 @@ export function useTerminalShortcuts({
         keys: ["Enter"],
         description: "Select/execute highlighted item",
         category: "help",
-        action: () => {}, // Handled by individual components
+        action: () => {},
         enabled: true,
         customizable: false,
       },
@@ -205,10 +245,8 @@ export function useTerminalShortcuts({
     onCommandExecute,
   ]);
 
-  // Handle global keyboard events
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      // Skip if typing in input fields
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement
@@ -223,14 +261,12 @@ export function useTerminalShortcuts({
       if (e.shiftKey) pressedKeys.push("Shift");
       if (e.metaKey) pressedKeys.push("Meta");
 
-      // Add the main key
       let mainKey = e.key;
       if (mainKey === " ") mainKey = "Space";
       if (mainKey.length === 1) mainKey = mainKey.toUpperCase();
 
       pressedKeys.push(mainKey);
 
-      // Find matching shortcut
       const matchingShortcut = shortcuts.find((shortcut) => {
         if (!shortcut.enabled) return false;
 
@@ -255,7 +291,6 @@ export function useTerminalShortcuts({
     return () => document.removeEventListener("keydown", handleGlobalKeyDown);
   }, [shortcuts]);
 
-  // Update shortcut keys
   const updateShortcutKeys = useCallback(
     (shortcutId: string, newKeys: string[]) => {
       setCustomShortcuts((prev) => ({
@@ -266,7 +301,6 @@ export function useTerminalShortcuts({
     [],
   );
 
-  // Get shortcut suggestions based on input
   const getShortcutSuggestions = useCallback(
     (query: string) => {
       return shortcuts
@@ -287,13 +321,11 @@ export function useTerminalShortcuts({
     [shortcuts],
   );
 
-  // Reset all shortcuts to defaults
   const resetToDefaults = useCallback(() => {
     setCustomShortcuts({});
     localStorage.removeItem("terminal-custom-shortcuts");
   }, []);
 
-  // Export shortcuts configuration
   const exportShortcuts = useCallback(() => {
     const config = {
       shortcuts: customShortcuts,
@@ -311,7 +343,6 @@ export function useTerminalShortcuts({
     URL.revokeObjectURL(url);
   }, [customShortcuts]);
 
-  // Import shortcuts configuration
   const importShortcuts = useCallback((file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {

@@ -6,11 +6,9 @@ import {
   useTimerManager,
 } from "./utils/hookUtils";
 
-// Import tRPC conditionally to avoid SSR issues
 let trpc: any = null;
 if (typeof window !== "undefined") {
   try {
-    // Use dynamic import instead of require
     import("@/lib/trpc")
       .then((module) => {
         trpc = module.trpc;
@@ -60,19 +58,16 @@ interface ValidationResult {
   riskLevel: "low" | "medium" | "high";
 }
 
-// Constants
 const SECURITY_LIMITS = {
   MAX_RECENT_INPUTS: 50,
   MAX_ALERTS: 10,
-  RATE_LIMIT_TIMEOUT: 60000, // 1 minute
-  CLEANUP_INTERVAL: 300000, // 5 minutes
+  RATE_LIMIT_TIMEOUT: 60000,
+  CLEANUP_INTERVAL: 300000,
   ONE_HOUR: 3600000,
 } as const;
 
-// Helper function to check if we're on client side
 const isClientSide = () => typeof window !== "undefined";
 
-// Helper function for error handling
 const withErrorHandling = <T>(fn: () => T, fallback: T): (() => T) => {
   return () => {
     try {
@@ -85,14 +80,23 @@ const withErrorHandling = <T>(fn: () => T, fallback: T): (() => T) => {
 };
 
 /**
- * Basic client-side input validation (fallback when tRPC is not available)
- * @param {string} input - The input to validate
- * @returns {ValidationResult} - The validation result
+ * Client-side input validation (fallback when tRPC is unavailable)
+ *
+ * Performs basic security checks for dangerous patterns including:
+ * - Script injection attempts
+ * - XSS attack patterns
+ * - Excessively long input
+ *
+ * @param {string} input - The input string to validate
+ * @returns {ValidationResult} Validation result with sanitized input
+ * @property {boolean} isValid - Whether the input passed validation
+ * @property {string} sanitizedInput - Cleaned/trimmed input
+ * @property {string | null} error - Error message if validation failed
+ * @property {"low" | "medium" | "high"} riskLevel - Assessed risk level
  */
 function validateInputClientSide(input: string): ValidationResult {
   const sanitizedInput = input.trim();
 
-  // Basic validation rules
   const dangerousPatterns = [
     /<script/i,
     /javascript:/i,
@@ -109,13 +113,12 @@ function validateInputClientSide(input: string): ValidationResult {
   if (hasDangerousPattern) {
     return {
       isValid: false,
-      sanitizedInput: sanitizedInput.replace(/<[^>]*>/g, ""), // Strip HTML
+      sanitizedInput: sanitizedInput.replace(/<[^>]*>/g, ""),
       error: "Potentially dangerous input detected",
       riskLevel: "high",
     };
   }
 
-  // Check for excessively long input
   if (sanitizedInput.length > 10000) {
     return {
       isValid: false,
@@ -134,15 +137,54 @@ function validateInputClientSide(input: string): ValidationResult {
 }
 
 /**
- * Hook for security monitoring and input validation using backend SecurityService via tRPC
- * @returns {object} - The security state and methods
+ * Security monitoring and input validation hook with tRPC integration
+ *
+ * Provides comprehensive security features:
+ * - Input validation and sanitization (tRPC or client-side)
+ * - Rate limiting detection
+ * - Suspicious activity monitoring
+ * - Threat alerts management
+ * - Security metrics and recommendations
+ * - Automatic cleanup and memory management
+ *
+ * @returns {object} Security state and methods
+ * @property {SecurityState} securityState - Current security status
+ * @property {ThreatAlert[]} threatAlerts - Array of threat alerts
+ * @property {Function} validateInput - Async validation (prefers tRPC)
+ * @property {Function} validateInputSync - Synchronous client-side validation
+ * @property {Function} resetRateLimit - Reset rate limit flag
+ * @property {Function} getSecurityMetrics - Get current security metrics
+ * @property {Function} getSecurityRecommendations - Get security recommendations
+ * @property {Function} clearOldAlerts - Clean up old threat alerts
+ * @property {boolean} isSecure - Whether system is in secure state
+ * @property {"low" | "medium" | "high"} riskLevel - Current overall risk level
+ *
+ * @example
+ * ```tsx
+ * const {
+ *   validateInput,
+ *   securityState,
+ *   threatAlerts,
+ *   isSecure,
+ *   getSecurityMetrics
+ * } = useSecurity();
+ *
+ * // Validate user input
+ * const result = await validateInput(userInput);
+ * if (result.shouldProceed) {
+ *   // Process input
+ * }
+ *
+ * // Check security metrics
+ * const metrics = getSecurityMetrics();
+ * console.log(`Blocked requests: ${metrics.blockedRequests}`);
+ * ```
  */
 export function useSecurity() {
   const isMountedRef = useMountRef();
   const { setTimer, clearTimer } = useTimerManager();
   const { setInterval, clearInterval } = useIntervalManager();
 
-  // Initialize with SSR-safe defaults to prevent hydration issues
   const [securityState, setSecurityState] = useState<SecurityState>({
     isRateLimited: false,
     suspiciousActivity: 0,
@@ -156,12 +198,11 @@ export function useSecurity() {
     [],
   );
 
-  // Cache expensive calculations
   const metricsCache = useRef<{
     timestamp: number;
     metrics: SecurityMetrics;
   } | null>(null);
-  const CACHE_DURATION = 5000; // 5 seconds
+  const CACHE_DURATION = 5000;
 
   /**
    * Validate and sanitize user input using backend SecurityService or fallback to client-side validation
@@ -180,7 +221,6 @@ export function useSecurity() {
         let shouldProceed = false;
         let alert: ThreatAlert | undefined;
 
-        // Try to use tRPC validation if available
         if (trpc?.security?.validateInput?.mutateAsync) {
           try {
             const result = await trpc.security.validateInput.mutateAsync({
@@ -202,14 +242,11 @@ export function useSecurity() {
             shouldProceed = validation.isValid;
           }
         } else {
-          // Use client-side validation as fallback
           validation = validateInputClientSide(input);
           shouldProceed = validation.isValid;
         }
 
-        // Only perform tracking on client side when component is mounted
         if (isClientSide() && isMountedRef.current) {
-          // Track input for pattern analysis with size limit
           recentInputs.current.push(input);
           if (recentInputs.current.length > SECURITY_LIMITS.MAX_RECENT_INPUTS) {
             recentInputs.current = recentInputs.current.slice(
@@ -217,23 +254,19 @@ export function useSecurity() {
             );
           }
 
-          // Record request with timestamp
           const now = Date.now();
           requestHistory.current.push({
             timestamp: now,
             valid: validation.isValid,
           });
 
-          // Clean old records efficiently (keep last hour)
           const oneHourAgo = now - SECURITY_LIMITS.ONE_HOUR;
           if (requestHistory.current.length > 100) {
-            // Only clean when necessary
             requestHistory.current = requestHistory.current.filter(
               (record) => record.timestamp > oneHourAgo,
             );
           }
 
-          // Check for suspicious patterns with minimum threshold
           if (recentInputs.current.length >= 5) {
             const suspiciousAnalysis = detectSuspiciousActivity(
               recentInputs.current.slice(-10),
@@ -250,7 +283,6 @@ export function useSecurity() {
                 },
               );
 
-              // Update security state only if component is mounted
               if (isMountedRef.current) {
                 setSecurityState((prev) => ({
                   ...prev,
@@ -258,7 +290,6 @@ export function useSecurity() {
                   lastThreatTime: new Date(),
                 }));
 
-                // Reduce rate limit for high-risk activity
                 if (suspiciousAnalysis.riskLevel === "high") {
                   shouldProceed = false;
                 }
@@ -266,7 +297,6 @@ export function useSecurity() {
             }
           }
 
-          // Add alert if created and component is mounted
           if (alert && isMountedRef.current) {
             setThreatAlerts((prev) => [
               ...prev.slice(-SECURITY_LIMITS.MAX_ALERTS + 1),
@@ -305,14 +335,11 @@ export function useSecurity() {
       alert?: ThreatAlert;
     } => {
       try {
-        // Use client-side validation for synchronous calls
         const validation = validateInputClientSide(input);
         let shouldProceed = validation.isValid;
         let alert: ThreatAlert | undefined;
 
-        // Only perform tracking on client side when component is mounted
         if (isClientSide() && isMountedRef.current) {
-          // Track input for pattern analysis with size limit
           recentInputs.current.push(input);
           if (recentInputs.current.length > SECURITY_LIMITS.MAX_RECENT_INPUTS) {
             recentInputs.current = recentInputs.current.slice(
@@ -320,14 +347,12 @@ export function useSecurity() {
             );
           }
 
-          // Record request with timestamp
           const now = Date.now();
           requestHistory.current.push({
             timestamp: now,
             valid: validation.isValid,
           });
 
-          // Clean old records efficiently (keep last hour)
           const oneHourAgo = now - SECURITY_LIMITS.ONE_HOUR;
           if (requestHistory.current.length > 100) {
             requestHistory.current = requestHistory.current.filter(
@@ -335,7 +360,6 @@ export function useSecurity() {
             );
           }
 
-          // Check for suspicious patterns with minimum threshold
           if (recentInputs.current.length >= 5) {
             const suspiciousAnalysis = detectSuspiciousActivity(
               recentInputs.current.slice(-10),
@@ -352,7 +376,6 @@ export function useSecurity() {
                 },
               );
 
-              // Update security state only if component is mounted
               if (isMountedRef.current) {
                 setSecurityState((prev) => ({
                   ...prev,
@@ -360,7 +383,6 @@ export function useSecurity() {
                   lastThreatTime: new Date(),
                 }));
 
-                // Reduce rate limit for high-risk activity
                 if (suspiciousAnalysis.riskLevel === "high") {
                   shouldProceed = false;
                 }
@@ -368,7 +390,6 @@ export function useSecurity() {
             }
           }
 
-          // Add alert if created and component is mounted
           if (alert && isMountedRef.current) {
             setThreatAlerts((prev) => [
               ...prev.slice(-SECURITY_LIMITS.MAX_ALERTS + 1),
@@ -422,7 +443,6 @@ export function useSecurity() {
       };
     }
 
-    // Return cached metrics if still valid
     const now = Date.now();
     if (
       metricsCache.current &&
@@ -439,7 +459,6 @@ export function useSecurity() {
         ).length;
         const blockedRequests = totalRequests - validRequests;
 
-        // Calculate requests per minute efficiently
         const oneMinuteAgo = now - 60000;
         const recentRequests = requestHistory.current.filter(
           (r) => r.timestamp > oneMinuteAgo,
@@ -447,7 +466,6 @@ export function useSecurity() {
 
         const averageRequestsPerMinute = recentRequests.length;
 
-        // Analyze threat types with performance optimization
         const threatTypes = threatAlerts.reduce(
           (counts, alert) => {
             counts[alert.type] = (counts[alert.type] || 0) + 1;
@@ -469,7 +487,6 @@ export function useSecurity() {
           topThreats,
         };
 
-        // Cache the calculated metrics
         metricsCache.current = {
           timestamp: now,
           metrics,
@@ -499,11 +516,9 @@ export function useSecurity() {
         const filtered = prev.filter(
           (alert) => alert.timestamp.getTime() > oneHourAgo,
         );
-        // Only update state if there are alerts to remove
         return filtered.length !== prev.length ? filtered : prev;
       });
 
-      // Clear metrics cache when alerts are cleared
       if (metricsCache.current) {
         metricsCache.current = null;
       }
@@ -546,7 +561,6 @@ export function useSecurity() {
     }, [])();
   }, [securityState, getSecurityMetrics]);
 
-  // Auto-reset rate limiting after timeout using timer manager
   useEffect(() => {
     if (!isClientSide() || !isMountedRef.current) return;
 
@@ -571,7 +585,6 @@ export function useSecurity() {
     clearTimer,
   ]);
 
-  // Auto-cleanup old alerts using interval manager
   useEffect(() => {
     if (!isClientSide() || !isMountedRef.current) return;
 
@@ -588,7 +601,6 @@ export function useSecurity() {
     return () => clearInterval("alertCleanup");
   }, [clearOldAlerts, isMountedRef, setInterval, clearInterval]);
 
-  // Cleanup on unmount (automatic with timer manager)
   useEffect(() => {
     return () => {
       recentInputs.current = [];
@@ -598,19 +610,16 @@ export function useSecurity() {
   }, []);
 
   return {
-    // State
     securityState,
     threatAlerts,
 
-    // Methods
-    validateInput, // Async version
-    validateInputSync, // Sync version for immediate use
+    validateInput,
+    validateInputSync,
     resetRateLimit,
     getSecurityMetrics,
     getSecurityRecommendations,
     clearOldAlerts,
 
-    // Computed values
     isSecure:
       securityState.suspiciousActivity < 3 && !securityState.isRateLimited,
     riskLevel:
@@ -623,12 +632,14 @@ export function useSecurity() {
 }
 
 /**
- * Create a threat alert with SSR-safe defaults
- * @param {ThreatAlert["type"]} type - The type of threat
- * @param {string} message - The message of the threat
- * @param {ThreatAlert["riskLevel"]} riskLevel - The risk level of the threat
- * @param {Record<string, any>} metadata - The metadata of the threat
- * @returns {ThreatAlert} - The threat alert
+ * Create a threat alert with SSR-safe ID generation
+ *
+ * @param {ThreatAlert["type"]} type - Type of threat detected
+ * @param {string} message - Human-readable threat description
+ * @param {ThreatAlert["riskLevel"]} riskLevel - Severity level of the threat
+ * @param {Record<string, any>} [metadata={}] - Additional threat data
+ *
+ * @returns {ThreatAlert} Formatted threat alert object
  */
 function createThreatAlert(
   type: ThreatAlert["type"],
@@ -636,7 +647,6 @@ function createThreatAlert(
   riskLevel: ThreatAlert["riskLevel"],
   metadata: Record<string, any> = {},
 ): ThreatAlert {
-  // MODIFICATION: Generate consistent IDs for SSR
   const id =
     typeof window !== "undefined"
       ? `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -655,9 +665,18 @@ function createThreatAlert(
 }
 
 /**
- * Detect suspicious activity patterns
+ * Detect suspicious activity patterns in recent inputs
+ *
+ * Analyzes recent input history for:
+ * - Excessive repetition of the same input
+ * - Rapid input patterns indicating automation
+ *
  * @param {string[]} recentInputs - Array of recent inputs to analyze
- * @returns {object} - Analysis result
+ *
+ * @returns {object} Analysis result
+ * @property {boolean} isSuspicious - Whether suspicious activity detected
+ * @property {string} reason - Description of suspicious pattern
+ * @property {"low" | "medium" | "high"} riskLevel - Assessed risk level
  */
 function detectSuspiciousActivity(recentInputs: string[]): {
   isSuspicious: boolean;
@@ -668,14 +687,12 @@ function detectSuspiciousActivity(recentInputs: string[]): {
     return { isSuspicious: false, reason: "", riskLevel: "low" };
   }
 
-  // Check for repeated patterns
   const patternCounts: Record<string, number> = {};
   recentInputs.forEach((input) => {
     const pattern = input.toLowerCase().trim();
     patternCounts[pattern] = (patternCounts[pattern] || 0) + 1;
   });
 
-  // Check for excessive repetition
   const maxRepetition = Math.max(...Object.values(patternCounts));
   if (maxRepetition > 3) {
     return {
@@ -685,8 +702,7 @@ function detectSuspiciousActivity(recentInputs: string[]): {
     };
   }
 
-  // Check for rapid input (basic check)
-  const timeSpan = recentInputs.length > 1 ? 10000 : 0; // 10 seconds
+  const timeSpan = recentInputs.length > 1 ? 10000 : 0;
   if (timeSpan > 0 && recentInputs.length > 5) {
     return {
       isSuspicious: true,
@@ -699,8 +715,19 @@ function detectSuspiciousActivity(recentInputs: string[]): {
 }
 
 /**
- * Hook for monitoring security in development
- * @returns {object} - The security state and methods
+ * Development-mode security monitoring hook with console logging
+ *
+ * Extends useSecurity with periodic logging of security metrics in development.
+ * Logs threats and recommendations every 30 seconds when issues are detected.
+ *
+ * @returns {object} Same return value as useSecurity
+ *
+ * @example
+ * ```tsx
+ * // Use in development for debugging
+ * const security = useSecurityMonitoring();
+ * // Console will show security reports automatically
+ * ```
  */
 export function useSecurityMonitoring() {
   const security = useSecurity();
@@ -726,7 +753,7 @@ export function useSecurityMonitoring() {
         } catch (error) {
           console.warn("Security monitoring error:", error);
         }
-      }, 30000); // Every 30 seconds
+      }, 30000);
 
       return () => clearInterval(interval);
     }

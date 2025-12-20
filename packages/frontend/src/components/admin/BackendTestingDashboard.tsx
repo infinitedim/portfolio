@@ -11,11 +11,24 @@ import { GrpcClient } from "./test/GrpcClient";
 import { ErrorHandler } from "./test/ErrorHandler";
 import { ValidationUtils } from "./test/ValidationUtils";
 
+/**
+ * Props for the BackendTestingDashboard component
+ * @interface BackendTestingDashboardProps
+ * @property {ThemeConfig} themeConfig - Theme configuration for styling
+ */
 interface BackendTestingDashboardProps {
   themeConfig: ThemeConfig;
 }
 
-// Define the available services and their methods
+/**
+ * Represents a service method that can be called via the testing dashboard
+ * @interface ServiceMethod
+ * @property {string} name - The name of the method
+ * @property {"query" | "mutation"} type - The type of method (query or mutation)
+ * @property {"GET" | "POST" | "PUT" | "DELETE" | "PATCH"} httpMethod - The HTTP method used
+ * @property {Array<{name: string, type: string, required: boolean, description: string}>} [parameters] - Method parameters
+ * @property {string} description - Description of what the method does
+ */
 export interface ServiceMethod {
   name: string;
   type: "query" | "mutation";
@@ -29,6 +42,14 @@ export interface ServiceMethod {
   description: string;
 }
 
+/**
+ * Represents a backend service that can be tested
+ * @interface Service
+ * @property {string} name - The internal name of the service
+ * @property {string} displayName - The display name for the UI
+ * @property {string} description - Description of the service
+ * @property {ServiceMethod[]} methods - Available methods for this service
+ */
 export interface Service {
   name: string;
   displayName: string;
@@ -243,10 +264,15 @@ const availableServices: Service[] = [
 ];
 
 /**
- *
- * @param {ThemeConfig} themeConfig - Theme configuration for styling
- * @returns {JSX.Element} - The BackendTestingDashboard component
- * @description Admin dashboard for testing backend services and methods via gRPC
+ * Admin dashboard component for testing backend services and methods via gRPC
+ * Provides an interactive interface for testing various backend endpoints with real-time request/response logging
+ * @param {BackendTestingDashboardProps} props - Component props
+ * @param {ThemeConfig} props.themeConfig - Theme configuration for styling
+ * @returns {JSX.Element} The backend testing dashboard component
+ * @example
+ * ```tsx
+ * <BackendTestingDashboard themeConfig={themeConfig} />
+ * ```
  */
 export function BackendTestingDashboard({
   themeConfig,
@@ -263,7 +289,6 @@ export function BackendTestingDashboard({
   const [_hasErrors, setHasErrors] = useState(false);
 
   useEffect(() => {
-    // Initialize gRPC client
     const client = new GrpcClient();
     setGrpcClient(client);
   }, []);
@@ -276,7 +301,6 @@ export function BackendTestingDashboard({
 
   const handleMethodSelect = (method: ServiceMethod) => {
     setSelectedMethod(method);
-    // Initialize parameters with default values
     const defaultParams: Record<string, any> = {};
     method.parameters?.forEach((param) => {
       if (param.type === "number") {
@@ -305,7 +329,6 @@ export function BackendTestingDashboard({
     setResponseLog("");
 
     try {
-      // Validate service and method
       const serviceValidation = ValidationUtils.validateServiceMethod(
         selectedService.name,
         selectedMethod.name,
@@ -328,10 +351,8 @@ export function BackendTestingDashboard({
         return;
       }
 
-      // Initialize parameters for the request
       let requestParameters = parameters;
 
-      // Validate parameters if they exist
       if (selectedMethod.parameters && selectedMethod.parameters.length > 0) {
         const parameterValidations = ValidationUtils.validateParameters(
           selectedMethod.parameters,
@@ -362,7 +383,6 @@ export function BackendTestingDashboard({
           return;
         }
 
-        // Sanitize parameters
         const sanitizedParameters: Record<string, any> = {};
         selectedMethod.parameters.forEach((param) => {
           const value = parameters[param.name];
@@ -372,7 +392,6 @@ export function BackendTestingDashboard({
           );
         });
 
-        // Validate payload size
         const payloadValidation =
           ValidationUtils.validatePayloadSize(sanitizedParameters);
         if (!payloadValidation.isValid) {
@@ -392,11 +411,9 @@ export function BackendTestingDashboard({
           return;
         }
 
-        // Use sanitized parameters for the request
         requestParameters = sanitizedParameters;
       }
 
-      // Log the request
       const requestData = {
         service: selectedService.name,
         method: selectedMethod.name,
@@ -408,7 +425,6 @@ export function BackendTestingDashboard({
 
       setRequestLog(JSON.stringify(requestData, null, 2));
 
-      // Execute the request via tRPC
       const response = await grpcClient.executeRequest(
         selectedService.name,
         selectedMethod.name,
@@ -421,7 +437,6 @@ export function BackendTestingDashboard({
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
 
-      // Enhanced error handling with suggestions
       let suggestions: string[] = [];
       if (
         errorMessage.includes("Failed to fetch") ||
@@ -471,25 +486,23 @@ export function BackendTestingDashboard({
   };
 
   const handleError = (_error: Error) => {
-    // Log error through proper logging system
     setHasErrors(true);
   };
 
   const handleRecovery = () => {
-    // Services recovered - reset error state
     setHasErrors(false);
   };
 
   return (
     <div className="space-y-6">
-      {/* Error Handler */}
+      { }
       <ErrorHandler
         themeConfig={themeConfig}
         onError={handleError}
         onRecovery={handleRecovery}
       />
 
-      {/* Header */}
+      { }
       <div
         className="border-b pb-4"
         style={{ borderColor: themeConfig.colors.border }}
@@ -514,11 +527,11 @@ export function BackendTestingDashboard({
         </p>
       </div>
 
-      {/* Main Content Grid */}
+      { }
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Panel - Service and Method Selection */}
+        { }
         <div className="lg:col-span-1 space-y-6">
-          {/* Service Selector */}
+          { }
           <div
             className="border rounded-lg p-4"
             style={{
@@ -540,7 +553,7 @@ export function BackendTestingDashboard({
             />
           </div>
 
-          {/* Method Selector */}
+          { }
           {selectedService && (
             <div
               className="border rounded-lg p-4"
@@ -564,7 +577,7 @@ export function BackendTestingDashboard({
             </div>
           )}
 
-          {/* Parameter Input */}
+          { }
           {selectedMethod &&
             selectedMethod.parameters &&
             selectedMethod.parameters.length > 0 && (
@@ -590,7 +603,7 @@ export function BackendTestingDashboard({
               </div>
             )}
 
-          {/* Execute Button */}
+          { }
           {selectedService && selectedMethod && (
             <div
               className="border rounded-lg p-4"
@@ -602,11 +615,10 @@ export function BackendTestingDashboard({
               <button
                 onClick={executeRequest}
                 disabled={isLoading}
-                className={`w-full p-3 rounded font-mono text-sm transition-all duration-200 ${
-                  isLoading
+                className={`w-full p-3 rounded font-mono text-sm transition-all duration-200 ${isLoading
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:scale-105"
-                }`}
+                  }`}
                 style={{
                   backgroundColor: themeConfig.colors.accent,
                   color: themeConfig.colors.bg,
@@ -628,7 +640,7 @@ export function BackendTestingDashboard({
           )}
         </div>
 
-        {/* Right Panel - Request/Response Logs */}
+        { }
         <div className="lg:col-span-2">
           <RequestResponsePanel
             requestLog={requestLog}

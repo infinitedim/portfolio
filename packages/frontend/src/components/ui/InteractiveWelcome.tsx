@@ -3,13 +3,31 @@
 import { useState, memo, JSX } from "react";
 import { useTheme } from "@/hooks/useTheme";
 
+/**
+ * Props for the InteractiveWelcome component
+ * @interface InteractiveWelcomeProps
+ * @property {(command: string) => void} onCommandSelect - Callback when a command is selected
+ * @property {() => void} onDismiss - Callback when welcome screen is dismissed
+ */
 interface InteractiveWelcomeProps {
   onCommandSelect: (command: string) => void;
   onDismiss: () => void;
 }
 
 /**
- * Interactive welcome component with enhanced styling for the new terminal layout
+ * Interactive welcome screen with quick command buttons
+ * Displays an introduction to the terminal with clickable command shortcuts
+ * @param {InteractiveWelcomeProps} props - Component props
+ * @param {(command: string) => void} props.onCommandSelect - Command selection callback
+ * @param {() => void} props.onDismiss - Dismiss callback
+ * @returns {JSX.Element} The interactive welcome component
+ * @example
+ * ```tsx
+ * <InteractiveWelcome
+ *   onCommandSelect={handleCommand}
+ *   onDismiss={handleDismiss}
+ * />
+ * ```
  */
 export const InteractiveWelcome = memo(function InteractiveWelcome({
   onCommandSelect,
@@ -43,7 +61,7 @@ export const InteractiveWelcome = memo(function InteractiveWelcome({
         backgroundColor: `${themeConfig.colors.bg}40`,
       }}
     >
-      {/* Welcome Header */}
+      { }
       <div className="text-center mb-6">
         <div
           className="text-lg font-bold mb-2"
@@ -60,15 +78,14 @@ export const InteractiveWelcome = memo(function InteractiveWelcome({
         </div>
       </div>
 
-      {/* Quick Commands Grid */}
+      { }
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
         {quickCommands.map((cmd) => (
           <button
             key={cmd.command}
             onClick={() => handleCommandClick(cmd.command)}
-            className={`p-3 rounded-lg border transition-all duration-200 text-left hover:scale-105 ${
-              selectedCommand === cmd.command ? "animate-pulse" : ""
-            }`}
+            className={`p-3 rounded-lg border transition-all duration-200 text-left hover:scale-105 ${selectedCommand === cmd.command ? "animate-pulse" : ""
+              }`}
             style={{
               borderColor: themeConfig.colors.border,
               backgroundColor:
@@ -97,7 +114,7 @@ export const InteractiveWelcome = memo(function InteractiveWelcome({
         ))}
       </div>
 
-      {/* Dismiss Options */}
+      { }
       <div className="flex items-center justify-between text-xs">
         <div
           className="opacity-60"

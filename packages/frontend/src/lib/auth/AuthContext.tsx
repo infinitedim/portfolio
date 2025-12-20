@@ -26,7 +26,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize authentication state
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -44,7 +43,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth();
   }, []);
 
-  // Set up token refresh interval
   useEffect(() => {
     if (!authService.isAuthenticated()) return;
 
@@ -55,7 +53,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (result.success) {
             setUser(authService.getCurrentUser());
           } else {
-            // Token refresh failed, user needs to login again
             setUser(null);
           }
         } catch (error) {
@@ -64,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       },
       14 * 60 * 1000,
-    ); // Refresh every 14 minutes (assuming 15-minute token expiry)
+    );
 
     return () => clearInterval(refreshInterval);
   }, [user]);
@@ -92,7 +89,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
     } catch (error) {
       console.error("Logout failed:", error);
-      // Clear user state even if logout fails
       setUser(null);
     }
   };

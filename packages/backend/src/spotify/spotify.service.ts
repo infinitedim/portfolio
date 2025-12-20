@@ -96,11 +96,9 @@ export class SpotifyServiceBackend {
   async nowPlaying(): Promise<NowPlayingResponse> {
     const cacheKey = "spotify:now-playing";
 
-    // Check Redis cache first
     const cachedRedis = await this.redis.get<NowPlayingResponse>(cacheKey);
     if (cachedRedis) return cachedRedis;
 
-    // Check memory cache
     const cached = await this.cache.get<NowPlayingResponse>(cacheKey);
     if (cached) return cached;
 
@@ -117,7 +115,6 @@ export class SpotifyServiceBackend {
         },
       );
 
-      // No content - user is not playing anything
       if (response.status === 204) {
         const payload: NowPlayingResponse = { isPlaying: false };
         await this.cache.set(cacheKey, payload, 60_000); // 1 minute cache
@@ -125,12 +122,10 @@ export class SpotifyServiceBackend {
         return payload;
       }
 
-      // Rate limited
       if (response.status === 429) {
         throw new ServiceUnavailableException("Spotify API rate limited");
       }
 
-      // Other errors
       if (!response.ok) {
         throw new ServiceUnavailableException(
           `Spotify API error: ${response.status} ${response.statusText}`,
@@ -139,7 +134,6 @@ export class SpotifyServiceBackend {
 
       const data = (await response.json()) as SpotifyCurrentlyPlayingResponse;
 
-      // Only process track type, ignore other types like ad, episode, etc.
       if (data.currently_playing_type !== "track" || !data.item) {
         const payload: NowPlayingResponse = { isPlaying: false };
         await this.cache.set(cacheKey, payload, 60_000);
@@ -158,7 +152,6 @@ export class SpotifyServiceBackend {
         duration: data.item.duration_ms,
       };
 
-      // Cache the result
       await this.cache.set(cacheKey, payload, 60_000); // 1 minute cache
       await this.redis.set(cacheKey, payload, 60); // 60 seconds cache
 

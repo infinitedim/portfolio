@@ -4,7 +4,6 @@
 import { useState, useEffect, JSX } from "react";
 import { Music, ExternalLink, AlertCircle, CheckCircle } from "lucide-react";
 
-// Conditional tRPC import to avoid SSR issues
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let trpc: any = null;
 if (typeof window !== "undefined") {
@@ -16,17 +15,31 @@ if (typeof window !== "undefined") {
   }
 }
 
+/**
+ * Props for the SpotifyAuth component
+ * @interface SpotifyAuthProps
+ * @property {() => void} onAuthenticated - Callback when authentication succeeds
+ * @property {() => void} onClose - Callback to close the auth modal
+ */
 interface SpotifyAuthProps {
   onAuthenticated: () => void;
   onClose: () => void;
 }
 
 /**
- * SpotifyAuth component
- * @param {SpotifyAuthProps} props - The props for the SpotifyAuth component
- * @param {Function} props.onAuthenticated - The function to call when the Spotify account is authenticated
- * @param {Function} props.onClose - The function to call when the SpotifyAuth component is closed
- * @returns {JSX.Element} The SpotifyAuth component
+ * Spotify authentication modal component
+ * Handles OAuth flow for Spotify integration with loading and error states
+ * @param {SpotifyAuthProps} props - Component props
+ * @param {() => void} props.onAuthenticated - Success callback
+ * @param {() => void} props.onClose - Close callback
+ * @returns {JSX.Element} The Spotify authentication modal
+ * @example
+ * ```tsx
+ * <SpotifyAuth
+ *   onAuthenticated={handleAuth}
+ *   onClose={handleClose}
+ * />
+ * ```
  */
 export function SpotifyAuth({
   onAuthenticated,
@@ -36,7 +49,6 @@ export function SpotifyAuth({
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Use tRPC mutation for Spotify authentication (with fallback)
   const spotifyLoginMutation = trpc?.auth?.spotifyLogin?.useMutation?.() || {
     mutateAsync: async () => {
       throw new Error("tRPC not available - Spotify authentication disabled");
@@ -44,7 +56,6 @@ export function SpotifyAuth({
   };
 
   useEffect(() => {
-    // Check if we have tokens in URL params (after OAuth redirect)
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
     const error = urlParams.get("error");
@@ -57,7 +68,6 @@ export function SpotifyAuth({
     if (code) {
       handleAuthCallback(code);
     } else {
-      // Check if already authenticated (you might want to implement this based on your needs)
       const hasTokens = localStorage.getItem("spotify_access_token");
       setIsAuthenticated(!!hasTokens);
     }
@@ -71,7 +81,6 @@ export function SpotifyAuth({
       const result = await spotifyLoginMutation.mutateAsync({ code });
 
       if (result.success && result.access_token) {
-        // Store tokens in localStorage
         localStorage.setItem("spotify_access_token", result.access_token);
         if (result.expires_in) {
           const expiresAt = Date.now() + result.expires_in * 1000;
@@ -81,14 +90,12 @@ export function SpotifyAuth({
         setIsAuthenticated(true);
         onAuthenticated();
 
-        // Clean up URL
         window.history.replaceState(
           {},
           document.title,
           window.location.pathname,
         );
       } else {
-        // Handle the case where success is false
         const errorMessage =
           "error" in result ? result.error : "Authentication failed";
         throw new Error(errorMessage);
@@ -122,7 +129,6 @@ export function SpotifyAuth({
   };
 
   const handleLogout = () => {
-    // Clear tokens from localStorage
     localStorage.removeItem("spotify_access_token");
     localStorage.removeItem("spotify_expires_at");
 

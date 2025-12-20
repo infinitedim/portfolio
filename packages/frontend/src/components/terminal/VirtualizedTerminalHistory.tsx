@@ -33,7 +33,6 @@ export function VirtualizedTerminalHistory({
   const containerRef = useRef<HTMLDivElement>(null);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
 
-  // Calculate visible range
   const { startIndex, visibleItems } = useMemo(() => {
     const start = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
     const visibleCount = Math.ceil(containerHeight / itemHeight);
@@ -45,7 +44,6 @@ export function VirtualizedTerminalHistory({
     };
   }, [history, scrollTop, itemHeight, containerHeight, overscan]);
 
-  // Auto-scroll to bottom when new items are added
   useEffect(() => {
     if (shouldAutoScroll && containerRef.current) {
       const scrollContainer = containerRef.current;
@@ -59,21 +57,17 @@ export function VirtualizedTerminalHistory({
     }
   }, [history.length, shouldAutoScroll]);
 
-  // Handle scroll events
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
     setScrollTop(target.scrollTop);
 
-    // Check if user is near bottom for auto-scroll
     const isNearBottom =
       target.scrollTop + target.clientHeight >= target.scrollHeight - 100;
     setShouldAutoScroll(isNearBottom);
   };
 
-  // Handle resize for responsive behavior
   useEffect(() => {
     const handleResize = () => {
-      // Force re-render on resize for responsive adjustments
       if (containerRef.current) {
         containerRef.current.style.height = `${containerHeight}px`;
       }
@@ -99,9 +93,9 @@ export function VirtualizedTerminalHistory({
       }}
       onScroll={handleScroll}
     >
-      {/* Total height spacer */}
+      {}
       <div style={{ height: totalHeight, position: "relative" }}>
-        {/* Visible items container */}
+        {}
         <div
           style={{
             transform: `translateY(${offsetY}px)`,
@@ -123,7 +117,7 @@ export function VirtualizedTerminalHistory({
                   borderBottom: `1px solid ${themeConfig.colors.border}20`,
                 }}
               >
-                {/* Command */}
+                {}
                 <div className="flex items-center gap-2 mb-2">
                   <span
                     className="font-mono text-sm"
@@ -151,7 +145,7 @@ export function VirtualizedTerminalHistory({
                   </span>
                 </div>
 
-                {/* Output */}
+                {}
                 {item.output && (
                   <div className="ml-6">
                     <CommandOutput output={item.output} />
@@ -163,7 +157,7 @@ export function VirtualizedTerminalHistory({
         </div>
       </div>
 
-      {/* Scroll indicator */}
+      {}
       {history.length > 10 && (
         <div
           className="absolute bottom-4 right-4 px-2 py-1 rounded text-xs font-mono opacity-60"
@@ -178,7 +172,7 @@ export function VirtualizedTerminalHistory({
         </div>
       )}
 
-      {/* Performance stats in dev mode */}
+      {}
       {process.env.NODE_ENV === "development" && (
         <div
           className="absolute top-4 right-4 px-2 py-1 rounded text-xs font-mono opacity-40"

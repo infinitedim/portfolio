@@ -43,7 +43,7 @@ export const ProjectCard = memo(function ProjectCard({
       itemScope
       itemType="https://schema.org/CreativeWork"
     >
-      {/* Featured Badge */}
+      {}
       {featured && (
         <div className="absolute top-4 right-4 z-10">
           <span className="bg-terminal-accent text-terminal-bg px-2 py-1 text-xs font-bold rounded">
@@ -52,7 +52,7 @@ export const ProjectCard = memo(function ProjectCard({
         </div>
       )}
 
-      {/* Project Image */}
+      {}
       <div className="relative h-48 bg-terminal-muted/10 overflow-hidden">
         <Suspense fallback={<ProjectImageLoader />}>
           <ImageErrorBoundary>
@@ -75,7 +75,7 @@ export const ProjectCard = memo(function ProjectCard({
           </ImageErrorBoundary>
         </Suspense>
 
-        {/* Status Overlay */}
+        {}
         <div className="absolute bottom-2 right-2 bg-terminal-bg/80 backdrop-blur-sm px-2 py-1 rounded">
           <span
             className={`${status.color} text-sm font-mono flex items-center gap-1`}
@@ -86,9 +86,9 @@ export const ProjectCard = memo(function ProjectCard({
         </div>
       </div>
 
-      {/* Project Content */}
+      {}
       <div className="p-6">
-        {/* Title and Description */}
+        {}
         <div className="mb-4">
           <h3
             className="text-xl font-bold text-terminal-text group-hover:text-terminal-accent transition-colors mb-2"
@@ -104,7 +104,7 @@ export const ProjectCard = memo(function ProjectCard({
           </p>
         </div>
 
-        {/* Technologies */}
+        {}
         <div className="mb-4">
           <div className="text-xs text-terminal-muted mb-2 font-mono">
             TECH STACK:
@@ -127,7 +127,7 @@ export const ProjectCard = memo(function ProjectCard({
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {}
         <div className="flex gap-4">
           {project.demoUrl && (
             <a
@@ -153,7 +153,7 @@ export const ProjectCard = memo(function ProjectCard({
           )}
         </div>
 
-        {/* Metadata for SEO */}
+        {}
         <meta
           itemProp="url"
           content={project.demoUrl || project.githubUrl}

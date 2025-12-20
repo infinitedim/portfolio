@@ -15,11 +15,9 @@ import {
 } from "./utils/hookUtils";
 import { PerformanceMonitor } from "../lib/performance/PerformanceMonitor";
 
-// Constants
 const STORAGE_KEY = "terminal-theme" as const;
 const REQUIRED_COLORS = ["bg", "text", "accent", "muted", "border"] as const;
 
-// Types
 interface ThemeState {
   theme: ThemeName;
   error: string | null;
@@ -38,7 +36,6 @@ interface UseThemeReturn {
   getThemeInfo: (themeName?: ThemeName) => ThemeConfig;
   isThemeActive: (themeName: ThemeName) => boolean;
   validateTheme: typeof validateTheme;
-  // Performance metrics for dashboard
   themeMetrics: {
     switchCount: number;
     averageSwitchTime: number;
@@ -56,7 +53,6 @@ interface UseThemeReturn {
   resetPerformanceMetrics: () => void;
 }
 
-// Utility functions (pure functions moved outside component)
 const hexToHsl = (hex: string): string => {
   if (!hex?.match(/^#[0-9A-Fa-f]{6}$/)) return "0 0% 0%";
 
@@ -95,7 +91,6 @@ const isValidThemeConfig = (config: ThemeConfig): boolean => {
 };
 
 const generateCSSVariables = (colors: ThemeColors) => ({
-  // Terminal variables
   "--terminal-bg": colors.bg,
   "--terminal-text": colors.text,
   "--terminal-accent": colors.accent,
@@ -107,7 +102,6 @@ const generateCSSVariables = (colors: ThemeColors) => ({
   "--terminal-info": colors.info || "#00aaff",
   "--terminal-prompt": colors.prompt || colors.accent,
 
-  // Shadcn variables
   "--background": hexToHsl(colors.bg),
   "--foreground": hexToHsl(colors.text),
   "--primary": hexToHsl(colors.accent),
@@ -130,17 +124,64 @@ const generateCSSVariables = (colors: ThemeColors) => ({
 });
 
 /**
- * A custom React hook for managing the terminal's theme with improved performance and type safety.
+ * Advanced theme management hook with performance monitoring and validation
+ *
+ * Provides comprehensive theme functionality:
+ * - Theme switching with CSS variable application
+ * - localStorage persistence
+ * - Performance tracking and metrics
+ * - Theme validation and error handling
+ * - HSL color conversion for shadcn/ui compatibility
+ * - Usage analytics and popular themes tracking
+ * - Safe DOM manipulation with SSR support
+ *
  * @returns {UseThemeReturn} Theme state and management functions
+ * @property {ThemeName} theme - Current active theme name
+ * @property {ThemeConfig} themeConfig - Current theme configuration object
+ * @property {string | null} error - Current error message or null
+ * @property {boolean} hasError - Whether an error exists
+ * @property {boolean} mounted - Whether the hook is mounted (SSR safety)
+ * @property {Function} changeTheme - Switch to a different theme
+ * @property {Function} clearError - Clear the current error
+ * @property {ThemeName[]} availableThemes - Array of all available theme names
+ * @property {Function} getThemeInfo - Get configuration for any theme
+ * @property {Function} isThemeActive - Check if a theme is currently active
+ * @property {Function} validateTheme - Validate a theme name
+ * @property {object} themeMetrics - Performance metrics for theme operations
+ * @property {Function} getPerformanceReport - Get detailed performance report
+ * @property {Function} resetPerformanceMetrics - Reset all performance metrics
+ *
+ * @example
+ * ```tsx
+ * const {
+ *   theme,
+ *   themeConfig,
+ *   changeTheme,
+ *   availableThemes,
+ *   themeMetrics,
+ *   getPerformanceReport
+ * } = useTheme();
+ *
+ * // Change theme
+ * const success = changeTheme('dracula');
+ *
+ * // Get available themes
+ * console.log('Available themes:', availableThemes);
+ *
+ * // Check performance
+ * const report = getPerformanceReport();
+ * console.log(`Average switch time: ${report.averageTime}ms`);
+ *
+ * // Get theme info
+ * const draculaConfig = getThemeInfo('dracula');
+ * ```
  */
 export function useTheme(): UseThemeReturn {
   const isMountedRef = useMountRef();
   const { getValue, setValue } = useLocalStorage(STORAGE_KEY, defaultTheme);
 
-  // Cache for applied theme to prevent redundant DOM operations
   const appliedThemeRef = useRef<ThemeName | null>(null);
 
-  // Performance tracking state
   const performanceMonitor = useMemo(
     () => PerformanceMonitor.getInstance(),
     [],
@@ -155,14 +196,12 @@ export function useTheme(): UseThemeReturn {
     renderTime: 0,
   });
 
-  // Initialize state with SSR-safe values
   const [state, setState] = useState<ThemeState>({
     theme: defaultTheme,
     error: null,
     mounted: false,
   });
 
-  // Memoized values with proper dependencies
   const themeConfig = useMemo(() => {
     const config = themes[state.theme];
     return config && isValidThemeConfig(config) ? config : themes[defaultTheme];
@@ -170,19 +209,16 @@ export function useTheme(): UseThemeReturn {
 
   const availableThemes = useMemo(() => getSortedThemeNames(), []);
 
-  // Optimized theme application with proper safety checks and caching
   const applyTheme = useCallback(
     (config: ThemeConfig, themeName: ThemeName) => {
       if (!isMountedRef.current || !isValidThemeConfig(config)) {
         return;
       }
 
-      // Skip if theme is already applied
       if (appliedThemeRef.current === themeName) {
         return;
       }
 
-      // Start performance measurement
       const startTime = performance.now();
       performanceMonitor.startTiming("theme-application", "theme");
 
@@ -195,14 +231,12 @@ export function useTheme(): UseThemeReturn {
             throw new Error("DOM elements not available");
           }
 
-          // Update theme class efficiently
           const themeClasses = body.className
             .split(" ")
             .filter((cls) => !cls.startsWith("theme-"));
           themeClasses.push(`theme-${themeName}`);
           body.className = themeClasses.join(" ");
 
-          // Apply CSS variables in batch
           const cssVars = generateCSSVariables(config.colors);
           Object.entries(cssVars).forEach(([property, value]) => {
             root.style.setProperty(property, value);
@@ -210,14 +244,12 @@ export function useTheme(): UseThemeReturn {
 
           appliedThemeRef.current = themeName;
 
-          // Record performance metrics
           const renderTime = performanceMonitor.endTiming(
             "theme-application",
             "theme",
             { theme: themeName },
           );
 
-          // Update local metrics
           setThemeMetrics((prev) => ({
             ...prev,
             renderTime,
@@ -237,15 +269,13 @@ export function useTheme(): UseThemeReturn {
         }
       });
     },
-    [isMountedRef, performanceMonitor, setThemeMetrics], // Updated dependencies
+    [isMountedRef, performanceMonitor, setThemeMetrics],
   );
 
-  // Theme change handler with improved validation and localStorage integration
   const changeTheme = useCallback(
     (newTheme: ThemeName): boolean => {
       if (!isMountedRef.current) return false;
 
-      // Validate theme exists and has valid config
       if (
         !validateTheme(newTheme) ||
         !themes[newTheme] ||
@@ -257,29 +287,22 @@ export function useTheme(): UseThemeReturn {
 
       if (state.theme === newTheme) return true;
 
-      // Start performance tracking for theme switch
       performanceMonitor.startTiming("theme-switch", "theme");
 
-      // Update theme usage statistics
       const currentCount = themeUsageRef.current.get(newTheme) || 0;
       themeUsageRef.current.set(newTheme, currentCount + 1);
 
-      // Update state
       setState((prev) => ({ ...prev, theme: newTheme, error: null }));
 
-      // Save to localStorage using utility
       if (!setValue(newTheme)) {
         console.warn("Failed to save theme to localStorage");
-        // Don't set error state for localStorage failures as theme still works
       }
 
-      // Record theme switch performance
       const switchTime = performanceMonitor.endTiming("theme-switch", "theme", {
         fromTheme: state.theme,
         toTheme: newTheme,
       });
 
-      // Update performance metrics
       switchTimesRef.current.push(switchTime);
       if (switchTimesRef.current.length > 100) {
         switchTimesRef.current = switchTimesRef.current.slice(-100);
@@ -289,7 +312,6 @@ export function useTheme(): UseThemeReturn {
         switchTimesRef.current.reduce((sum, time) => sum + time, 0) /
         switchTimesRef.current.length;
 
-      // Update popular themes
       const themeEntries = Array.from(themeUsageRef.current.entries()).map(
         ([theme, count]) => ({ theme, count }),
       );
@@ -316,25 +338,20 @@ export function useTheme(): UseThemeReturn {
     ],
   );
 
-  // Initialize theme and handle mounting
   useEffect(() => {
     try {
-      // Set mounted state
       setState((prev) => ({ ...prev, mounted: true }));
 
-      // Load saved theme from localStorage using utility
       const savedTheme = getValue();
       if (savedTheme && validateTheme(savedTheme) && themes[savedTheme]) {
         setState((prev) => ({ ...prev, theme: savedTheme as ThemeName }));
       }
     } catch (error) {
       console.warn("Error initializing theme:", error);
-      // Set default theme if initialization fails
       setState((prev) => ({ ...prev, mounted: true, theme: defaultTheme }));
     }
-  }, [getValue]); // Include getValue dependency
+  }, [getValue]);
 
-  // Apply theme changes when theme or mounted state changes
   useEffect(() => {
     try {
       if (state.mounted && isMountedRef.current) {
@@ -345,7 +362,6 @@ export function useTheme(): UseThemeReturn {
     }
   }, [state.mounted, state.theme, themeConfig, applyTheme, isMountedRef]);
 
-  // Memoized utility functions to prevent unnecessary re-renders
   const getThemeInfo = useCallback(
     (themeName?: ThemeName): ThemeConfig => {
       const targetTheme = themeName || state.theme;
@@ -368,7 +384,6 @@ export function useTheme(): UseThemeReturn {
     }
   }, [isMountedRef]);
 
-  // Performance report generator
   const getPerformanceReport = useCallback(() => {
     const times = switchTimesRef.current;
     const usage = Array.from(themeUsageRef.current.entries()).reduce(
@@ -389,7 +404,6 @@ export function useTheme(): UseThemeReturn {
     };
   }, [switchTimesRef, themeUsageRef]);
 
-  // Reset performance metrics
   const resetPerformanceMetrics = useCallback(() => {
     switchTimesRef.current = [];
     themeUsageRef.current.clear();
@@ -402,7 +416,6 @@ export function useTheme(): UseThemeReturn {
     });
   }, [setThemeMetrics]);
 
-  // Memoize return object to prevent unnecessary re-renders
   return useMemo(
     () => ({
       theme: state.theme,

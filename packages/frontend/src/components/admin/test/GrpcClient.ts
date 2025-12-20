@@ -7,7 +7,6 @@ export class GrpcClient {
   private baseUrl: string;
 
   constructor() {
-    // Use the tRPC endpoint directly
     this.baseUrl = process.env.NEXT_PUBLIC_API_URL
       ? `${process.env.NEXT_PUBLIC_API_URL}/trpc`
       : "http://localhost:4000/trpc";
@@ -38,11 +37,9 @@ export class GrpcClient {
         credentials: "include",
       };
 
-      // Add parameters to request
       if (type === "mutation") {
         requestOptions.body = JSON.stringify({ input: parameters });
       } else if (Object.keys(parameters).length > 0) {
-        // For queries, add parameters as URL search params
         const searchParams = new URLSearchParams();
         Object.entries(parameters).forEach(([key, value]) => {
           if (value !== undefined && value !== null && value !== "") {

@@ -4,6 +4,19 @@ import { useState, useEffect, useRef } from "react";
 import type { ThemeConfig } from "@/types/theme";
 import { useI18n } from "@/hooks/useI18n";
 
+/**
+ * Represents a blog post with all its metadata
+ * @interface BlogPost
+ * @property {string} id - Unique identifier for the post
+ * @property {string} title - Title of the blog post
+ * @property {string} slug - URL-friendly slug
+ * @property {string} content - Markdown content of the post
+ * @property {string} summary - Brief summary of the post
+ * @property {string[]} tags - Tags associated with the post
+ * @property {boolean} published - Publication status
+ * @property {string} createdAt - ISO timestamp of creation
+ * @property {string} updatedAt - ISO timestamp of last update
+ */
 interface BlogPost {
   id: string;
   title: string;
@@ -16,14 +29,25 @@ interface BlogPost {
   updatedAt: string;
 }
 
+/**
+ * Props for the BlogEditor component
+ * @interface BlogEditorProps
+ * @property {ThemeConfig} themeConfig - Theme configuration for styling
+ */
 interface BlogEditorProps {
   themeConfig: ThemeConfig;
 }
 
 /**
- *
- * @param root0
- * @param root0.themeConfig
+ * Blog editor component with markdown support, live preview, and auto-save
+ * Provides a comprehensive interface for creating and editing blog posts with markdown syntax
+ * @param {BlogEditorProps} props - Component props
+ * @param {ThemeConfig} props.themeConfig - Theme configuration for styling
+ * @returns {JSX.Element} The blog editor component
+ * @example
+ * ```tsx
+ * <BlogEditor themeConfig={themeConfig} />
+ * ```
  */
 export function BlogEditor({ themeConfig }: BlogEditorProps) {
   const { t } = useI18n();
@@ -40,7 +64,6 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout>(null);
 
-  // Initialize with sample draft
   useEffect(() => {
     const sampleDraft: BlogPost = {
       id: "draft-1",
@@ -64,7 +87,6 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-save functionality
   useEffect(() => {
     if (autoSaveTimeoutRef.current) {
       clearTimeout(autoSaveTimeoutRef.current);
@@ -92,7 +114,6 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
 
     setIsSaving(true);
 
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     const updatedPost: BlogPost = {
@@ -157,7 +178,6 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
 
     setIsSaving(true);
 
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     const publishedPost: BlogPost = {
@@ -180,11 +200,17 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
   };
 
   /**
-   * Sanitize HTML to prevent XSS attacks
-   * Allows safe tags only and removes dangerous attributes
+   * Sanitizes HTML content to prevent XSS attacks
+   * Removes dangerous tags and attributes while preserving safe formatting
+   * @param {string} html - The HTML content to sanitize
+   * @returns {string} The sanitized HTML
+   * @example
+   * ```typescript
+   * const safe = sanitizeHtml('<script>alert("xss")</script><p>Safe text</p>');
+   * // Returns: '<p>Safe text</p>'
+   * ```
    */
   const sanitizeHtml = (html: string): string => {
-    // Define allowed tags and attributes
     const allowedTags = [
       "h1",
       "h2",
@@ -208,30 +234,25 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
       a: ["href", "title"],
     };
 
-    // Create a temporary element to parse HTML
     if (typeof document === "undefined") return html;
 
     const temp = document.createElement("div");
     temp.innerHTML = html;
 
-    // Recursively sanitize nodes
     const sanitizeNode = (node: Node): void => {
       if (node.nodeType === Node.ELEMENT_NODE) {
         const element = node as Element;
         const tagName = element.tagName.toLowerCase();
 
-        // Remove disallowed tags but keep their text content
         if (!allowedTags.includes(tagName)) {
           const text = document.createTextNode(element.textContent || "");
           element.parentNode?.replaceChild(text, element);
           return;
         }
 
-        // Remove dangerous attributes
         const attrs = Array.from(element.attributes);
         for (const attr of attrs) {
           const attrName = attr.name.toLowerCase();
-          // Remove event handlers and javascript: URLs
           if (
             attrName.startsWith("on") ||
             (attrName === "href" &&
@@ -244,7 +265,6 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
         }
       }
 
-      // Process child nodes
       Array.from(node.childNodes).forEach(sanitizeNode);
     };
 
@@ -253,7 +273,6 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
   };
 
   const renderMarkdownPreview = (markdown: string) => {
-    // Simple Markdown to HTML conversion with sanitization
     const html = markdown
       .replace(/^### (.*$)/gim, "<h3>$1</h3>")
       .replace(/^## (.*$)/gim, "<h2>$1</h2>")
@@ -264,13 +283,12 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
       .replace(/`([^`]+)`/gim, "<code>$1</code>")
       .replace(/\n/gim, "<br>");
 
-    // Sanitize output to prevent XSS
     return sanitizeHtml(html);
   };
 
   return (
     <div className="space-y-6">
-      {/* Header Controls */}
+      { }
       <div
         className="p-4 border rounded"
         style={{
@@ -332,7 +350,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
           </div>
         </div>
 
-        {/* Status */}
+        { }
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center space-x-4">
             <span>
@@ -365,7 +383,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Drafts Sidebar */}
+        { }
         <div className="lg:col-span-1">
           <div
             className="p-4 border rounded"
@@ -421,7 +439,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
           </div>
         </div>
 
-        {/* Editor/Preview */}
+        { }
         <div className="lg:col-span-3">
           <div
             className="p-4 border rounded"
@@ -430,7 +448,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
               backgroundColor: themeConfig.colors.bg,
             }}
           >
-            {/* Title */}
+            { }
             <div className="mb-4">
               <div className="text-xs opacity-70 mb-2">{t("blogTitle")}</div>
               <input
@@ -446,7 +464,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
               />
             </div>
 
-            {/* Summary */}
+            { }
             <div className="mb-4">
               <div className="text-xs opacity-70 mb-2">{t("blogSummary")}</div>
               <textarea
@@ -462,7 +480,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
               />
             </div>
 
-            {/* Tags */}
+            { }
             <div className="mb-4">
               <div className="text-xs opacity-70 mb-2">{t("blogTags")}</div>
               <div className="flex items-center space-x-2 mb-2">
@@ -511,7 +529,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
               </div>
             </div>
 
-            {/* Content */}
+            { }
             <div>
               <div className="text-xs opacity-70 mb-2">{t("blogContent")}</div>
               {isPreview ? (
@@ -541,7 +559,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
               )}
             </div>
 
-            {/* Markdown Help */}
+            { }
             {!isPreview && (
               <div
                 className="mt-4 pt-4 border-t"

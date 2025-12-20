@@ -4,11 +4,14 @@ import { useTheme } from "@/hooks/useTheme";
 import { useState, useEffect, type JSX } from "react";
 
 /**
- * An enhanced development banner with comprehensive development metrics.
- *
- * Includes animated progress indicators, test coverage, build status,
- * performance metrics, and development statistics.
- * @returns {JSX.Element | null} The rendered development banner or null if dismissed.
+ * Enhanced development banner with comprehensive development metrics
+ * Displays development progress, test coverage, build status, and performance metrics
+ * Includes animated progress indicators and real-time statistics
+ * @returns {JSX.Element | null} The development banner or null if dismissed
+ * @example
+ * ```tsx
+ * <DevelopmentBanner />
+ * ```
  */
 export function DevelopmentBanner(): JSX.Element | null {
   const { theme, themeConfig } = useTheme();
@@ -77,7 +80,7 @@ export function DevelopmentBanner(): JSX.Element | null {
       }}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Left side - Development status */}
+        { }
         <div className="flex items-center gap-4">
           <div
             className="flex items-center gap-2 px-3 py-1 rounded border transition-all duration-300"
@@ -92,7 +95,7 @@ export function DevelopmentBanner(): JSX.Element | null {
           </div>
 
           <div className="hidden lg:flex items-center gap-4">
-            {/* Development Progress */}
+            { }
             <div className="flex items-center gap-2">
               <span className="opacity-70">Progress:</span>
               <span style={{ color: themeConfig.colors.accent }}>
@@ -104,7 +107,7 @@ export function DevelopmentBanner(): JSX.Element | null {
               )}
             </div>
 
-            {/* Test Coverage */}
+            { }
             <div className="flex items-center gap-2">
               <span className="opacity-70">Tests:</span>
               <span style={{ color: getStatusColor("success") }}>
@@ -113,7 +116,7 @@ export function DevelopmentBanner(): JSX.Element | null {
               {getProgressBar(metrics.testCoverage, getStatusColor("success"))}
             </div>
 
-            {/* Performance Score */}
+            { }
             <div className="flex items-center gap-2">
               <span className="opacity-70">Perf:</span>
               <span style={{ color: getStatusColor("success") }}>
@@ -127,7 +130,7 @@ export function DevelopmentBanner(): JSX.Element | null {
           </div>
         </div>
 
-        {/* Center - Build status and metrics */}
+        { }
         <div className="hidden md:flex items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="opacity-70">Build:</span>
@@ -179,7 +182,7 @@ export function DevelopmentBanner(): JSX.Element | null {
           </div>
         </div>
 
-        {/* Right side - Tips and close button */}
+        { }
         <div className="flex items-center gap-4">
           <div className="hidden xl:block text-xs opacity-75">
             <span

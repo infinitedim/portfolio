@@ -3,7 +3,11 @@ import { ArgumentParser } from "@/lib/utils/argParser";
 import { generateId } from "@/lib/utils/utils";
 
 /**
- * Resume command - Download/view formatted resume
+ * Command for viewing or downloading resume
+ * Supports viewing in terminal format or downloading as PDF
+ * @example
+ * User types: resume --view
+ * User types: resume -d (downloads PDF)
  */
 export const resumeCommand: Command = {
   name: "resume",
@@ -34,7 +38,6 @@ Examples:
     }
 
     if (ArgumentParser.hasFlag(parsed, "d", "download")) {
-      // Trigger download
       if (typeof window !== "undefined") {
         const link = document.createElement("a");
         link.href = "/resume.pdf";
@@ -50,7 +53,6 @@ Examples:
       };
     }
 
-    // Default: view resume
     const resumeContent = [
       "📄 RESUME",
       "═".repeat(60),
@@ -337,7 +339,6 @@ Let's build something amazing together! 🚀`,
       };
     }
 
-    // Default: show contact information
     const contactInfo = [
       "📧 CONTACT INFORMATION",
       "═".repeat(60),
@@ -429,7 +430,6 @@ export const easterEggsCommand: Command = {
   },
 };
 
-// Export all commands as a collection for easy import
 export const enhancedCommands = {
   resume: resumeCommand,
   social: socialCommand,

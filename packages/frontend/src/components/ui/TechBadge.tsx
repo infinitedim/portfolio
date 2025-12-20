@@ -2,6 +2,16 @@
 
 import { JSX, useState } from "react";
 
+/**
+ * Props for the TechBadge component
+ * @interface TechBadgeProps
+ * @property {string} technology - Name of the technology
+ * @property {number} [count] - Optional count to display
+ * @property {(tech: string) => void} [onClick] - Click handler callback
+ * @property {boolean} [selected] - Whether badge is selected
+ * @property {boolean} [interactive] - Whether badge is interactive
+ * @property {"sm" | "md" | "lg"} [size] - Badge size
+ */
 interface TechBadgeProps {
   technology: string;
   count?: number;
@@ -15,7 +25,6 @@ const TECH_COLORS: Record<
   string,
   { bg: string; text: string; border: string }
 > = {
-  // Frontend
   React: {
     bg: "bg-blue-500/20",
     text: "text-blue-400",
@@ -67,7 +76,6 @@ const TECH_COLORS: Record<
     border: "border-pink-500/30",
   },
 
-  // Backend
   "Node.js": {
     bg: "bg-green-600/20",
     text: "text-green-400",
@@ -124,7 +132,6 @@ const TECH_COLORS: Record<
     border: "border-red-500/30",
   },
 
-  // Databases
   MongoDB: {
     bg: "bg-green-500/20",
     text: "text-green-400",
@@ -151,7 +158,6 @@ const TECH_COLORS: Record<
     border: "border-blue-400/30",
   },
 
-  // Cloud & DevOps
   AWS: {
     bg: "bg-orange-500/20",
     text: "text-orange-400",
@@ -193,7 +199,6 @@ const TECH_COLORS: Record<
     border: "border-purple-500/30",
   },
 
-  // Mobile
   "React Native": {
     bg: "bg-blue-500/20",
     text: "text-blue-400",
@@ -215,7 +220,6 @@ const TECH_COLORS: Record<
     border: "border-purple-500/30",
   },
 
-  // Testing
   Vitest: {
     bg: "bg-green-600/20",
     text: "text-green-400",
@@ -232,7 +236,6 @@ const TECH_COLORS: Record<
     border: "border-blue-500/30",
   },
 
-  // Tools & Libraries
   Webpack: {
     bg: "bg-blue-600/20",
     text: "text-blue-400",
@@ -308,11 +311,11 @@ export function TechBadge({
 
   const interactiveClasses = interactive
     ? [
-        "cursor-pointer hover:scale-105 hover:shadow-lg",
-        selected
-          ? "ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-900"
-          : "",
-      ]
+      "cursor-pointer hover:scale-105 hover:shadow-lg",
+      selected
+        ? "ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-900"
+        : "",
+    ]
     : [];
 
   const hoverClasses = isHovered && interactive ? "shadow-lg scale-105" : "";

@@ -2,7 +2,6 @@
 
 import { JSX, Profiler, ProfilerOnRenderCallback, ReactNode } from "react";
 
-// Performance monitoring utility
 export class PerformanceMonitor {
   private static instance: PerformanceMonitor;
   private metrics: Map<string, number[]> = new Map();
@@ -20,7 +19,6 @@ export class PerformanceMonitor {
     }
     this.metrics.get(name)!.push(value);
 
-    // Keep only last 100 entries to prevent memory leak
     const values = this.metrics.get(name)!;
     if (values.length > 100) {
       values.splice(0, values.length - 100);
@@ -77,7 +75,6 @@ export class PerformanceMonitor {
   }
 }
 
-// Performance profiler component
 interface PerformanceProfilerProps {
   id: string;
   children: ReactNode;
@@ -109,14 +106,11 @@ export function PerformanceProfiler({
     actualDuration,
     baseDuration,
   ) => {
-    // Record metrics
     performanceMonitor.recordMetric(`${id}-${phase}`, actualDuration);
     performanceMonitor.recordMetric(`${id}-base`, baseDuration);
 
-    // Call custom handler if provided
     onRender?.(id, phase, actualDuration);
 
-    // Log slow renders in development
     if (process.env.NODE_ENV === "development" && actualDuration > 16) {
       console.warn(
         `🐌 Slow render detected: ${id} (${phase}) took ${actualDuration.toFixed(2)}ms`,
@@ -134,7 +128,6 @@ export function PerformanceProfiler({
   );
 }
 
-// Hook for measuring custom operations
 /**
  * Hook for measuring custom operations
  * @returns {object} An object containing:

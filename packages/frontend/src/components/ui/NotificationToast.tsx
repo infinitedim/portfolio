@@ -3,6 +3,15 @@
 import { type JSX, useEffect, useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
 
+/**
+ * Props for the NotificationToast component
+ * @interface NotificationToastProps
+ * @property {string} message - The message to display
+ * @property {"info" | "success" | "warning" | "error"} type - Notification type
+ * @property {number} [duration] - Auto-dismiss duration in milliseconds
+ * @property {() => void} onClose - Callback when toast closes
+ * @property {boolean} [visible] - Whether toast is visible
+ */
 interface NotificationToastProps {
   message: string;
   type: "info" | "success" | "warning" | "error";
@@ -12,26 +21,24 @@ interface NotificationToastProps {
 }
 
 /**
- * A toast notification component for temporary feedback messages.
- *
- * Displays a floating message at the top-right of the screen with different styles
- * depending on the `type` (info, success, warning, error). It auto-dismisses after
- * a specified duration and supports accessibility via ARIA roles and motion reduction.
- *
- * Integrates with theme config and accessibility provider.
- * @param {object} props - Props object
- * @param {string} props.message - The message to display in the toast
- * @param {"info" | "success" | "warning" | "error"} props.type - Type of notification to style accordingly
- * @param {number} [props.duration] - How long the toast stays visible (in ms)
- * @param {() => void} props.onClose - Callback function triggered when toast is closed
- * @param {boolean} [props.visible] - Controls whether the toast is shown
+ * Toast notification component for temporary feedback messages
+ * Displays floating messages with auto-dismiss and type-based styling
+ * @param {NotificationToastProps} props - Component props
+ * @param {string} props.message - Message to display
+ * @param {"info" | "success" | "warning" | "error"} props.type - Notification type
+ * @param {boolean} [props.visible=true] - Visibility state
+ * @param {() => void} props.onClose - Close callback
+ * @param {number} [props.duration=4000] - Auto-dismiss duration in ms
+ * @returns {JSX.Element | null} The toast notification or null
  * @example
+ * ```tsx
  * <NotificationToast
- *   message="Data saved successfully"
+ *   message="Operation successful"
  *   type="success"
  *   onClose={() => setShowToast(false)}
+ *   duration={3000}
  * />
- * @returns {JSX.Element | null} The rendered toast or null if not visible
+ * ```
  */
 export function NotificationToast({
   message,
@@ -43,17 +50,15 @@ export function NotificationToast({
   const { themeConfig, theme } = useTheme();
   const [isVisible, setIsVisible] = useState(visible);
 
-  // Update visibility when prop changes
   useEffect(() => {
     setIsVisible(visible);
   }, [visible]);
 
-  // Auto-dismiss timer
   useEffect(() => {
     if (isVisible && duration > 0) {
       const timer = setTimeout(() => {
         setIsVisible(false);
-        setTimeout(onClose, 300); // Wait for exit animation
+        setTimeout(onClose, 300);
       }, duration);
 
       return () => clearTimeout(timer);
@@ -64,7 +69,6 @@ export function NotificationToast({
     const colors = themeConfig?.colors;
 
     if (!colors) {
-      // Fallback colors if theme is not loaded
       return {
         backgroundColor: "#4f46e5",
         color: "#ffffff",
@@ -108,10 +112,9 @@ export function NotificationToast({
 
   const typeStyles = getTypeStyles();
 
-  // Handle close button click
   const handleClose = () => {
     setIsVisible(false);
-    setTimeout(onClose, 300); // Wait for exit animation
+    setTimeout(onClose, 300);
   };
 
   if (!isVisible) return null;
@@ -122,14 +125,13 @@ export function NotificationToast({
       className={`
         fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg backdrop-blur-sm
         transition-all duration-300 ease-out max-w-sm
-        ${
-          isVisible
-            ? "opacity-100 translate-x-0 animate-in slide-in-from-right"
-            : "opacity-0 translate-x-full animate-out slide-out-to-right"
+        ${isVisible
+          ? "opacity-100 translate-x-0 animate-in slide-in-from-right"
+          : "opacity-0 translate-x-full animate-out slide-out-to-right"
         }
       `}
       style={{
-        backgroundColor: `${typeStyles.backgroundColor}dd`, // Semi-transparent
+        backgroundColor: `${typeStyles.backgroundColor}dd`,
         color: typeStyles.color,
         border: `1px solid ${typeStyles.borderColor}`,
         boxShadow: `0 8px 32px ${typeStyles.backgroundColor}40`,

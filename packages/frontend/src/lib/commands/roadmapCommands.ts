@@ -2,14 +2,13 @@ import type { Command } from "@/types/terminal";
 import { generateId } from "@/lib/utils/utils";
 import type { RoadmapSkill } from "@/types/roadmap";
 
-// Lazy load the roadmap service to avoid SSR issues
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let roadmapService: any = null;
 let roadmapServicePromise: Promise<unknown> | null = null;
 
 const getRoadmapService = async () => {
   if (typeof window === "undefined") {
-    return null; // Return null during SSR
+    return null;
   }
 
   if (roadmapService) {
@@ -22,7 +21,6 @@ const getRoadmapService = async () => {
 
   roadmapServicePromise = (async () => {
     try {
-      // Use dynamic import instead of require
       const { RoadmapService } = await import("@/lib/services/roadmapService");
       roadmapService = RoadmapService.getInstance();
       return roadmapService;
@@ -35,7 +33,6 @@ const getRoadmapService = async () => {
   return await roadmapServicePromise;
 };
 
-// Helper function to get service with error handling
 const getServiceOrError = async () => {
   try {
     const service = await getRoadmapService();
@@ -47,7 +44,6 @@ const getServiceOrError = async () => {
       };
     }
 
-    // MODIFICATION: Validate service has required methods
     if (typeof service.getUserProgress !== "function") {
       return {
         error: true,
@@ -326,7 +322,6 @@ export const roadmapCommand: Command = {
         };
       }
 
-      // Simple search implementation
       const data = await service.getUserProgress();
       const results: RoadmapSkill[] = [];
 

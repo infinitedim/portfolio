@@ -34,11 +34,9 @@ function getClientIp(req: Request): string {
 
   const socketIp = req.socket?.remoteAddress || req.ip || "unknown";
 
-  // Only trust X-Forwarded-For if request came from a trusted proxy
   if (trustedProxies.length > 0 && trustedProxies.includes(socketIp)) {
     const xForwardedFor = req.headers["x-forwarded-for"];
     if (typeof xForwardedFor === "string") {
-      // Take the first IP in the chain (original client)
       const clientIp = xForwardedFor.split(",")[0]?.trim();
       if (clientIp) {
         return clientIp;
@@ -46,7 +44,6 @@ function getClientIp(req: Request): string {
     }
   }
 
-  // Fallback to socket remote address
   return socketIp;
 }
 
@@ -64,7 +61,6 @@ export async function createBackendContext(
   const authHeader = opts.req?.headers?.["authorization"];
   let user: AuthUser | undefined = undefined;
 
-  // Parse and verify JWT token if present
   if (authHeader && authHeader.startsWith("Bearer ")) {
     try {
       const token = authHeader.substring(7);
@@ -72,7 +68,6 @@ export async function createBackendContext(
       const payload = securityService.verifyAccessToken(token);
 
       if (payload && payload.userId) {
-        // Check if token is blacklisted
         const jti = securityService.extractJWTId(token);
         if (jti) {
           const authService = getAuthService();
@@ -84,7 +79,6 @@ export async function createBackendContext(
               component: "TrpcContext",
               operation: "createBackendContext",
             });
-            // Token is blacklisted, don't set user
           } else {
             user = {
               userId: payload.userId,
@@ -93,7 +87,6 @@ export async function createBackendContext(
             };
           }
         } else {
-          // No JTI, but valid payload - allow (for backwards compatibility)
           user = {
             userId: payload.userId,
             email: payload.email || "",
@@ -102,7 +95,6 @@ export async function createBackendContext(
         }
       }
     } catch (error) {
-      // Token invalid or expired - user remains undefined
       securityLogger.debug("Token validation failed in context", {
         error: error instanceof Error ? error.message : "Unknown error",
         clientIp,

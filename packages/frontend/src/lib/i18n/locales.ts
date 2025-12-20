@@ -1,19 +1,34 @@
+/**
+ * Configuration for a locale/language
+ * @property code - Locale code in format 'language_COUNTRY' (e.g., 'en_US')
+ * @property name - English name of the language
+ * @property nativeName - Native name of the language
+ * @property flag - Flag emoji for the locale
+ * @property direction - Text direction ('ltr' for left-to-right, 'rtl' for right-to-left)
+ * @property fallback - Optional fallback locale code for regional variants
+ */
 export interface LocaleConfig {
   code: string;
   name: string;
   nativeName: string;
   flag: string;
   direction: "ltr" | "rtl";
-  fallback?: string; // For regional variants that fall back to main language
+  fallback?: string;
 }
 
+/**
+ * Mapping of locale codes to their configurations
+ * @example { 'en_US': { code: 'en_US', name: 'English (US)', ... } }
+ */
 export interface LocaleMapping {
   [key: string]: LocaleConfig;
 }
 
-// Supported locales configuration
+/**
+ * Registry of all supported locales with their configurations
+ * Contains primary language locales (not regional variants)
+ */
 export const SUPPORTED_LOCALES: LocaleMapping = {
-  // English (American) - Primary English
   en_US: {
     code: "en_US",
     name: "English (US)",
@@ -22,7 +37,6 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
     direction: "ltr",
   },
 
-  // Indonesian
   id_ID: {
     code: "id_ID",
     name: "Indonesian",
@@ -31,7 +45,6 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
     direction: "ltr",
   },
 
-  // Spanish
   es_ES: {
     code: "es_ES",
     name: "Spanish",
@@ -40,7 +53,6 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
     direction: "ltr",
   },
 
-  // French
   fr_FR: {
     code: "fr_FR",
     name: "French",
@@ -49,7 +61,6 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
     direction: "ltr",
   },
 
-  // German
   de_DE: {
     code: "de_DE",
     name: "German",
@@ -58,7 +69,6 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
     direction: "ltr",
   },
 
-  // Japanese
   ja_JP: {
     code: "ja_JP",
     name: "Japanese",
@@ -67,7 +77,6 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
     direction: "ltr",
   },
 
-  // Korean
   ko_KR: {
     code: "ko_KR",
     name: "Korean",
@@ -76,7 +85,6 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
     direction: "ltr",
   },
 
-  // Chinese (Simplified)
   zh_CN: {
     code: "zh_CN",
     name: "Chinese (Simplified)",
@@ -85,7 +93,6 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
     direction: "ltr",
   },
 
-  // Arabic
   ar_SA: {
     code: "ar_SA",
     name: "Arabic",
@@ -94,7 +101,6 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
     direction: "rtl",
   },
 
-  // Portuguese
   pt_BR: {
     code: "pt_BR",
     name: "Portuguese (Brazil)",
@@ -103,7 +109,6 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
     direction: "ltr",
   },
 
-  // Russian
   ru_RU: {
     code: "ru_RU",
     name: "Russian",
@@ -112,7 +117,6 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
     direction: "ltr",
   },
 
-  // Italian
   it_IT: {
     code: "it_IT",
     name: "Italian",
@@ -121,7 +125,6 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
     direction: "ltr",
   },
 
-  // Dutch
   nl_NL: {
     code: "nl_NL",
     name: "Dutch",
@@ -130,7 +133,6 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
     direction: "ltr",
   },
 
-  // Turkish
   tr_TR: {
     code: "tr_TR",
     name: "Turkish",
@@ -139,7 +141,6 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
     direction: "ltr",
   },
 
-  // Hindi
   hi_IN: {
     code: "hi_IN",
     name: "Hindi",
@@ -148,7 +149,6 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
     direction: "ltr",
   },
 
-  // Thai
   th_TH: {
     code: "th_TH",
     name: "Thai",
@@ -157,7 +157,6 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
     direction: "ltr",
   },
 
-  // Vietnamese
   vi_VN: {
     code: "vi_VN",
     name: "Vietnamese",
@@ -167,9 +166,11 @@ export const SUPPORTED_LOCALES: LocaleMapping = {
   },
 };
 
-// Regional variants that fall back to main language
+/**
+ * Regional variants that map to primary locales
+ * e.g., en_GB, en_CA all fallback to en_US
+ */
 export const REGIONAL_VARIANTS: LocaleMapping = {
-  // English variants fall back to en_US
   en_GB: {
     code: "en_US",
     name: "English (US)",
@@ -219,7 +220,6 @@ export const REGIONAL_VARIANTS: LocaleMapping = {
     fallback: "en_US",
   },
 
-  // Spanish variants fall back to es_ES
   es_MX: {
     code: "es_ES",
     name: "Spanish",
@@ -245,7 +245,6 @@ export const REGIONAL_VARIANTS: LocaleMapping = {
     fallback: "es_ES",
   },
 
-  // French variants fall back to fr_FR
   fr_CA: {
     code: "fr_FR",
     name: "French",
@@ -263,7 +262,6 @@ export const REGIONAL_VARIANTS: LocaleMapping = {
     fallback: "fr_FR",
   },
 
-  // German variants fall back to de_DE
   de_AT: {
     code: "de_DE",
     name: "German",
@@ -281,7 +279,6 @@ export const REGIONAL_VARIANTS: LocaleMapping = {
     fallback: "de_DE",
   },
 
-  // Portuguese variants fall back to pt_BR
   pt_PT: {
     code: "pt_BR",
     name: "Portuguese (Brazil)",
@@ -291,7 +288,6 @@ export const REGIONAL_VARIANTS: LocaleMapping = {
     fallback: "pt_BR",
   },
 
-  // Chinese variants fall back to zh_CN
   zh_TW: {
     code: "zh_CN",
     name: "Chinese (Simplified)",
@@ -309,7 +305,6 @@ export const REGIONAL_VARIANTS: LocaleMapping = {
     fallback: "zh_CN",
   },
 
-  // Arabic variants fall back to ar_SA
   ar_EG: {
     code: "ar_SA",
     name: "Arabic",
@@ -328,39 +323,57 @@ export const REGIONAL_VARIANTS: LocaleMapping = {
   },
 };
 
-// Combine all locales
+/**
+ * Combined mapping of all locales including regional variants
+ */
 export const ALL_LOCALES = { ...SUPPORTED_LOCALES, ...REGIONAL_VARIANTS };
 
-// Default locale
+/**
+ * Default locale used when no locale is specified or detected
+ */
 export const DEFAULT_LOCALE = "en_US";
 
-// Get locale config by code
 /**
- * Get locale config by code
- * @param {string} localeCode - The locale code
- * @returns {LocaleConfig | null} The locale config
+ * Retrieves locale configuration by locale code
+ * Normalizes hyphens to underscores (e.g., 'en-US' → 'en_US')
+ * @param localeCode - Locale code to look up
+ * @returns Locale configuration object, or null if not found
+ * @example
+ * ```ts
+ * const config = getLocaleConfig('en-US');
+ * console.log(config?.name); // 'English (US)'
+ * ```
  */
 export function getLocaleConfig(localeCode: string): LocaleConfig | null {
   const normalizedCode = localeCode.replace("-", "_");
   return ALL_LOCALES[normalizedCode] || null;
 }
 
-// Check if locale is a regional variant
 /**
- * Check if locale is a regional variant
- * @param {string} localeCode - The locale code
- * @returns {boolean} Whether the locale is a regional variant
+ * Checks if a locale code is a regional variant (has a fallback)
+ * @param localeCode - Locale code to check
+ * @returns True if the locale is a regional variant, false otherwise
+ * @example
+ * ```ts
+ * isRegionalVariant('en_GB'); // true (fallback to en_US)
+ * isRegionalVariant('en_US'); // false (primary locale)
+ * ```
  */
 export function isRegionalVariant(localeCode: string): boolean {
   const normalizedCode = localeCode.replace("-", "_");
   return !!REGIONAL_VARIANTS[normalizedCode];
 }
 
-// Get fallback locale for regional variants
 /**
- * Get fallback locale for regional variants
- * @param {string} localeCode - The locale code
- * @returns {string} The fallback locale
+ * Gets the fallback locale for regional variants
+ * Returns the same code if not a regional variant
+ * @param localeCode - Locale code to get fallback for
+ * @returns Fallback locale code
+ * @example
+ * ```ts
+ * getFallbackLocale('en_GB'); // 'en_US'
+ * getFallbackLocale('en_US'); // 'en_US'
+ * ```
  */
 export function getFallbackLocale(localeCode: string): string {
   const normalizedCode = localeCode.replace("-", "_");
@@ -368,20 +381,29 @@ export function getFallbackLocale(localeCode: string): string {
   return config?.fallback || normalizedCode;
 }
 
-// Get supported locales list
 /**
- * Get supported locales list
- * @returns {LocaleConfig[]} The supported locales
+ * Gets list of all primary supported locales (excludes regional variants)
+ * @returns Array of locale configuration objects
+ * @example
+ * ```ts
+ * const locales = getSupportedLocales();
+ * locales.forEach(locale => console.log(locale.name));
+ * ```
  */
 export function getSupportedLocales(): LocaleConfig[] {
   return Object.values(SUPPORTED_LOCALES);
 }
 
-// Validate locale code
 /**
- * Validate locale code
- * @param {string} localeCode - The locale code
- * @returns {boolean} Whether the locale code is valid
+ * Validates if a locale code is supported (including regional variants)
+ * @param localeCode - Locale code to validate
+ * @returns True if locale is valid, false otherwise
+ * @example
+ * ```ts
+ * isValidLocale('en_US'); // true
+ * isValidLocale('en_GB'); // true (regional variant)
+ * isValidLocale('xx_XX'); // false
+ * ```
  */
 export function isValidLocale(localeCode: string): boolean {
   const normalizedCode = localeCode.replace("-", "_");

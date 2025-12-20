@@ -15,10 +15,8 @@ import { LoggingService } from "./logging.service";
  */
 @Module({
   imports: [
-    // Import the centralized logger module
     PortfolioLoggerModule,
 
-    // Configure Winston for NestJS
     WinstonModule.forRootAsync({
       useFactory: () => {
         return createNestWinstonConfig({
@@ -38,7 +36,6 @@ import { LoggingService } from "./logging.service";
     }),
   ],
   providers: [
-    // Provide the centralized logger service
     {
       provide: "LOGGER",
       useFactory: () => {
@@ -58,7 +55,6 @@ import { LoggingService } from "./logging.service";
       },
     },
 
-    // Provide specialized loggers
     {
       provide: "SECURITY_LOGGER",
       useFactory: () => {
@@ -89,7 +85,6 @@ import { LoggingService } from "./logging.service";
       },
     },
 
-    // Provide the logging service
     LoggingService,
   ],
   exports: [

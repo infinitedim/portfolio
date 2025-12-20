@@ -23,7 +23,6 @@ export default [
     ],
   },
 
-  // Base configuration for all TypeScript files
   {
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
@@ -43,18 +42,15 @@ export default [
     },
   },
 
-  // ESLint recommended rules
   {
     files: ["**/*.{ts,tsx}"],
     ...js.configs.recommended,
   },
 
-  // TypeScript ESLint recommended configuration
   ...tseslint.configs.recommended.map((config) => ({
     ...config,
     files: ["**/*.{ts,tsx}"],
   })),
-  // Backend-specific configuration
   {
     files: ["packages/backend/**/*.{ts}"],
     languageOptions: {
@@ -65,7 +61,6 @@ export default [
     },
   },
 
-  // React configuration
   {
     files: ["**/*.{ts,tsx}"],
     plugins: {
@@ -98,7 +93,6 @@ export default [
     },
   },
 
-  // React Hooks configuration
   {
     files: ["**/*.{ts,tsx}"],
     plugins: {
@@ -110,7 +104,6 @@ export default [
     },
   },
 
-  // JSX A11Y configuration
   {
     files: ["**/*.{ts,tsx}"],
     plugins: {
@@ -130,7 +123,6 @@ export default [
     },
   },
 
-  // Import plugin configuration
   {
     files: ["**/*.{ts,tsx}"],
     plugins: {
@@ -147,12 +139,9 @@ export default [
     },
   },
 
-  // TypeScript specific rules
   {
     files: ["**/*.{ts,tsx}"],
     rules: {
-      // Disable conflicting quotes rule in favor of prettier
-      // quotes: ["error", "double"],
       semi: ["error", "always"],
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": [
@@ -163,16 +152,13 @@ export default [
           caughtErrorsIgnorePattern: "^_",
         },
       ],
-      // Relax TypeScript rules for development
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-require-imports": "warn",
-      // Allow console statements in backend development
       "no-console": process.env.NODE_ENV === "production" ? "error" : "warn",
       "prefer-const": "error",
       "no-var": "error",
       "no-case-declarations": "warn",
       "no-console": "off",
-      // Relax JSDoc requirements for development
       "jsdoc/require-returns": "off",
       "jsdoc/require-param-description": "off",
       "jsdoc/require-param-type": "off",
@@ -184,18 +170,15 @@ export default [
     },
   },
 
-  // Backend-specific overrides
   {
     files: ["packages/backend/**/*.{ts}"],
     rules: {
-      // More lenient for backend development
-      "no-console": "off", // Allow console statements in backend
-      "@typescript-eslint/no-explicit-any": "warn", // Allow any type with warning
-      "promise/param-names": "off", // Allow flexible promise parameter names
+      "no-console": "off",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "promise/param-names": "off",
     },
   },
 
-  // Test file overrides
   {
     files: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
     rules: {
@@ -205,7 +188,6 @@ export default [
     },
   },
 
-  // Prettier configuration (must be last to override other formatting rules)
   {
     files: ["**/*.{ts,tsx}"],
     plugins: {
@@ -216,14 +198,12 @@ export default [
     },
   },
 
-  // JSDoc configuration - relaxed for development
   {
     files: ["**/*.{ts,tsx}"],
     plugins: {
       jsdoc,
     },
     rules: {
-      // Turn off most JSDoc rules for development
       "jsdoc/require-jsdoc": "off",
       "jsdoc/require-param": "off",
       "jsdoc/require-param-description": "off",
@@ -237,7 +217,6 @@ export default [
     },
   },
 
-  // Promise configuration
   {
     files: ["**/*.{ts,tsx}"],
     plugins: {

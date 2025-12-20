@@ -19,22 +19,26 @@ interface SpotifyData {
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 /**
- * NowPlayingWidget component using SWR for data fetching
- * @returns {JSX.Element} The NowPlayingWidget component
+ * Spotify now playing widget using SWR for real-time data
+ * Displays currently playing track with album art and auto-refresh
+ * @returns {JSX.Element} The now playing widget component
+ * @example
+ * ```tsx
+ * <NowPlayingWidget />
+ * ```
  */
 export function NowPlayingWidget(): JSX.Element {
   const { data, error, isLoading } = useSWR<SpotifyData>(
     "/api/spotify/now-playing",
     fetcher,
     {
-      refreshInterval: 30000, // Refresh every 30 seconds
+      refreshInterval: 30000,
       revalidateOnFocus: true,
       revalidateOnReconnect: true,
-      dedupingInterval: 60000, // Dedupe requests within 1 minute
+      dedupingInterval: 60000,
     },
   );
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="flex items-center space-x-4 rounded-md border p-4 bg-gray-900/50">
@@ -48,7 +52,6 @@ export function NowPlayingWidget(): JSX.Element {
     );
   }
 
-  // Error state
   if (error || data?.error) {
     return (
       <div className="flex items-center space-x-4 rounded-md border p-4 bg-red-900/20 border-red-500/20">
@@ -65,7 +68,6 @@ export function NowPlayingWidget(): JSX.Element {
     );
   }
 
-  // Not playing state
   if (!data?.isPlaying) {
     return (
       <a
@@ -86,7 +88,6 @@ export function NowPlayingWidget(): JSX.Element {
     );
   }
 
-  // Now playing state
   return (
     <a
       href={data.songUrl || "https://open.spotify.com"}

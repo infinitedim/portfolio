@@ -9,6 +9,17 @@ import {
 } from "react";
 import { useTheme } from "@/hooks/useTheme";
 
+/**
+ * Represents a single keyboard shortcut
+ * @interface KeyboardShortcut
+ * @property {string} id - Unique identifier for the shortcut
+ * @property {string[]} keys - Array of keys that trigger the shortcut
+ * @property {string} description - Human-readable description
+ * @property {string} category - Category for grouping shortcuts
+ * @property {() => void} action - Function to execute when triggered
+ * @property {boolean} enabled - Whether the shortcut is currently enabled
+ * @property {boolean} customizable - Whether users can customize this shortcut
+ */
 export interface KeyboardShortcut {
   id: string;
   keys: string[];
@@ -19,6 +30,15 @@ export interface KeyboardShortcut {
   customizable: boolean;
 }
 
+/**
+ * Props for the KeyboardShortcut component
+ * @interface KeyboardShortcutProps
+ * @property {boolean} isOpen - Whether the shortcuts panel is open
+ * @property {() => void} onClose - Callback when panel is closed
+ * @property {KeyboardShortcut[]} shortcuts - List of available shortcuts
+ * @property {(shortcutId: string, newKeys: string[]) => void} [onShortcutChange] - Callback when shortcut is customized
+ * @property {string} [className] - Additional CSS classes
+ */
 interface KeyboardShortcutProps {
   isOpen: boolean;
   onClose: () => void;
@@ -35,6 +55,23 @@ interface ShortcutCategory {
 
 /**
  * Enhanced keyboard shortcuts panel with customization and visual guide
+ * Displays all available keyboard shortcuts with search, categorization, and customization
+ * @param {KeyboardShortcutProps} props - Component props
+ * @param {boolean} props.isOpen - Panel open state
+ * @param {() => void} props.onClose - Close callback
+ * @param {KeyboardShortcut[]} props.shortcuts - Available shortcuts
+ * @param {(shortcutId: string, newKeys: string[]) => void} [props.onShortcutChange] - Customization callback
+ * @param {string} [props.className] - Additional classes
+ * @returns {JSX.Element | null} The shortcuts panel or null if closed
+ * @example
+ * ```tsx
+ * <KeyboardShortcut
+ *   isOpen={isOpen}
+ *   onClose={handleClose}
+ *   shortcuts={shortcuts}
+ *   onShortcutChange={handleShortcutChange}
+ * />
+ * ```
  */
 export function KeyboardShortcut({
   isOpen,
@@ -51,7 +88,6 @@ export function KeyboardShortcut({
   const [recordingKeys, setRecordingKeys] = useState<string[]>([]);
   const [isRecording, setIsRecording] = useState(false);
 
-  // Group shortcuts by category
   const categories: ShortcutCategory[] = [
     {
       name: "all",
@@ -76,7 +112,6 @@ export function KeyboardShortcut({
     })),
   ];
 
-  // Get category icon
   function getCategoryIcon(category: string): string {
     const icons: Record<string, string> = {
       navigation: "🧭",
@@ -90,7 +125,6 @@ export function KeyboardShortcut({
     return icons[category] || "🔧";
   }
 
-  // Filter shortcuts based on search and category
   const filteredShortcuts = shortcuts.filter((shortcut) => {
     const matchesSearch =
       searchQuery === "" ||
@@ -105,7 +139,6 @@ export function KeyboardShortcut({
     return matchesSearch && matchesCategory;
   });
 
-  // Handle key recording for customization
   useEffect(() => {
     if (!isRecording) return;
 
@@ -121,7 +154,6 @@ export function KeyboardShortcut({
       if (e.shiftKey) modifiers.push("Shift");
       if (e.metaKey) modifiers.push("Meta");
 
-      // Special keys
       const specialKeys = [
         "Enter",
         "Escape",
@@ -174,7 +206,6 @@ export function KeyboardShortcut({
     return () => document.removeEventListener("keydown", handleKeyDown, true);
   }, [isRecording, editingShortcut, onShortcutChange]);
 
-  // Handle panel keyboard navigation
   const handlePanelKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Escape" && !isRecording) {
       onClose();
@@ -339,7 +370,7 @@ export function KeyboardShortcut({
         aria-labelledby="shortcuts-panel-title"
         tabIndex={-1}
       >
-        {/* Header */}
+        { }
         <div
           className="flex items-center justify-between p-4 border-b"
           style={{ borderColor: themeConfig.colors.border }}
@@ -390,7 +421,7 @@ export function KeyboardShortcut({
           </button>
         </div>
 
-        {/* Search */}
+        { }
         <div
           className="p-4 border-b"
           style={{ borderColor: themeConfig.colors.border }}
@@ -408,7 +439,7 @@ export function KeyboardShortcut({
           />
         </div>
 
-        {/* Shortcuts List */}
+        { }
         <div className="flex-1 overflow-y-auto p-4">
           <div className="space-y-3">
             {filteredShortcuts.length === 0 ? (
@@ -424,7 +455,7 @@ export function KeyboardShortcut({
           </div>
         </div>
 
-        {/* Footer */}
+        { }
         <div
           className="px-4 py-3 border-t text-xs flex items-center justify-between"
           style={{

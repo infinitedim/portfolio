@@ -2,7 +2,6 @@ import { initTRPC } from "@trpc/server";
 import type { inferAsyncReturnType } from "@trpc/server";
 import type { Request } from "express";
 
-// Define the context type locally to avoid circular dependencies
 export type TrpcContext = {
   req: Request;
   user?: {

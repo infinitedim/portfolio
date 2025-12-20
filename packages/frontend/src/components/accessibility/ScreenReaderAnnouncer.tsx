@@ -23,7 +23,6 @@ export function ScreenReaderAnnouncer({
 
   useEffect(() => {
     if (message && announcerRef.current) {
-      // Clear and set new message
       announcerRef.current.textContent = "";
       setTimeout(() => {
         if (announcerRef.current) {

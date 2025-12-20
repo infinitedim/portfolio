@@ -7,6 +7,12 @@ import { AuthProvider } from "../lib/auth";
 import { AccessibilityProvider } from "../components/accessibility/AccessibilityProvider";
 import { ScreenReaderAnnouncer } from "../components/accessibility/ScreenReaderAnnouncer";
 
+/**
+ * Viewport configuration for the application
+ * Defines responsive behavior and theme colors for different color schemes
+ * @remarks
+ * Optimized for mobile devices with proper scaling and theme color support
+ */
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -19,6 +25,12 @@ export const viewport: Viewport = {
   colorScheme: "light dark",
 };
 
+/**
+ * Root metadata for the application
+ * Comprehensive SEO configuration including Open Graph, Twitter Cards, and structured data
+ * @remarks
+ * Optimized for search engines with rich metadata and social media sharing
+ */
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_BASE_URL || "https://infinitedim.site",
@@ -152,7 +164,7 @@ export default function RootLayout({
       className={"antialiased"}
     >
       <head>
-        {/* DNS prefetch for performance */}
+        { }
         <link
           rel="dns-prefetch"
           href="//www.google-analytics.com"
@@ -162,7 +174,7 @@ export default function RootLayout({
           href="//www.googletagmanager.com"
         />
 
-        {/* Structured Data for Person */}
+        { }
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -196,7 +208,7 @@ export default function RootLayout({
           }}
         />
 
-        {/* Structured Data for WebSite */}
+        { }
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

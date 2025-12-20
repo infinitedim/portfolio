@@ -3,6 +3,14 @@
 import { JSX } from "react";
 import { useTheme } from "@/hooks/useTheme";
 
+/**
+ * Props for the TabCompletion component
+ * @interface TabCompletionProps
+ * @property {string} input - Current input value for matching completions
+ * @property {string[]} availableCommands - List of available commands
+ * @property {(completion: string) => void} onComplete - Callback when completion is selected
+ * @property {boolean} visible - Whether the completion dropdown is visible
+ */
 interface TabCompletionProps {
   input: string;
   availableCommands: string[];
@@ -11,12 +19,23 @@ interface TabCompletionProps {
 }
 
 /**
- * Displays tab completion suggestions for a command input with enhanced UX.
- * @param root0
- * @param root0.input
- * @param root0.availableCommands
- * @param root0.onComplete
- * @param root0.visible
+ * Tab completion dropdown component for command input
+ * Displays matching commands with enhanced UX and visual feedback
+ * @param {TabCompletionProps} props - Component props
+ * @param {string} props.input - Current input for matching
+ * @param {string[]} props.availableCommands - Available commands
+ * @param {(completion: string) => void} props.onComplete - Selection callback
+ * @param {boolean} props.visible - Visibility state
+ * @returns {JSX.Element | null} The completion dropdown or null
+ * @example
+ * ```tsx
+ * <TabCompletion
+ *   input="hel"
+ *   availableCommands={['help', 'hello']}
+ *   onComplete={handleComplete}
+ *   visible={true}
+ * />
+ * ```
  */
 export function TabCompletion({
   input,
@@ -44,7 +63,7 @@ export function TabCompletion({
         boxShadow: `0 8px 25px -5px ${themeConfig.colors.accent}30, 0 4px 10px -2px ${themeConfig.colors.accent}20`,
       }}
     >
-      {/* Header */}
+      { }
       <div
         className="px-3 py-2 text-xs font-mono border-b flex items-center justify-between"
         style={{
@@ -65,7 +84,7 @@ export function TabCompletion({
         </div>
       </div>
 
-      {/* Completions list */}
+      { }
       <div className="max-h-48 overflow-y-auto scrollbar-thin">
         {completions.map((completion) => (
           <button
@@ -120,7 +139,7 @@ export function TabCompletion({
         ))}
       </div>
 
-      {/* Footer */}
+      { }
       <div
         className="px-3 py-2 text-xs text-center border-t"
         style={{

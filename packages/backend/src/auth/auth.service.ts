@@ -9,7 +9,6 @@ import { securityLogger } from "../logging/logger";
 export type AuthUser = { userId: string; email: string; role: "admin" };
 
 const TOKEN_BLACKLIST_PREFIX = "token:blacklist:";
-// Token family prefix for refresh token rotation tracking
 const TOKEN_FAMILY_PREFIX = "token:family:";
 
 /**
@@ -20,7 +19,6 @@ const TOKEN_FAMILY_PREFIX = "token:family:";
 function parseTimeToSeconds(timeStr: string): number {
   const match = timeStr.match(/^(\d+)([smhd])$/);
   if (!match) {
-    // Default to 15 minutes if parsing fails
     securityLogger.warn("Failed to parse time string, using default", {
       timeStr,
       default: "15m (900s)",
@@ -47,19 +45,15 @@ function parseTimeToSeconds(timeStr: string): number {
   }
 }
 
-// Calculate TOKEN_BLACKLIST_TTL dynamically based on JWT_EXPIRES_IN + 5 minute buffer
 function getTokenBlacklistTTL(): number {
   const jwtConfig = getJWTConfig();
   const jwtExpirySeconds = parseTimeToSeconds(jwtConfig.expiresIn);
-  // Add 5 minute buffer to ensure token is blacklisted longer than its validity
   return jwtExpirySeconds + 5 * 60;
 }
 
-// Refresh token family TTL matches refresh token expiry + 1 day buffer
 function getTokenFamilyTTL(): number {
   const jwtConfig = getJWTConfig();
   const refreshExpirySeconds = parseTimeToSeconds(jwtConfig.refreshExpiresIn);
-  // Add 1 day buffer
   return refreshExpirySeconds + 24 * 60 * 60;
 }
 
@@ -74,8 +68,6 @@ export class AuthService {
     private readonly redisService: RedisService,
   ) {
     this.adminEmail = env?.ADMIN_EMAIL || "";
-    // In production, use ONLY the hashed password (plain text is forbidden)
-    // In development, ADMIN_HASH_PASSWORD takes precedence if set
     this.adminPasswordHash = env?.ADMIN_HASH_PASSWORD || "";
 
     if (!this.adminPasswordHash && env?.NODE_ENV === "production") {
@@ -92,15 +84,12 @@ export class AuthService {
     clientIp: string,
     request?: any,
   ): Promise<{ user: AuthUser; accessToken: string; refreshToken: string }> {
-    // Validate input
     const validatedEmail = this.securityService.validateEmail(email);
     this.securityService.validatePassword(password);
 
-    // Security check
     this.securityService.securityCheck(email);
     this.securityService.securityCheck(password);
 
-    // Check rate limit for login attempts
     const rateLimitResult = await this.securityService.checkRateLimit(
       clientIp,
       "login",
@@ -127,21 +116,14 @@ export class AuthService {
       throw new UnauthorizedException("Invalid credentials");
     }
 
-    // Always use secure password verification
-    // In production: ONLY hashed passwords are allowed (ADMIN_HASH_PASSWORD)
-    // In development: ADMIN_HASH_PASSWORD takes precedence, fallback to ADMIN_PASSWORD
     let isValidPassword = false;
 
     if (this.adminPasswordHash) {
-      // Verify against stored bcrypt hash (production and development with hash)
       isValidPassword = await this.securityService.verifyPassword(
         password,
         this.adminPasswordHash,
       );
     } else if (env?.NODE_ENV !== "production" && env?.ADMIN_PASSWORD) {
-      // Development only: hash the dev password on-the-fly for comparison
-      // This prevents timing attacks while still allowing dev workflow
-      // WARNING: This path is for development convenience only
       securityLogger.warn(
         "Using plain text ADMIN_PASSWORD - not allowed in production",
         {
@@ -157,7 +139,6 @@ export class AuthService {
         devPasswordHash,
       );
     } else {
-      // No password configured
       await this.auditLogService.logAuthEvent(
         AuditEventType.LOGIN_FAILED,
         validatedEmail,
@@ -177,7 +158,6 @@ export class AuthService {
       throw new UnauthorizedException("Invalid credentials");
     }
 
-    // Generate tokens with a new token family
     const user: AuthUser = {
       userId: "admin",
       email: validatedEmail,
@@ -185,12 +165,12 @@ export class AuthService {
     };
 
     const accessToken = this.securityService.generateAccessToken(user);
-    // generateRefreshToken creates a new familyId when none is provided
-    const refreshToken = this.securityService.generateRefreshToken(user.userId);
+    const newRefreshToken = this.securityService.generateRefreshToken(
+      user.userId,
+    );
 
-    // Initialize the token family in Redis for rotation tracking
     const refreshPayload =
-      this.securityService.verifyRefreshToken(refreshToken);
+      this.securityService.verifyRefreshToken(newRefreshToken);
     const familyKey = `${TOKEN_FAMILY_PREFIX}${refreshPayload.familyId}`;
     await this.redisService.set(
       familyKey,
@@ -203,10 +183,8 @@ export class AuthService {
       getTokenFamilyTTL(),
     );
 
-    // Reset rate limit on successful login
     await this.securityService.resetRateLimit(clientIp, "login");
 
-    // Log successful login
     await this.auditLogService.logAuthEvent(
       AuditEventType.LOGIN_SUCCESS,
       validatedEmail,
@@ -221,7 +199,7 @@ export class AuthService {
       operation: "validateCredentials",
     });
 
-    return { user, accessToken, refreshToken };
+    return { user, accessToken, refreshToken: newRefreshToken };
   }
 
   async refreshToken(
@@ -230,11 +208,9 @@ export class AuthService {
     request?: any,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
-      // Validate refresh token
       const payload = this.securityService.verifyRefreshToken(refreshToken);
       const { userId, tokenId, familyId, jti } = payload;
 
-      // Check rate limit for refresh attempts
       const rateLimitResult = await this.securityService.checkRateLimit(
         clientIp,
         "api",
@@ -245,7 +221,6 @@ export class AuthService {
         );
       }
 
-      // Token rotation: verify this token hasn't been used before
       const familyKey = `${TOKEN_FAMILY_PREFIX}${familyId}`;
       const familyData = await this.redisService.get<{
         currentTokenId: string;
@@ -254,10 +229,7 @@ export class AuthService {
       }>(familyKey);
 
       if (familyData) {
-        // Family exists - check if this is the current valid token
         if (familyData.currentTokenId !== tokenId) {
-          // Token reuse detected! This could be a replay attack.
-          // Invalidate the entire family to force re-authentication
           securityLogger.warn(
             "Refresh token reuse detected - possible replay attack",
             {
@@ -271,10 +243,8 @@ export class AuthService {
             },
           );
 
-          // Delete the family to invalidate all tokens in the chain
           await this.redisService.del(familyKey);
 
-          // Blacklist the presented token's jti if available
           if (jti) {
             await this.blacklistToken(jti);
           }
@@ -296,7 +266,6 @@ export class AuthService {
         }
       }
 
-      // Generate new tokens (same family for rotation chain)
       const user: AuthUser = {
         userId,
         email: this.adminEmail,
@@ -306,14 +275,12 @@ export class AuthService {
       const newAccessToken = this.securityService.generateAccessToken(user);
       const newRefreshToken = this.securityService.generateRefreshToken(
         user.userId,
-        familyId, // Keep the same family for the rotation chain
+        familyId,
       );
 
-      // Extract the new token's ID for family tracking
       const newPayload =
         this.securityService.verifyRefreshToken(newRefreshToken);
 
-      // Update family with new current token ID
       await this.redisService.set(
         familyKey,
         {
@@ -325,7 +292,6 @@ export class AuthService {
         getTokenFamilyTTL(),
       );
 
-      // Blacklist the old token's jti to prevent reuse
       if (jti) {
         await this.blacklistToken(jti);
       }
@@ -380,10 +346,8 @@ export class AuthService {
     refreshToken?: string,
   ): Promise<void> {
     try {
-      // Extract JWT ID for blacklisting access token
       const jti = this.securityService.extractJWTId(token);
       if (jti) {
-        // Blacklist the access token to prevent reuse after logout
         await this.blacklistToken(jti);
         securityLogger.info("Access token blacklisted on logout", {
           jti,
@@ -393,17 +357,14 @@ export class AuthService {
         });
       }
 
-      // If refresh token provided, invalidate its entire family
       if (refreshToken) {
         try {
           const refreshPayload =
             this.securityService.verifyRefreshToken(refreshToken);
           const familyKey = `${TOKEN_FAMILY_PREFIX}${refreshPayload.familyId}`;
 
-          // Delete the family to invalidate all tokens in the chain
           await this.redisService.del(familyKey);
 
-          // Also blacklist the refresh token's jti
           if (refreshPayload.jti) {
             await this.blacklistToken(refreshPayload.jti, getTokenFamilyTTL());
           }
@@ -415,7 +376,6 @@ export class AuthService {
             operation: "logout",
           });
         } catch (refreshError) {
-          // Refresh token may already be expired/invalid - that's fine for logout
           securityLogger.debug("Could not invalidate refresh token on logout", {
             error:
               refreshError instanceof Error
@@ -428,10 +388,8 @@ export class AuthService {
         }
       }
 
-      // Reset rate limit for the client
       await this.securityService.resetRateLimit(clientIp, "api");
 
-      // Log logout event
       await this.auditLogService.logAuthEvent(
         AuditEventType.LOGOUT,
         "admin",
@@ -439,7 +397,6 @@ export class AuthService {
         request,
       );
     } catch (error) {
-      // Log error but don't throw - logout should always succeed
       securityLogger.error("Error during logout", {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
@@ -468,7 +425,6 @@ export class AuthService {
         component: "AuthService",
         operation: "blacklistToken",
       });
-      // Don't throw - blacklisting failure shouldn't break logout
     }
   }
 
@@ -488,14 +444,12 @@ export class AuthService {
         component: "AuthService",
         operation: "isTokenBlacklisted",
       });
-      // Fail closed - if we can't check, assume it might be blacklisted
       return true;
     }
   }
 
   async validateToken(token: string, request?: any): Promise<AuthUser> {
     try {
-      // First, check if token is blacklisted
       const jti = this.securityService.extractJWTId(token);
       if (jti) {
         const isBlacklisted = await this.isTokenBlacklisted(jti);

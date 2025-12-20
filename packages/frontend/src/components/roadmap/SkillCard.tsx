@@ -99,7 +99,7 @@ export function SkillCard({
         color: themeConfig.colors.text,
       }}
     >
-      {/* Header */}
+      {}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
           <span className="text-lg">{getStatusIcon()}</span>
@@ -128,7 +128,7 @@ export function SkillCard({
         </div>
       </div>
 
-      {/* Progress */}
+      {}
       <div className="space-y-1">
         <div className="flex justify-between text-xs">
           <span>Progress</span>
@@ -140,7 +140,7 @@ export function SkillCard({
         />
       </div>
 
-      {/* Projects */}
+      {}
       {showProjects && skill.projects && skill.projects.length > 0 && (
         <div className="space-y-1">
           <p
@@ -167,7 +167,7 @@ export function SkillCard({
         </div>
       )}
 
-      {/* Completion Date */}
+      {}
       {skill.dateCompleted && (
         <div className="text-xs opacity-60">
           Completed: {formatTimestamp(skill.dateCompleted)}

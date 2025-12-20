@@ -6,15 +6,27 @@ import { CommandOutput } from "./CommandOutput";
 import type { TerminalHistory as TerminalHistoryType } from "@/types/terminal";
 import { type JSX } from "react";
 
+/**
+ * Props for the TerminalHistory component
+ * @interface TerminalHistoryProps
+ * @property {TerminalHistoryType[]} history - Array of terminal history entries
+ */
 interface TerminalHistoryProps {
   history: TerminalHistoryType[];
 }
 
 /**
- * Renders the history of commands and their outputs in the terminal.
- * @param {TerminalHistoryProps} props - The properties for the TerminalHistory component.
- * @param {TerminalHistoryType[]} props.history - An array of terminal history objects.
- * @returns {JSX.Element | null} A component displaying the history, or null if history is empty.
+ * Renders the command history with outputs in the terminal
+ * Displays all executed commands and their results with proper formatting
+ * @param {TerminalHistoryProps} props - Component props
+ * @param {TerminalHistoryType[]} props.history - Array of history entries
+ * @returns {JSX.Element | null} The history display or null if empty
+ * @example
+ * ```tsx
+ * <TerminalHistory history={[
+ *   { input: 'help', output: { type: 'info', content: 'Available commands...' }}
+ * ]} />
+ * ```
  */
 export function TerminalHistory({
   history,
@@ -39,7 +51,7 @@ export function TerminalHistory({
           className={`${!isReducedMotion ? "fade-in" : ""}`}
           style={{ animationDelay: `${index * 0.1}s` }}
         >
-          {/* Command Input Display */}
+          { }
           <div className="flex items-center gap-2 mb-2">
             <span
               className="font-bold"
@@ -56,7 +68,7 @@ export function TerminalHistory({
             </span>
           </div>
 
-          {/* Command Output */}
+          { }
           {entry.output && (
             <div className="ml-4 mb-4">
               <CommandOutput output={entry.output} />

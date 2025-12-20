@@ -21,13 +21,11 @@ export default function AdminLayout({
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Skip authentication check for login page
     if (pathname === "/admin/login") {
       setIsAuthenticated(true);
       return;
     }
 
-    // Verify authentication using secure method
     const verifyAuth = async (): Promise<void> => {
       try {
         const result = await SecureAuth.verifyAuthentication();
@@ -45,7 +43,6 @@ export default function AdminLayout({
     verifyAuth();
   }, [router, pathname]);
 
-  // Show loading while checking authentication
   if (isAuthenticated === null && pathname !== "/admin/login") {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -57,11 +54,9 @@ export default function AdminLayout({
     );
   }
 
-  // Render children if authenticated or on login page
   if (isAuthenticated || pathname === "/admin/login") {
     return <>{children}</>;
   }
 
-  // This should not be reached, but just in case
   return <></>;
 }

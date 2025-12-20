@@ -1,7 +1,6 @@
 import { cache } from "react";
 import { logger } from "../logging/logger";
 
-// Types for portfolio data
 interface GitHubRepository {
   name: string;
   description: string | null;
@@ -71,7 +70,6 @@ export interface AboutInfo {
   };
 }
 
-// Cache duration constants
 const CACHE_DURATIONS = {
   SKILLS: 1000 * 60 * 15, // 15 minutes
   PROJECTS: 1000 * 60 * 30, // 30 minutes
@@ -79,7 +77,6 @@ const CACHE_DURATIONS = {
   ABOUT: 1000 * 60 * 60 * 24, // 24 hours
 } as const;
 
-// MODIFICATION: Static fallback data for build time
 const STATIC_PROJECTS: Project[] = [
   {
     id: "terminal-portfolio",
@@ -123,7 +120,6 @@ const STATIC_PROJECTS: Project[] = [
   },
 ];
 
-// Generic fetch with caching and error handling
 /**
  *
  * @param {string} url - The URL to fetch
@@ -163,9 +159,7 @@ async function fetchWithCache<T>(
   }
 }
 
-// React cache wrapper for server components
 export const getPortfolioData = cache(async (): Promise<PortfolioData> => {
-  // ALWAYS use fallback data during production builds to avoid external API calls
   logger.debug("Build mode detected - using static portfolio data", {
     component: "SSRDataFetching",
     operation: "getPortfolioData",
@@ -173,9 +167,7 @@ export const getPortfolioData = cache(async (): Promise<PortfolioData> => {
   return getFallbackPortfolioData();
 });
 
-// Get specific portfolio sections with optimized caching
 export const getSkillsData = cache(async (): Promise<SkillCategory[]> => {
-  // Use static data during build time to avoid API calls
   logger.debug("Build mode detected - returning empty skills array", {
     component: "SSRDataFetching",
     operation: "getSkillsData",
@@ -185,7 +177,6 @@ export const getSkillsData = cache(async (): Promise<SkillCategory[]> => {
 
 export const getProjectsData = cache(
   async (limit?: number): Promise<Project[]> => {
-    // ALWAYS use fallback data during production builds to avoid external API calls
     logger.debug("Build mode detected - using static project data", {
       component: "SSRDataFetching",
       operation: "getProjectsData",
@@ -236,13 +227,11 @@ export const getAboutData = cache(async (): Promise<AboutInfo> => {
   }
 });
 
-// Featured projects for homepage
 export const getFeaturedProjects = cache(async (): Promise<Project[]> => {
   const projects = await getProjectsData();
   return projects.filter((project) => project.featured);
 });
 
-// Analytics and performance data
 export const getAnalyticsData = cache(
   async (): Promise<{
     pageViews: number;
@@ -250,8 +239,6 @@ export const getAnalyticsData = cache(
     topProjects: string[];
     topSkills: string[];
   }> => {
-    // In production, this would fetch from your analytics provider
-    // For now, return mock data
     return {
       pageViews: 15420,
       uniqueVisitors: 8342,
@@ -265,7 +252,6 @@ export const getAnalyticsData = cache(
   },
 );
 
-// GitHub integration for real-time project data
 export const getGitHubData = cache(
   async (): Promise<{
     repositories: Array<{
@@ -342,7 +328,6 @@ export const getGitHubData = cache(
   },
 );
 
-// Fallback data generators
 /**
  *
  * @returns {PortfolioData} The fallback portfolio data
@@ -375,17 +360,14 @@ function getFallbackAboutData(): AboutInfo {
   };
 }
 
-// Cache invalidation utilities
 /**
  *
  * @param {string} section - The section to invalidate
  */
 export async function invalidateCache(section?: string): Promise<void> {
-  // In production, you might use Redis or another cache invalidation system
   console.log(`Cache invalidated for section: ${section || "all"}`);
 }
 
-// Health check for data sources
 /**
  *
  * @returns {Promise<{api: boolean, github: boolean, lastCheck: string}>} The health check result

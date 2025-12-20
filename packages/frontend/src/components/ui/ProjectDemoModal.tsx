@@ -31,7 +31,6 @@ export function ProjectDemoModal({
   const [errorMessage, setErrorMessage] = useState("");
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Get project data
   const project = projectService.getProjectById(projectId);
   const projectUrl = project?.demoUrl || "";
   const projectTitle = project?.name || "Unknown Project";
@@ -63,12 +62,10 @@ export function ProjectDemoModal({
       setIsLoading(true);
       setHasError(false);
       setErrorMessage("");
-      // Force reload by changing the src attribute to trigger a reload
       const iframe = iframeRef.current;
       if (iframe) {
         const currentSrc = iframe.src;
         iframe.src = "";
-        // Use setTimeout to ensure the browser registers the src change
         setTimeout(() => {
           iframe.src = currentSrc;
         }, 0);
@@ -132,7 +129,7 @@ export function ProjectDemoModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
       <div className="relative w-full max-w-6xl h-[80vh] mx-4 bg-gray-900 rounded-lg border border-gray-700 shadow-2xl">
-        {/* Header */}
+        {}
         <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800 rounded-t-lg">
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-white">{projectTitle}</h2>
@@ -168,7 +165,7 @@ export function ProjectDemoModal({
           </div>
         </div>
 
-        {/* Content */}
+        {}
         <div className="relative flex-1 h-full">
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-10">

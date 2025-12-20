@@ -123,14 +123,11 @@ export class PerformanceMonitor {
 
     this.metrics.push(metric);
 
-    // Keep only the most recent metrics
     if (this.metrics.length > this.maxMetrics) {
       this.metrics = this.metrics.slice(-this.maxMetrics);
     }
 
-    // Log slow operations
     if (value > 100) {
-      // More than 100ms
       console.warn(
         `Slow operation detected: ${name} took ${value.toFixed(2)}ms`,
         metadata,
@@ -296,20 +293,18 @@ export class PerformanceMonitor {
   private startSystemMonitoring(): void {
     if (typeof window === "undefined") return;
 
-    // Store interval IDs for cleanup
     const memoryInterval = setInterval(() => {
       const memoryUsage = this.getMemoryUsage();
       if (memoryUsage) {
         this.recordMetric("memory-usage", memoryUsage, "system");
       }
-    }, 30000); // Every 30 seconds
+    }, 30000);
 
     const historyInterval = setInterval(() => {
       const historySize = this.getHistorySize();
       this.recordMetric("history-size", historySize, "history");
-    }, 10000); // Every 10 seconds
+    }, 10000);
 
-    // Store intervals for cleanup
     this.intervals.set("memory-monitoring", memoryInterval);
     this.intervals.set("history-monitoring", historyInterval);
   }
@@ -319,19 +314,16 @@ export class PerformanceMonitor {
    * @returns {void}
    */
   stopMonitoring(): void {
-    // Clear all intervals
     this.intervals.forEach((interval) => {
       clearInterval(interval);
     });
     this.intervals.clear();
 
-    // Clear all timeouts
     this.timeouts.forEach((timeout) => {
       clearTimeout(timeout);
     });
     this.timeouts.clear();
 
-    // Clear metrics data to free memory
     this.metrics.length = 0;
   }
 
@@ -381,7 +373,6 @@ export class PerformanceMonitor {
     const recommendations: string[] = [];
     const report = this.getReport();
 
-    // Command performance recommendations
     if (report.summary.averageCommandTime > 200) {
       recommendations.push(
         "Consider optimizing slow commands - average execution time is high",
@@ -394,25 +385,21 @@ export class PerformanceMonitor {
       );
     }
 
-    // Render performance recommendations
     if (report.summary.averageRenderTime > 50) {
       recommendations.push(
         "Consider using React.memo or useMemo for expensive renders",
       );
     }
 
-    // Memory recommendations
     if (
       report.summary.memoryUsage &&
       report.summary.memoryUsage > 50 * 1024 * 1024
     ) {
-      // 50MB
       recommendations.push(
         "High memory usage detected - consider clearing old history",
       );
     }
 
-    // History size recommendations
     if (report.summary.historySize > 1000) {
       recommendations.push(
         "Large history detected - consider using virtual scrolling",
@@ -422,7 +409,6 @@ export class PerformanceMonitor {
       );
     }
 
-    // Command frequency recommendations
     const commandMetrics = this.getMetricsByCategory("command");
     const commandCounts = commandMetrics.reduce(
       (counts, metric) => {
@@ -455,7 +441,6 @@ export class PerformanceMonitor {
   }
 }
 
-// Hook for React components
 /**
  * Hook for React components
  * @returns {object} The performance monitor

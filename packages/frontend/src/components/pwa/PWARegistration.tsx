@@ -4,7 +4,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { PWAInstallPrompt } from "./PWAInstallPrompt";
 
-// Define the BeforeInstallPromptEvent interface
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
   readonly userChoice: Promise<{
@@ -14,7 +13,6 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
 }
 
-// Extend the Window interface
 declare global {
   interface WindowEventMap {
     beforeinstallprompt: BeforeInstallPromptEvent;

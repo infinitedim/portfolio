@@ -45,7 +45,6 @@ const LOG_LEVELS: Record<LogLevel, number> = {
   debug: 4,
 };
 
-// Add colors to winston
 winston.addColors({
   error: "red",
   warn: "yellow",
@@ -114,10 +113,8 @@ function createWinstonConfig(config: LoggerConfig): LoggerOptions {
     environment = process.env.NODE_ENV || "development",
   } = config;
 
-  // Define transports
   const transports: winston.transport[] = [];
 
-  // Console transport
   if (enableConsole) {
     transports.push(
       new winston.transports.Console({
@@ -137,9 +134,7 @@ function createWinstonConfig(config: LoggerConfig): LoggerOptions {
     );
   }
 
-  // File transports for production
   if (enableFile) {
-    // Error log file
     transports.push(
       new winston.transports.File({
         filename: `${logDir}/error.log`,
@@ -152,7 +147,6 @@ function createWinstonConfig(config: LoggerConfig): LoggerOptions {
       }),
     );
 
-    // Combined log file
     transports.push(
       new winston.transports.File({
         filename: `${logDir}/combined.log`,
@@ -164,7 +158,6 @@ function createWinstonConfig(config: LoggerConfig): LoggerOptions {
       }),
     );
 
-    // HTTP log file
     transports.push(
       new winston.transports.File({
         filename: `${logDir}/http.log`,
@@ -221,10 +214,8 @@ class Logger {
       environment: config.environment || process.env.NODE_ENV || "development",
     };
 
-    // Create Winston logger
     this.winstonLogger = winston.createLogger(createWinstonConfig(this.config));
 
-    // Handle uncaught exceptions and unhandled rejections in production
     if (this.config.environment === "production") {
       this.winstonLogger.exceptions.handle(
         new winston.transports.File({
@@ -281,7 +272,6 @@ class Logger {
     }
   }
 
-  // Public logging methods
   error(message: string, meta?: Record<string, unknown>): void {
     this.log("error", message, meta);
   }
@@ -302,7 +292,6 @@ class Logger {
     this.log("http", message, meta);
   }
 
-  // Utility methods
   getLogBuffer(): LogEntry[] {
     return [...this.logBuffer];
   }
@@ -324,26 +313,21 @@ class Logger {
     return { ...this.config };
   }
 
-  // Winston-specific methods
   getWinstonLogger(): WinstonLogger {
     return this.winstonLogger;
   }
 
-  // Profile method for performance monitoring
   profile(id: string, meta?: Record<string, unknown>): void {
     this.winstonLogger.profile(id, meta);
   }
 
-  // Start timer for performance monitoring
   startTimer(): { done: (meta?: Record<string, unknown>) => void } {
     return this.winstonLogger.startTimer();
   }
 }
 
-// Create default logger instance
 const defaultLogger = new Logger();
 
-// Export the main log function for backward compatibility
 /**
  * Main logging function for backward compatibility
  * @param {LogLevel} level - The log level
@@ -358,10 +342,8 @@ export function log(
   defaultLogger[level](message, meta);
 }
 
-// Export the Logger class for advanced usage
 export { Logger };
 
-// Export utility functions for specialized logging
 export const logSecurity = (
   event: string,
   details: Record<string, unknown>,
@@ -397,5 +379,4 @@ export const logAPICall = (
   });
 };
 
-// Export the default logger instance
 export { defaultLogger as logger };

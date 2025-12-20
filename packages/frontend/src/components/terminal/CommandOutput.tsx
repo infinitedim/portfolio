@@ -5,15 +5,28 @@ import { useAccessibility } from "@/components/accessibility/AccessibilityProvid
 import type { CommandOutput as CommandOutputType } from "@/types/terminal";
 import type { JSX } from "react";
 
+/**
+ * Props for the CommandOutput component
+ * @interface CommandOutputProps
+ * @property {CommandOutputType} output - The command output object to render
+ */
 interface CommandOutputProps {
   output: CommandOutputType;
 }
 
 /**
- * Renders the output of a command, with appropriate coloring and formatting.
- * @param {CommandOutputProps} props - The properties for the CommandOutput component.
- * @param {CommandOutputType} props.output - The command output object to be rendered.
- * @returns {JSX.Element} - A component that displays the command output.
+ * Renders command output with appropriate styling and formatting
+ * Displays command results with color-coded types (success, error, warning, info)
+ * @param {CommandOutputProps} props - Component props
+ * @param {CommandOutputType} props.output - The command output object containing type and content
+ * @returns {JSX.Element} The formatted command output component
+ * @example
+ * ```tsx
+ * <CommandOutput output={{
+ *   type: 'success',
+ *   content: 'Operation completed successfully'
+ * }} />
+ * ```
  */
 export function CommandOutput({ output }: CommandOutputProps): JSX.Element {
   const { themeConfig, theme } = useTheme();

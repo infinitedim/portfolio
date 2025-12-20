@@ -1,21 +1,56 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Shared utilities for React hooks to reduce code duplication and improve performance
+ *
+ * This module provides common hook utilities for:
+ * - SSR-safe operations
+ * - Component lifecycle management
+ * - localStorage with error handling
+ * - Timer and interval management
+ * - Performance optimization (debounce, throttle)
+ * - Safe DOM manipulation
+ * - ID generation
+ * - Error handling wrappers
  */
 
 import React, { useRef, useEffect, useCallback } from "react";
 
 /**
- * SSR-safe check for client-side rendering
- * @returns {boolean} True if the code is running on the client side, false otherwise
+ * SSR-safe check for client-side rendering environment
+ *
+ * @returns {boolean} True if code is running in browser, false on server
+ *
+ * @example
+ * ```tsx
+ * if (isClientSide()) {
+ *   // Safe to access window, document, localStorage
+ *   localStorage.setItem('key', 'value');
+ * }
+ * ```
  */
 export const isClientSide = (): boolean => {
   return typeof window !== "undefined";
 };
 
 /**
- * Hook for managing component mount state safely
- * @returns {React.MutableRefObject<boolean>} A ref that tracks the component's mount state
+ * Hook for safely tracking component mount state
+ *
+ * Prevents state updates on unmounted components by providing a ref
+ * that indicates whether the component is currently mounted.
+ *
+ * @returns {React.MutableRefObject<boolean>} Ref that is true when mounted
+ *
+ * @example
+ * ```tsx
+ * const isMountedRef = useMountRef();
+ *
+ * const fetchData = async () => {
+ *   const data = await api.getData();
+ *   if (isMountedRef.current) {
+ *     setState(data); // Safe - only updates if mounted
+ *   }
+ * };
+ * ```
  */
 export function useMountRef() {
   const isMountedRef = useRef(false);
@@ -32,8 +67,22 @@ export function useMountRef() {
 
 /**
  * Hook for SSR-safe client-side effects
- * @param {Function} effect - The effect to run
- * @param {React.DependencyList} deps - The dependencies to watch
+ *
+ * Only runs effects in client environment, preventing SSR errors
+ * when accessing browser-only APIs.
+ *
+ * @param {Function} effect - Effect function to run (can return cleanup)
+ * @param {React.DependencyList} deps - Effect dependencies
+ *
+ * @example
+ * ```tsx
+ * useClientEffect(() => {
+ *   // Safe to use window, document, etc.
+ *   const handler = () => console.log(window.innerWidth);
+ *   window.addEventListener('resize', handler);
+ *   return () => window.removeEventListener('resize', handler);
+ * }, []);
+ * ```
  */
 export function useClientEffect(
   effect: () => void | (() => void),
@@ -46,10 +95,39 @@ export function useClientEffect(
 }
 
 /**
- * Hook for managing localStorage with error handling
- * @param {string} key - The key to store the value
- * @param {T} defaultValue - The default value to return if the key is not found
- * @returns {object} An object with getValue, setValue, and removeValue methods
+ * Hook for managing localStorage with comprehensive error handling
+ *
+ * Provides safe localStorage operations with:
+ * - SSR compatibility
+ * - JSON serialization/deserialization
+ * - Error logging
+ * - Null/undefined value protection
+ *
+ * @template T - Type of value to store
+ * @param {string} key - localStorage key
+ * @param {T} defaultValue - Default value if key doesn't exist
+ *
+ * @returns {object} localStorage operations
+ * @property {Function} getValue - Get value from localStorage
+ * @property {Function} setValue - Set value in localStorage
+ * @property {Function} removeValue - Remove value from localStorage
+ *
+ * @example
+ * ```tsx
+ * const { getValue, setValue, removeValue } = useLocalStorage<string>(
+ *   'user-theme',
+ *   'dark'
+ * );
+ *
+ * // Get value
+ * const theme = getValue(); // 'dark' if not set
+ *
+ * // Set value
+ * setValue('light');
+ *
+ * // Remove value
+ * removeValue();
+ * ```
  */
 export function useLocalStorage<T>(key: string, defaultValue: T) {
   const getValue = useCallback((): T => {
@@ -74,7 +152,6 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
       if (!isClientSide()) return false;
 
       try {
-        // Validate value before storing
         if (value === null || value === undefined) {
           console.warn(
             `Attempted to store null/undefined value for key: ${key}`,
@@ -109,7 +186,33 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
 
 /**
  * Hook for managing timers with automatic cleanup
- * @returns {object} An object with setTimer, clearTimer, and clearAllTimers methods
+ *
+ * Provides safe timer management that:
+ * - Auto-cleans on unmount
+ * - Only executes callbacks if component is mounted
+ * - Tracks timers by custom IDs
+ * - Prevents duplicate timers with same ID
+ *
+ * @returns {object} Timer management functions
+ * @property {Function} setTimer - Create a named timeout
+ * @property {Function} clearTimer - Clear a specific timer
+ * @property {Function} clearAllTimers - Clear all timers
+ *
+ * @example
+ * ```tsx
+ * const { setTimer, clearTimer, clearAllTimers } = useTimerManager();
+ *
+ * // Set a timer
+ * setTimer('myTimer', () => {
+ *   console.log('Executed');
+ * }, 1000);
+ *
+ * // Clear specific timer
+ * clearTimer('myTimer');
+ *
+ * // Clear all timers
+ * clearAllTimers();
+ * ```
  */
 export function useTimerManager() {
   const timersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
@@ -119,7 +222,6 @@ export function useTimerManager() {
     (id: string, callback: () => void, delay: number) => {
       if (!isMountedRef.current) return;
 
-      // Clear existing timer with same id
       const existingTimer = timersRef.current.get(id);
       if (existingTimer) {
         clearTimeout(existingTimer);
@@ -150,7 +252,6 @@ export function useTimerManager() {
     timersRef.current.clear();
   }, []);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       clearAllTimers();
@@ -162,7 +263,27 @@ export function useTimerManager() {
 
 /**
  * Hook for managing intervals with automatic cleanup
- * @returns {object} An object with setInterval, clearInterval, and clearAllIntervals methods
+ *
+ * Similar to useTimerManager but for setInterval operations.
+ * Automatically clears all intervals on unmount.
+ *
+ * @returns {object} Interval management functions
+ * @property {Function} setInterval - Create a named interval
+ * @property {Function} clearInterval - Clear a specific interval
+ * @property {Function} clearAllIntervals - Clear all intervals
+ *
+ * @example
+ * ```tsx
+ * const { setInterval, clearInterval } = useIntervalManager();
+ *
+ * // Set an interval
+ * setInterval('polling', () => {
+ *   fetchData();
+ * }, 5000);
+ *
+ * // Clear it
+ * clearInterval('polling');
+ * ```
  */
 export function useIntervalManager() {
   const intervalsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
@@ -180,7 +301,6 @@ export function useIntervalManager() {
     (id: string, callback: () => void, delay: number) => {
       if (!isMountedRef.current) return;
 
-      // Clear existing interval with same id
       const existingInterval = intervalsRef.current.get(id);
       if (existingInterval) {
         clearInterval(existingInterval.toString());
@@ -204,7 +324,6 @@ export function useIntervalManager() {
     intervalsRef.current.clear();
   }, [clearInterval]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       clearAllIntervals();
@@ -215,10 +334,28 @@ export function useIntervalManager() {
 }
 
 /**
- * Debounce utility with proper cleanup
- * @param {Function} func - The function to debounce
- * @param {number} delay - The delay in milliseconds
- * @returns {Function} The debounced function
+ * Debounce utility function with proper cleanup
+ *
+ * Delays function execution until after wait time has elapsed
+ * since the last invocation.
+ *
+ * @template T - Function type
+ * @param {T} func - Function to debounce
+ * @param {number} delay - Delay in milliseconds
+ *
+ * @returns {Function} Debounced function
+ *
+ * @example
+ * ```tsx
+ * const debouncedSearch = debounce((query: string) => {
+ *   api.search(query);
+ * }, 300);
+ *
+ * // Multiple rapid calls
+ * debouncedSearch('a');
+ * debouncedSearch('ab');
+ * debouncedSearch('abc'); // Only this executes after 300ms
+ * ```
  */
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
@@ -234,9 +371,25 @@ export function debounce<T extends (...args: any[]) => any>(
 
 /**
  * Throttle utility for performance optimization
- * @param {Function} func - The function to throttle
- * @param {number} delay - The delay in milliseconds
- * @returns {Function} The throttled function
+ *
+ * Ensures function is called at most once per delay period.
+ * Useful for rate-limiting expensive operations.
+ *
+ * @template T - Function type
+ * @param {T} func - Function to throttle
+ * @param {number} delay - Minimum delay between calls in ms
+ *
+ * @returns {Function} Throttled function
+ *
+ * @example
+ * ```tsx
+ * const throttledScroll = throttle(() => {
+ *   updateScrollPosition();
+ * }, 100);
+ *
+ * window.addEventListener('scroll', throttledScroll);
+ * // Executes at most once every 100ms
+ * ```
  */
 export function throttle<T extends (...args: any[]) => any>(
   func: T,
@@ -254,14 +407,25 @@ export function throttle<T extends (...args: any[]) => any>(
 }
 
 /**
- * Safe DOM manipulation with existence checks
- * @param {Function} callback - The callback to execute
+ * Safe DOM manipulation with existence checks and error handling
+ *
+ * Wraps DOM operations in requestAnimationFrame and try-catch for safety.
+ * Only executes in client environment.
+ *
+ * @param {Function} callback - DOM manipulation function to execute
+ *
+ * @example
+ * ```tsx
+ * safeDOMManipulation(() => {
+ *   document.body.style.backgroundColor = 'blue';
+ *   element.classList.add('active');
+ * });
+ * ```
  */
 export function safeDOMManipulation(callback: () => void) {
   if (!isClientSide()) return;
 
   try {
-    // Wait for next tick to ensure DOM is ready
     requestAnimationFrame(() => {
       callback();
     });
@@ -271,9 +435,20 @@ export function safeDOMManipulation(callback: () => void) {
 }
 
 /**
- * Generate unique IDs for components
- * @param {string} prefix - The prefix to use for the ID
- * @returns {string} The generated ID
+ * Generate unique IDs for components and elements
+ *
+ * Creates unique identifiers with optional prefix.
+ * SSR-safe with fallback for server environments.
+ *
+ * @param {string} [prefix="id"] - Prefix for the generated ID
+ *
+ * @returns {string} Unique ID string
+ *
+ * @example
+ * ```tsx
+ * const elementId = generateId('button'); // 'button_1234567890_abc123'
+ * const timerId = generateId('timer');     // 'timer_1234567890_def456'
+ * ```
  */
 export function generateId(prefix: string = "id"): string {
   if (isClientSide()) {
@@ -283,10 +458,25 @@ export function generateId(prefix: string = "id"): string {
 }
 
 /**
- * Error boundary helper for hooks
- * @param {Function} fn - The function to execute
- * @param {any} fallback - The fallback value to return if the function throws an error
- * @returns {Function} The wrapped function
+ * Error boundary helper wrapper for hook functions
+ *
+ * Wraps functions in try-catch and returns fallback on error.
+ * Logs errors to console for debugging.
+ *
+ * @template T - Function type
+ * @param {T} fn - Function to wrap with error handling
+ * @param {any} [fallback] - Value to return if function throws
+ *
+ * @returns {T} Wrapped function that won't throw errors
+ *
+ * @example
+ * ```tsx
+ * const safeOperation = withErrorHandling(() => {
+ *   return riskyCalculation();
+ * }, 0);
+ *
+ * const result = safeOperation(); // Returns 0 if error occurs
+ * ```
  */
 export function withErrorHandling<T extends (...args: any[]) => any>(
   fn: T,

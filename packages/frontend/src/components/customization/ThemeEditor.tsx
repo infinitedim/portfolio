@@ -61,13 +61,11 @@ export function ThemeEditor({
 
   const togglePreview = () => {
     if (!previewMode) {
-      // Apply preview
       const root = document.documentElement;
       Object.entries(editedTheme.colors || {}).forEach(([key, value]) => {
         root.style.setProperty(`--terminal-${key}`, value);
       });
     } else {
-      // Restore original
       const root = document.documentElement;
       Object.entries(themeConfig.colors).forEach(([key, value]) => {
         root.style.setProperty(`--terminal-${key}`, value);
@@ -77,7 +75,6 @@ export function ThemeEditor({
   };
 
   const generateRandomTheme = () => {
-    // Parse color rule percentages
     const rulePercentages = colorRule.split("-").map(Number);
     const [
       _bgPercent,
@@ -89,11 +86,9 @@ export function ThemeEditor({
       neutralPercent,
     ] = rulePercentages;
 
-    // Generate base hue and theme type
     const baseHue = Math.floor(Math.random() * 360);
     const isLightTheme = Math.random() > 0.5;
 
-    // Helper function to generate color
     const generateColor = (
       hue: number,
       saturation: number,
@@ -194,7 +189,7 @@ export function ThemeEditor({
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
+      {}
       <div
         className="p-4 border-b"
         style={{ borderColor: themeConfig.colors.border }}
@@ -223,7 +218,7 @@ export function ThemeEditor({
           </div>
         </div>
 
-        {/* Generate Random Theme Section - Only show for new themes */}
+        {}
         {!theme.id && (
           <div
             className="mt-3 p-3 rounded border"
@@ -284,9 +279,9 @@ export function ThemeEditor({
         )}
       </div>
 
-      {/* Main Content */}
+      {}
       <div className="flex-1 overflow-auto p-4">
-        {/* Basic Info */}
+        {}
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium mb-1">
@@ -326,7 +321,7 @@ export function ThemeEditor({
         </div>
       </div>
 
-      {/* Color Editor */}
+      {}
       <div className="flex-1 p-4 overflow-y-auto">
         <div className="space-y-4">
           <h4
@@ -382,7 +377,7 @@ export function ThemeEditor({
         </div>
       </div>
 
-      {/* Actions */}
+      {}
       <div
         className="p-4 border-t flex justify-end gap-2"
         style={{ borderColor: themeConfig.colors.border }}

@@ -5,7 +5,6 @@ import type {
   RoadmapCategory,
 } from "@/types/roadmap";
 
-// Roadmap.sh API response interface
 interface RoadmapApiResponse {
   done: { total: number };
   learning: {
@@ -46,7 +45,7 @@ export class RoadmapService {
   private roadmapData: RoadmapApiResponse | null = null;
   private loaded = false;
   private lastFetchTime = 0;
-  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  private readonly CACHE_DURATION = 5 * 60 * 1000;
 
   private constructor() {}
 
@@ -66,7 +65,6 @@ export class RoadmapService {
    * @returns {object} The API configuration
    */
   private getApiConfig() {
-    // Only access environment variables on client side
     if (typeof window === "undefined") {
       return { authToken: null, userId: "infinitedim" };
     }
@@ -79,7 +77,6 @@ export class RoadmapService {
       process.env.ROADMAP_USER_ID ||
       "infinitedim";
 
-    // Debug logging only on client side
     if (typeof window !== "undefined") {
       console.log("Roadmap API Config:", {
         hasAuthToken: !!authToken,
@@ -102,7 +99,6 @@ export class RoadmapService {
    * Load data from roadmap.sh API
    */
   private async loadApiData(): Promise<void> {
-    // Skip fetch during build time or SSR
     if (typeof window === "undefined") {
       console.warn(
         "Skipping roadmap.sh API fetch during server-side rendering",
@@ -111,7 +107,6 @@ export class RoadmapService {
       return;
     }
 
-    // Check cache
     const now = Date.now();
     if (this.roadmapData && now - this.lastFetchTime < this.CACHE_DURATION) {
       console.log("Using cached roadmap data");
@@ -122,7 +117,6 @@ export class RoadmapService {
     const { authToken, userId } = this.getApiConfig();
 
     try {
-      // Try roadmap.sh API first
       if (authToken && userId) {
         console.log("Fetching data from roadmap.sh API...");
         const response = await fetch(
@@ -140,7 +134,6 @@ export class RoadmapService {
         if (response.ok) {
           const data = await response.json();
 
-          // Validate API response structure
           if (this.isValidApiResponse(data)) {
             this.roadmapData = data;
             this.lastFetchTime = now;
@@ -159,7 +152,6 @@ export class RoadmapService {
         }
       }
 
-      // Fallback to stat.json if API fails or no auth token
       console.log("Falling back to stat.json...");
       await this.loadStaticData();
     } catch (error) {
@@ -229,7 +221,6 @@ export class RoadmapService {
 
     const categories: RoadmapCategory[] = [];
 
-    // Parse roadmaps
     this.roadmapData.learning.roadmaps.forEach((roadmap) => {
       const skills: RoadmapSkill[] = [
         {
@@ -253,7 +244,6 @@ export class RoadmapService {
       });
     });
 
-    // Parse best practices
     this.roadmapData.learning.bestPractices.forEach((practice) => {
       const skills: RoadmapSkill[] = [
         {
@@ -273,7 +263,7 @@ export class RoadmapService {
         description: `${practice.title} best practices`,
         skills,
         progress: Math.round((practice.done / practice.total) * 100),
-        color: "#10b981", // Green for best practices
+        color: "#10b981",
       });
     });
 
@@ -282,9 +272,9 @@ export class RoadmapService {
     this.progress = {
       userId,
       username: userId,
-      totalProgress: Math.round((this.roadmapData.done.total / 1000) * 100), // Estimated total
+      totalProgress: Math.round((this.roadmapData.done.total / 1000) * 100),
       completedSkills: this.roadmapData.done.total,
-      totalSkills: 1000, // Estimated
+      totalSkills: 1000,
       categories,
       lastUpdated: new Date(),
     };
@@ -322,11 +312,9 @@ export class RoadmapService {
   public async initialize(): Promise<void> {
     if (this.loaded) return;
 
-    // Only load data on client side
     if (typeof window !== "undefined") {
       await this.loadApiData();
     } else {
-      // Use fallback data on server side
       this.loadFallbackData();
     }
 
@@ -412,14 +400,12 @@ export class RoadmapService {
             skill.progress = update.progress;
           }
 
-          // Recalculate category progress
           const categoryProgress = Math.round(
             category.skills.reduce((sum, s) => sum + s.progress, 0) /
               category.skills.length,
           );
           category.progress = categoryProgress;
 
-          // Update last updated timestamp
           progress.lastUpdated = new Date();
 
           return true;

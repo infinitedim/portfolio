@@ -11,9 +11,7 @@ import { SecureAuth } from "./secureAuth";
 export async function testSecurityFixes(): Promise<void> {
   console.log("🔒 Testing Security Fixes...");
 
-  // Test 1: Verify SecureAuth class exists and has proper static methods
   try {
-    // Check required static methods exist
     const requiredMethods = [
       "login",
       "logout",
@@ -36,18 +34,15 @@ export async function testSecurityFixes(): Promise<void> {
     console.log("❌ Error accessing SecureAuth static methods:", error);
   }
 
-  // Test 2: Verify API routes are available (static check)
   const apiRoutes = ["/api/auth/login", "/api/auth/logout", "/api/auth/verify"];
 
   console.log("✅ Required API routes defined:", apiRoutes);
 
-  // Test 3: Verify secure cookie operations work
   try {
-    // Test cookie setting with secure config
     SecureAuth.setCookie("test", "value", {
       secure: true,
       sameSite: "strict",
-      maxAge: 86400, // 24 hours
+      maxAge: 86400,
     });
     console.log("✅ Secure cookie operations available");
   } catch (error) {
@@ -63,9 +58,7 @@ export async function testSecurityFixes(): Promise<void> {
 export function testTimerManagement(): void {
   console.log("⏰ Testing Timer Management...");
 
-  // This is a basic test that our timer utilities exist
   try {
-    // Check if timer management hooks are importable
     console.log("✅ Timer management utilities available");
   } catch (error) {
     console.log("❌ Timer management test failed:", error);

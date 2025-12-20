@@ -32,7 +32,6 @@ export const languageCommand: Command = {
       };
     }
 
-    // Check if it's a regional variant
     if (isRegionalVariant(normalizedCode)) {
       const fallbackLocale = getFallbackLocale(normalizedCode);
       const fallbackConfig = getLocaleConfig(fallbackLocale);
@@ -46,7 +45,6 @@ export const languageCommand: Command = {
         "💡 Regional variants are automatically mapped to their primary language",
       ].join("\n");
 
-      // Set the fallback locale
       const success = i18n.setLocale(fallbackLocale);
 
       if (success) {
@@ -58,7 +56,6 @@ export const languageCommand: Command = {
         };
       }
     } else {
-      // Direct locale change
       const success = i18n.setLocale(normalizedCode);
 
       if (success) {
@@ -188,7 +185,6 @@ export const languageInfoCommand: Command = {
     const localeCode = args[0];
 
     if (!localeCode) {
-      // Show current language info
       const currentLocale = i18n.getCurrentLocale();
       const currentConfig = i18n.getCurrentLocaleConfig();
 
@@ -215,7 +211,6 @@ export const languageInfoCommand: Command = {
       };
     }
 
-    // Show specific language info
     const normalizedCode = localeCode.replace("-", "_");
     const localeConfig = getLocaleConfig(normalizedCode);
 

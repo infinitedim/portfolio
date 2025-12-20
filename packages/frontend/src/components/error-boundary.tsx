@@ -38,13 +38,11 @@ export class ErrorBoundary extends Component<
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     this.setState({ errorInfo });
 
-    // Log error to console in development
     if (process.env.NODE_ENV === "development") {
       console.error("ErrorBoundary caught an error:", error);
       console.error("Component stack:", errorInfo.componentStack);
     }
 
-    // Call optional error handler
     this.props.onError?.(error, errorInfo);
   }
 
@@ -59,7 +57,6 @@ export class ErrorBoundary extends Component<
 
   render(): ReactNode {
     if (this.state.hasError && this.state.error) {
-      // Custom fallback
       if (this.props.fallback) {
         if (typeof this.props.fallback === "function") {
           return this.props.fallback(this.state.error, this.handleReset);
@@ -67,7 +64,6 @@ export class ErrorBoundary extends Component<
         return this.props.fallback;
       }
 
-      // Default fallback UI
       return (
         <DefaultErrorFallback
           error={this.state.error}
@@ -227,5 +223,4 @@ function DefaultLoadingFallback(): ReactNode {
   );
 }
 
-// Need to import React for Suspense
 import React from "react";

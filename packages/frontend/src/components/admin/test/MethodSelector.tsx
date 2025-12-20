@@ -34,15 +34,15 @@ export function MethodSelector({
   const getMethodColor = (httpMethod: string) => {
     switch (httpMethod) {
       case "GET":
-        return "#10B981"; // green
+        return "#10B981";
       case "POST":
-        return "#3B82F6"; // blue
+        return "#3B82F6";
       case "PUT":
-        return "#F59E0B"; // yellow
+        return "#F59E0B";
       case "DELETE":
-        return "#EF4444"; // red
+        return "#EF4444";
       case "PATCH":
-        return "#8B5CF6"; // purple
+        return "#8B5CF6";
       default:
         return themeConfig.colors.accent;
     }

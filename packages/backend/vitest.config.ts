@@ -14,11 +14,8 @@ export default defineConfig({
       "**/.{idea,git,cache,output,temp}/**",
       "**/prisma/migrations/**",
       "**/generated/**",
-      // Exclude problematic test files that crash
       "**/logging/test/**",
       "**/dist/**/*.js",
-      // Exclude integration tests that require real DB/Redis connections
-      // TODO: Set up proper test database for these tests
       "**/health/test/health.service.test.ts",
       "**/prisma/test/database-connection-manager.service.test.ts",
       "**/prisma/test/prisma-connection-cleanup.test.ts",

@@ -4,6 +4,15 @@ import { useState, useRef, useEffect, type JSX } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { useI18n } from "@/hooks/useI18n";
 
+/**
+ * Props for the LanguageSwitcher component
+ * @interface LanguageSwitcherProps
+ * @property {"dropdown" | "list"} [variant] - Display style (dropdown or full list)
+ * @property {string} [className] - Additional CSS classes
+ * @property {boolean} [showNative] - Whether to show native language names
+ * @property {boolean} [showFlags] - Whether to show flag emojis
+ * @property {(locale: string) => void} [onLanguageChange] - Callback when language changes
+ */
 interface LanguageSwitcherProps {
   /** Whether to show as compact dropdown or full list */
   variant?: "dropdown" | "list";
@@ -19,8 +28,22 @@ interface LanguageSwitcherProps {
 
 /**
  * Language switcher component for changing application locale
+ * Provides dropdown or list view with flags and native language names
  * @param {LanguageSwitcherProps} props - Component props
- * @returns {JSX.Element} Language switcher UI
+ * @param {"dropdown" | "list"} [props.variant="dropdown"] - Display style
+ * @param {string} [props.className] - Additional classes
+ * @param {boolean} [props.showNative=true] - Show native names
+ * @param {boolean} [props.showFlags=true] - Show flags
+ * @param {(locale: string) => void} [props.onLanguageChange] - Change callback
+ * @returns {JSX.Element} The language switcher component
+ * @example
+ * ```tsx
+ * <LanguageSwitcher
+ *   variant="dropdown"
+ *   showFlags={true}
+ *   onLanguageChange={(locale) => console.log(locale)}
+ * />
+ * ```
  */
 export function LanguageSwitcher({
   variant = "dropdown",
@@ -43,7 +66,6 @@ export function LanguageSwitcher({
   const supportedLocales = getSupportedLocales();
   const currentConfig = getCurrentLocaleConfig();
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -58,7 +80,6 @@ export function LanguageSwitcher({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Handle language change
   const handleLanguageChange = (localeCode: string) => {
     const success = changeLocale(localeCode);
     if (success) {
@@ -67,7 +88,6 @@ export function LanguageSwitcher({
     }
   };
 
-  // Handle keyboard navigation
   const handleKeyDown = (event: React.KeyboardEvent, localeCode?: string) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
@@ -119,7 +139,6 @@ export function LanguageSwitcher({
     );
   }
 
-  // Dropdown variant
   return (
     <div
       ref={dropdownRef}

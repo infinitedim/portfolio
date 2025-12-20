@@ -13,17 +13,30 @@ const ThemeConfigs = lazy(() =>
   })),
 );
 
+/**
+ * Props for the LazyThemeLoader component
+ * @interface LazyThemeLoaderProps
+ * @property {ThemeName} themeName - Name of the theme to load
+ * @property {(themeConfig: any) => React.ReactNode} children - Render prop receiving theme config
+ */
 interface LazyThemeLoaderProps {
   themeName: ThemeName;
   children: (themeConfig: any) => React.ReactNode;
 }
 
 /**
- * Lazily loads a theme configuration and provides it to its children.
- * @param {LazyThemeLoaderProps} props - The properties for the LazyThemeLoader component.
- * @param {ThemeName} props.themeName - The name of the theme to load.
- * @param {(themeConfig: any) => React.ReactNode} props.children - A render-prop function that receives the loaded theme configuration.
- * @returns {JSX.Element} - A Suspense component with the lazily loaded theme.
+ * Lazy theme loader component with code splitting
+ * Loads theme configurations dynamically with a loading fallback
+ * @param {LazyThemeLoaderProps} props - Component props
+ * @param {ThemeName} props.themeName - Name of theme to load
+ * @param {(themeConfig: any) => React.ReactNode} props.children - Render prop function
+ * @returns {JSX.Element} Suspense wrapper with lazy-loaded theme
+ * @example
+ * ```tsx
+ * <LazyThemeLoader themeName="cyberpunk">
+ *   {(config) => <Terminal themeConfig={config} />}
+ * </LazyThemeLoader>
+ * ```
  */
 export function LazyThemeLoader({
   themeName,

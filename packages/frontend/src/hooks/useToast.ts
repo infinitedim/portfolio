@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-// Inspired by react-hot-toast library
 import * as React from "react";
 import { generateId, useTimerManager, useMountRef } from "./utils/hookUtils";
 
@@ -48,7 +47,6 @@ interface State {
   toasts: ToasterToast[];
 }
 
-// Toast manager class to handle state and cleanup properly
 class ToastManager {
   private listeners = new Set<(state: State) => void>();
   private state: State = { toasts: [] };
@@ -76,7 +74,6 @@ class ToastManager {
     this.toastTimeouts.set(toastId, timeout);
   }
 
-  // Enhanced cleanup method to prevent memory leaks
   removeFromQueue(toastId: string) {
     const timeout = this.toastTimeouts.get(toastId);
     if (timeout) {
@@ -104,7 +101,6 @@ class ToastManager {
       case "DISMISS_TOAST": {
         const { toastId } = action;
 
-        // Clear timeout immediately when dismissing
         if (toastId) {
           this.removeFromQueue(toastId);
           this.addToRemoveQueue(toastId);
@@ -129,7 +125,6 @@ class ToastManager {
       }
       case "REMOVE_TOAST":
         if (action.toastId === undefined) {
-          // Clear all timeouts when removing all toasts
           this.toastTimeouts.forEach((timeout) => clearTimeout(timeout));
           this.toastTimeouts.clear();
           return {
@@ -137,7 +132,6 @@ class ToastManager {
             toasts: [],
           };
         }
-        // Clear specific timeout when removing specific toast
         this.removeFromQueue(action.toastId);
         return {
           ...state,
@@ -171,12 +165,15 @@ class ToastManager {
   }
 }
 
-// Create a singleton instance
 let toastManager: ToastManager;
 
 /**
- * Returns the singleton instance of the toast manager.
- * @returns {ToastManager} The singleton instance of the toast manager.
+ * Returns the singleton instance of the toast manager
+ *
+ * Ensures only one toast manager exists across the application,
+ * preventing duplicate toast state management.
+ *
+ * @returns {ToastManager} The singleton toast manager instance
  */
 function getToastManager(): ToastManager {
   if (!toastManager) {
@@ -190,11 +187,12 @@ export const reducer = (state: State, action: Action): State => {
 };
 
 /**
- * Dispatches an action to update the toast state.
- * This function is the central hub for all state changes. It calls the reducer
- * to compute the new state and then notifies all active listeners (instances of useToast)
- * of the change.
- * @param {Action} action The action to dispatch.
+ * Dispatches an action to update the toast state
+ *
+ * Central hub for all toast state changes. Calls the reducer to compute
+ * new state and notifies all active listeners (useToast instances).
+ *
+ * @param {Action} action - The action to dispatch (ADD, UPDATE, DISMISS, or REMOVE)
  */
 function dispatch(action: Action) {
   getToastManager().dispatch(action);
@@ -203,10 +201,38 @@ function dispatch(action: Action) {
 type Toast = Omit<ToasterToast, "id">;
 
 /**
- * Imperatively creates and displays a toast notification.
- * This function can be called from anywhere in the application.
- * @param {Toast} props The properties for the toast, such as title, description, and variant.
- * @returns {{ id: string, dismiss: () => void, update: (props: ToasterToast) => void }} An object with methods to control the toast.
+ * Imperatively create and display a toast notification
+ *
+ * Can be called from anywhere in the application to show toasts.
+ * Supports various variants (default, destructive, success, etc.)
+ *
+ * @param {Toast} props - Toast configuration
+ * @param {string} [props.title] - Toast title
+ * @param {string} [props.description] - Toast description
+ * @param {"default" | "destructive"} [props.variant] - Toast variant
+ * @param {number} [props.duration] - Display duration in ms
+ * @param {ToastActionElement} [props.action] - Action button element
+ *
+ * @returns {object} Toast control methods
+ * @property {string} id - Unique toast ID
+ * @property {Function} dismiss - Dismiss this toast
+ * @property {Function} update - Update this toast's properties
+ *
+ * @example
+ * ```tsx
+ * // Simple toast
+ * toast({ title: "Success", description: "Operation completed" });
+ *
+ * // Toast with action
+ * const { id, dismiss } = toast({
+ *   title: "Confirm",
+ *   description: "Are you sure?",
+ *   action: <Button onClick={() => confirm()}>Yes</Button>
+ * });
+ *
+ * // Manually dismiss
+ * dismiss();
+ * ```
  */
 function toast(props: Toast) {
   const manager = getToastManager();
@@ -239,9 +265,35 @@ function toast(props: Toast) {
 }
 
 /**
- * A React hook that provides access to the toast state and methods for managing toasts.
- * It subscribes the component to toast state changes with proper cleanup.
- * @returns {{ toasts: ToasterToast[], toast: (props: Toast) => { id: string, dismiss: () => void, update: (props: ToasterToast) => void; }, dismiss: (toastId?: string) => void }} An object containing the list of toasts and functions to create or dismiss them.
+ * React hook for toast state management and notifications
+ *
+ * Provides access to toast state and methods for managing toasts.
+ * Automatically subscribes component to toast state changes with cleanup.
+ * Handles visibility changes and beforeunload events for cleanup.
+ *
+ * @returns {object} Toast state and methods
+ * @property {ToasterToast[]} toasts - Array of active toast notifications
+ * @property {Function} toast - Function to create a new toast
+ * @property {Function} dismiss - Function to dismiss toast(s) by ID
+ *
+ * @example
+ * ```tsx
+ * function MyComponent() {
+ *   const { toasts, toast, dismiss } = useToast();
+ *
+ *   return (
+ *     <div>
+ *       <button onClick={() => toast({ title: "Hello!" })}>
+ *         Show Toast
+ *       </button>
+ *
+ *       {toasts.map(t => (
+ *         <Toast key={t.id} {...t} />
+ *       ))}
+ *     </div>
+ *   );
+ * }
+ * ```
  */
 function useToast() {
   const manager = getToastManager();
@@ -251,25 +303,19 @@ function useToast() {
   React.useEffect(() => {
     if (!isMountedRef.current) return;
 
-    // Capture the current state for cleanup
     const isMounted = isMountedRef.current;
 
-    // Subscribe to toast manager updates
     const unsubscribe = manager.subscribe((newState) => {
       if (isMountedRef.current) {
         setState(newState);
       }
     });
 
-    // Set initial state
     setState(manager.getState());
 
-    // Enhanced cleanup for component unmount
     return () => {
       unsubscribe();
-      // If this component was mounted, cleanup manager if no toasts remain
       if (!isMounted) {
-        // Small delay to allow other components to re-subscribe if needed
         setTimeout(() => {
           if (manager.getState().toasts.length === 0) {
             manager.cleanup();
@@ -279,7 +325,6 @@ function useToast() {
     };
   }, [manager, isMountedRef]);
 
-  // Cleanup on page/app unload to prevent memory leaks
   React.useEffect(() => {
     const handleBeforeUnload = () => {
       manager.cleanup();
@@ -287,7 +332,6 @@ function useToast() {
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // Clear pending timeouts when page becomes hidden
         const currentToasts = manager.getState().toasts;
         if (currentToasts.length === 0) {
           manager.cleanup();
@@ -311,7 +355,6 @@ function useToast() {
     return undefined;
   }, [manager]);
 
-  // Memoized return object to prevent unnecessary re-renders
   return React.useMemo(
     () => ({
       ...state,

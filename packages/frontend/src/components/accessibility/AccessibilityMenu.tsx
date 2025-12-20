@@ -55,7 +55,6 @@ export function AccessibilityMenu(): JSX.Element {
   }, [announceMessage]);
 
   const handleThemeToggle = useCallback(() => {
-    // Cycle through some popular themes
     const popularThemes: ThemeName[] = [
       "default",
       "matrix",
@@ -71,14 +70,11 @@ export function AccessibilityMenu(): JSX.Element {
     if (success) {
       announceMessage(`Theme changed to ${nextTheme}`, "polite");
 
-      // Close the menu before reloading
       setIsOpen(false);
 
-      // Force page reload to ensure all components re-render with new theme
-      // This ensures consistent behavior with terminal theme command
       setTimeout(() => {
         window.location.reload();
-      }, 150); // Brief delay to allow announcement and menu close animation
+      }, 150);
     }
   }, [theme, changeTheme, announceMessage]);
 
@@ -124,7 +120,7 @@ export function AccessibilityMenu(): JSX.Element {
             Accessibility Options
           </h3>
 
-          {/* Font Size Controls */}
+          {}
           <div
             className="mb-4"
             role="group"
@@ -161,7 +157,7 @@ export function AccessibilityMenu(): JSX.Element {
             </div>
           </div>
 
-          {/* Focus Mode Toggle */}
+          {}
           <div className="mb-4">
             <button
               onClick={handleFocusModeToggle}
@@ -189,7 +185,7 @@ export function AccessibilityMenu(): JSX.Element {
             </p>
           </div>
 
-          {/* System Preferences Info */}
+          {}
           <div
             className="text-xs space-y-2 mb-4"
             style={{ color: themeConfig.colors.muted }}
@@ -215,7 +211,7 @@ export function AccessibilityMenu(): JSX.Element {
             </div>
           </div>
 
-          {/* Quick Actions */}
+          {}
           <div
             className="pt-3 border-t space-y-2"
             style={{ borderColor: themeConfig.colors.border }}

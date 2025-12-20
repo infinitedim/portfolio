@@ -3,6 +3,16 @@
 import { useState, useEffect, useRef } from "react";
 import type { ThemeConfig } from "@/types/theme";
 
+/**
+ * Represents a single log entry in the system
+ * @interface LogEntry
+ * @property {string} id - Unique identifier for the log entry
+ * @property {string} timestamp - ISO timestamp when the log was created
+ * @property {"INFO" | "WARN" | "ERROR" | "DEBUG"} level - Log severity level
+ * @property {string} message - The log message content
+ * @property {string} source - Source system that generated the log
+ * @property {string} [details] - Optional additional details
+ */
 interface LogEntry {
   id: string;
   timestamp: string;
@@ -12,6 +22,11 @@ interface LogEntry {
   details?: string;
 }
 
+/**
+ * Props for the LoggingMonitor component
+ * @interface LoggingMonitorProps
+ * @property {ThemeConfig} themeConfig - Theme configuration for styling
+ */
 interface LoggingMonitorProps {
   themeConfig: ThemeConfig;
 }
@@ -20,9 +35,15 @@ const logLevels = ["INFO", "WARN", "ERROR", "DEBUG"] as const;
 const logSources = ["system", "auth", "database", "api", "frontend"] as const;
 
 /**
- *
- * @param root0
- * @param root0.themeConfig
+ * Real-time logging monitor component for system logs
+ * Displays logs with filtering, search, and export capabilities
+ * @param {LoggingMonitorProps} props - Component props
+ * @param {ThemeConfig} props.themeConfig - Theme configuration for styling
+ * @returns {JSX.Element} The logging monitor component
+ * @example
+ * ```tsx
+ * <LoggingMonitor themeConfig={themeConfig} />
+ * ```
  */
 export function LoggingMonitor({ themeConfig }: LoggingMonitorProps) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -38,7 +59,6 @@ export function LoggingMonitor({ themeConfig }: LoggingMonitorProps) {
   const logsEndRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Generate mock log entries
   const generateMockLog = (): LogEntry => {
     const levels: LogEntry["level"][] = ["INFO", "WARN", "ERROR", "DEBUG"];
     const sources: LogEntry["source"][] = [
@@ -72,13 +92,11 @@ export function LoggingMonitor({ themeConfig }: LoggingMonitorProps) {
     };
   };
 
-  // Initialize logs
   useEffect(() => {
     const initialLogs = Array.from({ length: 50 }, () => generateMockLog());
     setLogs(initialLogs);
   }, []);
 
-  // Add new logs
   useEffect(() => {
     if (isPaused) return;
 
@@ -95,14 +113,12 @@ export function LoggingMonitor({ themeConfig }: LoggingMonitorProps) {
     return () => clearInterval(interval);
   }, [isPaused]);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     if (autoScroll && logsEndRef.current) {
       logsEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [logs, autoScroll]);
 
-  // Filter logs
   const filteredLogs = logs.filter((log) => {
     const matchesSearch =
       searchTerm === "" ||

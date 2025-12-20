@@ -3,8 +3,17 @@
 import { useTheme } from "@/hooks/useTheme";
 import type { JSX } from "react";
 
+/**
+ * Props for the ProgressIndicator component
+ * @interface ProgressIndicatorProps
+ * @property {number} progress - Progress value from 0 to 100
+ * @property {string} [label] - Optional label text
+ * @property {boolean} [showPercentage] - Whether to show percentage
+ * @property {"sm" | "md" | "lg"} [size] - Size of the progress bar
+ * @property {boolean} [animated] - Whether to animate the bar
+ */
 interface ProgressIndicatorProps {
-  progress: number; // 0-100
+  progress: number;
   label?: string;
   showPercentage?: boolean;
   size?: "sm" | "md" | "lg";
@@ -12,19 +21,23 @@ interface ProgressIndicatorProps {
 }
 
 /**
- * A visual progress bar component that shows completion percentage.
- *
- * This component displays a styled progress bar, with optional label and percentage.
- * It adapts to the current theme and can be resized and animated.
- * @param {object} props - Props object
- * @param {number} props.progress - Progress value (from 0 to 100)
- * @param {string} [props.label] - Optional label to display above the bar
- * @param {boolean} [props.showPercentage] - Whether to display percentage value
- * @param {"sm" | "md" | "lg"} [props.size] - Size of the progress bar
- * @param {boolean} [props.animated] - Whether the progress bar should animate.
+ * Progress bar component showing completion percentage
+ * Displays a themed progress bar with optional label and percentage display
+ * @param {ProgressIndicatorProps} props - Component props
+ * @param {number} props.progress - Progress value (0-100)
+ * @param {string} [props.label] - Optional label
+ * @param {boolean} [props.showPercentage=true] - Show percentage
+ * @param {"sm" | "md" | "lg"} [props.size="md"] - Bar size
+ * @param {boolean} [props.animated=true] - Enable animation
+ * @returns {JSX.Element} The progress indicator component
  * @example
- * <ProgressIndicator progress={75} label="Loading..." />
- * @returns {JSX.Element} The rendered progress bar
+ * ```tsx
+ * <ProgressIndicator
+ *   progress={75}
+ *   label="Loading..."
+ *   size="lg"
+ * />
+ * ```
  */
 export function ProgressIndicator({
   progress,
@@ -71,9 +84,8 @@ export function ProgressIndicator({
         style={{ backgroundColor: `${themeConfig.colors.border}40` }}
       >
         <div
-          className={`${heights[size]} rounded-full transition-all duration-500 ease-out ${
-            animated ? "animate-pulse" : ""
-          }`}
+          className={`${heights[size]} rounded-full transition-all duration-500 ease-out ${animated ? "animate-pulse" : ""
+            }`}
           style={{
             width: `${Math.min(100, Math.max(0, progress))}%`,
             backgroundColor: themeConfig.colors.accent,

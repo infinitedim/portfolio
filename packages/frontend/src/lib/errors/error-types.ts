@@ -3,40 +3,86 @@
  * Provides comprehensive error categorization, recovery strategies, and utilities
  */
 
+/**
+ * Error severity levels for prioritization and handling
+ * @enum
+ */
 export enum ErrorSeverity {
+  /** Low severity - informational errors */
   LOW = "LOW",
+  /** Medium severity - minor issues that don't block functionality */
   MEDIUM = "MEDIUM",
+  /** High severity - significant issues affecting functionality */
   HIGH = "HIGH",
+  /** Critical severity - system-breaking errors requiring immediate attention */
   CRITICAL = "CRITICAL",
 }
 
+/**
+ * Error categories for classification and handling
+ * @enum
+ */
 export enum ErrorCategory {
+  /** Network-related errors (fetch, connection) */
   NETWORK = "NETWORK",
+  /** Input validation errors */
   VALIDATION = "VALIDATION",
+  /** Authentication errors (login, session) */
   AUTHENTICATION = "AUTHENTICATION",
+  /** Authorization errors (permissions) */
   AUTHORIZATION = "AUTHORIZATION",
+  /** Database operation errors */
   DATABASE = "DATABASE",
+  /** API request/response errors */
   API = "API",
+  /** User interface errors */
   UI = "UI",
+  /** Performance-related errors */
   PERFORMANCE = "PERFORMANCE",
+  /** Security-related errors */
   SECURITY = "SECURITY",
+  /** Business logic errors */
   BUSINESS_LOGIC = "BUSINESS_LOGIC",
+  /** External service integration errors */
   EXTERNAL_SERVICE = "EXTERNAL_SERVICE",
+  /** Configuration errors */
   CONFIGURATION = "CONFIGURATION",
+  /** Unknown or uncategorized errors */
   UNKNOWN = "UNKNOWN",
 }
 
+/**
+ * Strategies for recovering from errors
+ * @enum
+ */
 export enum ErrorRecoveryStrategy {
+  /** Retry the operation automatically */
   RETRY = "RETRY",
+  /** Use a fallback value or behavior */
   FALLBACK = "FALLBACK",
+  /** Ignore the error and continue */
   IGNORE = "IGNORE",
+  /** Require user action to resolve */
   USER_ACTION = "USER_ACTION",
+  /** Redirect to another page */
   REDIRECT = "REDIRECT",
+  /** Refresh the page or component */
   REFRESH = "REFRESH",
+  /** Log out the user */
   LOGOUT = "LOGOUT",
+  /** Escalate to higher-level error handler */
   ESCALATE = "ESCALATE",
 }
 
+/**
+ * Contextual information about where and when an error occurred
+ * @property userId - Optional user identifier
+ * @property sessionId - Optional session identifier
+ * @property url - URL where error occurred
+ * @property userAgent - Browser user agent string
+ * @property timestamp - When the error occurred
+ * @property additionalData - Additional custom context data
+ */
 export interface ErrorContext {
   userId?: string;
   sessionId?: string;
@@ -46,6 +92,18 @@ export interface ErrorContext {
   additionalData?: Record<string, unknown>;
 }
 
+/**
+ * Metadata for error handling and recovery
+ * @property id - Unique error identifier
+ * @property category - Error category for classification
+ * @property severity - Error severity level
+ * @property isRetryable - Whether the operation can be retried
+ * @property maxRetries - Maximum number of retry attempts
+ * @property retryDelay - Delay between retries in milliseconds
+ * @property recoveryStrategy - Recommended recovery approach
+ * @property context - Contextual information about the error
+ * @property suggestions - User-friendly suggestions for resolution
+ */
 export interface ErrorMetadata {
   id: string;
   category: ErrorCategory;
@@ -82,12 +140,10 @@ export class EnhancedError extends Error {
     super(message);
     this.name = this.constructor.name;
 
-    // Generate unique error ID
     this.id =
       options.id ||
       `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    // Set metadata with defaults
     this.category = options.category || ErrorCategory.UNKNOWN;
     this.severity = options.severity || ErrorSeverity.MEDIUM;
     this.isRetryable = options.isRetryable ?? false;
@@ -98,7 +154,6 @@ export class EnhancedError extends Error {
     this.suggestions = options.suggestions || [];
     this.timestamp = new Date();
 
-    // Set context with defaults
     this.context = {
       timestamp: this.timestamp,
       url: typeof window !== "undefined" ? window.location.href : undefined,
@@ -107,12 +162,10 @@ export class EnhancedError extends Error {
       ...options.context,
     };
 
-    // Set cause for error chaining
     if (options.cause) {
       this.cause = options.cause;
     }
 
-    // Maintain proper stack trace
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, this.constructor);
     }
@@ -392,7 +445,6 @@ export class ErrorUtils {
       return error.isRetryable && error.retryCount < error.maxRetries;
     }
 
-    // Default heuristics for standard errors
     const retryablePatterns = [
       /network/i,
       /timeout/i,
@@ -415,7 +467,6 @@ export class ErrorUtils {
       return error.severity;
     }
 
-    // Default heuristics
     if (error.message.toLowerCase().includes("critical")) {
       return ErrorSeverity.CRITICAL;
     }

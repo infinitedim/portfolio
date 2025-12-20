@@ -8,6 +8,22 @@ import {
   type SuggestionItem,
 } from "@/hooks/useCommandSuggestions";
 
+/**
+ * Props for the CommandSuggestions component
+ * @interface CommandSuggestionsProps
+ * @property {string} input - Current input value for matching suggestions
+ * @property {string[]} availableCommands - List of available commands
+ * @property {boolean} visible - Whether suggestions should be visible
+ * @property {(suggestion: string) => void} onSelect - Callback when suggestion is selected
+ * @property {(command: string) => void} [onCommandUsed] - Callback when command is used
+ * @property {number} [maxSuggestions] - Maximum number of suggestions to show
+ * @property {boolean} [showOnEmpty] - Show suggestions when input is empty
+ * @property {boolean} [showDescriptions] - Show command descriptions
+ * @property {boolean} [enableLearning] - Enable learning from user behavior
+ * @property {boolean} [enableCache] - Enable suggestion caching
+ * @property {number} [minQueryLength] - Minimum query length to show suggestions
+ * @property {number} [debounceMs] - Debounce delay in milliseconds
+ */
 interface CommandSuggestionsProps {
   input: string;
   availableCommands: string[];
@@ -24,8 +40,8 @@ interface CommandSuggestionsProps {
 }
 
 /**
- *  command suggestions component with real-time fuzzy matching,
- * intelligent caching, user behavior learning, and optimized performance.
+ * Advanced command suggestions component with fuzzy matching and learning
+ * Provides intelligent command suggestions with caching, personalization, and keyboard navigation
  *
  * Features:
  * - Advanced fuzzy matching with contextual scoring
@@ -35,6 +51,27 @@ interface CommandSuggestionsProps {
  * - Keyboard navigation with smooth scrolling
  * - Visual feedback and loading states
  * - Accessibility support
+ *
+ * @param {CommandSuggestionsProps} props - Component props
+ * @param {string} props.input - Current input for matching
+ * @param {string[]} props.availableCommands - Available commands
+ * @param {boolean} props.visible - Visibility state
+ * @param {(suggestion: string) => void} props.onSelect - Selection callback
+ * @param {number} [props.maxSuggestions=8] - Max suggestions to display
+ * @param {boolean} [props.showOnEmpty=true] - Show when input is empty
+ * @param {boolean} [props.enableCache=true] - Enable caching
+ * @param {boolean} [props.enableLearning=true] - Enable learning
+ * @returns {JSX.Element | null} The suggestions component or null
+ * @example
+ * ```tsx
+ * <CommandSuggestions
+ *   input={input}
+ *   availableCommands={commands}
+ *   visible={true}
+ *   onSelect={handleSelect}
+ *   maxSuggestions={5}
+ * />
+ * ```
  */
 export function CommandSuggestions({
   input,
@@ -56,7 +93,6 @@ export function CommandSuggestions({
   const containerRef = useRef<HTMLDivElement>(null);
   const selectedItemRef = useRef<HTMLButtonElement>(null);
 
-  // Use the  suggestions hook
   const {
     suggestions,
     isLoading,
@@ -72,30 +108,25 @@ export function CommandSuggestions({
     minQueryLength,
   });
 
-  // Smooth visibility transitions with proper timing
   useEffect(() => {
     console.log("CommandSuggestions visibility effect:", { visible, suggestionsLength: suggestions.length });
 
     if (visible && suggestions.length > 0) {
-      // Small delay for smoother appearance
       const timer = setTimeout(() => {
         console.log("Setting isVisible to true");
         setIsVisible(true);
       }, 10);
       return () => clearTimeout(timer);
     } else {
-      // Immediate hide when not visible or no suggestions
       console.log("Setting isVisible to false");
       setIsVisible(false);
     }
   }, [visible, suggestions.length]);
 
-  // Reset selection when suggestions change
   useEffect(() => {
     setSelectedIndex(0);
   }, [suggestions]);
 
-  // Auto-scroll selected item into view with smooth behavior
   useEffect(() => {
     if (selectedItemRef.current && isVisible) {
       selectedItemRef.current.scrollIntoView({
@@ -106,7 +137,6 @@ export function CommandSuggestions({
     }
   }, [selectedIndex, isVisible]);
 
-  //  keyboard navigation
   useEffect(() => {
     if (!visible || !isVisible) return;
 
@@ -133,7 +163,6 @@ export function CommandSuggestions({
             const selectedCommand = suggestions[selectedIndex].command;
             onSelect(selectedCommand);
 
-            // Track command usage for learning
             if (enableLearning) {
               updateCommandUsage(selectedCommand);
               onCommandUsed?.(selectedCommand);
@@ -167,7 +196,6 @@ export function CommandSuggestions({
     clearCache,
   ]);
 
-  // Don't render if not visible or no suggestions
   if (!isVisible || suggestions.length === 0 || !themeConfig?.colors) {
     console.log("CommandSuggestions NOT rendering:", {
       isVisible,
@@ -238,7 +266,6 @@ export function CommandSuggestions({
     setSelectedIndex(index);
     onSelect(suggestion.command);
 
-    // Track command usage for learning
     if (enableLearning) {
       updateCommandUsage(suggestion.command);
       onCommandUsed?.(suggestion.command);
@@ -262,7 +289,7 @@ export function CommandSuggestions({
         backdropFilter: "blur(8px)",
       }}
     >
-      {/*  Header with Context Info */}
+      { }
       <div
         className="px-4 py-3 text-xs font-mono border-b flex items-center justify-between"
         style={{
@@ -305,7 +332,7 @@ export function CommandSuggestions({
         </div>
       </div>
 
-      {/*  Suggestions List */}
+      { }
       <div className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-current scrollbar-thumb-opacity-20">
         {suggestions.map((suggestion, index) => (
           <button
@@ -340,7 +367,7 @@ export function CommandSuggestions({
           >
             <div className="flex items-center justify-between min-w-0">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                {/* Type Icon */}
+                { }
                 <span
                   className="shrink-0 text-sm transition-transform duration-200 group-hover:scale-110"
                   style={{ color: getTypeColor(suggestion.type) }}
@@ -349,7 +376,7 @@ export function CommandSuggestions({
                   {getTypeIcon(suggestion.type)}
                 </span>
 
-                {/* Command Info */}
+                { }
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span
@@ -364,7 +391,7 @@ export function CommandSuggestions({
                       {suggestion.command}
                     </span>
 
-                    {/* Category Badge */}
+                    { }
                     {suggestion.category && (
                       <span
                         className="text-xs px-2 py-0.5 rounded-full shrink-0 font-medium"
@@ -377,7 +404,7 @@ export function CommandSuggestions({
                       </span>
                     )}
 
-                    {/* Frequency Badge */}
+                    { }
                     {enableLearning &&
                       suggestion.frequency &&
                       suggestion.frequency > 0 && (
@@ -394,7 +421,7 @@ export function CommandSuggestions({
                       )}
                   </div>
 
-                  {/* Description */}
+                  { }
                   {showDescriptions && suggestion.description && (
                     <div
                       className="text-sm mb-1 opacity-75 leading-relaxed"
@@ -404,7 +431,7 @@ export function CommandSuggestions({
                     </div>
                   )}
 
-                  {/* Usage */}
+                  { }
                   {suggestion.usage && (
                     <div
                       className="text-xs font-mono opacity-60 bg-black bg-opacity-10 px-2 py-1 rounded"
@@ -416,9 +443,9 @@ export function CommandSuggestions({
                 </div>
               </div>
 
-              {/* Score and Additional Info */}
+              { }
               <div className="flex items-center gap-2 shrink-0 ml-3">
-                {/* Last Used */}
+                { }
                 {suggestion.lastUsed && (
                   <span
                     className="text-xs px-2 py-1 rounded-full opacity-60"
@@ -432,7 +459,7 @@ export function CommandSuggestions({
                   </span>
                 )}
 
-                {/* Score */}
+                { }
                 <span
                   className="text-xs px-2 py-1 rounded-full font-medium"
                   style={{
@@ -446,7 +473,7 @@ export function CommandSuggestions({
               </div>
             </div>
 
-            {/* Hover Effect */}
+            { }
             {index === selectedIndex && (
               <div
                 className="absolute inset-0 pointer-events-none opacity-5"
@@ -457,7 +484,7 @@ export function CommandSuggestions({
         ))}
       </div>
 
-      {/*  Footer with Tips */}
+      { }
       <div
         className="px-4 py-3 text-xs border-t"
         style={{

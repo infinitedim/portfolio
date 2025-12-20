@@ -20,7 +20,6 @@ export function SkipToContent({
 }: SkipToContentProps): JSX.Element {
   const { themeConfig, mounted } = useTheme();
 
-  // SOLUSI: Consistent theme resolution dengan memoization
   const resolvedTheme = useMemo(
     () => ({
       backgroundColor: (mounted && themeConfig?.colors?.accent) || "#0284c7",
@@ -55,7 +54,6 @@ export function SkipToContent({
     }
   };
 
-  // PERBAIKAN: Render konsisten dengan early return untuk loading state
   if (!mounted) {
     return (
       <a
@@ -112,7 +110,6 @@ interface SkipLinksProps {
 export function SkipLinks({ links }: SkipLinksProps): JSX.Element {
   const { themeConfig, mounted } = useTheme();
 
-  // SOLUSI: Consistent theme resolution
   const resolvedTheme = useMemo(
     () => ({
       backgroundColor: (mounted && themeConfig?.colors?.accent) || "#0284c7",
@@ -134,7 +131,6 @@ export function SkipLinks({ links }: SkipLinksProps): JSX.Element {
     link: "block px-4 py-2 mb-2 rounded shadow-lg transition-all duration-200 font-mono text-sm hover:opacity-80 focus:outline-none focus:ring-2",
   };
 
-  // PERBAIKAN: Consistent rendering pattern
   const linkStyle = {
     backgroundColor: resolvedTheme.backgroundColor,
     color: resolvedTheme.color,

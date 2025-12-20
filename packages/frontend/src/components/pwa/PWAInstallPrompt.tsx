@@ -31,7 +31,6 @@ export function PWAInstallPrompt({
   const timeoutRef = useRef<number | null>(null);
   const dismissedRef = useRef<boolean>(false);
 
-  // Check if prompt was previously dismissed
   const checkDismissalStatus = useCallback((): boolean => {
     if (!persistDismissal) return false;
 
@@ -46,7 +45,6 @@ export function PWAInstallPrompt({
     return false;
   }, [persistDismissal]);
 
-  // Save dismissal status
   const saveDismissalStatus = useCallback((): void => {
     if (!persistDismissal) return;
 
@@ -59,7 +57,6 @@ export function PWAInstallPrompt({
     }
   }, [persistDismissal]);
 
-  // Safe timeout helper
   const safeSetTimeout = useCallback(
     (callback: () => void, ms: number): number | null => {
       if (typeof window === "undefined" || !window.setTimeout) return null;
@@ -74,7 +71,6 @@ export function PWAInstallPrompt({
     [],
   );
 
-  // Safe clear timeout helper
   const safeClearTimeout = useCallback((id: number | null): void => {
     if (typeof window === "undefined" || !window.clearTimeout || !id) return;
 
@@ -85,18 +81,15 @@ export function PWAInstallPrompt({
     }
   }, []);
 
-  // Handle install button click with proper error handling
   const handleInstall = useCallback(() => {
     try {
       console.log("PWA Prompt: Install button clicked");
       setIsAnimating(true);
 
-      // Delay to allow animation
       setTimeout(() => {
         setIsVisible(false);
         setIsAnimating(false);
 
-        // Call the install callback if provided
         if (typeof onInstall === "function") {
           try {
             onInstall();
@@ -112,22 +105,18 @@ export function PWAInstallPrompt({
     }
   }, [onInstall]);
 
-  // Handle dismiss button click with proper error handling
   const handleDismiss = useCallback(() => {
     try {
       console.log("PWA Prompt: Dismiss button clicked");
       setIsAnimating(true);
       dismissedRef.current = true;
 
-      // Save dismissal status
       saveDismissalStatus();
 
-      // Delay to allow animation
       setTimeout(() => {
         setIsVisible(false);
         setIsAnimating(false);
 
-        // Call the dismiss callback if provided
         if (typeof onDismiss === "function") {
           try {
             onDismiss();
@@ -143,7 +132,6 @@ export function PWAInstallPrompt({
     }
   }, [onDismiss, saveDismissalStatus]);
 
-  // Handle keyboard events for accessibility
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       try {
@@ -158,19 +146,15 @@ export function PWAInstallPrompt({
   );
 
   useEffect(() => {
-    // Check if already dismissed
     if (checkDismissalStatus()) {
       dismissedRef.current = true;
       return;
     }
 
-    // Check if we're in a browser environment
     if (typeof window === "undefined") return;
 
-    // Don't show if already dismissed in this session
     if (dismissedRef.current) return;
 
-    // Set up the delayed appearance
     timeoutRef.current = safeSetTimeout(() => {
       if (!dismissedRef.current) {
         setIsVisible(true);
@@ -178,10 +162,8 @@ export function PWAInstallPrompt({
       }
     }, delay);
 
-    // Add keyboard event listener
     window.addEventListener("keydown", handleKeyDown);
 
-    // Cleanup function
     return () => {
       if (timeoutRef.current) {
         safeClearTimeout(timeoutRef.current);
@@ -197,7 +179,6 @@ export function PWAInstallPrompt({
     safeClearTimeout,
   ]);
 
-  // Don't render if not visible
   if (!isVisible) return null;
 
   const bgColor = themeConfig?.colors?.bg || "#000000";

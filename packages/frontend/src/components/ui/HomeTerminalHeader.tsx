@@ -6,8 +6,14 @@ import { useI18n } from "@/hooks/useI18n";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 /**
- * This component is a terminal header that displays the current time and portfolio metrics.
- * @returns {JSX.Element} - The HomeTerminalHeader component
+ * Terminal header component displaying time and portfolio metrics
+ * Shows real-time statistics including projects, skills, experience, commits, and more
+ * Includes language switcher integration
+ * @returns {JSX.Element} The home terminal header component
+ * @example
+ * ```tsx
+ * <HomeTerminalHeader />
+ * ```
  */
 export function HomeTerminalHeader(): JSX.Element {
   const { themeConfig } = useTheme();
@@ -27,31 +33,26 @@ export function HomeTerminalHeader(): JSX.Element {
     stars: 25,
   });
 
-  // Set client flag to prevent hydration mismatch
   useEffect(() => {
     setIsClient(true);
     setCurrentTime(new Date());
   }, []);
 
-  // Update time and portfolio metrics every second
   useEffect(() => {
     if (!isClient) return;
 
-    // Use a fixed start time to ensure consistent initial values
     const startTime = Date.now();
 
     const interval = setInterval(() => {
       const now = new Date();
       setCurrentTime(now);
 
-      // Calculate experience based on start date (simulated)
-      const startDate = new Date("2019-01-01"); // Simulated start date
+      const startDate = new Date("2019-01-01");
       const experienceYears = Math.floor(
         (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 365),
       );
       const experience = `${experienceYears}+ years`;
 
-      // Use fixed base values to ensure consistent initial render
       const baseProjects = 8;
       const baseSkills = 15;
       const baseLanguages = 6;
@@ -59,18 +60,15 @@ export function HomeTerminalHeader(): JSX.Element {
       const baseCommits = 150;
       const baseStars = 25;
 
-      // Simulate dynamic project count (based on time since component mounted)
       const timeSinceMount = now.getTime() - startTime;
       const timeBasedProjects =
         Math.floor(timeSinceMount / (1000 * 60 * 60 * 24)) + baseProjects;
-      const projects = Math.min(timeBasedProjects, 15); // Cap at 15
+      const projects = Math.min(timeBasedProjects, 15);
 
-      // Simulate skill growth over time
       const timeBasedSkills =
         Math.floor(timeSinceMount / (1000 * 60 * 60 * 12)) + baseSkills;
-      const skills = Math.min(timeBasedSkills, 30); // Cap at 30
+      const skills = Math.min(timeBasedSkills, 30);
 
-      // Simulate language and framework counts
       const languages = Math.min(
         baseLanguages + Math.floor(timeSinceMount / (1000 * 60 * 60 * 24 * 7)),
         12,
@@ -80,12 +78,10 @@ export function HomeTerminalHeader(): JSX.Element {
         20,
       );
 
-      // Simulate GitHub-like metrics
       const commits =
-        Math.floor(timeSinceMount / (1000 * 60 * 30)) + baseCommits; // Commit every 30 minutes
-      const stars = Math.floor(commits / 10) + baseStars; // Stars based on commits
+        Math.floor(timeSinceMount / (1000 * 60 * 30)) + baseCommits;
+      const stars = Math.floor(commits / 10) + baseStars;
 
-      // Format last update time
       const lastUpdate = now.toLocaleTimeString("en-US", {
         hour12: false,
         hour: "2-digit",
@@ -98,7 +94,7 @@ export function HomeTerminalHeader(): JSX.Element {
         experience,
         languages,
         frameworks,
-        tools: 15, // Fixed value to avoid hydration issues
+        tools: 15,
         status: "online",
         lastUpdate,
         commits,
@@ -109,7 +105,6 @@ export function HomeTerminalHeader(): JSX.Element {
     return () => clearInterval(interval);
   }, [isClient]);
 
-  // Format time consistently
   const formatTime = (date: Date | null) => {
     if (!date) return "--:--:--";
 
@@ -120,7 +115,6 @@ export function HomeTerminalHeader(): JSX.Element {
     return `${hours}:${minutes}:${seconds}`;
   };
 
-  // Get status color based on activity
   const getStatusColor = (
     metric: number,
     thresholds: { low: number; high: number },
@@ -140,7 +134,7 @@ export function HomeTerminalHeader(): JSX.Element {
         color: themeConfig.colors.text,
       }}
     >
-      {/* Left side - Portfolio info */}
+      { }
       <div className="flex items-center space-x-3">
         <div className="flex items-center space-x-2">
           <span
@@ -215,7 +209,7 @@ export function HomeTerminalHeader(): JSX.Element {
         </div>
       </div>
 
-      {/* Center - Title */}
+      { }
       <div className="flex items-center space-x-2">
         <span
           className="font-bold"
@@ -226,7 +220,7 @@ export function HomeTerminalHeader(): JSX.Element {
         <span className="opacity-50">v2.0.0</span>
       </div>
 
-      {/* Right side - Tech stack and time */}
+      { }
       <div className="flex items-center space-x-3">
         <div className="flex items-center space-x-2">
           <span className="opacity-70">Lang:</span>
@@ -282,7 +276,7 @@ export function HomeTerminalHeader(): JSX.Element {
           <span>{formatTime(currentTime)}</span>
         </div>
 
-        {/* Language Switcher */}
+        { }
         <LanguageSwitcher
           variant="dropdown"
           showNative={false}

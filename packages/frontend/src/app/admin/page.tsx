@@ -9,7 +9,15 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/lib/auth/AuthContext";
 
 /**
- * @returns {JSX.Element} Admin Dashboard Page
+ * Admin dashboard page component
+ * @returns Admin dashboard with user information and system status
+ * @remarks
+ * Protected route displaying:
+ * - User profile information (ID, email, role)
+ * - System status and session details
+ * - Quick action buttons for common tasks
+ * - Navigation to home and logout functionality
+ * - Terminal-themed UI with theme configuration support
  */
 export default function AdminDashboardPage(): JSX.Element {
   const { themeConfig } = useTheme();
@@ -17,11 +25,18 @@ export default function AdminDashboardPage(): JSX.Element {
   const router = useRouter();
   const [isLogoutHovered, setIsLogoutHovered] = useState(false);
 
+  /**
+   * Handles user logout
+   * Clears authentication state and redirects to login page
+   */
   const handleLogout = async () => {
     await logout();
     router.push("/admin/login");
   };
 
+  /**
+   * Navigates back to the home page
+   */
   const handleBackToHome = () => {
     router.push("/");
   };
@@ -35,10 +50,10 @@ export default function AdminDashboardPage(): JSX.Element {
           color: themeConfig.colors.text,
         }}
       >
-        {/* Terminal Header */}
+        { }
         <TerminalHeader />
 
-        {/* Main Content */}
+        { }
         <div className="flex-1 p-6">
           <div
             className="max-w-4xl mx-auto"
@@ -49,7 +64,7 @@ export default function AdminDashboardPage(): JSX.Element {
               boxShadow: `0 4px 20px ${themeConfig.colors.border}20`,
             }}
           >
-            {/* Terminal Window Header */}
+            { }
             <div
               className="flex items-center justify-between p-3 border-b"
               style={{ borderColor: themeConfig.colors.border }}
@@ -114,7 +129,7 @@ export default function AdminDashboardPage(): JSX.Element {
               </div>
             </div>
 
-            {/* Terminal Content */}
+            { }
             <div className="p-6">
               <div className="mb-6">
                 <h1
@@ -132,7 +147,7 @@ export default function AdminDashboardPage(): JSX.Element {
                 </p>
               </div>
 
-              {/* Admin Info */}
+              { }
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div
                   className="p-4 rounded border"
@@ -215,7 +230,7 @@ export default function AdminDashboardPage(): JSX.Element {
                 </div>
               </div>
 
-              {/* Quick Actions */}
+              { }
               <div
                 className="p-4 rounded border"
                 style={{ borderColor: themeConfig.colors.border }}
@@ -275,7 +290,7 @@ export default function AdminDashboardPage(): JSX.Element {
               </div>
             </div>
 
-            {/* Terminal Footer */}
+            { }
             <div
               className="p-3 border-t text-xs text-center"
               style={{ borderColor: themeConfig.colors.border }}

@@ -29,7 +29,6 @@ export function RequestResponsePanel({
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      // You could add a toast notification here
     } catch (err) {
       console.error("Failed to copy text: ", err);
     }
@@ -45,7 +44,7 @@ export function RequestResponsePanel({
         backgroundColor: themeConfig.colors.bg,
       }}
     >
-      {/* Tab Headers */}
+      {}
       <div
         className="flex border-b"
         style={{ borderColor: themeConfig.colors.border }}
@@ -92,7 +91,7 @@ export function RequestResponsePanel({
         </button>
       </div>
 
-      {/* Content Area */}
+      {}
       <div className="p-4">
         {activeTab === "request" ? (
           <div className="space-y-3">

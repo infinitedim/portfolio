@@ -6,9 +6,13 @@ import { useTheme } from "@/hooks/useTheme";
 import type { JSX } from "react";
 
 /**
- * ThemeSwitcher component that allows users to switch between different terminal themes.
- * It uses the terminal theme system for theme management.
- * @returns {JSX.Element} The ThemeSwitcher component
+ * Theme switcher component for changing terminal themes
+ * Displays available themes as buttons and highlights the current theme
+ * @returns {JSX.Element} The theme switcher component
+ * @example
+ * ```tsx
+ * <ThemeSwitcher />
+ * ```
  */
 export function ThemeSwitcher(): JSX.Element {
   const { theme, themeConfig, changeTheme, availableThemes } = useTheme();

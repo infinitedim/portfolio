@@ -96,15 +96,12 @@ export function FontManager({
     if (font.source === "system") {
       changeFont(font.id as any);
 
-      // Save to localStorage directly to ensure persistence
       if (typeof window !== "undefined") {
         localStorage.setItem("terminal-font", font.id);
       }
 
-      // Close the customization manager to show the font change
       onClose?.();
     } else {
-      // Apply custom font
       const root = document.documentElement;
       root.style.setProperty("--terminal-font-family", font.family);
       root.style.setProperty("--terminal-font-weight", font.weight);
@@ -113,10 +110,8 @@ export function FontManager({
         font.ligatures ? "normal" : "none",
       );
 
-      // Save to settings
       customizationService.saveSettings({ currentFont: font.id });
 
-      // Close the customization manager to show the font change
       onClose?.();
     }
   };
@@ -141,13 +136,13 @@ export function FontManager({
 
   return (
     <div className="h-full flex">
-      {/* Font List */}
+      {}
       <div
         className="w-1/2 border-r"
         style={{ borderColor: themeConfig.colors.border }}
       >
         <div className="p-4 space-y-4">
-          {/* Controls */}
+          {}
           <div className="space-y-3">
             <div className="flex gap-2">
               <input
@@ -200,7 +195,7 @@ export function FontManager({
             </select>
           </div>
 
-          {/* Font List */}
+          {}
           <div className="space-y-2 max-h-[60vh] overflow-y-auto">
             {filteredFonts.map((font) => (
               <div
@@ -221,7 +216,7 @@ export function FontManager({
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") setSelectedFont(font);
                 }}
-                tabIndex={0} // Make the div focusable
+                tabIndex={0}
                 onClick={() => setSelectedFont(font)}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -270,7 +265,7 @@ export function FontManager({
                   </div>
                 </div>
 
-                {/* Font Preview */}
+                {}
                 <div
                   className="text-sm mb-2 font-mono"
                   style={{
@@ -289,7 +284,7 @@ export function FontManager({
                   </div>
                 )}
 
-                {/* Actions */}
+                {}
                 <div className="flex gap-2">
                   <button
                     onClick={(e) => {
@@ -329,11 +324,11 @@ export function FontManager({
         </div>
       </div>
 
-      {/* Font Preview */}
+      {}
       <div className="w-1/2">
         {selectedFont ? (
           <div className="h-full flex flex-col">
-            {/* Header */}
+            {}
             <div
               className="p-4 border-b"
               style={{ borderColor: themeConfig.colors.border }}
@@ -363,7 +358,7 @@ export function FontManager({
                 </button>
               </div>
 
-              {/* Font Metadata */}
+              {}
               <div className="flex gap-4 text-xs opacity-75">
                 <span>Source: {selectedFont.source}</span>
                 <span>Weight: {selectedFont.weight}</span>
@@ -377,10 +372,10 @@ export function FontManager({
               </div>
             </div>
 
-            {/* Font Preview Content */}
+            {}
             <div className="flex-1 p-4 overflow-y-auto">
               <div className="space-y-6">
-                {/* Sample Text */}
+                {}
                 <div>
                   <h4
                     className="font-medium mb-3"
@@ -389,7 +384,7 @@ export function FontManager({
                     Font Preview
                   </h4>
                   <div className="space-y-4">
-                    {/* Different sizes */}
+                    {}
                     {[12, 14, 16, 18, 20].map((size) => (
                       <div
                         key={size}
@@ -414,7 +409,7 @@ export function FontManager({
                   </div>
                 </div>
 
-                {/* Code Sample */}
+                {}
                 <div>
                   <h4
                     className="font-medium mb-3"
@@ -464,7 +459,7 @@ export function FontManager({
                   </div>
                 </div>
 
-                {/* Terminal Sample */}
+                {}
                 <div>
                   <h4
                     className="font-medium mb-3"
@@ -507,7 +502,7 @@ export function FontManager({
                   </div>
                 </div>
 
-                {/* Ligatures Test */}
+                {}
                 {selectedFont.ligatures && (
                   <div>
                     <h4

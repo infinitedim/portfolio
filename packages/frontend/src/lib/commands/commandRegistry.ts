@@ -5,6 +5,16 @@ import { ThemeDisplay } from "@/lib/utils/themeDisplay";
 import { themes, getSortedThemeNames } from "@/lib/themes/themeConfig";
 import type { ThemeName } from "@/types/theme";
 
+/**
+ * Creates a help command that displays all available commands and their descriptions
+ * @param getCommands - Function that returns the current list of registered commands
+ * @returns Command object for the help command
+ * @example
+ * ```ts
+ * const helpCmd = createHelpCommand(() => parser.getCommands());
+ * parser.register(helpCmd);
+ * ```
+ */
 export const createHelpCommand = (getCommands: () => Command[]): Command => ({
   name: "help",
   description: "Show available commands",
@@ -20,7 +30,6 @@ export const createHelpCommand = (getCommands: () => Command[]): Command => ({
         const desc = cmd.description;
         const aliases = cmd.aliases ? ` (${cmd.aliases.join(", ")})` : "";
 
-        // Highlight special commands
         if (cmd.name === "skills") {
           return `  🗺️ ${name} - ${desc}${aliases}`;
         }
@@ -87,6 +96,15 @@ export const createHelpCommand = (getCommands: () => Command[]): Command => ({
   },
 });
 
+/**
+ * Command that displays information about the developer/portfolio owner
+ * Shows bio, skills, experience, and contact information
+ * @example
+ * ```ts
+ * parser.register(aboutCommand);
+ * // User types: about
+ * ```
+ */
 export const aboutCommand: Command = {
   name: "about",
   description: "Learn more about me",
@@ -225,11 +243,9 @@ export const themeCommand: Command = {
   usage: "theme [options] [theme-name]",
   aliases: ["color", "style"],
   async execute(args, fullInput = "") {
-    // Parse command-line arguments
     const parsedArgs = ArgumentParser.parse(fullInput);
     const availableThemes = getSortedThemeNames();
 
-    // Handle flags
     const isListFlag = ArgumentParser.hasFlagAny(parsedArgs, [
       { short: "l", long: "list" },
       { short: "list" },
@@ -255,7 +271,6 @@ export const themeCommand: Command = {
       { short: "h", long: "help" },
     ]);
 
-    // Show help
     if (isHelpFlag) {
       return {
         type: "success",
@@ -288,9 +303,7 @@ export const themeCommand: Command = {
       };
     }
 
-    // Show theme list
     if (isListFlag) {
-      // Get current theme from localStorage or use default
       const currentTheme: ThemeName =
         (typeof window !== "undefined" &&
           (localStorage.getItem("terminal-theme") as ThemeName)) ||
@@ -325,7 +338,6 @@ export const themeCommand: Command = {
       };
     }
 
-    // Show current theme
     if (isCurrentFlag) {
       const currentTheme =
         (typeof window !== "undefined"
@@ -361,7 +373,6 @@ export const themeCommand: Command = {
       };
     }
 
-    // Show theme preview
     if (isPreviewFlag) {
       const previewTheme = parsedArgs.positional[0] || args[1];
 
@@ -407,9 +418,7 @@ export const themeCommand: Command = {
       };
     }
 
-    // Handle theme switching (no flags)
     if (args.length === 0 && parsedArgs.positional.length === 0) {
-      // Show basic theme list when no arguments
       const currentTheme =
         (typeof window !== "undefined"
           ? (localStorage.getItem("terminal-theme") as ThemeName)
@@ -442,7 +451,6 @@ export const themeCommand: Command = {
       };
     }
 
-    // Theme switching
     const requestedTheme = parsedArgs.positional[0] || args[0];
     if (!requestedTheme) {
       return {
@@ -486,7 +494,6 @@ export const fontCommand: Command = {
   async execute(args, fullInput = "") {
     const parsedArgs = ArgumentParser.parse(fullInput);
 
-    // Only show fonts that are properly loaded via Next.js
     const availableFonts = [
       "fira-code",
       "inconsolata",
@@ -649,7 +656,6 @@ export const statusCommand: Command = {
   description: "Show system status and current theme",
   aliases: ["info", "sys", "system"],
   async execute() {
-    // This will be populated by the terminal component
     return {
       type: "text",
       content: "SHOW_STATUS",
@@ -678,7 +684,6 @@ export const pwaCommand: Command = {
       { short: "o", long: "offline" },
     ]);
 
-    // Check PWA status
     const isOnline = typeof navigator !== "undefined" ? navigator.onLine : true;
     const isInstalled =
       typeof window !== "undefined" &&
@@ -814,7 +819,6 @@ export const pwaCommand: Command = {
       };
     }
 
-    // Default behavior - show brief status
     return {
       type: "info",
       content: [

@@ -55,18 +55,14 @@ export class EnhancedErrorBoundary extends Component<
       errorInfo,
     });
 
-    // Log error for debugging
     console.error("Enhanced Error Boundary caught an error:", error, errorInfo);
 
-    // Report to external service if configured
     this.reportError(error, errorInfo);
 
-    // Call custom error handler
     this.props.onError?.(error, errorInfo);
   }
 
   private reportError(error: Error, errorInfo: ErrorInfo) {
-    // In production, you might want to send this to a logging service
     const errorReport = {
       message: error.message,
       stack: error.stack,
@@ -77,7 +73,6 @@ export class EnhancedErrorBoundary extends Component<
       errorId: this.state.errorId,
     };
 
-    // Store locally for debugging
     try {
       const errors = JSON.parse(
         localStorage.getItem("terminal-errors") || "[]",
@@ -153,7 +148,6 @@ export class EnhancedErrorBoundary extends Component<
 
   render() {
     if (this.state.hasError && this.state.error) {
-      // Use custom fallback if provided
       if (this.props.fallback) {
         return this.props.fallback(
           this.state.error,
@@ -162,7 +156,6 @@ export class EnhancedErrorBoundary extends Component<
         );
       }
 
-      // Default error UI
       return (
         <DefaultErrorFallback
           error={this.state.error}
@@ -258,7 +251,7 @@ function DefaultErrorFallback({
             color: themeConfig.colors.text,
           }}
         >
-          {/* Header */}
+          {}
           <div className="flex items-center gap-3 mb-6">
             <div
               className="text-2xl"
@@ -286,7 +279,7 @@ function DefaultErrorFallback({
             </div>
           </div>
 
-          {/* Error message */}
+          {}
           <div className="mb-6">
             <div
               className="p-4 rounded border font-mono text-sm"
@@ -301,7 +294,7 @@ function DefaultErrorFallback({
             </div>
           </div>
 
-          {/* Suggestions */}
+          {}
           <div className="mb-6">
             <h3
               className="font-semibold mb-3"
@@ -324,9 +317,9 @@ function DefaultErrorFallback({
             </ul>
           </div>
 
-          {/* Actions */}
+          {}
           <div className="flex flex-wrap gap-3">
-            {/* Retry button */}
+            {}
             {retryCount < maxRetries && (
               <button
                 onClick={onRetry}
@@ -340,7 +333,7 @@ function DefaultErrorFallback({
               </button>
             )}
 
-            {/* Reset button */}
+            {}
             <button
               onClick={onReset}
               className="px-4 py-2 rounded font-medium transition-all duration-200 hover:opacity-80"
@@ -353,7 +346,7 @@ function DefaultErrorFallback({
               🔄 Reset Application
             </button>
 
-            {/* Reload page */}
+            {}
             <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 rounded font-medium transition-all duration-200 hover:opacity-80"
@@ -366,7 +359,7 @@ function DefaultErrorFallback({
               🔄 Reload Page
             </button>
 
-            {/* Copy error */}
+            {}
             <button
               onClick={handleCopyError}
               className="px-4 py-2 rounded font-medium transition-all duration-200 text-sm hover:opacity-80"
@@ -379,7 +372,7 @@ function DefaultErrorFallback({
               📋 Copy Error
             </button>
 
-            {/* Report issue */}
+            {}
             <button
               onClick={handleReportIssue}
               className="px-4 py-2 rounded font-medium transition-all duration-200 text-sm hover:opacity-80"
@@ -393,7 +386,7 @@ function DefaultErrorFallback({
             </button>
           </div>
 
-          {/* Debug info (collapsed by default) */}
+          {}
           <details className="mt-6">
             <summary
               className="cursor-pointer text-sm opacity-75 hover:opacity-100"
@@ -462,7 +455,6 @@ export class ErrorRecoveryService {
     const suggestions: string[] = [];
     const quickFixes: Array<{ label: string; action: string }> = [];
 
-    // Command not found
     if (error.includes("not found") || error.includes("unknown command")) {
       suggestions.push("Did you mean one of these commands?");
       suggestions.push("Use 'help' to see all available commands");
@@ -472,7 +464,6 @@ export class ErrorRecoveryService {
       quickFixes.push({ label: "List Aliases", action: "alias" });
     }
 
-    // Theme errors
     if (
       command.startsWith("theme") &&
       (error.includes("not found") || error.includes("invalid"))
@@ -484,7 +475,6 @@ export class ErrorRecoveryService {
       quickFixes.push({ label: "Reset Theme", action: "theme matrix" });
     }
 
-    // Font errors
     if (
       command.startsWith("font") &&
       (error.includes("not found") || error.includes("invalid"))

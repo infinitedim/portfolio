@@ -1,6 +1,14 @@
 import { cache } from "react";
 
-// Types for portfolio data
+/**
+ * Represents a GitHub repository with key metrics
+ * @property name - Repository name
+ * @property description - Repository description text
+ * @property stargazers_count - Number of stars
+ * @property forks_count - Number of forks
+ * @property language - Primary programming language
+ * @property updated_at - Last update timestamp
+ */
 interface GitHubRepository {
   name: string;
   description: string | null;
@@ -10,12 +18,26 @@ interface GitHubRepository {
   updated_at: string;
 }
 
+/**
+ * Represents a GitHub user's profile statistics
+ * @property followers - Number of followers
+ * @property following - Number of accounts following
+ * @property public_repos - Number of public repositories
+ */
 interface GitHubUser {
   followers: number;
   following: number;
   public_repos: number;
 }
 
+/**
+ * Complete portfolio data structure
+ * @property skills - Categorized skills with progress tracking
+ * @property projects - List of portfolio projects
+ * @property experience - Professional experience entries
+ * @property about - Personal information and contact details
+ * @property lastUpdated - Timestamp of last data update
+ */
 export interface PortfolioData {
   skills: SkillCategory[];
   projects: Project[];
@@ -24,12 +46,25 @@ export interface PortfolioData {
   lastUpdated: string;
 }
 
+/**
+ * A category of related skills with progress tracking
+ * @property name - Category name (e.g., "Frontend", "Backend")
+ * @property skills - Array of skills in this category
+ * @property progress - Overall progress percentage (0-100)
+ */
 export interface SkillCategory {
   name: string;
   skills: Skill[];
   progress: number;
 }
 
+/**
+ * Individual skill with proficiency and experience details
+ * @property name - Skill name (e.g., "React", "TypeScript")
+ * @property level - Proficiency level
+ * @property yearsOfExperience - Years of experience with this skill
+ * @property projects - Project names using this skill
+ */
 export interface Skill {
   name: string;
   level: "beginner" | "intermediate" | "advanced" | "expert";
@@ -37,6 +72,18 @@ export interface Skill {
   projects: string[];
 }
 
+/**
+ * Portfolio project details
+ * @property id - Unique project identifier
+ * @property name - Project name
+ * @property description - Project description
+ * @property technologies - Array of technologies used
+ * @property demoUrl - Optional live demo URL
+ * @property githubUrl - Optional GitHub repository URL
+ * @property imageUrl - Optional project image URL
+ * @property status - Project completion status
+ * @property featured - Whether project is featured on homepage
+ */
 export interface Project {
   id: string;
   name: string;
@@ -49,6 +96,14 @@ export interface Project {
   featured: boolean;
 }
 
+/**
+ * Professional experience entry
+ * @property company - Company name
+ * @property position - Job title/position
+ * @property duration - Employment duration (e.g., "2020-2022")
+ * @property description - Array of responsibility/achievement descriptions
+ * @property technologies - Technologies used in this role
+ */
 export interface Experience {
   company: string;
   position: string;
@@ -57,6 +112,14 @@ export interface Experience {
   technologies: string[];
 }
 
+/**
+ * Personal information and contact details
+ * @property name - Full name
+ * @property title - Professional title
+ * @property bio - Biography text
+ * @property location - Geographic location
+ * @property contact - Contact information and social links
+ */
 export interface AboutInfo {
   name: string;
   title: string;
@@ -70,15 +133,13 @@ export interface AboutInfo {
   };
 }
 
-// Cache duration constants
 const CACHE_DURATIONS = {
-  SKILLS: 1000 * 60 * 15, // 15 minutes
-  PROJECTS: 1000 * 60 * 30, // 30 minutes
-  EXPERIENCE: 1000 * 60 * 60, // 1 hour
-  ABOUT: 1000 * 60 * 60 * 24, // 24 hours
+  SKILLS: 1000 * 60 * 15,
+  PROJECTS: 1000 * 60 * 30,
+  EXPERIENCE: 1000 * 60 * 60,
+  ABOUT: 1000 * 60 * 60 * 24,
 } as const;
 
-// MODIFICATION: Static fallback data for build time
 const STATIC_PROJECTS: Project[] = [
   {
     id: "terminal-portfolio",
@@ -122,7 +183,6 @@ const STATIC_PROJECTS: Project[] = [
   },
 ];
 
-// Generic fetch with caching and error handling
 async function fetchWithCache<T>(
   url: string,
   options: RequestInit & { cacheTime?: number } = {},
@@ -156,23 +216,18 @@ async function fetchWithCache<T>(
   }
 }
 
-// React cache wrapper for server components
 export const getPortfolioData = cache(async (): Promise<PortfolioData> => {
-  // ALWAYS use fallback data during production builds to avoid external API calls
   console.log("Build mode detected - using static portfolio data");
   return getFallbackPortfolioData();
 });
 
-// Get specific portfolio sections with optimized caching
 export const getSkillsData = cache(async (): Promise<SkillCategory[]> => {
-  // Use static data during build time to avoid API calls
   console.log("Build mode detected - returning empty skills array");
   return [];
 });
 
 export const getProjectsData = cache(
   async (limit?: number): Promise<Project[]> => {
-    // ALWAYS use fallback data during production builds to avoid external API calls
     console.log("Build mode detected - using static project data");
     return limit ? STATIC_PROJECTS.slice(0, limit) : STATIC_PROJECTS;
   },
@@ -220,13 +275,11 @@ export const getAboutData = cache(async (): Promise<AboutInfo> => {
   }
 });
 
-// Featured projects for homepage
 export const getFeaturedProjects = cache(async (): Promise<Project[]> => {
   const projects = await getProjectsData();
   return projects.filter((project) => project.featured);
 });
 
-// Analytics and performance data
 export const getAnalyticsData = cache(
   async (): Promise<{
     pageViews: number;
@@ -234,8 +287,6 @@ export const getAnalyticsData = cache(
     topProjects: string[];
     topSkills: string[];
   }> => {
-    // In production, this would fetch from your analytics provider
-    // For now, return mock data
     return {
       pageViews: 15420,
       uniqueVisitors: 8342,
@@ -249,7 +300,6 @@ export const getAnalyticsData = cache(
   },
 );
 
-// GitHub integration for real-time project data
 export const getGitHubData = cache(
   async (): Promise<{
     repositories: Array<{
@@ -284,12 +334,12 @@ export const getGitHubData = cache(
           `https://api.github.com/users/${username}/repos?sort=updated&per_page=10`,
           {
             headers,
-            cacheTime: 1000 * 60 * 30, // 30 minutes
+            cacheTime: 1000 * 60 * 30,
           },
         ),
         fetchWithCache(`https://api.github.com/users/${username}`, {
           headers,
-          cacheTime: 1000 * 60 * 60, // 1 hour
+          cacheTime: 1000 * 60 * 60,
         }),
       ]);
 
@@ -326,7 +376,6 @@ export const getGitHubData = cache(
   },
 );
 
-// Fallback data generators
 function getFallbackPortfolioData(): PortfolioData {
   return {
     skills: [],
@@ -351,13 +400,10 @@ function getFallbackAboutData(): AboutInfo {
   };
 }
 
-// Cache invalidation utilities
 export async function invalidateCache(section?: string): Promise<void> {
-  // In production, you might use Redis or another cache invalidation system
   console.log(`Cache invalidated for section: ${section || "all"}`);
 }
 
-// Health check for data sources
 export async function checkDataHealth(): Promise<{
   api: boolean;
   github: boolean;

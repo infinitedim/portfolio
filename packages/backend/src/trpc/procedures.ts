@@ -10,7 +10,6 @@ import type { TrpcContext } from "./context";
 import { getCSRFService } from "./services";
 import { securityLogger } from "../logging/logger";
 
-// Initialize tRPC with our context type
 const t = initTRPC.context<TrpcContext>().create();
 
 /**
@@ -18,16 +17,10 @@ const t = initTRPC.context<TrpcContext>().create();
  * Validates the x-csrf-token header against the stored token for the session.
  */
 const csrfMiddleware = t.middleware(async ({ ctx, next, type }) => {
-  // Only validate CSRF for mutations (state-changing operations)
   if (type !== "mutation") {
     return next({ ctx });
   }
 
-  // Skip CSRF for login/refresh endpoints (they handle their own security)
-  // These are allowed because:
-  // 1. Login requires valid credentials
-  // 2. Refresh requires a valid refresh token
-  // The CSRF token is obtained after login via the getCsrfToken endpoint
   const path = (ctx.req as { path?: string }).path || "";
   if (path.includes("auth.login") || path.includes("auth.refresh")) {
     return next({ ctx });
@@ -50,7 +43,6 @@ const csrfMiddleware = t.middleware(async ({ ctx, next, type }) => {
     });
   }
 
-  // Get session ID and validate token
   const sessionId = csrfService.getSessionId(ctx.req);
   const validationResult = await csrfService.validateToken(
     sessionId,
@@ -92,19 +84,13 @@ const authMiddleware = t.middleware(async ({ ctx, next }) => {
   });
 });
 
-// Base router and public procedure (no CSRF, no auth)
 export const router = t.router;
 export const publicProcedure = t.procedure;
 
-// CSRF-protected procedure for mutations that don't require auth
-// (rare, but possible for things like contact forms)
 export const csrfProcedure = t.procedure.use(csrfMiddleware);
 
-// Auth-protected procedure (requires authentication)
 export const protectedProcedure = t.procedure.use(authMiddleware);
 
-// Fully protected procedure (requires both auth AND CSRF)
-// Use this for sensitive mutations that change data
 export const protectedMutationProcedure = t.procedure
   .use(authMiddleware)
   .use(csrfMiddleware);

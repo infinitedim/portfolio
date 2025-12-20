@@ -10,7 +10,6 @@ import { createBackendContext } from "./context";
 
 export const appRouter = router({
   health: publicProcedure.query(async ({ ctx }) => {
-    // Use singleton redis from context services
     try {
       const cached = await ctx.services.redis.get<{ status: string }>(
         "api:health",
@@ -24,7 +23,6 @@ export const appRouter = router({
     }
   }),
 
-  // Comprehensive health check
   healthDetailed: publicProcedure.query(async ({ ctx }) => {
     try {
       return await ctx.services.health.getDetailedHealth();
@@ -37,7 +35,6 @@ export const appRouter = router({
     }
   }),
 
-  // Database health check
   healthDatabase: publicProcedure.query(async ({ ctx }) => {
     try {
       const result = await ctx.services.health.checkHealth();
@@ -55,7 +52,6 @@ export const appRouter = router({
     }
   }),
 
-  // Redis health check
   healthRedis: publicProcedure.query(async ({ ctx }) => {
     try {
       const result = await ctx.services.health.checkHealth();
@@ -73,7 +69,6 @@ export const appRouter = router({
     }
   }),
 
-  // Memory health check
   healthMemory: publicProcedure.query(async ({ ctx }) => {
     try {
       const result = await ctx.services.health.checkHealth();
@@ -91,7 +86,6 @@ export const appRouter = router({
     }
   }),
 
-  // System health check
   healthSystem: publicProcedure.query(async ({ ctx }) => {
     try {
       const result = await ctx.services.health.checkHealth();
@@ -109,7 +103,6 @@ export const appRouter = router({
     }
   }),
 
-  // Readiness probe
   healthReady: publicProcedure.query(async ({ ctx }) => {
     try {
       const result = await ctx.services.health.checkHealth();
@@ -144,7 +137,6 @@ export const appRouter = router({
     }
   }),
 
-  // Liveness probe
   healthLive: publicProcedure.query(async ({ ctx }) => {
     try {
       const result = await ctx.services.health.checkHealth();

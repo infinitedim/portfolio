@@ -23,7 +23,6 @@ export class SecurityMiddleware implements NestMiddleware {
     @Optional() private readonly auditLogService?: AuditLogService,
     @Optional() private readonly csrfService?: CSRFTokenService,
   ) {
-    // Log which services are available for debugging
     this.logServiceAvailability();
   }
 
@@ -40,7 +39,6 @@ export class SecurityMiddleware implements NestMiddleware {
       operation: "constructor",
     });
 
-    // Warn about missing critical services
     if (!this.securityService) {
       securityLogger.warn(
         "SecurityService not available - rate limiting disabled",
@@ -91,14 +89,12 @@ export class SecurityMiddleware implements NestMiddleware {
   private isFromTrustedProxy(req: Request): boolean {
     const trustedProxies = this.getTrustedProxies();
     if (trustedProxies.length === 0) {
-      // No trusted proxies configured - don't trust X-Forwarded-For
       return false;
     }
 
     const socketIp =
       req.socket?.remoteAddress || req.connection?.remoteAddress || "";
 
-    // Normalize IPv6-mapped IPv4 addresses (e.g., ::ffff:127.0.0.1 -> 127.0.0.1)
     const normalizedSocketIp = socketIp.replace(/^::ffff:/, "");
 
     return trustedProxies.some((proxy) => {
@@ -118,14 +114,11 @@ export class SecurityMiddleware implements NestMiddleware {
       req.ip ||
       "unknown";
 
-    // Normalize IPv6-mapped IPv4
     const normalizedSocketIp = socketIp.replace(/^::ffff:/, "");
 
-    // Only parse X-Forwarded-For if request came from a trusted proxy
     if (this.isFromTrustedProxy(req)) {
       const forwarded = req.headers["x-forwarded-for"];
       if (typeof forwarded === "string") {
-        // Take the first IP in the chain (original client)
         const clientIp = forwarded.split(",")[0]?.trim();
         if (clientIp) {
           securityLogger.debug("Using X-Forwarded-For from trusted proxy", {
@@ -138,7 +131,6 @@ export class SecurityMiddleware implements NestMiddleware {
         }
       }
     } else if (req.headers["x-forwarded-for"]) {
-      // Log when X-Forwarded-For is present but not trusted
       securityLogger.warn(
         "X-Forwarded-For header ignored - not from trusted proxy",
         {
@@ -149,7 +141,6 @@ export class SecurityMiddleware implements NestMiddleware {
       );
     }
 
-    // Fallback to socket remote address
     return normalizedSocketIp;
   }
 
@@ -225,16 +216,13 @@ export class SecurityMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      // Skip security checks for excluded paths
       if (this.isExcludedPath(req.path)) {
         return next();
       }
 
-      // Get client IP with fallback
       const clientIp =
         this.securityService?.getClientIp(req) ?? this.getFallbackClientIp(req);
 
-      // Only perform rate limiting if SecurityService is available
       if (this.securityService) {
         const rateLimitType = this.securityService.getRateLimitType(req);
         const rateLimitResult = await this.securityService.checkRateLimit(
@@ -243,7 +231,6 @@ export class SecurityMiddleware implements NestMiddleware {
         );
 
         if (rateLimitResult.isBlocked) {
-          // Log rate limit exceeded if audit service is available
           if (this.auditLogService) {
             await this.auditLogService.logSecurityEvent(
               AuditEventType.RATE_LIMIT_EXCEEDED,
@@ -260,19 +247,16 @@ export class SecurityMiddleware implements NestMiddleware {
           throw new ForbiddenException(rateLimitResult.message);
         }
 
-        // Add comprehensive rate limit headers
         const rateLimitHeaders = this.securityService.getRateLimitHeaders(
           rateLimitResult.remaining,
           100, // Default limit
           rateLimitResult.resetTime,
         );
 
-        // Set all rate limit headers
         Object.entries(rateLimitHeaders).forEach(([key, value]) => {
           res.setHeader(key, value);
         });
       } else {
-        // Log warning about disabled rate limiting
         securityLogger.warn(
           "Rate limiting disabled due to missing SecurityService",
           {
@@ -285,7 +269,6 @@ export class SecurityMiddleware implements NestMiddleware {
         );
       }
 
-      // Add additional security headers
       res.setHeader("X-Content-Type-Options", "nosniff");
       res.setHeader("X-Frame-Options", "DENY");
       res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -294,20 +277,16 @@ export class SecurityMiddleware implements NestMiddleware {
         "geolocation=(), microphone=(), camera=(), payment=(), usb=(), bluetooth=(), accelerometer=(), gyroscope=(), magnetometer=()",
       );
 
-      // Security checks for request body
       if (req.body && typeof req.body === "object") {
         await this.validateRequestBody(req);
       }
 
-      // Security checks for query parameters
       if (req.query && Object.keys(req.query).length > 0) {
         await this.validateQueryParameters(req);
       }
 
-      // Security checks for headers
       this.validateHeaders(req);
 
-      // Generate CSRF token for state-changing requests (only if CSRF service is available)
       if (this.requiresCSRFToken(req) && this.csrfService) {
         try {
           const sessionId = this.csrfService.getSessionId(req);
@@ -333,7 +312,6 @@ export class SecurityMiddleware implements NestMiddleware {
         );
       }
 
-      // Log security event for suspicious activity (only if audit service is available)
       if (this.isSuspiciousRequest(req) && this.auditLogService) {
         await this.auditLogService.logSecurityEvent(
           AuditEventType.SUSPICIOUS_ACTIVITY,
@@ -363,7 +341,6 @@ export class SecurityMiddleware implements NestMiddleware {
         operation: "use",
       });
 
-      // Log security event for middleware errors (only if audit service is available)
       if (this.auditLogService) {
         await this.auditLogService.logSecurityEvent(
           AuditEventType.SYSTEM_ERROR,
@@ -389,13 +366,12 @@ export class SecurityMiddleware implements NestMiddleware {
   private requiresCSRFToken(req: Request): boolean {
     const stateChangingMethods = ["POST", "PUT", "PATCH", "DELETE"];
 
-    // Paths that require CSRF protection for state-changing operations
     const csrfRequiredPaths = [
       "/auth/login",
       "/auth/register",
       "/admin",
-      "/api/", // All API routes
-      "/trpc/", // All tRPC routes (mutations)
+      "/api/",
+      "/trpc/",
     ];
 
     // Paths that are exempt from CSRF (typically read-only or have other auth)
@@ -405,13 +381,11 @@ export class SecurityMiddleware implements NestMiddleware {
       "/api/health", // Health checks
     ];
 
-    // Check if path is exempt
     const isExempt = csrfExemptPaths.some((path) => req.path.startsWith(path));
     if (isExempt) {
       return false;
     }
 
-    // Check if request has valid JWT - JWT-authenticated requests don't need CSRF
     const hasJWT = req.headers.authorization?.startsWith("Bearer ");
     if (hasJWT) {
       return false;
@@ -428,13 +402,11 @@ export class SecurityMiddleware implements NestMiddleware {
     const clientIp =
       this.securityService?.getClientIp(req) ?? this.getFallbackClientIp(req);
 
-    // Check for SQL injection patterns using SecurityService or fallback
     const hasSqlInjection =
       this.securityService?.hasSqlInjectionPatterns(bodyString) ??
       this.fallbackHasSqlInjectionPatterns(bodyString);
 
     if (hasSqlInjection) {
-      // Log event if audit service is available
       if (this.auditLogService) {
         const sanitizedBody =
           this.securityService?.sanitizeForLogging(req.body) ??
@@ -454,13 +426,11 @@ export class SecurityMiddleware implements NestMiddleware {
       throw new ForbiddenException("SQL injection attempt detected");
     }
 
-    // Check for XSS patterns using SecurityService or fallback
     const hasXss =
       this.securityService?.hasXssPatterns(bodyString) ??
       this.fallbackHasXssPatterns(bodyString);
 
     if (hasXss) {
-      // Log event if audit service is available
       if (this.auditLogService) {
         const sanitizedBody =
           this.securityService?.sanitizeForLogging(req.body) ??
@@ -486,13 +456,11 @@ export class SecurityMiddleware implements NestMiddleware {
     const clientIp =
       this.securityService?.getClientIp(req) ?? this.getFallbackClientIp(req);
 
-    // Check for SQL injection patterns in query parameters
     const hasSqlInjection =
       this.securityService?.hasSqlInjectionPatterns(queryString) ??
       this.fallbackHasSqlInjectionPatterns(queryString);
 
     if (hasSqlInjection) {
-      // Log event if audit service is available
       if (this.auditLogService) {
         const sanitizedQuery =
           this.securityService?.sanitizeForLogging(req.query) ??
@@ -514,14 +482,12 @@ export class SecurityMiddleware implements NestMiddleware {
       );
     }
 
-    // Check for path traversal attempts
     const pathTraversalPatterns = [/\.\.\//, /\.\.\\/];
     const hasPathTraversal = pathTraversalPatterns.some((pattern) =>
       pattern.test(queryString),
     );
 
     if (hasPathTraversal) {
-      // Log event if audit service is available
       if (this.auditLogService) {
         const sanitizedQuery =
           this.securityService?.sanitizeForLogging(req.query) ??
@@ -544,7 +510,6 @@ export class SecurityMiddleware implements NestMiddleware {
   }
 
   private validateHeaders(req: Request): void {
-    // Check for suspicious headers
     const suspiciousHeaders = [
       "x-forwarded-host",
       "x-forwarded-proto",
@@ -568,10 +533,9 @@ export class SecurityMiddleware implements NestMiddleware {
       }
     }
 
-    // Validate content length for POST requests
     if (req.method === "POST") {
       const contentLength = parseInt(req.headers["content-length"] || "0");
-      const maxContentLength = 10 * 1024 * 1024; // 10MB
+      const maxContentLength = 10 * 1024 * 1024;
 
       if (contentLength > maxContentLength) {
         throw new ForbiddenException("Request body too large");
@@ -580,7 +544,6 @@ export class SecurityMiddleware implements NestMiddleware {
   }
 
   private isSuspiciousRequest(req: Request): boolean {
-    // Check for suspicious user agents
     const userAgent = req.headers["user-agent"] || "";
     const suspiciousUserAgents = [
       "sqlmap",
@@ -596,7 +559,6 @@ export class SecurityMiddleware implements NestMiddleware {
       userAgent.toLowerCase().includes(agent.toLowerCase()),
     );
 
-    // Check for suspicious paths
     const suspiciousPaths = [
       "/admin",
       "/wp-admin",

@@ -39,7 +39,6 @@ export class ValidationUtils {
       errors.push("Method name is required and must be a string");
     }
 
-    // Check for valid service names
     const validServices = ["health", "auth", "projects", "spotify", "security"];
     if (service && !validServices.includes(service)) {
       warnings.push(
@@ -47,7 +46,6 @@ export class ValidationUtils {
       );
     }
 
-    // Check for common method patterns
     if (method && !/^[a-zA-Z][a-zA-Z0-9]*$/.test(method)) {
       warnings.push(
         "Method name should start with a letter and contain only alphanumeric characters",
@@ -85,7 +83,6 @@ export class ValidationUtils {
         isValid: true,
       };
 
-      // Check required parameters
       if (
         param.required &&
         (value === undefined || value === null || value === "")
@@ -95,7 +92,6 @@ export class ValidationUtils {
         return validation;
       }
 
-      // Skip validation for optional empty values
       if (
         !param.required &&
         (value === undefined || value === null || value === "")
@@ -103,7 +99,6 @@ export class ValidationUtils {
         return validation;
       }
 
-      // Type-specific validation
       switch (param.type) {
         case "string":
           if (typeof value !== "string") {
@@ -159,7 +154,6 @@ export class ValidationUtils {
           break;
 
         default:
-          // For unknown types, just check if value exists
           if (value === undefined || value === null) {
             validation.isValid = false;
             validation.error = `${param.name} is required`;
@@ -189,7 +183,6 @@ export class ValidationUtils {
       );
     }
 
-    // Check method-type compatibility
     if (type === "query" && method !== "GET") {
       warnings.push("Query procedures typically use GET method");
     }
@@ -281,7 +274,6 @@ export class ValidationUtils {
     const errors: string[] = [];
     const warnings: string[] = [];
 
-    // Check for required environment variables
     const requiredEnvVars = ["NEXT_PUBLIC_API_URL"];
 
     const optionalEnvVars = ["NEXT_PUBLIC_BASE_URL"];
@@ -298,7 +290,6 @@ export class ValidationUtils {
       }
     });
 
-    // Validate API URL if present
     if (process.env.NEXT_PUBLIC_API_URL) {
       const urlValidation = this.validateUrl(process.env.NEXT_PUBLIC_API_URL);
       errors.push(...urlValidation.errors);

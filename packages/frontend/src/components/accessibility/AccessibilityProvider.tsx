@@ -48,11 +48,9 @@ export function AccessibilityProvider({
   );
   const [focusMode, setFocusMode] = useState(false);
 
-  // Detect system preferences
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // High contrast detection
     const highContrastQuery = window.matchMedia("(prefers-contrast: high)");
     setIsHighContrast(highContrastQuery.matches);
 
@@ -62,7 +60,6 @@ export function AccessibilityProvider({
 
     highContrastQuery.addEventListener("change", handleHighContrastChange);
 
-    // Reduced motion detection
     const reducedMotionQuery = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     );
@@ -74,7 +71,6 @@ export function AccessibilityProvider({
 
     reducedMotionQuery.addEventListener("change", handleReducedMotionChange);
 
-    // Load saved preferences
     const savedFontSize = localStorage.getItem(
       "accessibility-font-size",
     ) as typeof fontSize;
@@ -95,7 +91,6 @@ export function AccessibilityProvider({
     };
   }, []);
 
-  // Apply font size to document
   useEffect(() => {
     const root = document.documentElement;
     const sizeMap = {
@@ -108,7 +103,6 @@ export function AccessibilityProvider({
     localStorage.setItem("accessibility-font-size", fontSize);
   }, [fontSize]);
 
-  // Apply focus mode
   useEffect(() => {
     const root = document.documentElement;
     if (focusMode) {
@@ -126,7 +120,6 @@ export function AccessibilityProvider({
     setCurrentMessage(message);
     setMessagePriority(priority);
 
-    // Clear message after announcement
     setTimeout(() => setCurrentMessage(""), 1000);
   };
 
@@ -144,7 +137,7 @@ export function AccessibilityProvider({
     >
       {children}
 
-      {/* Screen reader announcements */}
+      {}
       <div
         aria-live={messagePriority}
         aria-atomic="true"

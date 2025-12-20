@@ -51,7 +51,6 @@ export function MobileTerminal({ children }: MobileTerminalProps): JSX.Element {
     return <>{children}</>;
   }
 
-  // Don't render if themeConfig is not available
   if (!themeConfig?.colors) {
     return <div key={`mobile-terminal-no-config-${theme}`}>{children}</div>;
   }
@@ -65,14 +64,13 @@ export function MobileTerminal({ children }: MobileTerminalProps): JSX.Element {
         paddingBottom: isVirtualKeyboardOpen
           ? "0"
           : "env(safe-area-inset-bottom)",
-        // Improve touch interactions
         touchAction: "manipulation",
         WebkitTouchCallout: "none",
         WebkitUserSelect: "none",
         userSelect: "none",
       }}
     >
-      {/* Mobile Hint */}
+      {}
       {showMobileHint && (
         <div
           className="fixed top-0 left-0 right-0 z-50 p-4 text-sm animate-in slide-in-from-top duration-300"
@@ -104,7 +102,7 @@ export function MobileTerminal({ children }: MobileTerminalProps): JSX.Element {
         </div>
       )}
 
-      {/* Mobile-specific header - Compact version */}
+      {}
       <div
         className="sticky top-0 z-40 px-3 py-2 border-b backdrop-blur-sm"
         style={{
@@ -163,7 +161,7 @@ export function MobileTerminal({ children }: MobileTerminalProps): JSX.Element {
 
       {children}
 
-      {/* Mobile command suggestions */}
+      {}
       <div
         className="fixed bottom-0 left-0 right-0 p-4 border-t backdrop-blur-sm"
         style={{
@@ -202,7 +200,7 @@ export function MobileTerminal({ children }: MobileTerminalProps): JSX.Element {
           </div>
         </div>
 
-        {/* Enhanced swipe indicator with interaction hint */}
+        {}
         <div className="flex flex-col items-center gap-1">
           <div
             className="w-12 h-1 rounded-full"

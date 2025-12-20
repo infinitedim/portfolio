@@ -1,10 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
-// Minimal, frontend-friendly implementations of CSP/CORS helpers.
+
+/**
+ * Generates a cryptographically secure nonce for CSP
+ * @returns A unique nonce string using crypto.randomUUID
+ */
 function generateNonce() {
   return crypto.randomUUID();
 }
 
+/**
+ * Generates security headers for the response
+ * @param nonce - The nonce for Content Security Policy
+ * @param _isDev - Whether the app is in development mode
+ * @returns Object containing security headers
+ */
 function getSecurityHeaders(nonce: string, _isDev: boolean) {
   return {
     "Content-Security-Policy": `default-src 'self'; script-src 'self' 'nonce-${nonce}';`,
@@ -14,13 +24,21 @@ function getSecurityHeaders(nonce: string, _isDev: boolean) {
   } as Record<string, string>;
 }
 
+/**
+ * Generates CORS headers based on allowed origins
+ * @param origin - The request origin
+ * @param allowed - Array of allowed origin strings
+ * @returns CORS headers object if origin is allowed
+ */
 function getCORSHeaders(origin: string, allowed: string[]) {
   return allowed.includes(origin)
     ? { "Access-Control-Allow-Origin": origin }
     : {};
 }
 
-// Lightweight logger fallback for middleware environment
+/**
+ * Simple logger object for middleware logging
+ */
 const logger = {
   warn: (...args: unknown[]) => console.warn(...args),
   info: (...args: unknown[]) => console.info(...args),
@@ -28,26 +46,37 @@ const logger = {
 };
 
 /**
- * Enhanced middleware for the application with improved security
- * @param {NextRequest} request - The request object
- * @returns {NextResponse} The response object
+ * Enhanced Next.js middleware for security, performance, and analytics
+ *
+ * Features:
+ * - Security headers (CSP, X-Frame-Options, etc.)
+ * - CORS handling
+ * - Device detection (mobile/tablet/desktop)
+ * - Browser detection and feature support
+ * - Suspicious request pattern detection
+ * - Resource preloading
+ * - Cache control policies
+ * - A/B testing experiment assignment
+ * - Geo-location headers
+ * - Performance monitoring
+ * - Real User Monitoring (RUM) enablement
+ *
+ * @param request - The incoming Next.js request
+ * @returns Modified NextResponse with security and performance headers
  */
 export function middleware(request: NextRequest) {
   const startTime = Date.now();
 
-  // Parse user agent for device detection
   const userAgentHeader = request.headers.get("user-agent") || "";
   const device = { type: "desktop" };
   const browser = { name: "unknown" };
 
-  // Simple user agent parsing for device type
   if (/mobile/i.test(userAgentHeader)) {
     device.type = "mobile";
   } else if (/tablet|ipad/i.test(userAgentHeader)) {
     device.type = "tablet";
   }
 
-  // Simple browser detection
   if (/chrome/i.test(userAgentHeader)) {
     browser.name = "chrome";
   } else if (/firefox/i.test(userAgentHeader)) {
@@ -63,11 +92,9 @@ export function middleware(request: NextRequest) {
 
   const response = NextResponse.next();
 
-  // Generate nonce for CSP
   const nonce = generateNonce();
   response.headers.set("x-nonce", nonce);
 
-  // Add comprehensive security headers
   const isDevelopment = process.env.NODE_ENV === "development";
   const securityHeaders = getSecurityHeaders(nonce, isDevelopment);
 
@@ -75,7 +102,6 @@ export function middleware(request: NextRequest) {
     response.headers.set(key, value);
   });
 
-  // Handle CORS
   const origin = request.headers.get("origin") || "";
   const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",").map((o) =>
     o.trim(),
@@ -86,7 +112,6 @@ export function middleware(request: NextRequest) {
     response.headers.set(key, value);
   });
 
-  // Device-specific optimizations with security considerations
   if (device.type === "mobile") {
     response.headers.set("X-Device-Type", "mobile");
     response.headers.set("Vary", "User-Agent");
@@ -97,7 +122,6 @@ export function middleware(request: NextRequest) {
     response.headers.set("X-Device-Type", "desktop");
   }
 
-  // Security logging for suspicious requests
   const suspiciousPatterns = [
     /\.\.\//, // Path traversal
     /<script/i, // XSS attempts
@@ -121,21 +145,18 @@ export function middleware(request: NextRequest) {
     });
   }
 
-  // Browser-specific optimizations
   if (
     browser.name === "Chrome" &&
     typeof (browser as any).version === "string" &&
     parseInt((browser as any).version, 10) >= 90
   ) {
     response.headers.set("X-Browser-Support", "modern");
-    // Enable advanced features for modern browsers
     response.headers.set("Cross-Origin-Embedder-Policy", "require-corp");
     response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
   } else {
     response.headers.set("X-Browser-Support", "legacy");
   }
 
-  // Performance hints
   response.headers.set(
     "Link",
     [
@@ -145,12 +166,10 @@ export function middleware(request: NextRequest) {
     ].join(", "),
   );
 
-  // Analytics and monitoring headers
   const requestId = crypto.randomUUID();
   response.headers.set("X-Request-ID", requestId);
   response.headers.set("X-Timestamp", new Date().toISOString());
 
-  // Compression hints
   const acceptEncoding = request.headers.get("accept-encoding") || "";
   if (acceptEncoding.includes("br")) {
     response.headers.set("X-Compression-Support", "brotli");
@@ -158,14 +177,11 @@ export function middleware(request: NextRequest) {
     response.headers.set("X-Compression-Support", "gzip");
   }
 
-  // Cache optimization based on path
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/api/")) {
-    // API routes - shorter cache
     response.headers.set("Cache-Control", "public, max-age=300, s-maxage=600");
   } else if (pathname.startsWith("/_next/static/")) {
-    // Static assets - long cache
     response.headers.set(
       "Cache-Control",
       "public, max-age=31536000, immutable",
@@ -175,20 +191,17 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/projects") ||
     pathname.startsWith("/skills")
   ) {
-    // Main pages - moderate cache with revalidation
     response.headers.set(
       "Cache-Control",
       "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
     );
   }
 
-  // A/B Testing support (example)
   const experiment = request.cookies.get("experiment-variant");
   if (!experiment) {
-    // Assign random variant for A/B testing
     const variant = Math.random() < 0.5 ? "A" : "B";
     response.cookies.set("experiment-variant", variant, {
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      maxAge: 60 * 60 * 24 * 30,
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
     });
@@ -197,13 +210,11 @@ export function middleware(request: NextRequest) {
     response.headers.set("X-Experiment-Variant", experiment.value);
   }
 
-  // Geolocation-based optimizations (if you have multiple regions)
   const country = (request as any).geo?.country || "US";
   const region = (request as any).geo?.region || "Unknown";
   response.headers.set("X-Geo-Country", country);
   response.headers.set("X-Geo-Region", region);
 
-  // Theme preference detection from system
   const acceptHeader = request.headers.get("sec-ch-prefers-color-scheme");
   if (acceptHeader === "dark") {
     response.cookies.set("system-theme", "dark", {
@@ -217,13 +228,10 @@ export function middleware(request: NextRequest) {
     });
   }
 
-  // Performance monitoring
   const responseTime = Date.now() - startTime;
   response.headers.set("X-Response-Time", `${responseTime}ms`);
 
-  // Log performance metrics for monitoring
   if (responseTime > 1000) {
-    // Log slow requests
     logger.warn("Slow request detected", {
       url: request.url,
       method: request.method,
@@ -232,7 +240,6 @@ export function middleware(request: NextRequest) {
     });
   }
 
-  // Real User Monitoring (RUM) setup
   if (pathname === "/") {
     response.headers.set("X-RUM-Enable", "true");
     response.headers.set("Timing-Allow-Origin", "*");
@@ -241,17 +248,24 @@ export function middleware(request: NextRequest) {
   return response;
 }
 
+/**
+ * Middleware configuration for Next.js
+ *
+ * Defines which routes should be processed by the middleware.
+ * Excludes static files, images, and other resources that don't need middleware processing.
+ *
+ * @remarks
+ * The matcher uses negative lookahead to exclude:
+ * - _next/static (Next.js static assets)
+ * - _next/image (Next.js image optimization)
+ * - favicon.ico (site favicon)
+ * - sw.js (service worker)
+ * - manifest.json (PWA manifest)
+ * - robots.txt (robots file)
+ * - sitemap.xml (sitemap file)
+ */
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - sw.js (service worker)
-     * - robots.txt (robots file)
-     * - sitemap.xml (sitemap file)
-     */
     "/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.json|robots.txt|sitemap.xml).*)",
   ],
 };

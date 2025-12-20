@@ -1,8 +1,11 @@
 import { type Command } from "@/types/terminal";
 
-// Default aliases
+/**
+ * Default command aliases for common shortcuts
+ * Maps short forms to full command names
+ * @example 'h' → 'help', 'cls' → 'clear'
+ */
 const DEFAULT_ALIASES: Record<string, string> = {
-  // Quick shortcuts
   h: "help",
   "?": "help",
   c: "clear",
@@ -11,17 +14,14 @@ const DEFAULT_ALIASES: Record<string, string> = {
   s: "status",
   st: "status",
 
-  // Theme shortcuts
   th: "theme",
   themes: "theme -l",
   dark: "theme matrix",
   light: "theme terminal",
 
-  // Font shortcuts
   f: "font",
   fonts: "font -l",
 
-  // Navigation shortcuts
   home: "clear",
   info: "about",
   contact: "contact",
@@ -30,14 +30,21 @@ const DEFAULT_ALIASES: Record<string, string> = {
   edu: "education",
   road: "roadmap",
 
-  // Customization shortcuts
   custom: "customize",
   settings: "customize",
   config: "customize",
 };
 
 /**
- * Command alias manager
+ * Manager for command aliases with persistence
+ * Allows users to create custom shortcuts for commands
+ * Stores aliases in localStorage for persistence across sessions
+ * @example
+ * ```ts
+ * const manager = AliasManager.getInstance();
+ * manager.addAlias('g', 'git');
+ * const resolved = manager.resolve('g status'); // 'git status'
+ * ```
  */
 export class AliasManager {
   private static instance: AliasManager;
@@ -84,7 +91,6 @@ export class AliasManager {
    */
   private saveAliases(): void {
     try {
-      // Only save custom aliases, not defaults
       const customAliases = Object.fromEntries(
         Object.entries(this.aliases).filter(
           ([key]) => !(key in DEFAULT_ALIASES),
@@ -124,7 +130,6 @@ export class AliasManager {
 
     const normalizedAlias = alias.toLowerCase().trim();
 
-    // Prevent recursive aliases
     if (normalizedAlias === command.toLowerCase().trim()) {
       return false;
     }
@@ -142,7 +147,6 @@ export class AliasManager {
   removeAlias(alias: string): boolean {
     const normalizedAlias = alias.toLowerCase().trim();
 
-    // Don't allow removing default aliases
     if (normalizedAlias in DEFAULT_ALIASES) {
       return false;
     }
@@ -203,7 +207,6 @@ export const aliasCommand: Command = {
   execute: async (args: string[]) => {
     const aliasManager = AliasManager.getInstance();
 
-    // Show help
     if (args.includes("-h") || args.includes("--help")) {
       return {
         type: "success" as const,
@@ -235,7 +238,6 @@ export const aliasCommand: Command = {
       };
     }
 
-    // List aliases
     if (args.length === 0 || args.includes("-l") || args.includes("--list")) {
       const aliases = aliasManager.getAllAliases();
       const aliasEntries = Object.entries(aliases);
@@ -281,7 +283,6 @@ export const aliasCommand: Command = {
       };
     }
 
-    // List custom aliases only
     if (args.includes("-c") || args.includes("--custom")) {
       const customAliases = Object.entries(aliasManager.getCustomAliases());
 
@@ -308,7 +309,6 @@ export const aliasCommand: Command = {
       };
     }
 
-    // Remove alias
     if (args.includes("-r") || args.includes("--remove")) {
       const removeIndex = args.findIndex(
         (arg) => arg === "-r" || arg === "--remove",
@@ -337,7 +337,6 @@ export const aliasCommand: Command = {
       }
     }
 
-    // Reset to defaults
     if (args.includes("--reset")) {
       aliasManager.resetToDefaults();
       return {
@@ -346,7 +345,6 @@ export const aliasCommand: Command = {
       };
     }
 
-    // Create/update alias
     if (args.length >= 2) {
       const [alias, ...commandParts] = args;
       const command = commandParts.join(" ");

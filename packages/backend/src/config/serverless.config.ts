@@ -7,7 +7,6 @@ export class ServerlessConfig {
    * @returns {boolean} - Whether the application is running in a serverless environment
    */
   static isServerless(): boolean {
-    // No longer using Vercel - always return false for serverless mode
     return false;
   }
 
@@ -16,7 +15,6 @@ export class ServerlessConfig {
    * @returns {string} - The appropriate database URL for the environment
    */
   static getDatabaseUrl(): string {
-    // Use DATABASE_URL for all environments
     return process.env.DATABASE_URL || "";
   }
 
@@ -27,7 +25,6 @@ export class ServerlessConfig {
   static getConnectionPoolConfig() {
     const isServerlessEnv = this.isServerless();
 
-    // Default values based on environment
     const defaults = {
       connectionLimit: isServerlessEnv ? 5 : 10,
       idleTimeout: isServerlessEnv ? 30000 : 60000,
@@ -44,7 +41,6 @@ export class ServerlessConfig {
       },
     };
 
-    // Override with environment variables if provided
     return {
       connectionLimit: defaults.connectionLimit,
       idleTimeout: defaults.idleTimeout,
@@ -80,23 +76,19 @@ export class ServerlessConfig {
     return {
       isServerless: this.isServerless(),
       databaseUrl: this.getDatabaseUrl(),
-      // Enable connection pooling for all environments, with different configs
       enableConnectionPooling: true,
       connectionPool: this.getConnectionPoolConfig(),
-      // Reduce logging in production for better performance
       logLevel: isServerlessEnv ? "error" : process.env.LOG_LEVEL || "info",
-      // Query timeout settings
       queryTimeout: process.env.DB_QUERY_TIMEOUT
         ? parseInt(process.env.DB_QUERY_TIMEOUT)
         : isServerlessEnv
           ? 10000
-          : 30000, // 10s for serverless, 30s for regular
-      // Transaction timeout
+          : 30000,
       transactionTimeout: process.env.DB_TRANSACTION_TIMEOUT
         ? parseInt(process.env.DB_TRANSACTION_TIMEOUT)
         : isServerlessEnv
           ? 15000
-          : 45000, // 15s for serverless, 45s for regular
+          : 45000,
     };
   }
 }

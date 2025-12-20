@@ -7,16 +7,31 @@ import type { ThemeConfig } from "@/types/theme";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useI18n } from "@/hooks/useI18n";
 
+/**
+ * Props for the TerminalLoginForm component
+ * @interface TerminalLoginFormProps
+ * @property {() => void} [onLoginSuccess] - Callback function when login succeeds
+ * @property {ThemeConfig} themeConfig - Theme configuration for styling
+ */
 interface TerminalLoginFormProps {
   onLoginSuccess?: () => void;
   themeConfig: ThemeConfig;
 }
 
 /**
- *
- * @param root0
- * @param root0.onLoginSuccess
- * @param root0.themeConfig
+ * Terminal-styled login form with animated cursor and field transitions
+ * Provides email and password authentication with visual feedback
+ * @param {TerminalLoginFormProps} props - Component props
+ * @param {() => void} [props.onLoginSuccess] - Callback function when login succeeds
+ * @param {ThemeConfig} props.themeConfig - Theme configuration for styling
+ * @returns {JSX.Element} The terminal login form component
+ * @example
+ * ```tsx
+ * <TerminalLoginForm
+ *   onLoginSuccess={() => router.push('/admin/dashboard')}
+ *   themeConfig={themeConfig}
+ * />
+ * ```
  */
 export function TerminalLoginForm({
   onLoginSuccess,
@@ -41,7 +56,6 @@ export function TerminalLoginForm({
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const actualInputRef = useRef<HTMLInputElement>(null);
 
-  // Cursor blinking effect
   useEffect(() => {
     if (isLoading) return;
 
@@ -52,7 +66,6 @@ export function TerminalLoginForm({
     return () => clearInterval(interval);
   }, [isLoading]);
 
-  // Focus management
   useEffect(() => {
     if (currentField === "email" && emailInputRef.current) {
       emailInputRef.current.focus();
@@ -112,16 +125,13 @@ export function TerminalLoginForm({
       const result = await login(email.trim(), password);
 
       if (result.success) {
-        // Clear form
         setEmail("");
         setPassword("");
         setCurrentField("email");
 
-        // Call success callback
         onLoginSuccess?.();
       } else {
         setError(result.error || "Login failed");
-        // Focus back to password field on error
         setCurrentField("password");
       }
     } catch (err) {
@@ -180,13 +190,13 @@ export function TerminalLoginForm({
             spellCheck="false"
           />
 
-          {/* Custom cursor */}
+          { }
           {isActive && cursorVisible && !isLoading && (
             <span
               className={`absolute top-0 font-mono text-sm pointer-events-none select-none transition-all duration-150 ${isTyping ? "animate-pulse" : ""}`}
               style={{
                 color: themeConfig.colors.accent,
-                left: `${value.length * 8}px`, // Approximate character width
+                left: `${value.length * 8}px`,
                 animation: isTyping ? "pulse 1s infinite" : "none",
               }}
             >
@@ -194,7 +204,7 @@ export function TerminalLoginForm({
             </span>
           )}
 
-          {/* Password toggle button */}
+          { }
           {isPassword && value && (
             <button
               type="button"
@@ -212,7 +222,7 @@ export function TerminalLoginForm({
           )}
         </div>
 
-        {/* Focus line animation */}
+        { }
         {isFocused && (
           <div
             className="absolute bottom-0 left-0 h-0.5 transition-all duration-300 ease-out"
@@ -229,7 +239,7 @@ export function TerminalLoginForm({
 
   return (
     <div className="space-y-6">
-      {/* Error message */}
+      { }
       {error && (
         <div
           className="p-3 rounded border text-sm font-mono"
@@ -243,12 +253,12 @@ export function TerminalLoginForm({
         </div>
       )}
 
-      {/* Email field */}
+      { }
       <div className="relative">
         {renderInputField("email", email, "Enter your email", emailInputRef)}
       </div>
 
-      {/* Password field */}
+      { }
       <div className="relative">
         {renderInputField(
           "password",
@@ -258,7 +268,7 @@ export function TerminalLoginForm({
         )}
       </div>
 
-      {/* Submit button */}
+      { }
       <div className="flex items-center space-x-2">
         <span
           className={`text-sm font-mono transition-all duration-300 ${buttonHover ? "opacity-100" : "opacity-80"}`}
@@ -321,7 +331,7 @@ export function TerminalLoginForm({
         })()}
       </div>
 
-      {/* Help text */}
+      { }
       <div className="text-xs opacity-60 text-center">
         <div>Press Tab to switch fields • Press Enter to submit</div>
         <div>Use Ctrl+C to cancel • Use Ctrl+L to clear</div>
