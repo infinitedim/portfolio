@@ -1,4 +1,4 @@
-import { getTRPCClient } from "../trpc";
+import {getTRPCClient} from "../trpc";
 
 /**
  * Represents an authenticated user in the system
@@ -155,10 +155,10 @@ class AuthService {
       }
 
       if (!trpcClient?.auth?.login?.mutate) {
-        return { success: false, error: "tRPC client unavailable" };
+        return {success: false, error: "tRPC client unavailable"};
       }
 
-      const result = await trpcClient.auth.login.mutate({ email, password });
+      const result = await trpcClient.auth.login.mutate({email, password});
 
       if (result.success && result.accessToken && result.user) {
         this.accessToken = result.accessToken;
@@ -229,7 +229,7 @@ class AuthService {
       }
 
       if (!trpcClient?.auth?.refresh?.mutate) {
-        return { success: false, error: "tRPC client unavailable" };
+        return {success: false, error: "tRPC client unavailable"};
       }
 
       const result = await trpcClient.auth.refresh.mutate({
@@ -294,7 +294,16 @@ class AuthService {
             accessToken: this.accessToken,
           });
         }
-      } catch {}
+      } catch (error) {
+        if (
+          typeof error === "object" &&
+          error !== null &&
+          "message" in error &&
+          typeof error.message === "string"
+        ) {
+          throw new Error();
+        }
+      }
     }
 
     this.clearTokens();
@@ -337,7 +346,7 @@ class AuthService {
       }
 
       if (!trpcClient?.auth?.validate?.mutate) {
-        return { success: false, error: "tRPC client unavailable" };
+        return {success: false, error: "tRPC client unavailable"};
       }
 
       const result = await trpcClient.auth.validate.mutate({

@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/ui/button";
 import { useTheme } from "@/hooks/useTheme";
+import { isThemeName } from "@/types/theme";
 import type { JSX } from "react";
 
 /**
@@ -19,7 +19,9 @@ export function ThemeSwitcher(): JSX.Element {
 
   const handleThemeChange = (newTheme: string) => {
     try {
-      changeTheme(newTheme as any);
+      if (isThemeName(newTheme)) {
+        changeTheme(newTheme);
+      }
     } catch (error) {
       console.warn("Error changing theme:", error);
     }

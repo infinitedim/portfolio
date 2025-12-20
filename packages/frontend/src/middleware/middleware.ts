@@ -1,5 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextRequest, NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
+
+/** Extended browser info with version */
+interface BrowserInfo {
+  name: string;
+  version?: string;
+}
+
+/** Extended NextRequest with geo data (Vercel/Edge) */
+interface NextRequestWithGeo extends NextRequest {
+  geo?: {
+    country?: string;
+    region?: string;
+    city?: string;
+  };
+}
 
 /**
  * Generates a cryptographically secure nonce for CSP
@@ -32,7 +46,7 @@ function getSecurityHeaders(nonce: string, _isDev: boolean) {
  */
 function getCORSHeaders(origin: string, allowed: string[]) {
   return allowed.includes(origin)
-    ? { "Access-Control-Allow-Origin": origin }
+    ? {"Access-Control-Allow-Origin": origin}
     : {};
 }
 
@@ -68,8 +82,8 @@ export function middleware(request: NextRequest) {
   const startTime = Date.now();
 
   const userAgentHeader = request.headers.get("user-agent") || "";
-  const device = { type: "desktop" };
-  const browser = { name: "unknown" };
+  const device = {type: "desktop"};
+  const browser = {name: "unknown"};
 
   if (/mobile/i.test(userAgentHeader)) {
     device.type = "mobile";
@@ -147,8 +161,8 @@ export function middleware(request: NextRequest) {
 
   if (
     browser.name === "Chrome" &&
-    typeof (browser as any).version === "string" &&
-    parseInt((browser as any).version, 10) >= 90
+    typeof (browser as BrowserInfo).version === "string" &&
+    parseInt((browser as BrowserInfo).version!, 10) >= 90
   ) {
     response.headers.set("X-Browser-Support", "modern");
     response.headers.set("Cross-Origin-Embedder-Policy", "require-corp");
@@ -177,7 +191,7 @@ export function middleware(request: NextRequest) {
     response.headers.set("X-Compression-Support", "gzip");
   }
 
-  const { pathname } = request.nextUrl;
+  const {pathname} = request.nextUrl;
 
   if (pathname.startsWith("/api/")) {
     response.headers.set("Cache-Control", "public, max-age=300, s-maxage=600");
@@ -210,8 +224,8 @@ export function middleware(request: NextRequest) {
     response.headers.set("X-Experiment-Variant", experiment.value);
   }
 
-  const country = (request as any).geo?.country || "US";
-  const region = (request as any).geo?.region || "Unknown";
+  const country = (request as NextRequestWithGeo).geo?.country || "US";
+  const region = (request as NextRequestWithGeo).geo?.region || "Unknown";
   response.headers.set("X-Geo-Country", country);
   response.headers.set("X-Geo-Region", region);
 

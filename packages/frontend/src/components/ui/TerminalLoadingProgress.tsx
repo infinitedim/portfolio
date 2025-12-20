@@ -260,7 +260,7 @@ export function TerminalLoadingProgress({
     <div
       key={`terminal-loading-${theme}`}
       ref={scrollContainerRef}
-      className="font-mono text-sm space-y-1 max-h-[32rem] overflow-y-auto"
+      className="font-mono text-sm space-y-1 max-h-32rem overflow-y-auto"
       role="status"
       aria-label="Loading files"
       suppressHydrationWarning={true}

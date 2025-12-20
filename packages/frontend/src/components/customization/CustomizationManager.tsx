@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect, JSX, useCallback } from "react";
@@ -10,6 +9,7 @@ import { SettingsManager } from "./SettingsManager";
 import { ImportExportManager } from "./ImportExportManager";
 import { TerminalLoadingProgress } from "@/components/ui/TerminalLoadingProgress";
 import type { CustomTheme, CustomFont } from "@/types/customization";
+import type { ThemeName } from "@/types/theme";
 
 interface CustomizationManagerProps {
   isOpen: boolean;
@@ -93,7 +93,7 @@ export function CustomizationManager({
       console.log(`🎨 CustomizationManager: Applying theme ${themeId}`);
 
       try {
-        const success = changeTheme(themeId as any);
+        const success = changeTheme(themeId as ThemeName);
 
         if (success) {
           console.log(`✅ Successfully applied theme: ${themeId}`);
@@ -171,7 +171,7 @@ export function CustomizationManager({
           color: themeConfig.colors.text,
         }}
       >
-        {}
+        { }
         <div
           className="flex items-center justify-between p-4 border-b"
           style={{ borderColor: themeConfig.colors.border }}
@@ -202,7 +202,7 @@ export function CustomizationManager({
           </button>
         </div>
 
-        {}
+        { }
         <div
           className="flex border-b overflow-x-auto"
           style={{ borderColor: themeConfig.colors.border }}
@@ -244,7 +244,7 @@ export function CustomizationManager({
           ))}
         </div>
 
-        {}
+        { }
         <div className="flex-1 overflow-hidden">
           {isLoading ? (
             <div className="flex items-center justify-center h-full p-6">
@@ -296,7 +296,7 @@ export function CustomizationManager({
           )}
         </div>
 
-        {}
+        { }
         {notification && (
           <div
             className="absolute bottom-4 right-4 p-3 rounded-lg shadow-lg animate-in slide-in-from-right duration-300"

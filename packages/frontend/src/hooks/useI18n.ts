@@ -1,13 +1,13 @@
-import { useState, useEffect, useCallback } from "react";
-import { i18n, t, type TranslationKeys } from "@/lib/i18n/i18nService";
+import {useState, useEffect, useCallback, useMemo} from "react";
+import {i18n, t, type TranslationKeys} from "@/lib/i18n/i18nService";
 
 /**
  * React hook for internationalization (i18n) with locale management
  *
- * Provides a React-friendly interface to the i18n service with features:
- * - Automatic re-rendering on locale changes
- * - Translation functions with fallback support
- * - Locale validation and info retrieval
+ * Optimized for performance with:
+ * - Stable callback references using useCallback
+ * - Memoized derived values
+ * - Automatic cleanup of subscriptions
  * - RTL (right-to-left) support
  * - Document direction management
  *
@@ -25,33 +25,23 @@ import { i18n, t, type TranslationKeys } from "@/lib/i18n/i18nService";
  *
  * @example
  * ```tsx
- * const {
- *   currentLocale,
- *   isRTL,
- *   t,
- *   changeLocale,
- *   getSupportedLocales
- * } = useI18n();
+ * const { currentLocale, isRTL, t, changeLocale } = useI18n();
  *
  * // Translate a key
  * const greeting = t('common.greeting');
  *
  * // Change locale
  * changeLocale('es');
- *
- * // Get supported locales
- * const locales = getSupportedLocales();
  * ```
  */
 export function useI18n() {
-  const [currentLocale, setCurrentLocale] = useState(i18n.getCurrentLocale());
-  const [isRTL, setIsRTL] = useState(i18n.isRTL());
+  const [currentLocale, setCurrentLocale] = useState(i18n.getCurrentLocale);
+  const [isRTL, setIsRTL] = useState(() => i18n.isRTL());
 
   useEffect(() => {
     const unsubscribe = i18n.subscribe((locale) => {
       setCurrentLocale(locale);
       setIsRTL(i18n.isRTL());
-
       i18n.updateDocumentDirection();
     });
 
@@ -75,34 +65,24 @@ export function useI18n() {
     return i18n.setLocale(localeCode);
   }, []);
 
-  const getCurrentLocaleConfig = useCallback(() => {
-    return i18n.getCurrentLocaleConfig();
-  }, []);
-
-  const getSupportedLocales = useCallback(() => {
-    return i18n.getSupportedLocales();
-  }, []);
-
-  const isLocaleSupported = useCallback((localeCode: string): boolean => {
-    return i18n.isLocaleSupported(localeCode);
-  }, []);
-
-  const getLocaleInfo = useCallback((localeCode: string) => {
-    return i18n.getLocaleInfo(localeCode);
-  }, []);
+  const localeUtils = useMemo(
+    () => ({
+      getCurrentLocaleConfig: () => i18n.getCurrentLocaleConfig(),
+      getSupportedLocales: () => i18n.getSupportedLocales(),
+      isLocaleSupported: (localeCode: string) =>
+        i18n.isLocaleSupported(localeCode),
+      getLocaleInfo: (localeCode: string) => i18n.getLocaleInfo(localeCode),
+    }),
+    [],
+  );
 
   return {
     currentLocale,
     isRTL,
-
     t: translate,
     tWithFallback: translateWithFallback,
     changeLocale,
-    getCurrentLocaleConfig,
-    getSupportedLocales,
-    isLocaleSupported,
-    getLocaleInfo,
-
+    ...localeUtils,
     i18n,
   };
 }

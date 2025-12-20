@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { useDebouncedValue } from "./useDebouncedValue";
+import {useState, useEffect, useMemo, useCallback, useRef} from "react";
+import {useDebouncedValue} from "./useDebouncedValue";
 
 export interface HistoryItem {
   command: string;
@@ -91,7 +90,32 @@ export function useHistory({
   persistKey = "-terminal-history",
   categorizeCommands = true,
 }: UseHistoryOptions = {}) {
-  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [history, setHistory] = useState<HistoryItem[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const savedHistory = localStorage.getItem(persistKey);
+      if (!savedHistory) return [];
+
+      const data: unknown = JSON.parse(savedHistory);
+
+      if (!Array.isArray(data) || data.length === 0) return [];
+
+      const isValidItem = (item: unknown): item is SerializedHistoryItem =>
+        typeof item === "object" &&
+        item !== null &&
+        typeof (item as SerializedHistoryItem).command === "string" &&
+        typeof (item as SerializedHistoryItem).timestamp === "string";
+
+      if (!data.every(isValidItem)) return [];
+
+      return data.map((item) => ({
+        ...item,
+        timestamp: new Date(item.timestamp),
+      }));
+    } catch {
+      return [];
+    }
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"recent" | "frequency" | "alphabetical">(
@@ -100,37 +124,12 @@ export function useHistory({
 
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 200);
 
+  const isInitialMount = useRef(true);
   useEffect(() => {
-    try {
-      const savedHistory = localStorage.getItem(persistKey);
-
-      const data: unknown = JSON.parse(savedHistory || "[]");
-
-      if (
-        typeof data === "object" &&
-        data !== null &&
-        typeof (data as SerializedHistoryItem[])[0].command === "string" &&
-        typeof (data as SerializedHistoryItem[])[0].timestamp === "string" &&
-        typeof (data as SerializedHistoryItem[])[0].success === "boolean" &&
-        typeof (data as SerializedHistoryItem[])[0].category === "string" &&
-        typeof (data as SerializedHistoryItem[])[0].favorite === "boolean" &&
-        typeof (data as SerializedHistoryItem[])[0].executionTime === "number"
-      ) {
-        const parsed = (data as SerializedHistoryItem[]).map(
-          (item: SerializedHistoryItem) => ({
-            ...item,
-            timestamp: new Date(item.timestamp),
-          }),
-        );
-
-        setHistory(parsed as HistoryItem[]);
-      }
-    } catch (error) {
-      console.warn("Failed to load command history:", error);
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
     }
-  }, [persistKey]);
-
-  useEffect(() => {
     try {
       localStorage.setItem(persistKey, JSON.stringify(history));
     } catch (error) {
@@ -138,50 +137,52 @@ export function useHistory({
     }
   }, [history, persistKey]);
 
-  const categorizeCommand = (command: string): string => {
-    if (!categorizeCommands) return "general";
+  const categorizeCommand = useCallback(
+    (command: string): string => {
+      if (!categorizeCommands) return "general";
 
-    const cmd = command.toLowerCase().split(" ")[0];
+      const cmd = command.toLowerCase().split(" ")[0];
 
-    if (["theme", "font", "customize"].includes(cmd)) return "customization";
-    if (
-      ["skills", "projects", "about", "experience", "education"].includes(cmd)
-    )
-      return "portfolio";
-    if (["help", "clear", "status", "alias"].includes(cmd)) return "system";
-    if (["roadmap", "progress"].includes(cmd)) return "development";
+      if (["theme", "font", "customize"].includes(cmd)) return "customization";
+      if (
+        ["skills", "projects", "about", "experience", "education"].includes(cmd)
+      )
+        return "portfolio";
+      if (["help", "clear", "status", "alias"].includes(cmd)) return "system";
+      if (["roadmap", "progress"].includes(cmd)) return "development";
 
-    return "general";
-  };
+      return "general";
+    },
+    [categorizeCommands],
+  );
 
-  const addToHistory = (
-    command: string,
-    success: boolean = true,
-    executionTime?: number,
-  ) => {
-    const newItem: HistoryItem = {
-      command: command.trim(),
-      timestamp: new Date(),
-      success,
-      category: categorizeCommand(command),
-      executionTime,
-    };
+  const addToHistory = useCallback(
+    (command: string, success: boolean = true, executionTime?: number) => {
+      const trimmedCommand = command.trim();
+      const category = categorizeCommand(trimmedCommand);
 
-    setHistory((prev) => {
-      const filtered = prev.filter((item) => item.command !== newItem.command);
-      const updated = [newItem, ...filtered];
+      setHistory((prev) => {
+        const filtered = prev.filter((item) => item.command !== trimmedCommand);
+        const newItem: HistoryItem = {
+          command: trimmedCommand,
+          timestamp: new Date(),
+          success,
+          category,
+          executionTime,
+        };
+        return [newItem, ...filtered].slice(0, maxHistorySize);
+      });
+    },
+    [categorizeCommand, maxHistorySize],
+  );
 
-      return updated.slice(0, maxHistorySize);
-    });
-  };
-
-  const toggleFavorite = (command: string) => {
+  const toggleFavorite = useCallback((command: string) => {
     setHistory((prev) =>
       prev.map((item) =>
-        item.command === command ? { ...item, favorite: !item.favorite } : item,
+        item.command === command ? {...item, favorite: !item.favorite} : item,
       ),
     );
-  };
+  }, []);
 
   const getCommandFrequency = useMemo(() => {
     const frequency: Record<string, number> = {};
@@ -211,24 +212,19 @@ export function useHistory({
 
     switch (sortBy) {
       case "frequency":
-        filtered = filtered.sort(
+        return [...filtered].sort(
           (a, b) =>
             (getCommandFrequency[b.command] || 0) -
             (getCommandFrequency[a.command] || 0),
         );
-        break;
       case "alphabetical":
-        filtered = filtered.sort((a, b) => a.command.localeCompare(b.command));
-        break;
+        return [...filtered].sort((a, b) => a.command.localeCompare(b.command));
       case "recent":
       default:
-        filtered = filtered.sort(
+        return [...filtered].sort(
           (a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
         );
-        break;
     }
-
-    return filtered;
   }, [
     history,
     debouncedSearchQuery,
@@ -246,37 +242,41 @@ export function useHistory({
     return Object.entries(getCommandFrequency)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 10)
-      .map(([command, count]) => ({ command, count }));
+      .map(([command, count]) => ({command, count}));
   }, [getCommandFrequency]);
 
-  const clearHistory = () => {
+  const clearHistory = useCallback(() => {
     setHistory([]);
     localStorage.removeItem(persistKey);
-  };
+  }, [persistKey]);
 
-  const exportHistory = () => {
+  const exportHistory = useCallback(() => {
     const dataStr = JSON.stringify(history, null, 2);
-    const blob = new Blob([dataStr], { type: "application/json" });
+    const blob = new Blob([dataStr], {type: "application/json"});
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
     link.download = `terminal-history-${new Date().toISOString().split("T")[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-  };
+  }, [history]);
 
-  const importHistory = (file: File) => {
+  const importHistory = useCallback((file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
         const imported = JSON.parse(e.target?.result as string);
 
-        if (typeof imported === "object" && imported !== null) {
-          const validHistory = (imported as any)
+        if (Array.isArray(imported)) {
+          const validHistory = imported
             .filter(
-              (item: SerializedHistoryItem) => item.command && item.timestamp,
+              (item): item is SerializedHistoryItem =>
+                typeof item === "object" &&
+                item !== null &&
+                typeof item.command === "string" &&
+                item.timestamp,
             )
-            .map((item: SerializedHistoryItem) => ({
+            .map((item) => ({
               ...item,
               timestamp: new Date(item.timestamp),
             }));
@@ -287,16 +287,30 @@ export function useHistory({
       }
     };
     reader.readAsText(file);
-  };
+  }, []);
 
-  const getSuggestions = (partialCommand: string, limit: number = 5) => {
-    return history
-      .filter((item) =>
-        item.command.toLowerCase().startsWith(partialCommand.toLowerCase()),
-      )
-      .slice(0, limit)
-      .map((item) => item.command);
-  };
+  const getSuggestions = useCallback(
+    (partialCommand: string, limit: number = 5) => {
+      const lowerPartial = partialCommand.toLowerCase();
+      return history
+        .filter((item) => item.command.toLowerCase().startsWith(lowerPartial))
+        .slice(0, limit)
+        .map((item) => item.command);
+    },
+    [history],
+  );
+
+  const stats = useMemo(
+    () => ({
+      totalCommands: history.length,
+      successRate:
+        history.length > 0
+          ? (history.filter((item) => item.success).length / history.length) *
+            100
+          : 100,
+    }),
+    [history],
+  );
 
   return {
     history: filteredHistory,
@@ -319,10 +333,7 @@ export function useHistory({
     importHistory,
     getSuggestions,
 
-    totalCommands: history.length,
-    successRate:
-      history.length > 0
-        ? (history.filter((item) => item.success).length / history.length) * 100
-        : 100,
+    totalCommands: stats.totalCommands,
+    successRate: stats.successRate,
   };
 }

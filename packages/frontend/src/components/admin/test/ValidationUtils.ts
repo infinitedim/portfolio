@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Validation utilities for the backend testing dashboard
  */
@@ -9,11 +8,20 @@ export interface ValidationResult {
   warnings: string[];
 }
 
+/** Type for parameter values that can be validated */
+export type ParameterValue =
+  | string
+  | number
+  | boolean
+  | object
+  | null
+  | undefined;
+
 export interface ParameterValidation {
   name: string;
   type: string;
   required: boolean;
-  value: any;
+  value: ParameterValue;
   isValid: boolean;
   error?: string;
 }
@@ -71,7 +79,7 @@ export class ValidationUtils {
       required: boolean;
       description: string;
     }>,
-    values: Record<string, any>,
+    values: Record<string, ParameterValue>,
   ): ParameterValidation[] {
     return parameters.map((param) => {
       const value = values[param.name];
@@ -146,6 +154,9 @@ export class ValidationUtils {
 
         case "url":
           try {
+            if (typeof value !== "string") {
+              throw new Error("Value must be a string");
+            }
             new URL(value);
           } catch {
             validation.isValid = false;
@@ -203,7 +214,7 @@ export class ValidationUtils {
    * @param value
    * @param type
    */
-  static sanitizeValue(value: any, type: string): any {
+  static sanitizeValue(value: ParameterValue, type: string): ParameterValue {
     if (value === undefined || value === null) {
       return value;
     }
@@ -331,7 +342,7 @@ export class ValidationUtils {
    * Check if a value is empty or null
    * @param value
    */
-  static isEmpty(value: any): boolean {
+  static isEmpty(value: unknown): boolean {
     if (value === null || value === undefined) {
       return true;
     }
@@ -357,7 +368,7 @@ export class ValidationUtils {
    * @param maxSizeKB
    */
   static validatePayloadSize(
-    payload: any,
+    payload: unknown,
     maxSizeKB: number = 1024,
   ): ValidationResult {
     const errors: string[] = [];

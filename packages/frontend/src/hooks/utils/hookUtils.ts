@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Shared utilities for React hooks to reduce code duplication and improve performance
  *
@@ -13,7 +12,7 @@
  * - Error handling wrappers
  */
 
-import React, { useRef, useEffect, useCallback } from "react";
+import React, {useRef, useEffect, useCallback} from "react";
 
 /**
  * SSR-safe check for client-side rendering environment
@@ -181,7 +180,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
     }
   }, [key]);
 
-  return { getValue, setValue, removeValue };
+  return {getValue, setValue, removeValue};
 }
 
 /**
@@ -258,7 +257,7 @@ export function useTimerManager() {
     };
   }, [clearAllTimers]);
 
-  return { setTimer, clearTimer, clearAllTimers };
+  return {setTimer, clearTimer, clearAllTimers};
 }
 
 /**
@@ -330,7 +329,7 @@ export function useIntervalManager() {
     };
   }, [clearAllIntervals]);
 
-  return { setInterval, clearInterval, clearAllIntervals };
+  return {setInterval, clearInterval, clearAllIntervals};
 }
 
 /**
@@ -357,7 +356,7 @@ export function useIntervalManager() {
  * debouncedSearch('abc'); // Only this executes after 300ms
  * ```
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   delay: number,
 ): (...args: Parameters<T>) => void {
@@ -391,7 +390,7 @@ export function debounce<T extends (...args: any[]) => any>(
  * // Executes at most once every 100ms
  * ```
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   delay: number,
 ): (...args: Parameters<T>) => void {
@@ -464,8 +463,9 @@ export function generateId(prefix: string = "id"): string {
  * Logs errors to console for debugging.
  *
  * @template T - Function type
+ * @template F - Fallback type (defaults to undefined)
  * @param {T} fn - Function to wrap with error handling
- * @param {any} [fallback] - Value to return if function throws
+ * @param {F} [fallback] - Value to return if function throws
  *
  * @returns {T} Wrapped function that won't throw errors
  *
@@ -478,16 +478,16 @@ export function generateId(prefix: string = "id"): string {
  * const result = safeOperation(); // Returns 0 if error occurs
  * ```
  */
-export function withErrorHandling<T extends (...args: any[]) => any>(
-  fn: T,
-  fallback?: any,
-): T {
-  return ((...args: any[]) => {
+export function withErrorHandling<
+  T extends (...args: unknown[]) => unknown,
+  F = undefined,
+>(fn: T, fallback?: F): (...args: Parameters<T>) => ReturnType<T> | F {
+  return (...args: Parameters<T>): ReturnType<T> | F => {
     try {
-      return fn(...args);
+      return fn(...args) as ReturnType<T>;
     } catch (error) {
       console.error("Hook execution error:", error);
-      return fallback;
+      return fallback as F;
     }
-  }) as T;
+  };
 }

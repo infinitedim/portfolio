@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { useDebouncedValue } from "./useDebouncedValue";
+import {useState, useEffect, useMemo, useRef, useCallback} from "react";
+import {useDebouncedValue} from "./useDebouncedValue";
 
 /**
  * Represents a single command suggestion with scoring and metadata
@@ -241,10 +241,10 @@ class FuzzyMatcher {
 class SuggestionCache {
   private cache = new Map<
     string,
-    { suggestions: SuggestionItem[]; timestamp: number; hits: number }
+    {suggestions: SuggestionItem[]; timestamp: number; hits: number}
   >();
   private readonly TTL = 5 * 60 * 1000;
-  private readonly MAX_SIZE = 100;
+  private readonly MAX_SIZE = 50;
 
   set(key: string, suggestions: SuggestionItem[]): void {
     if (this.cache.size >= this.MAX_SIZE) {
@@ -371,7 +371,6 @@ export function useCommandSuggestions(
   }));
 
   const cacheRef = useRef(new SuggestionCache());
-  const commandMetadataRef = useRef(new Map(Object.entries(COMMAND_METADATA)));
   const lastQueryRef = useRef("");
 
   const debouncedInput = useDebouncedValue(input.trim(), debounceMs);
@@ -381,7 +380,7 @@ export function useCommandSuggestions(
       if (!enableLearning) return;
 
       setUserContext((prev) => {
-        const newContext = { ...prev };
+        const newContext = {...prev};
 
         newContext.recentCommands = [
           command,
@@ -396,7 +395,7 @@ export function useCommandSuggestions(
         return newContext;
       });
 
-      const metadata = commandMetadataRef.current.get(command);
+      const metadata = COMMAND_METADATA[command];
       if (metadata) {
         metadata.frequency++;
         metadata.lastUsed = new Date();
@@ -407,21 +406,12 @@ export function useCommandSuggestions(
 
   const generateContextualSuggestions = useCallback(
     (query: string): SuggestionItem[] => {
-      console.log("generateContextualSuggestions called:", {
-        query,
-        showOnEmpty,
-        availableCommandsCount: availableCommands.length,
-        recentCommandsCount: userContext.recentCommands.length,
-      });
-
       const results: SuggestionItem[] = [];
 
       if (!query && showOnEmpty) {
-        console.log("Generating empty query suggestions...");
-
         userContext.recentCommands.forEach((cmd, index) => {
           if (availableCommands.includes(cmd)) {
-            const metadata = commandMetadataRef.current.get(cmd);
+            const metadata = COMMAND_METADATA[cmd];
             results.push({
               command: cmd,
               score: 90 - index * 5,
@@ -447,7 +437,7 @@ export function useCommandSuggestions(
         );
 
         popularCommands.forEach((cmd, index) => {
-          const metadata = commandMetadataRef.current.get(cmd);
+          const metadata = COMMAND_METADATA[cmd];
           results.push({
             command: cmd,
             score: 80 - index * 3,
@@ -467,7 +457,7 @@ export function useCommandSuggestions(
         const score = FuzzyMatcher.calculateScore(query, command);
 
         if (score > 0) {
-          const metadata = commandMetadataRef.current.get(command);
+          const metadata = COMMAND_METADATA[command];
           const isRecent = userContext.recentCommands.includes(command);
           const frequency = userContext.frequentCommands.get(command) || 0;
 
@@ -526,34 +516,28 @@ export function useCommandSuggestions(
   }, [generateContextualSuggestions, enableCache]);
 
   useEffect(() => {
-    console.log("useCommandSuggestions effect:", {
-      debouncedInput,
-      debouncedInputLength: debouncedInput.length,
-      minQueryLength,
-      showOnEmpty,
-      availableCommands: availableCommands.length,
-    });
-
     if (debouncedInput.length < minQueryLength && !showOnEmpty) {
-      console.log("Clearing suggestions due to length check");
       setSuggestions([]);
       return;
     }
 
-    console.log("Generating suggestions...");
     const newSuggestions = generateSuggestions(debouncedInput);
-    console.log("Generated suggestions:", newSuggestions);
     setSuggestions(newSuggestions);
     lastQueryRef.current = debouncedInput;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedInput, generateSuggestions, minQueryLength, showOnEmpty]);
+
+  const clearCache = useCallback(() => {
+    cacheRef.current.clear();
+  }, []);
+
+  const getUserContext = useCallback(() => userContext, [userContext]);
 
   return {
     suggestions,
     isLoading,
     updateCommandUsage,
-    clearCache: () => cacheRef.current.clear(),
-    getUserContext: () => userContext,
+    clearCache,
+    getUserContext,
     setUserContext,
   };
 }

@@ -1,17 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useRef, useCallback, useEffect } from "react";
+import {useState, useRef, useCallback, useEffect} from "react";
 import {
   useIntervalManager,
   useMountRef,
   useTimerManager,
 } from "./utils/hookUtils";
+import type {trpcClient as TrpcClientType} from "@/lib/trpc";
 
-let trpc: any = null;
+let trpcClient: typeof TrpcClientType | null = null;
 if (typeof window !== "undefined") {
   try {
     import("@/lib/trpc")
       .then((module) => {
-        trpc = module.trpc;
+        trpcClient = module.trpcClient;
         return module;
       })
       .catch((error) => {
@@ -40,7 +40,7 @@ interface ThreatAlert {
   message: string;
   timestamp: Date;
   riskLevel: "low" | "medium" | "high";
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 interface SecurityMetrics {
@@ -48,7 +48,7 @@ interface SecurityMetrics {
   validRequests: number;
   blockedRequests: number;
   averageRequestsPerMinute: number;
-  topThreats: Array<{ type: string; count: number }>;
+  topThreats: Array<{type: string; count: number}>;
 }
 
 interface ValidationResult {
@@ -182,8 +182,8 @@ function validateInputClientSide(input: string): ValidationResult {
  */
 export function useSecurity() {
   const isMountedRef = useMountRef();
-  const { setTimer, clearTimer } = useTimerManager();
-  const { setInterval, clearInterval } = useIntervalManager();
+  const {setTimer, clearTimer} = useTimerManager();
+  const {setInterval, clearInterval} = useIntervalManager();
 
   const [securityState, setSecurityState] = useState<SecurityState>({
     isRateLimited: false,
@@ -194,9 +194,7 @@ export function useSecurity() {
 
   const [threatAlerts, setThreatAlerts] = useState<ThreatAlert[]>([]);
   const recentInputs = useRef<string[]>([]);
-  const requestHistory = useRef<Array<{ timestamp: number; valid: boolean }>>(
-    [],
-  );
+  const requestHistory = useRef<Array<{timestamp: number; valid: boolean}>>([]);
 
   const metricsCache = useRef<{
     timestamp: number;
@@ -221,9 +219,9 @@ export function useSecurity() {
         let shouldProceed = false;
         let alert: ThreatAlert | undefined;
 
-        if (trpc?.security?.validateInput?.mutateAsync) {
+        if (trpcClient?.security?.validateInput) {
           try {
-            const result = await trpc.security.validateInput.mutateAsync({
+            const result = await trpcClient.security.validateInput.mutate({
               input,
             });
             validation = {
@@ -475,7 +473,7 @@ export function useSecurity() {
         );
 
         const topThreats = Object.entries(threatTypes)
-          .map(([type, count]) => ({ type, count }))
+          .map(([type, count]) => ({type, count}))
           .sort((a, b) => b.count - a.count)
           .slice(0, 5);
 
@@ -637,7 +635,7 @@ export function useSecurity() {
  * @param {ThreatAlert["type"]} type - Type of threat detected
  * @param {string} message - Human-readable threat description
  * @param {ThreatAlert["riskLevel"]} riskLevel - Severity level of the threat
- * @param {Record<string, any>} [metadata={}] - Additional threat data
+ * @param {Record<string, unknown>} [metadata={}] - Additional threat data
  *
  * @returns {ThreatAlert} Formatted threat alert object
  */
@@ -645,7 +643,7 @@ function createThreatAlert(
   type: ThreatAlert["type"],
   message: string,
   riskLevel: ThreatAlert["riskLevel"],
-  metadata: Record<string, any> = {},
+  metadata: Record<string, unknown> = {},
 ): ThreatAlert {
   const id =
     typeof window !== "undefined"
@@ -684,7 +682,7 @@ function detectSuspiciousActivity(recentInputs: string[]): {
   riskLevel: "low" | "medium" | "high";
 } {
   if (recentInputs.length < 3) {
-    return { isSuspicious: false, reason: "", riskLevel: "low" };
+    return {isSuspicious: false, reason: "", riskLevel: "low"};
   }
 
   const patternCounts: Record<string, number> = {};
@@ -711,7 +709,7 @@ function detectSuspiciousActivity(recentInputs: string[]): {
     };
   }
 
-  return { isSuspicious: false, reason: "", riskLevel: "low" };
+  return {isSuspicious: false, reason: "", riskLevel: "low"};
 }
 
 /**

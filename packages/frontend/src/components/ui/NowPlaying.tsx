@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef, JSX } from "react";
 import { Music, Play, Pause, ExternalLink, Clock } from "lucide-react";
+import type { trpc as TrpcType } from "@/lib/trpc";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let trpc: any = null;
+let trpc: typeof TrpcType | null = null;
 if (typeof window !== "undefined") {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -192,7 +192,7 @@ export function NowPlaying({ onClose }: NowPlayingProps): JSX.Element {
         </button>
 
         <div className="text-center">
-          {}
+          { }
           <div className="relative mx-auto mb-4">
             {nowPlaying.albumArt ? (
               <img
@@ -206,7 +206,7 @@ export function NowPlaying({ onClose }: NowPlayingProps): JSX.Element {
               </div>
             )}
 
-            {}
+            { }
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-12 h-12 bg-black/50 rounded-full flex items-center justify-center">
                 {nowPlaying.isPlaying ? (
@@ -218,13 +218,13 @@ export function NowPlaying({ onClose }: NowPlayingProps): JSX.Element {
             </div>
           </div>
 
-          {}
+          { }
           <h3 className="text-lg font-semibold text-white mb-1 line-clamp-2">
             {nowPlaying.title}
           </h3>
           <p className="text-gray-400 mb-4 line-clamp-1">{nowPlaying.artist}</p>
 
-          {}
+          { }
           <div className="mb-4">
             <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
               <div
@@ -237,7 +237,7 @@ export function NowPlaying({ onClose }: NowPlayingProps): JSX.Element {
             </div>
           </div>
 
-          {}
+          { }
           <div className="flex gap-3">
             <button
               onClick={handleRefresh}
@@ -255,7 +255,7 @@ export function NowPlaying({ onClose }: NowPlayingProps): JSX.Element {
             </button>
           </div>
 
-          {}
+          { }
           {nowPlaying.album && (
             <div className="mt-4 text-sm text-gray-400">
               <p>Album: {nowPlaying.album}</p>
