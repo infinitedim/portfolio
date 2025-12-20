@@ -3,9 +3,9 @@ import type {
   OnModuleInit,
   OnModuleDestroy,
 } from "@nestjs/common";
-import { Injectable, Logger } from "@nestjs/common";
-import { PrismaClient } from "@prisma/client";
-import { ServerlessConfig } from "../config/serverless.config";
+import {Injectable, Logger} from "@nestjs/common";
+import {PrismaClient} from "@prisma/client";
+import {ServerlessConfig} from "../config/serverless.config";
 
 @Injectable()
 export class PrismaService
@@ -27,15 +27,15 @@ export class PrismaService
     const config = ServerlessConfig.getConfig();
 
     super({
-      ...(config.databaseUrl && { datasourceUrl: config.databaseUrl }),
+      ...(config.databaseUrl && {datasourceUrl: config.databaseUrl}),
       log:
         config.logLevel === "debug"
           ? [
-              { emit: "stdout", level: "query" },
-              { emit: "stdout", level: "error" },
-              { emit: "stdout", level: "warn" },
+              {emit: "stdout", level: "query"},
+              {emit: "stdout", level: "error"},
+              {emit: "stdout", level: "warn"},
             ]
-          : [{ emit: "stdout", level: "error" }],
+          : [{emit: "stdout", level: "error"}],
       errorFormat: "pretty",
     });
   }
@@ -216,7 +216,16 @@ export class PrismaService
     if (typeof global.gc === "function") {
       try {
         global.gc();
-      } catch (_error) {}
+      } catch (error) {
+        if (
+          typeof error === "object" &&
+          error !== null &&
+          "message" in error &&
+          typeof error.message === "string"
+        ) {
+          throw new Error();
+        }
+      }
     }
   }
 
