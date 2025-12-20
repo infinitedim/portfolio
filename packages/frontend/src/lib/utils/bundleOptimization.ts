@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Bundle optimization utilities for better performance
  */
@@ -239,7 +238,9 @@ export const optimizeMemoryUsage = () => {
   const cleanupListeners = () => {
     const unusedEvents = ["resize", "scroll", "touchmove"];
     unusedEvents.forEach((event) => {
-      const listeners = (window as any)._eventListeners?.[event];
+      const listeners = (
+        window as Window & {_eventListeners?: Record<string, unknown[]>}
+      )._eventListeners?.[event];
       if (listeners && listeners.length > 10) {
         console.warn(`Many ${event} listeners detected. Consider cleanup.`);
       }
@@ -256,12 +257,12 @@ export const optimizeMemoryUsage = () => {
      * @param {unknown} data - The data to check
      * @returns {boolean} True if the data is a data with a timestamp, false otherwise
      */
-    function isDataWithTimestamp(data: unknown): data is { timestamp: number } {
+    function isDataWithTimestamp(data: unknown): data is {timestamp: number} {
       return (
         typeof data === "object" &&
         data !== null &&
         "timestamp" in data &&
-        typeof (data as any).timestamp === "number"
+        typeof (data as {timestamp: unknown}).timestamp === "number"
       );
     }
 

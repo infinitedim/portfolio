@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import type { ThemeConfig, ThemeName, ThemeColors } from "../types/theme";
+import {useState, useEffect, useCallback, useMemo, useRef} from "react";
+import type {ThemeConfig, ThemeName, ThemeColors} from "../types/theme";
 import {
   themes,
   defaultTheme,
@@ -13,7 +13,7 @@ import {
   useLocalStorage,
   useMountRef,
 } from "./utils/hookUtils";
-import { PerformanceMonitor } from "../lib/performance/PerformanceMonitor";
+import {PerformanceMonitor} from "../lib/performance/PerformanceMonitor";
 
 const STORAGE_KEY = "terminal-theme" as const;
 const REQUIRED_COLORS = ["bg", "text", "accent", "muted", "border"] as const;
@@ -40,7 +40,7 @@ interface UseThemeReturn {
     switchCount: number;
     averageSwitchTime: number;
     lastSwitchTime: number;
-    popularThemes: { theme: ThemeName; count: number }[];
+    popularThemes: {theme: ThemeName; count: number}[];
     renderTime: number;
   };
   getPerformanceReport: () => {
@@ -178,7 +178,7 @@ const generateCSSVariables = (colors: ThemeColors) => ({
  */
 export function useTheme(): UseThemeReturn {
   const isMountedRef = useMountRef();
-  const { getValue, setValue } = useLocalStorage(STORAGE_KEY, defaultTheme);
+  const {getValue, setValue} = useLocalStorage(STORAGE_KEY, defaultTheme);
 
   const appliedThemeRef = useRef<ThemeName | null>(null);
 
@@ -192,7 +192,7 @@ export function useTheme(): UseThemeReturn {
     switchCount: 0,
     averageSwitchTime: 0,
     lastSwitchTime: 0,
-    popularThemes: [] as { theme: ThemeName; count: number }[],
+    popularThemes: [] as {theme: ThemeName; count: number}[],
     renderTime: 0,
   });
 
@@ -238,16 +238,17 @@ export function useTheme(): UseThemeReturn {
           body.className = themeClasses.join(" ");
 
           const cssVars = generateCSSVariables(config.colors);
-          Object.entries(cssVars).forEach(([property, value]) => {
-            root.style.setProperty(property, value);
-          });
+          const cssText = Object.entries(cssVars)
+            .map(([property, value]) => `${property}: ${value}`)
+            .join("; ");
+          root.style.cssText += `; ${cssText}`;
 
           appliedThemeRef.current = themeName;
 
           const renderTime = performanceMonitor.endTiming(
             "theme-application",
             "theme",
-            { theme: themeName },
+            {theme: themeName},
           );
 
           setThemeMetrics((prev) => ({
@@ -261,15 +262,15 @@ export function useTheme(): UseThemeReturn {
             "theme-application-error",
             performance.now() - startTime,
             "theme",
-            { error: String(error), theme: themeName },
+            {error: String(error), theme: themeName},
           );
           if (isMountedRef.current) {
-            setState((prev) => ({ ...prev, error: "Failed to apply theme" }));
+            setState((prev) => ({...prev, error: "Failed to apply theme"}));
           }
         }
       });
     },
-    [isMountedRef, performanceMonitor, setThemeMetrics],
+    [isMountedRef, performanceMonitor],
   );
 
   const changeTheme = useCallback(
@@ -281,7 +282,7 @@ export function useTheme(): UseThemeReturn {
         !themes[newTheme] ||
         !isValidThemeConfig(themes[newTheme])
       ) {
-        setState((prev) => ({ ...prev, error: `Invalid theme: ${newTheme}` }));
+        setState((prev) => ({...prev, error: `Invalid theme: ${newTheme}`}));
         return false;
       }
 
@@ -292,7 +293,7 @@ export function useTheme(): UseThemeReturn {
       const currentCount = themeUsageRef.current.get(newTheme) || 0;
       themeUsageRef.current.set(newTheme, currentCount + 1);
 
-      setState((prev) => ({ ...prev, theme: newTheme, error: null }));
+      setState((prev) => ({...prev, theme: newTheme, error: null}));
 
       if (!setValue(newTheme)) {
         console.warn("Failed to save theme to localStorage");
@@ -313,7 +314,7 @@ export function useTheme(): UseThemeReturn {
         switchTimesRef.current.length;
 
       const themeEntries = Array.from(themeUsageRef.current.entries()).map(
-        ([theme, count]) => ({ theme, count }),
+        ([theme, count]) => ({theme, count}),
       );
       themeEntries.sort((a, b) => b.count - a.count);
 
@@ -340,15 +341,15 @@ export function useTheme(): UseThemeReturn {
 
   useEffect(() => {
     try {
-      setState((prev) => ({ ...prev, mounted: true }));
+      setState((prev) => ({...prev, mounted: true}));
 
       const savedTheme = getValue();
       if (savedTheme && validateTheme(savedTheme) && themes[savedTheme]) {
-        setState((prev) => ({ ...prev, theme: savedTheme as ThemeName }));
+        setState((prev) => ({...prev, theme: savedTheme as ThemeName}));
       }
     } catch (error) {
       console.warn("Error initializing theme:", error);
-      setState((prev) => ({ ...prev, mounted: true, theme: defaultTheme }));
+      setState((prev) => ({...prev, mounted: true, theme: defaultTheme}));
     }
   }, [getValue]);
 
@@ -380,7 +381,7 @@ export function useTheme(): UseThemeReturn {
 
   const clearError = useCallback(() => {
     if (isMountedRef.current) {
-      setState((prev) => ({ ...prev, error: null }));
+      setState((prev) => ({...prev, error: null}));
     }
   }, [isMountedRef]);
 
@@ -402,7 +403,7 @@ export function useTheme(): UseThemeReturn {
       slowestSwitch: times.length > 0 ? Math.max(...times) : 0,
       themeUsage: usage,
     };
-  }, [switchTimesRef, themeUsageRef]);
+  }, []);
 
   const resetPerformanceMetrics = useCallback(() => {
     switchTimesRef.current = [];
@@ -414,7 +415,7 @@ export function useTheme(): UseThemeReturn {
       popularThemes: [],
       renderTime: 0,
     });
-  }, [setThemeMetrics]);
+  }, []);
 
   return useMemo(
     () => ({

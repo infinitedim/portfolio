@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { debounce, throttle, useMountRef } from "./utils/hookUtils";
+import {useState, useEffect, useCallback, useRef, useMemo} from "react";
 
 interface MobileState {
   isMobile: boolean;
@@ -18,152 +17,151 @@ const BREAKPOINTS = {
 } as const;
 
 const KEYBOARD_THRESHOLD = 0.75;
+const RESIZE_DEBOUNCE_MS = 100;
 
 /**
  * A custom React hook to detect mobile device properties and state.
  *
- * This hook provides information about whether the user is on a mobile or tablet device,
- * the screen orientation, and whether the virtual keyboard is currently open.
- * @returns {object} An object containing the current mobile device state, conforming to the `MobileState` interface.
- * @property {boolean} isMobile True if the screen width is less than or equal to 768px.
- * @property {boolean} isTablet True if the screen width is between 768px and 1024px.
- * @property {"portrait" | "landscape"} orientation The current screen orientation.
- * @property {boolean} isVirtualKeyboardOpen True if the virtual keyboard is likely open.
- * @property {boolean} isIOS True if the device is iOS.
- * @property {boolean} isAndroid True if the device is Android.
+ * Optimized for performance with:
+ * - Lazy device detection (cached after first call)
+ * - Debounced resize handling to prevent excessive updates
+ * - RequestAnimationFrame throttling for smooth performance
+ * - Consolidated state updates to reduce re-renders
+ * - Proper cleanup of all event listeners
+ *
+ * @returns {MobileState} An object containing the current mobile device state.
+ * @property {boolean} isMobile - True if screen width is less than or equal to 768px.
+ * @property {boolean} isTablet - True if screen width is between 768px and 1024px.
+ * @property {"portrait" | "landscape"} orientation - Current screen orientation.
+ * @property {boolean} isVirtualKeyboardOpen - True if the virtual keyboard is likely open.
+ * @property {boolean} isIOS - True if the device is iOS.
+ * @property {boolean} isAndroid - True if the device is Android.
+ *
+ * @example
+ * ```tsx
+ * const { isMobile, isTablet, orientation, isVirtualKeyboardOpen } = useMobile();
+ *
+ * if (isMobile) {
+ *   return <MobileLayout />;
+ * }
+ * ```
  */
-export function useMobile() {
-  const isMountedRef = useMountRef();
+export function useMobile(): MobileState {
+  const isMountedRef = useRef(true);
+  const rafIdRef = useRef<number | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [mobileState, setMobileState] = useState<MobileState>({
-    isMobile: false,
-    isTablet: false,
-    orientation: "portrait",
-    isVirtualKeyboardOpen: false,
-    isIOS: false,
-    isAndroid: false,
-  });
-
-  const deviceInfoRef = useRef<{ isIOS: boolean; isAndroid: boolean } | null>(
-    null,
-  );
-
-  const getDeviceInfo = useCallback(() => {
-    if (deviceInfoRef.current) return deviceInfoRef.current;
-
+  const deviceInfo = useMemo(() => {
     if (typeof window === "undefined") {
-      return { isIOS: false, isAndroid: false };
+      return {isIOS: false, isAndroid: false};
     }
-
     const userAgent = navigator.userAgent;
-    const info = {
+    return {
       isIOS: /iPad|iPhone|iPod/.test(userAgent),
       isAndroid: /Android/.test(userAgent),
     };
-
-    deviceInfoRef.current = info;
-    return info;
   }, []);
 
-  const checkDevice = useCallback(() => {
-    if (!isMountedRef.current || typeof window === "undefined") return;
-
-    try {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const isMobile = width <= BREAKPOINTS.MOBILE;
-      const isTablet =
-        width > BREAKPOINTS.MOBILE && width <= BREAKPOINTS.TABLET;
-      const orientation = height > width ? "portrait" : "landscape";
-      const { isIOS, isAndroid } = getDeviceInfo();
-
-      setMobileState((prev) => {
-        if (
-          prev.isMobile === isMobile &&
-          prev.isTablet === isTablet &&
-          prev.orientation === orientation &&
-          prev.isIOS === isIOS &&
-          prev.isAndroid === isAndroid
-        ) {
-          return prev;
-        }
-
-        return {
-          ...prev,
-          isMobile,
-          isTablet,
-          orientation,
-          isIOS,
-          isAndroid,
-        };
-      });
-    } catch (error) {
-      console.warn("Error checking device state:", error);
+  const [mobileState, setMobileState] = useState<MobileState>(() => {
+    if (typeof window === "undefined") {
+      return {
+        isMobile: false,
+        isTablet: false,
+        orientation: "portrait",
+        isVirtualKeyboardOpen: false,
+        isIOS: false,
+        isAndroid: false,
+      };
     }
-  }, [isMountedRef, getDeviceInfo]);
 
-  const checkKeyboard = useCallback(() => {
-    if (!isMountedRef.current || typeof window === "undefined") return;
-
-    try {
-      const viewportHeight =
-        window.visualViewport?.height || window.innerHeight;
-      const windowHeight = window.innerHeight;
-      const isVirtualKeyboardOpen =
-        viewportHeight < windowHeight * KEYBOARD_THRESHOLD;
-
-      setMobileState((prev) => {
-        if (prev.isVirtualKeyboardOpen === isVirtualKeyboardOpen) {
-          return prev;
-        }
-        return {
-          ...prev,
-          isVirtualKeyboardOpen,
-        };
-      });
-    } catch (error) {
-      console.warn("Error checking keyboard state:", error);
-    }
-  }, [isMountedRef]);
-
-  const debouncedCheckDevice = useRef(debounce(checkDevice, 100));
-  const throttledCheckKeyboard = useRef(throttle(checkKeyboard, 100));
-
-  useEffect(() => {
-    debouncedCheckDevice.current = debounce(checkDevice, 100);
-    throttledCheckKeyboard.current = throttle(checkKeyboard, 100);
-  }, [checkDevice, checkKeyboard]);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !isMountedRef.current) return;
-
-    checkDevice();
-    checkKeyboard();
-
-    const handleResize = debouncedCheckDevice.current;
-    const handleOrientationChange = () => {
-      setTimeout(checkDevice, 100);
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    return {
+      isMobile: width <= BREAKPOINTS.MOBILE,
+      isTablet: width > BREAKPOINTS.MOBILE && width <= BREAKPOINTS.TABLET,
+      orientation: height > width ? "portrait" : "landscape",
+      isVirtualKeyboardOpen: false,
+      ...deviceInfo,
     };
-    const handleKeyboardResize = throttledCheckKeyboard.current;
+  });
 
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("orientationchange", handleOrientationChange);
+  const updateState = useCallback(() => {
+    if (!isMountedRef.current || typeof window === "undefined") return;
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const viewportHeight = window.visualViewport?.height || height;
+
+    const newState: MobileState = {
+      isMobile: width <= BREAKPOINTS.MOBILE,
+      isTablet: width > BREAKPOINTS.MOBILE && width <= BREAKPOINTS.TABLET,
+      orientation: height > width ? "portrait" : "landscape",
+      isVirtualKeyboardOpen: viewportHeight < height * KEYBOARD_THRESHOLD,
+      ...deviceInfo,
+    };
+
+    setMobileState((prev) => {
+      if (
+        prev.isMobile === newState.isMobile &&
+        prev.isTablet === newState.isTablet &&
+        prev.orientation === newState.orientation &&
+        prev.isVirtualKeyboardOpen === newState.isVirtualKeyboardOpen
+      ) {
+        return prev;
+      }
+      return newState;
+    });
+  }, [deviceInfo]);
+
+  const debouncedUpdate = useCallback(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+      rafIdRef.current = requestAnimationFrame(updateState);
+    }, RESIZE_DEBOUNCE_MS);
+  }, [updateState]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    if (typeof window === "undefined") return;
+
+    updateState();
+
+    window.addEventListener("resize", debouncedUpdate, {passive: true});
+    window.addEventListener("orientationchange", debouncedUpdate, {
+      passive: true,
+    });
 
     if (window.visualViewport) {
-      window.visualViewport.addEventListener("resize", handleKeyboardResize);
+      window.visualViewport.addEventListener("resize", debouncedUpdate, {
+        passive: true,
+      });
     }
 
     return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("orientationchange", handleOrientationChange);
+      isMountedRef.current = false;
+
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+
+      window.removeEventListener("resize", debouncedUpdate);
+      window.removeEventListener("orientationchange", debouncedUpdate);
+
       if (window.visualViewport) {
-        window.visualViewport.removeEventListener(
-          "resize",
-          handleKeyboardResize,
-        );
+        window.visualViewport.removeEventListener("resize", debouncedUpdate);
       }
     };
-  }, [checkDevice, checkKeyboard, isMountedRef]);
+  }, [updateState, debouncedUpdate]);
 
   return mobileState;
 }

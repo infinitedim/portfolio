@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import type {
@@ -7,8 +6,8 @@ import type {
   ThemeExport,
   CustomizationSettings,
 } from "@/types/customization";
-import { themes } from "@/lib/themes/themeConfig";
-import { fonts } from "@/lib/fonts/fontConfig";
+import {themes} from "@/lib/themes/themeConfig";
+import {fonts} from "@/lib/fonts/fontConfig";
 
 export class CustomizationService {
   private static instance: CustomizationService;
@@ -50,11 +49,19 @@ export class CustomizationService {
       ([id, config]) => ({
         id,
         name: config.name,
-        colors: config.colors,
+        colors: {
+          bg: config.colors.bg,
+          text: config.colors.text,
+          accent: config.colors.accent,
+          border: config.colors.border,
+          prompt: config.colors.prompt ?? config.colors.accent,
+          success: config.colors.success ?? "#10b981",
+          error: config.colors.error ?? "#ef4444",
+        },
         source: "built-in" as const,
         createdAt: new Date("2024-01-01"),
       }),
-    ) as any;
+    );
 
     const customThemes = this.getCustomThemes();
     return [...builtInThemes, ...customThemes];
@@ -111,7 +118,7 @@ export class CustomizationService {
       name: newName || `${originalTheme.name} (Copy)`,
       description: originalTheme.description,
       source: "custom",
-      colors: { ...originalTheme.colors },
+      colors: {...originalTheme.colors},
       tags: originalTheme.tags ? [...originalTheme.tags] : undefined,
     });
 
@@ -255,7 +262,7 @@ export class CustomizationService {
       const parsed = JSON.parse(stored);
 
       if (typeof parsed === "object" && parsed !== null) {
-        return { ...this.getDefaultSettings(), ...parsed };
+        return {...this.getDefaultSettings(), ...parsed};
       }
 
       return this.getDefaultSettings();
@@ -267,7 +274,7 @@ export class CustomizationService {
 
   saveSettings(settings: Partial<CustomizationSettings>) {
     const currentSettings = this.getSettings();
-    const updatedSettings = { ...currentSettings, ...settings };
+    const updatedSettings = {...currentSettings, ...settings};
 
     localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(updatedSettings));
   }
@@ -299,9 +306,7 @@ export class CustomizationService {
     };
   }
 
-  async importThemes(
-    file: File,
-  ): Promise<{ success: number; errors: string[] }> {
+  async importThemes(file: File): Promise<{success: number; errors: string[]}> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
 
@@ -342,7 +347,7 @@ export class CustomizationService {
             }
           });
 
-          resolve({ success, errors });
+          resolve({success, errors});
         } catch (error) {
           reject(new Error("Invalid theme file format"));
         }

@@ -1,8 +1,8 @@
-import type { Command } from "@/types/terminal";
-import { generateId } from "@/lib/utils/utils";
-import type { RoadmapSkill } from "@/types/roadmap";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type {Command} from "@/types/terminal";
+import {generateId} from "@/lib/utils/utils";
+import type {RoadmapSkill} from "@/types/roadmap";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let roadmapService: any = null;
 let roadmapServicePromise: Promise<unknown> | null = null;
 
@@ -21,7 +21,7 @@ const getRoadmapService = async () => {
 
   roadmapServicePromise = (async () => {
     try {
-      const { RoadmapService } = await import("@/lib/services/roadmapService");
+      const {RoadmapService} = await import("@/lib/services/roadmapService");
       roadmapService = RoadmapService.getInstance();
       return roadmapService;
     } catch (error) {
@@ -79,7 +79,7 @@ const getServiceOrError = async () => {
       };
     }
 
-    return { service, error: false };
+    return {service, error: false};
   } catch (error) {
     return {
       error: true,
@@ -97,7 +97,7 @@ export const roadmapCommand: Command = {
     const subcommand = args[0]?.toLowerCase();
 
     if (!subcommand || subcommand === "overview") {
-      const { service, error, message } = await getServiceOrError();
+      const {service, error, message} = await getServiceOrError();
       if (error) {
         return {
           type: "error",
@@ -121,11 +121,11 @@ export const roadmapCommand: Command = {
         ...data.categories.map(
           (cat: {
             name: string;
-            skills: Array<{ status: string }>;
+            skills: Array<{status: string}>;
             progress: number;
           }) => {
             const completed = cat.skills.filter(
-              (s: { status: string }) => s.status === "completed",
+              (s: {status: string}) => s.status === "completed",
             ).length;
             const total = cat.skills.length;
             const progressBar =
@@ -152,7 +152,7 @@ export const roadmapCommand: Command = {
     }
 
     if (subcommand === "skills") {
-      const { service, error, message } = await getServiceOrError();
+      const {service, error, message} = await getServiceOrError();
       if (error) {
         return {
           type: "error",
@@ -169,7 +169,7 @@ export const roadmapCommand: Command = {
         if (!categoryData) {
           return {
             type: "error",
-            content: `Category "${category}" not found. Available: ${data.categories.map((c: { id: string }) => c.id).join(", ")}`,
+            content: `Category "${category}" not found. Available: ${data.categories.map((c: {id: string}) => c.id).join(", ")}`,
             timestamp: new Date(),
             id: generateId(),
           };
@@ -205,7 +205,7 @@ export const roadmapCommand: Command = {
           "═".repeat(40),
           "",
           ...data.categories.flatMap(
-            (cat: { name: string; skills: RoadmapSkill[] }) => [
+            (cat: {name: string; skills: RoadmapSkill[]}) => [
               `📁 ${cat.name}:`,
               ...cat.skills.map((skill: RoadmapSkill) => {
                 const statusIcon =
@@ -231,7 +231,7 @@ export const roadmapCommand: Command = {
     }
 
     if (subcommand === "update") {
-      const { service, error, message } = await getServiceOrError();
+      const {service, error, message} = await getServiceOrError();
       if (error) {
         return {
           type: "error",
@@ -301,7 +301,7 @@ export const roadmapCommand: Command = {
     }
 
     if (subcommand === "search") {
-      const { service, error, message } = await getServiceOrError();
+      const {service, error, message} = await getServiceOrError();
       if (error) {
         return {
           type: "error",
@@ -325,7 +325,7 @@ export const roadmapCommand: Command = {
       const data = await service.getUserProgress();
       const results: RoadmapSkill[] = [];
 
-      data.categories.forEach((category: { skills: RoadmapSkill[] }) => {
+      data.categories.forEach((category: {skills: RoadmapSkill[]}) => {
         category.skills.forEach((skill: RoadmapSkill) => {
           if (
             skill.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -369,7 +369,7 @@ export const roadmapCommand: Command = {
     }
 
     if (subcommand === "completed") {
-      const { service, error, message } = await getServiceOrError();
+      const {service, error, message} = await getServiceOrError();
       if (error) {
         return {
           type: "error",
@@ -401,7 +401,7 @@ export const roadmapCommand: Command = {
     }
 
     if (subcommand === "progress" || subcommand === "in-progress") {
-      const { service, error, message } = await getServiceOrError();
+      const {service, error, message} = await getServiceOrError();
       if (error) {
         return {
           type: "error",
@@ -459,7 +459,7 @@ export const progressCommand: Command = {
   aliases: ["prog"],
   category: "skills",
   async execute() {
-    const { service, error, message } = await getServiceOrError();
+    const {service, error, message} = await getServiceOrError();
     if (error) {
       return {
         type: "error",

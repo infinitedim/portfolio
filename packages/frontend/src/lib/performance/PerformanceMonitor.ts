@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 /**
  * Performance monitoring and metrics collection system
  */
@@ -9,7 +7,7 @@ interface PerformanceMetric {
   value: number;
   timestamp: number;
   category: "command" | "render" | "theme" | "font" | "history" | "system";
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface PerformanceReport {
@@ -18,7 +16,7 @@ interface PerformanceReport {
     totalCommands: number;
     averageCommandTime: number;
     averageRenderTime: number;
-    slowestCommand: { name: string; time: number };
+    slowestCommand: {name: string; time: number};
     memoryUsage?: number;
     historySize: number;
   };
@@ -75,13 +73,13 @@ export class PerformanceMonitor {
    * End timing an operation and record the metric
    * @param {string} name - The name of the operation
    * @param {PerformanceMetric["category"]} category - The category of the operation
-   * @param {Record<string, any>} [metadata] - The metadata for the operation
+   * @param {Record<string, unknown>} [metadata] - The metadata for the operation
    * @returns {number} The duration of the operation
    */
   endTiming(
     name: string,
     category: PerformanceMetric["category"] = "system",
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ): number {
     if (!this.isEnabled) return 0;
 
@@ -103,13 +101,13 @@ export class PerformanceMonitor {
    * @param {string} name - The name of the metric
    * @param {number} value - The value of the metric
    * @param {PerformanceMetric["category"]} category - The category of the metric
-   * @param {Record<string, any>} metadata - The metadata for the metric
+   * @param {Record<string, unknown>} metadata - The metadata for the metric
    */
   recordMetric(
     name: string,
     value: number,
     category: PerformanceMetric["category"],
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ): void {
     if (!this.isEnabled) return;
 
@@ -139,13 +137,13 @@ export class PerformanceMonitor {
    * Measure command execution performance
    * @param {string} commandName - The name of the command
    * @param {() => Promise<T>} commandFn - The function to measure
-   * @param {Record<string, any>} metadata - The metadata for the command
+   * @param {Record<string, unknown>} metadata - The metadata for the command
    * @returns {Promise<T>} The result of the command
    */
   measureCommand<T>(
     commandName: string,
     commandFn: () => Promise<T>,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ): Promise<T> {
     if (!this.isEnabled) return commandFn();
 
@@ -208,9 +206,9 @@ export class PerformanceMonitor {
     const slowestCommand = commandMetrics.reduce(
       (slowest, current) =>
         current.value > slowest.time
-          ? { name: current.name, time: current.value }
+          ? {name: current.name, time: current.value}
           : slowest,
-      { name: "none", time: 0 },
+      {name: "none", time: 0},
     );
 
     const recommendations = this.generateRecommendations();
@@ -280,7 +278,7 @@ export class PerformanceMonitor {
         });
       });
 
-      observer.observe({ entryTypes: ["measure", "navigation"] });
+      observer.observe({entryTypes: ["measure", "navigation"]});
     } catch (error) {
       console.warn("Failed to setup PerformanceObserver:", error);
     }
@@ -337,8 +335,10 @@ export class PerformanceMonitor {
       "performance" in window &&
       "memory" in performance
     ) {
-      const memory = (performance as any).memory;
-      return memory.usedJSHeapSize;
+      const memory = (
+        performance as Performance & {memory?: {usedJSHeapSize: number}}
+      ).memory;
+      return memory?.usedJSHeapSize;
     }
     return undefined;
   }
@@ -421,8 +421,8 @@ export class PerformanceMonitor {
 
     const mostUsedCommand = Object.entries(commandCounts).reduce(
       (most, [cmd, count]) =>
-        count > most.count ? { command: cmd, count } : most,
-      { command: "", count: 0 },
+        count > most.count ? {command: cmd, count} : most,
+      {command: "", count: 0},
     );
 
     if (mostUsedCommand.count > 10 && mostUsedCommand.command) {
@@ -457,7 +457,7 @@ export function usePerformanceMonitor() {
     name: string,
     value: number,
     category: PerformanceMetric["category"],
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ): void => {
     monitor.recordMetric(name, value, category, metadata);
   };

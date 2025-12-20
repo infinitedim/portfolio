@@ -1,4 +1,13 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {describe, it, expect, vi, beforeEach, afterEach} from "vitest";
+
+/** Locale configuration interface for test mocks */
+interface LocaleConfig {
+  code: string;
+  name: string;
+  nativeName: string;
+  flag: string;
+  direction: "ltr" | "rtl";
+}
 
 // Mock state for dynamic testing
 let mockCurrentLocale = "en_US";
@@ -8,7 +17,7 @@ vi.mock("@/lib/i18n/i18nService", () => ({
   i18n: {
     getCurrentLocale: () => mockCurrentLocale,
     getCurrentLocaleConfig: () => {
-      const locales: Record<string, any> = {
+      const locales: Record<string, LocaleConfig> = {
         en_US: {
           code: "en_US",
           name: "English (US)",
@@ -34,11 +43,11 @@ vi.mock("@/lib/i18n/i18nService", () => ({
       return locales[mockCurrentLocale] || locales.en_US;
     },
     getSupportedLocales: () => [
-      { code: "en_US", name: "English (US)", flag: "🇺🇸" },
-      { code: "id_ID", name: "Indonesian", flag: "🇮🇩" },
-      { code: "es_ES", name: "Spanish", flag: "🇪🇸" },
-      { code: "fr_FR", name: "French", flag: "🇫🇷" },
-      { code: "ar_SA", name: "Arabic", flag: "🇸🇦" },
+      {code: "en_US", name: "English (US)", flag: "🇺🇸"},
+      {code: "id_ID", name: "Indonesian", flag: "🇮🇩"},
+      {code: "es_ES", name: "Spanish", flag: "🇪🇸"},
+      {code: "fr_FR", name: "French", flag: "🇫🇷"},
+      {code: "ar_SA", name: "Arabic", flag: "🇸🇦"},
     ],
     setLocale: (code: string) => {
       if (mockSetLocaleResult) {
@@ -91,7 +100,7 @@ vi.mock("@/lib/i18n/locales", () => ({
     return fallbacks[code] || "en_US";
   },
   getLocaleConfig: (code: string) => {
-    const configs: Record<string, any> = {
+    const configs: Record<string, LocaleConfig> = {
       en_US: {
         code: "en_US",
         name: "English (US)",

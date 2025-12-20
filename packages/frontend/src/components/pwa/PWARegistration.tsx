@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
@@ -134,7 +133,7 @@ export function PWARegistration() {
 
       const isStandalone =
         window.matchMedia?.("(display-mode: standalone)")?.matches || false;
-      const isIOSStandalone = (navigator as any).standalone === true;
+      const isIOSStandalone = (navigator as Navigator & { standalone?: boolean }).standalone === true;
       const isTWA = document.referrer.includes("android-app://");
       const isInstalledPWA = isStandalone || isIOSStandalone || isTWA;
 

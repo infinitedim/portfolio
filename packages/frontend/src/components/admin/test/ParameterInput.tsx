@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -11,10 +10,13 @@ interface Parameter {
   description: string;
 }
 
+/** Type for parameter input values */
+type ParameterInputValue = string | number | boolean | object | null | undefined;
+
 interface ParameterInputProps {
   parameters: Parameter[];
-  values: Record<string, any>;
-  onChange: (name: string, value: any) => void;
+  values: Record<string, ParameterInputValue>;
+  onChange: (name: string, value: ParameterInputValue) => void;
   themeConfig: ThemeConfig;
 }
 
@@ -45,14 +47,15 @@ export function ParameterInput({
   };
 
   const renderInput = (param: Parameter) => {
-    const value = values[param.name] ?? "";
+    const rawValue = values[param.name];
 
     switch (param.type) {
-      case "number":
+      case "number": {
+        const numValue = typeof rawValue === "number" ? rawValue : 0;
         return (
           <input
             type="number"
-            value={value}
+            value={numValue}
             onChange={(e) => onChange(param.name, Number(e.target.value))}
             className="w-full p-2 rounded border font-mono text-sm"
             style={{
@@ -63,11 +66,13 @@ export function ParameterInput({
             placeholder={`Enter ${param.name}...`}
           />
         );
+      }
 
-      case "boolean":
+      case "boolean": {
+        const boolValue = typeof rawValue === "boolean" ? rawValue : Boolean(rawValue);
         return (
           <select
-            value={value.toString()}
+            value={boolValue.toString()}
             onChange={(e) => onChange(param.name, e.target.value === "true")}
             className="w-full p-2 rounded border font-mono text-sm"
             style={{
@@ -80,16 +85,16 @@ export function ParameterInput({
             <option value="false">False</option>
           </select>
         );
+      }
 
-      case "object":
+      case "object": {
+        const objValue = typeof rawValue === "string" ? rawValue : JSON.stringify(rawValue ?? {}, null, 2);
         return (
           <textarea
-            value={
-              typeof value === "string" ? value : JSON.stringify(value, null, 2)
-            }
+            value={objValue}
             onChange={(e) => {
               try {
-                const parsed = JSON.parse(e.target.value);
+                const parsed = JSON.parse(e.target.value) as object;
                 onChange(param.name, parsed);
               } catch {
                 onChange(param.name, e.target.value);
@@ -105,12 +110,14 @@ export function ParameterInput({
             placeholder={`Enter ${param.name} as JSON...`}
           />
         );
+      }
 
-      default:
+      default: {
+        const strValue = typeof rawValue === "string" ? rawValue : String(rawValue ?? "");
         return (
           <input
             type="text"
-            value={value}
+            value={strValue}
             onChange={(e) => onChange(param.name, e.target.value)}
             className="w-full p-2 rounded border font-mono text-sm"
             style={{
@@ -121,6 +128,7 @@ export function ParameterInput({
             placeholder={`Enter ${param.name}...`}
           />
         );
+      }
     }
   };
 

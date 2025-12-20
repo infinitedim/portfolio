@@ -3,9 +3,9 @@
 
 import { useState, useEffect, JSX } from "react";
 import { Music, ExternalLink, AlertCircle, CheckCircle } from "lucide-react";
+import type { trpc as TrpcType } from "@/lib/trpc";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let trpc: any = null;
+let trpc: typeof TrpcType | null = null;
 if (typeof window !== "undefined") {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, type JSX } from "react";
@@ -163,7 +162,7 @@ export function ThemeManager({
 
   return (
     <div className="h-full flex flex-col">
-      {}
+      { }
       <div
         className="p-4 border-b"
         style={{ borderColor: themeConfig.colors.border }}
@@ -193,7 +192,7 @@ export function ThemeManager({
           </button>
         </div>
 
-        {}
+        { }
         <div className="flex flex-col sm:flex-row gap-4">
           <input
             type="text"
@@ -210,7 +209,7 @@ export function ThemeManager({
           <div className="flex gap-2">
             <select
               value={filterSource}
-              onChange={(e) => setFilterSource(e.target.value as any)}
+              onChange={(e) => setFilterSource(e.target.value as "all" | "built-in" | "custom" | "imported")}
               className="px-3 py-2 rounded border text-sm"
               style={{
                 backgroundColor: `${themeConfig.colors.muted}20`,
@@ -225,7 +224,7 @@ export function ThemeManager({
             </select>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={(e) => setSortBy(e.target.value as "name" | "created" | "modified")}
               className="px-3 py-2 rounded border text-sm"
               style={{
                 backgroundColor: `${themeConfig.colors.muted}20`,
@@ -241,7 +240,7 @@ export function ThemeManager({
         </div>
       </div>
 
-      {}
+      { }
       <div className="flex-1 overflow-auto p-4">
         {filteredThemes.length === 0 ? (
           <div className="text-center py-12">
@@ -304,7 +303,7 @@ export function ThemeManager({
                       : "none",
                   }}
                 >
-                  {}
+                  { }
                   <div className="mb-3">
                     <div className="flex gap-1 mb-2">
                       {Object.entries(theme.colors)
@@ -323,7 +322,7 @@ export function ThemeManager({
                     </div>
                   </div>
 
-                  {}
+                  { }
                   <div className="mb-3">
                     <div className="flex items-center justify-between mb-1">
                       <h4
@@ -374,7 +373,7 @@ export function ThemeManager({
                     )}
                   </div>
 
-                  {}
+                  { }
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleApplyTheme(theme.id)}

@@ -6,5 +6,6 @@
   "jsxSingleQuote": false,
   "singleAttributePerLine": true,
   "endOfLine": "auto",
-  "trailingComma": "all"
+  "trailingComma": "all",
+  "bracketSpacing": false
 }

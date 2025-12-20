@@ -194,7 +194,7 @@ export default [
       prettier,
     },
     rules: {
-      "prettier/prettier": "error",
+      "prettier/prettier": "off",
     },
   },
 

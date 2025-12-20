@@ -1,8 +1,44 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * tRPC Client for backend testing dashboard
  * Handles communication with backend services via tRPC
  */
+
+/** Type for request parameters */
+type RequestParameterValue =
+  | string
+  | number
+  | boolean
+  | object
+  | null
+  | undefined;
+
+/** Generic response type from tRPC */
+interface TRPCResponse {
+  result?: {
+    data: unknown;
+  };
+  error?: {
+    message: string;
+    code?: string;
+  };
+  [key: string]: unknown;
+}
+
+/** Health check response type */
+interface HealthResponse {
+  status?: string;
+  healthy?: boolean;
+  timestamp?: string;
+  [key: string]: unknown;
+}
+
+/** Service definition response */
+interface ServiceDefinitionsResponse {
+  services?: string[];
+  methods?: Record<string, string[]>;
+  [key: string]: unknown;
+}
+
 export class GrpcClient {
   private baseUrl: string;
 
@@ -24,8 +60,8 @@ export class GrpcClient {
     service: string,
     method: string,
     type: "query" | "mutation",
-    parameters: Record<string, any> = {},
-  ): Promise<any> {
+    parameters: Record<string, RequestParameterValue> = {},
+  ): Promise<TRPCResponse> {
     try {
       let url = `${this.baseUrl}/${service}.${method}`;
 
@@ -38,7 +74,7 @@ export class GrpcClient {
       };
 
       if (type === "mutation") {
-        requestOptions.body = JSON.stringify({ input: parameters });
+        requestOptions.body = JSON.stringify({input: parameters});
       } else if (Object.keys(parameters).length > 0) {
         const searchParams = new URLSearchParams();
         Object.entries(parameters).forEach(([key, value]) => {
@@ -110,7 +146,7 @@ export class GrpcClient {
    * Get available services and methods
    * @returns Promise with service definitions
    */
-  async getServiceDefinitions(): Promise<any> {
+  async getServiceDefinitions(): Promise<ServiceDefinitionsResponse> {
     try {
       const response = await fetch(`${this.baseUrl}/health.health`, {
         method: "GET",
@@ -135,7 +171,7 @@ export class GrpcClient {
    * Execute a health check
    * @returns Promise with health status
    */
-  async healthCheck(): Promise<any> {
+  async healthCheck(): Promise<HealthResponse> {
     return this.executeRequest("health", "health", "query");
   }
 
@@ -143,7 +179,7 @@ export class GrpcClient {
    * Execute a ping test
    * @returns Promise with ping response
    */
-  async ping(): Promise<any> {
+  async ping(): Promise<HealthResponse> {
     return this.executeRequest("health", "ping", "query");
   }
 
@@ -151,7 +187,7 @@ export class GrpcClient {
    * Get detailed health information
    * @returns Promise with detailed health status
    */
-  async getDetailedHealth(): Promise<any> {
+  async getDetailedHealth(): Promise<HealthResponse> {
     return this.executeRequest("health", "healthDetailed", "query");
   }
 
@@ -159,7 +195,7 @@ export class GrpcClient {
    * Check database health
    * @returns Promise with database health status
    */
-  async checkDatabaseHealth(): Promise<any> {
+  async checkDatabaseHealth(): Promise<HealthResponse> {
     return this.executeRequest("health", "healthDatabase", "query");
   }
 
@@ -167,7 +203,7 @@ export class GrpcClient {
    * Check Redis health
    * @returns Promise with Redis health status
    */
-  async checkRedisHealth(): Promise<any> {
+  async checkRedisHealth(): Promise<HealthResponse> {
     return this.executeRequest("health", "healthRedis", "query");
   }
 
@@ -175,7 +211,7 @@ export class GrpcClient {
    * Check memory health
    * @returns Promise with memory health status
    */
-  async checkMemoryHealth(): Promise<any> {
+  async checkMemoryHealth(): Promise<HealthResponse> {
     return this.executeRequest("health", "healthMemory", "query");
   }
 
@@ -183,7 +219,7 @@ export class GrpcClient {
    * Check system health
    * @returns Promise with system health status
    */
-  async checkSystemHealth(): Promise<any> {
+  async checkSystemHealth(): Promise<HealthResponse> {
     return this.executeRequest("health", "healthSystem", "query");
   }
 
@@ -191,7 +227,7 @@ export class GrpcClient {
    * Check readiness probe
    * @returns Promise with readiness status
    */
-  async checkReadiness(): Promise<any> {
+  async checkReadiness(): Promise<HealthResponse> {
     return this.executeRequest("health", "healthReady", "query");
   }
 
@@ -199,7 +235,7 @@ export class GrpcClient {
    * Check liveness probe
    * @returns Promise with liveness status
    */
-  async checkLiveness(): Promise<any> {
+  async checkLiveness(): Promise<HealthResponse> {
     return this.executeRequest("health", "healthLive", "query");
   }
 }

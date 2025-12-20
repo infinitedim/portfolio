@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useTheme } from "@/hooks/useTheme";
-import type { JSX } from "react";
+import type { JSX, HTMLAttributes } from "react";
 
 /**
  * Props for the LoadingSpinner component
@@ -11,11 +10,10 @@ import type { JSX } from "react";
  * @property {string} [text] - Optional text to display
  * @property {string} [className] - Additional CSS classes
  */
-interface LoadingSpinnerProps {
+interface LoadingSpinnerProps extends HTMLAttributes<HTMLDivElement> {
   size?: "sm" | "md" | "lg";
   text?: string;
   className?: string;
-  [key: string]: any;
 }
 
 /**

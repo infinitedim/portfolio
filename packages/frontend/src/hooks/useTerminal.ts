@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
-import { CommandParser } from "@/lib/commands/commandParser";
+import {useState, useCallback, useRef, useEffect} from "react";
+import {CommandParser} from "@/lib/commands/commandParser";
 import {
   createHelpCommand,
   aboutCommand,
@@ -19,13 +19,13 @@ import {
   languageListCommand,
   languageInfoCommand,
 } from "@/lib/commands/languageCommands";
-import { useCommandHistory } from "./useCommandHistory";
-import { generateId } from "@/lib/utils/utils";
+import {useCommandHistory} from "./useCommandHistory";
+import {generateId} from "@/lib/utils/utils";
 
 const getSkillsCommand = async () => {
   if (typeof window === "undefined") return null;
   try {
-    const { skillsCommand } = await import("@/lib/commands/skillsCommands");
+    const {skillsCommand} = await import("@/lib/commands/skillsCommands");
     return skillsCommand;
   } catch (error) {
     console.error("Failed to load skills command:", error);
@@ -35,14 +35,14 @@ const getSkillsCommand = async () => {
 
 const getRoadmapCommands = async () => {
   if (typeof window === "undefined")
-    return { roadmapCommand: null, progressCommand: null };
+    return {roadmapCommand: null, progressCommand: null};
   try {
-    const { roadmapCommand, progressCommand } =
+    const {roadmapCommand, progressCommand} =
       await import("@/lib/commands/roadmapCommands");
-    return { roadmapCommand, progressCommand };
+    return {roadmapCommand, progressCommand};
   } catch (error) {
     console.error("Failed to load roadmap commands:", error);
-    return { roadmapCommand: null, progressCommand: null };
+    return {roadmapCommand: null, progressCommand: null};
   }
 };
 
@@ -51,11 +51,11 @@ import {
   themesCommand,
   fontsCommand,
 } from "@/lib/commands/customizationCommands";
-import { demoCommand, setDemoCallback } from "@/lib/commands/demoCommands";
-import { githubCommand } from "@/lib/commands/githubCommands";
-import { techStackCommand } from "@/lib/commands/techStackCommands";
-import { createNowPlayingCommand } from "@/lib/commands/nowPlayingCommands";
-import { createLocationCommand } from "@/lib/commands/locationCommands";
+import {demoCommand, setDemoCallback} from "@/lib/commands/demoCommands";
+import {githubCommand} from "@/lib/commands/githubCommands";
+import {techStackCommand} from "@/lib/commands/techStackCommands";
+import {createNowPlayingCommand} from "@/lib/commands/nowPlayingCommands";
+import {createLocationCommand} from "@/lib/commands/locationCommands";
 import {
   resumeCommand,
   socialCommand,
@@ -63,7 +63,7 @@ import {
   enhancedContactCommand,
   easterEggsCommand,
 } from "@/lib/commands/commands";
-import type { CommandOutput, TerminalHistory } from "@/types/terminal";
+import type {CommandOutput, TerminalHistory} from "@/types/terminal";
 
 const STORAGE_KEYS = {
   COMMAND_HISTORY: "terminal-command-history",
@@ -74,6 +74,34 @@ const SPECIAL_COMMANDS = {
   THEME_PREFIX: "CHANGE_THEME:",
   FONT_PREFIX: "CHANGE_FONT:",
 } as const;
+
+const ALL_COMMANDS = [
+  "help",
+  "skills",
+  "customize",
+  "themes",
+  "fonts",
+  "status",
+  "clear",
+  "alias",
+  "about",
+  "contact",
+  "projects",
+  "experience",
+  "education",
+  "roadmap",
+  "theme",
+  "font",
+  "language",
+  "now-playing",
+  "demo",
+  "github",
+  "tech-stack",
+  "resume",
+  "social",
+  "shortcuts",
+  "easter-eggs",
+] as const;
 
 /**
  * Comprehensive terminal management hook with command execution and history
@@ -155,7 +183,7 @@ export function useTerminal(
       switchCount: number;
       averageSwitchTime: number;
       lastSwitchTime: number;
-      popularThemes: { theme: string; count: number }[];
+      popularThemes: {theme: string; count: number}[];
       renderTime: number;
     };
     resetMetrics: () => void;
@@ -312,7 +340,7 @@ export function useTerminal(
       });
 
       const skillsCmd = await getSkillsCommand();
-      const { roadmapCommand, progressCommand } = await getRoadmapCommands();
+      const {roadmapCommand, progressCommand} = await getRoadmapCommands();
 
       if (skillsCmd) parser.register(skillsCmd);
       if (roadmapCommand) parser.register(roadmapCommand);
@@ -355,10 +383,21 @@ export function useTerminal(
             themeUsage: {},
           };
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          let monitor: any;
+          interface PerformanceReport {
+            metrics: Array<{name: string; value: number}>;
+            summary: {
+              totalCommands: number;
+              averageCommandTime: number;
+              averageRenderTime: number;
+              memoryUsage?: number;
+              historySize: number;
+            };
+            recommendations: string[];
+          }
+
+          let monitor: PerformanceReport;
           try {
-            const { PerformanceMonitor } =
+            const {PerformanceMonitor} =
               await import("@/lib/performance/PerformanceMonitor");
             monitor = PerformanceMonitor.getInstance().getReport();
           } catch (error) {
@@ -438,7 +477,7 @@ export function useTerminal(
               monitor.summary.totalCommands > 0
                 ? (
                     ((monitor.summary.totalCommands -
-                      monitor.metrics.filter((m: { name: string }) =>
+                      monitor.metrics.filter((m: {name: string}) =>
                         m.name.includes("error"),
                       ).length) /
                       monitor.summary.totalCommands) *
@@ -719,37 +758,10 @@ export function useTerminal(
     (input: string, limit: number = 8) => {
       if (!input.trim()) return [];
 
-      const allCommands = [
-        "help",
-        "skills",
-        "customize",
-        "themes",
-        "fonts",
-        "status",
-        "clear",
-        "alias",
-        "about",
-        "contact",
-        "projects",
-        "experience",
-        "education",
-        "roadmap",
-        "theme",
-        "font",
-        "language",
-        "now-playing",
-        "demo",
-        "github",
-        "tech-stack",
-        "resume",
-        "social",
-        "shortcuts",
-        "easter-eggs",
-      ];
-
       const query = input.toLowerCase();
-      const suggestions = allCommands
-        .filter((command) => command.toLowerCase().includes(query))
+      const suggestions = ALL_COMMANDS.filter((command) =>
+        command.toLowerCase().includes(query),
+      )
         .sort((a, b) => {
           if (a.toLowerCase() === query) return -1;
           if (b.toLowerCase() === query) return 1;

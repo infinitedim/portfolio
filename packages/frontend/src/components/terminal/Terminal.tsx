@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useRef, useEffect, useMemo, type JSX } from "react";
@@ -24,6 +23,8 @@ import { TerminalLoadingProgress, CommandLoadingIndicator } from "../ui";
 import { SpotifyAuth } from "../ui/SpotifyAuth";
 import { NowPlayingWidget } from "../ui/NowPlayingWidget";
 import { LetterGlitch } from "../ui/LetterGlitch";
+import { isThemeName } from "@/types/theme";
+import { isFontName } from "@/types/font";
 
 /**
  * Props for the Terminal component
@@ -286,8 +287,8 @@ export function Terminal({
         const themeName = output.content.split(":")[1];
         console.log(`🎨 Terminal: Attempting to change theme to ${themeName}`);
 
-        if (typeof changeTheme === "function") {
-          const success = changeTheme(themeName as any);
+        if (typeof changeTheme === "function" && isThemeName(themeName)) {
+          const success = changeTheme(themeName);
 
           if (success) {
             onThemeChange?.(themeName);
@@ -329,8 +330,8 @@ export function Terminal({
       ) {
         const fontName = output.content.split(":")[1];
 
-        if (typeof changeFont === "function") {
-          changeFont(fontName as any);
+        if (typeof changeFont === "function" && isFontName(fontName)) {
+          changeFont(fontName);
           onFontChange?.(fontName);
 
           showNotification(`Font changed to "${fontName}"`, "success");

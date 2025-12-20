@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect, JSX } from "react";
@@ -263,6 +262,9 @@ const availableServices: Service[] = [
   },
 ];
 
+/** Type for parameter values in requests */
+type ParameterValue = string | number | boolean | object | null | undefined;
+
 /**
  * Admin dashboard component for testing backend services and methods via gRPC
  * Provides an interactive interface for testing various backend endpoints with real-time request/response logging
@@ -281,7 +283,7 @@ export function BackendTestingDashboard({
   const [selectedMethod, setSelectedMethod] = useState<ServiceMethod | null>(
     null,
   );
-  const [parameters, setParameters] = useState<Record<string, any>>({});
+  const [parameters, setParameters] = useState<Record<string, ParameterValue>>({});
   const [requestLog, setRequestLog] = useState<string>("");
   const [responseLog, setResponseLog] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -301,12 +303,14 @@ export function BackendTestingDashboard({
 
   const handleMethodSelect = (method: ServiceMethod) => {
     setSelectedMethod(method);
-    const defaultParams: Record<string, any> = {};
+    const defaultParams: Record<string, ParameterValue> = {};
     method.parameters?.forEach((param) => {
       if (param.type === "number") {
         defaultParams[param.name] = 0;
       } else if (param.type === "boolean") {
         defaultParams[param.name] = false;
+      } else if (param.type === "object") {
+        defaultParams[param.name] = {};
       } else {
         defaultParams[param.name] = "";
       }
@@ -314,7 +318,7 @@ export function BackendTestingDashboard({
     setParameters(defaultParams);
   };
 
-  const handleParameterChange = (name: string, value: any) => {
+  const handleParameterChange = (name: string, value: ParameterValue) => {
     setParameters((prev) => ({
       ...prev,
       [name]: value,
@@ -383,7 +387,7 @@ export function BackendTestingDashboard({
           return;
         }
 
-        const sanitizedParameters: Record<string, any> = {};
+        const sanitizedParameters: Record<string, ParameterValue> = {};
         selectedMethod.parameters.forEach((param) => {
           const value = parameters[param.name];
           sanitizedParameters[param.name] = ValidationUtils.sanitizeValue(
@@ -616,8 +620,8 @@ export function BackendTestingDashboard({
                 onClick={executeRequest}
                 disabled={isLoading}
                 className={`w-full p-3 rounded font-mono text-sm transition-all duration-200 ${isLoading
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:scale-105"
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:scale-105"
                   }`}
                 style={{
                   backgroundColor: themeConfig.colors.accent,
