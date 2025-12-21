@@ -11,7 +11,7 @@ import {
   optimizeThirdParty,
   optimizeMemoryUsage,
   initBundleOptimizations,
-} from "../bundleOptimization";
+} from "../bundler-optimization";
 
 // Mock DOM methods
 const mockDocument = {

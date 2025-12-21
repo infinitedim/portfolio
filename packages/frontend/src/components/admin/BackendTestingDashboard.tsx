@@ -2,13 +2,13 @@
 
 import { useState, useEffect, JSX } from "react";
 import type { ThemeConfig } from "@/types/theme";
-import { ServiceSelector } from "./test/ServiceSelector";
-import { MethodSelector } from "./test/MethodSelector";
-import { ParameterInput } from "./test/ParameterInput";
-import { RequestResponsePanel } from "./test/RequestResponsePanel";
-import { GrpcClient } from "./test/GrpcClient";
-import { ErrorHandler } from "./test/ErrorHandler";
-import { ValidationUtils } from "./test/ValidationUtils";
+import { ServiceSelector } from "./ServiceSelector";
+import { MethodSelector } from "./MethodSelector";
+import { ParameterInput } from "./ParameterInput";
+import { RequestResponsePanel } from "./RequestResponsePanel";
+import { TrpcClient } from "../../lib/utils/trpc-client";
+import { ErrorHandler } from "./ErrorHandler";
+import { ValidationUtils } from "@/lib/utils/validation-utils";
 
 /**
  * Props for the BackendTestingDashboard component
@@ -266,7 +266,7 @@ const availableServices: Service[] = [
 type ParameterValue = string | number | boolean | object | null | undefined;
 
 /**
- * Admin dashboard component for testing backend services and methods via gRPC
+ * Admin dashboard component for testing backend services and methods via tRPC
  * Provides an interactive interface for testing various backend endpoints with real-time request/response logging
  * @param {BackendTestingDashboardProps} props - Component props
  * @param {ThemeConfig} props.themeConfig - Theme configuration for styling
@@ -287,12 +287,12 @@ export function BackendTestingDashboard({
   const [requestLog, setRequestLog] = useState<string>("");
   const [responseLog, setResponseLog] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
-  const [grpcClient, setGrpcClient] = useState<GrpcClient | null>(null);
+  const [trpcClient, setTrpcClient] = useState<TrpcClient | null>(null);
   const [_hasErrors, setHasErrors] = useState(false);
 
   useEffect(() => {
-    const client = new GrpcClient();
-    setGrpcClient(client);
+    const client = new TrpcClient();
+    setTrpcClient(client);
   }, []);
 
   const handleServiceSelect = (service: Service) => {
@@ -326,7 +326,7 @@ export function BackendTestingDashboard({
   };
 
   const executeRequest = async () => {
-    if (!selectedService || !selectedMethod || !grpcClient) return;
+    if (!selectedService || !selectedMethod || !trpcClient) return;
 
     setIsLoading(true);
     setRequestLog("");
@@ -429,7 +429,7 @@ export function BackendTestingDashboard({
 
       setRequestLog(JSON.stringify(requestData, null, 2));
 
-      const response = await grpcClient.executeRequest(
+      const response = await trpcClient.executeRequest(
         selectedService.name,
         selectedMethod.name,
         selectedMethod.type,
@@ -527,7 +527,7 @@ export function BackendTestingDashboard({
           Backend Testing Dashboard
         </h1>
         <p className="text-sm opacity-70 mt-1">
-          Test backend services and methods with real-time gRPC communication
+          Test backend services and methods with real-time tRPC communication
         </p>
       </div>
 

@@ -1,5 +1,5 @@
 import type { Command, CommandOutput } from "@/types/terminal";
-import { ArgumentParser } from "@/lib/utils/argParser";
+import { ArgumentParser } from "@/lib/utils/arg-parser";
 import { generateId } from "@/lib/utils/utils";
 
 /**

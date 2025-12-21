@@ -62,7 +62,7 @@ export default [
   },
 
   {
-    files: ["**/*.{ts,tsx}"],
+    files: ["packages/frontend/**/*.{ts,tsx}", "packages/ui/**/*.{ts,tsx}"],
     plugins: {
       react: pluginReact,
     },
@@ -94,7 +94,7 @@ export default [
   },
 
   {
-    files: ["**/*.{ts,tsx}"],
+    files: ["packages/frontend/**/*.{ts,tsx}", "packages/ui/**/*.{ts,tsx}"],
     plugins: {
       "react-hooks": reactHooks,
     },
@@ -105,7 +105,7 @@ export default [
   },
 
   {
-    files: ["**/*.{ts,tsx}"],
+    files: ["packages/frontend/**/*.{ts,tsx}", "packages/ui/**/*.{ts,tsx}"],
     plugins: {
       "jsx-a11y": jsxA11y,
     },

@@ -4,9 +4,8 @@
 // See: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = []
-  output          = "../generated/prisma_generated"
+  provider = "prisma-client"
+  output   = "./generated/prisma"
 }
 
 datasource db {

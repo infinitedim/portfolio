@@ -22,7 +22,16 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "hash-password": "bun run scripts/hash-password.ts"
+    "hash-password": "bun run scripts/hash-password.ts",
+    "prisma:generate": "bunx prisma generate",
+    "prisma:migrate:dev": "bunx prisma migrate dev",
+    "prisma:migrate:deploy": "bunx prisma migrate deploy",
+    "prisma:migrate:status": "bunx prisma migrate status",
+    "prisma:migrate:reset": "bunx prisma migrate reset",
+    "prisma:studio": "bunx prisma studio",
+    "prisma:db:push": "bunx prisma db push",
+    "prisma:db:seed": "bunx prisma db seed",
+    "db:setup": "bun run prisma:generate && bun run prisma:migrate:deploy"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.56",
@@ -33,6 +42,7 @@
     "@nestjs/throttler": "^6.5.0",
     "@portfolio/logger": "workspace:*",
     "@portfolio/trpc": "workspace:*",
+    "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "@prisma/config": "^7.2.0",
     "@trpc/client": "^11.8.1",

@@ -109,8 +109,9 @@ export const InteractiveWelcome = memo(function InteractiveWelcome({
                     ? `${themeConfig.colors.accent}20`
                     : `${themeConfig.colors.bg}20`,
                 color: themeConfig.colors.text,
-                ringColor: isHighlighted ? themeConfig.colors.accent : undefined,
-              }}
+                // Use CSS custom property for ring color (Tailwind will pick it up)
+                "--tw-ring-color": isHighlighted ? themeConfig.colors.accent : undefined,
+              } as React.CSSProperties}
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-lg">{cmd.icon}</span>

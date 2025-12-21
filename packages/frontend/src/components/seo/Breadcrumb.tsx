@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { type JSX } from "react";
+import { UrlObject } from "url";
 
 /**
  * Represents a single breadcrumb item in the navigation trail
@@ -12,7 +13,7 @@ import { type JSX } from "react";
  */
 interface BreadcrumbItem {
   label: string;
-  href: string;
+  href: UrlObject;
   current?: boolean;
 }
 
@@ -78,7 +79,7 @@ export function Breadcrumb({
         <ol className="flex items-center space-x-2">
           {items.map((item, index) => (
             <li
-              key={item.href}
+              key={`${item.href}`}
               className="flex items-center"
             >
               {index > 0 && (

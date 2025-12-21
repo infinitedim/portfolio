@@ -1,10 +1,10 @@
-import {useState, useRef, useCallback, useEffect} from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import {
   useIntervalManager,
   useMountRef,
   useTimerManager,
-} from "./utils/hookUtils";
-import type {trpcClient as TrpcClientType} from "@/lib/trpc";
+} from "./utils/hooks-utils";
+import type { trpcClient as TrpcClientType } from "@/lib/trpc";
 
 let trpcClient: typeof TrpcClientType | null = null;
 if (typeof window !== "undefined") {
@@ -48,7 +48,7 @@ interface SecurityMetrics {
   validRequests: number;
   blockedRequests: number;
   averageRequestsPerMinute: number;
-  topThreats: Array<{type: string; count: number}>;
+  topThreats: Array<{ type: string; count: number }>;
 }
 
 interface ValidationResult {
@@ -182,8 +182,8 @@ function validateInputClientSide(input: string): ValidationResult {
  */
 export function useSecurity() {
   const isMountedRef = useMountRef();
-  const {setTimer, clearTimer} = useTimerManager();
-  const {setInterval, clearInterval} = useIntervalManager();
+  const { setTimer, clearTimer } = useTimerManager();
+  const { setInterval, clearInterval } = useIntervalManager();
 
   const [securityState, setSecurityState] = useState<SecurityState>({
     isRateLimited: false,
@@ -194,7 +194,9 @@ export function useSecurity() {
 
   const [threatAlerts, setThreatAlerts] = useState<ThreatAlert[]>([]);
   const recentInputs = useRef<string[]>([]);
-  const requestHistory = useRef<Array<{timestamp: number; valid: boolean}>>([]);
+  const requestHistory = useRef<Array<{ timestamp: number; valid: boolean }>>(
+    [],
+  );
 
   const metricsCache = useRef<{
     timestamp: number;
@@ -473,7 +475,7 @@ export function useSecurity() {
         );
 
         const topThreats = Object.entries(threatTypes)
-          .map(([type, count]) => ({type, count}))
+          .map(([type, count]) => ({ type, count }))
           .sort((a, b) => b.count - a.count)
           .slice(0, 5);
 
@@ -682,7 +684,7 @@ function detectSuspiciousActivity(recentInputs: string[]): {
   riskLevel: "low" | "medium" | "high";
 } {
   if (recentInputs.length < 3) {
-    return {isSuspicious: false, reason: "", riskLevel: "low"};
+    return { isSuspicious: false, reason: "", riskLevel: "low" };
   }
 
   const patternCounts: Record<string, number> = {};
@@ -709,7 +711,7 @@ function detectSuspiciousActivity(recentInputs: string[]): {
     };
   }
 
-  return {isSuspicious: false, reason: "", riskLevel: "low"};
+  return { isSuspicious: false, reason: "", riskLevel: "low" };
 }
 
 /**

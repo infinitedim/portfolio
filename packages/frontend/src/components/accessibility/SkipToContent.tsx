@@ -58,7 +58,7 @@ export function SkipToContent({
     return (
       <a
         href={`#${targetId}`}
-        className={`sr-only focus:not-sr-only focus:absolute focus:top-16 focus:left-4 focus:z-[100] px-4 py-2 rounded shadow-lg transition-all duration-200 font-mono text-sm ${className}`}
+        className={`sr-only focus:not-sr-only focus:absolute focus:top-16 focus:left-4 focus:z-100 px-4 py-2 rounded shadow-lg transition-all duration-200 font-mono text-sm ${className}`}
         style={{
           backgroundColor: "#0284c7",
           color: "#ffffff",
@@ -76,7 +76,7 @@ export function SkipToContent({
   return (
     <a
       href={`#${targetId}`}
-      className={`sr-only focus:not-sr-only focus:absolute focus:top-16 focus:left-4 focus:z-[100] px-4 py-2 rounded shadow-lg transition-all duration-200 font-mono text-sm ${className}`}
+      className={`sr-only focus:not-sr-only focus:absolute focus:top-16 focus:left-4 focus:z-100 px-4 py-2 rounded shadow-lg transition-all duration-200 font-mono text-sm ${className}`}
       style={{
         backgroundColor: resolvedTheme.backgroundColor,
         color: resolvedTheme.color,

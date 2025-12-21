@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { generateId, useTimerManager, useMountRef } from "./utils/hookUtils";
+import { generateId, useTimerManager, useMountRef } from "./utils/hooks-utils";
 
 import type { ToastActionElement, ToastProps } from "@/ui/toast";
 

@@ -5,42 +5,44 @@ import process from "node:process";
 
 // Try to load .env file from project root (for local development)
 // In CI/CD, environment variables are provided directly
-const envPath = path.join(__dirname, "../../.env");
+const envPath = path.join(__dirname, "./.env");
 if (fs.existsSync(envPath)) {
   try {
     process.loadEnvFile(envPath);
-  } catch {
-    // Silently ignore - env vars should be provided by CI/CD
+  } catch (error) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "message" in error &&
+      typeof error.message === "string"
+    ) {
+      console.log(error.message);
+      throw new Error(
+        "Env path file not found. Please make sure your .env file is there",
+      );
+    }
   }
 }
 
-// Validate required environment variables
+// DIRECT_URL is used for migrations (direct connection, not pooled)
+// DATABASE_URL is used for runtime queries (can be pooled)
 const directUrl = process.env.DIRECT_URL;
-const databaseUrl = process.env.DATABASE_URL;
+// const databaseUrl = process.env.DATABASE_URL;
 
 if (!directUrl) {
   throw new Error(
-    "DIRECT_URL environment variable is required for Prisma configuration. " +
+    "DIRECT_URL environment variable is required for Prisma migrations. " +
       "Please set it in your .env file or environment.",
   );
 }
 
-if (!databaseUrl) {
-  throw new Error(
-    "DATABASE_URL environment variable is required for Prisma configuration. " +
-      "Please set it in your .env file or environment.",
-  );
-}
-
-// Prisma 7 configuration
-// In Prisma 7, datasource URLs should be configured here instead of schema.prisma
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
   },
   datasource: {
+    // Use DIRECT_URL for migrations (non-pooled connection required)
     url: directUrl,
-    shadowDatabaseUrl: databaseUrl,
   },
 });

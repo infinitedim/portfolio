@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { ThemeDisplay, ThemeDisplayOptions } from "../themeDisplay";
+import { ThemeDisplay, ThemeDisplayOptions } from "../theme-display";
 
 describe("themeDisplay", () => {
   beforeEach(() => {

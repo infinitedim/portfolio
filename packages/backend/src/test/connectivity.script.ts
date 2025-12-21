@@ -3,7 +3,8 @@
  * Tests database (PostgreSQL) and Redis (Upstash) connections
  */
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../../prisma/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { Redis } from "@upstash/redis";
 
 // Colors for console output
@@ -53,8 +54,13 @@ async function testDatabaseConnection(): Promise<boolean> {
   const maskedUrl = databaseUrl.replace(/:[^:@]+@/, ":****@");
   log(`Connection URL: ${maskedUrl}`, "info");
 
+  // Prisma 7.x requires a driver adapter
+  const adapter = new PrismaPg({
+    connectionString: databaseUrl,
+  });
+
   const prisma = new PrismaClient({
-    log: ["error"],
+    adapter,
   });
 
   try {

@@ -31,11 +31,14 @@
     "test:tools": "turbo test --filter=@portfolio/trpc --filter=@portfolio/logger",
     "format": "npx prettier --write .",
     "prepare": "husky",
-    "prisma:generate": "cd packages/backend && npx prisma generate",
-    "prisma:migrate": "cd packages/backend && npx prisma migrate dev",
-    "prisma:migrate:deploy": "cd packages/backend && npx prisma migrate deploy",
-    "prisma:migrate:create": "cd packages/backend && npx prisma migrate dev --create-only",
-    "prisma:studio": "cd packages/backend && npx prisma studio"
+    "prisma:generate": "cd packages/backend && bunx prisma generate",
+    "prisma:migrate": "cd packages/backend && bunx prisma migrate dev",
+    "prisma:migrate:deploy": "cd packages/backend && bunx prisma migrate deploy",
+    "prisma:migrate:create": "cd packages/backend && bunx prisma migrate dev --create-only",
+    "prisma:migrate:status": "cd packages/backend && bunx prisma migrate status",
+    "prisma:migrate:reset": "cd packages/backend && bunx prisma migrate reset",
+    "prisma:studio": "cd packages/backend && bunx prisma studio",
+    "prisma:db:push": "cd packages/backend && bunx prisma db push"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.2.0",

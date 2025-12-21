@@ -1,7 +1,7 @@
 import type { Command } from "@/types/terminal";
 import { generateId } from "@/lib/utils/utils";
-import { ArgumentParser } from "@/lib/utils/argParser";
-import { ThemeDisplay } from "@/lib/utils/themeDisplay";
+import { ArgumentParser } from "@/lib/utils/arg-parser";
+import { ThemeDisplay } from "@/lib/utils/theme-display";
 import { themes, getSortedThemeNames } from "@/lib/themes/themeConfig";
 import type { ThemeName } from "@/types/theme";
 
