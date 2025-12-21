@@ -9,20 +9,14 @@
     "ashinzekene.nestjs",
     "vitest.explorer",
     "ms-playwright.playwright",
-    "eamodio.gitlens",
     "mhutchie.git-graph",
     "ms-azuretools.vscode-docker",
     "humao.rest-client",
     "vercel.turbo-vsc",
-    "streetsidesoftware.code-spell-checker",
     "usernamehw.errorlens",
-    "gruntfuggly.todo-tree",
-    "christian-kohler.path-intellisense",
     "mikestead.dotenv",
     "editorconfig.editorconfig",
     "github.copilot",
-    "yzhang.markdown-all-in-one",
-    "bierner.markdown-mermaid"
   ],
   "unwantedRecommendations": []
 }
