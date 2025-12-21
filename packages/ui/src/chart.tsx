@@ -1,4 +1,4 @@
- 
+
 "use client";
 
 import * as React from "react";
@@ -137,7 +137,7 @@ const ChartTooltip = RechartsPrimitive.Tooltip;
  * It displays formatted data from the chart payload, using the configuration from `ChartContext`.
  * @param {object} props - The properties for the ChartTooltipContent component.
  * @param {boolean} [props.active] - Whether the tooltip is active. Provided by Recharts.
- * @param {any[]} [props.payload] - The data payload for the tooltip. Provided by Recharts.
+ * @param {ChartPayloadItem[]} [props.payload] - The data payload for the tooltip. Provided by Recharts.
  * @param {string} [props.className] - Additional class names for the tooltip container.
  * @param {"line" | "dot" | "dashed"} [props.indicator="dot"] - The type of indicator to display next to each item.
  * @param {boolean} [props.hideLabel=false] - Whether to hide the main tooltip label.
@@ -335,7 +335,7 @@ const ChartLegend = RechartsPrimitive.Legend;
  * @param {object} props - The properties for the ChartLegendContent component.
  * @param {string} [props.className] - Additional class names for the legend container.
  * @param {boolean} [props.hideIcon=false] - Whether to hide the icon for each legend item.
- * @param {any[]} [props.payload] - The data payload for the legend. Provided by Recharts.
+ * @param {ChartPayloadItem[]} [props.payload] - The data payload for the legend. Provided by Recharts.
  * @param {"top" | "bottom" | "middle"} [props.verticalAlign="bottom"] - The vertical alignment of the legend.
  * @param {string} [props.nameKey] - The key in the payload to use for the item name.
  * @returns {React.JSX.Element | null} The rendered legend content, or null if there is no payload.
