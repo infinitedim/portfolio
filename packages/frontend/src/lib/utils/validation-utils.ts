@@ -1,14 +1,9 @@
-/**
- * Validation utilities for the backend testing dashboard
- */
-
 export interface ValidationResult {
   isValid: boolean;
   errors: string[];
   warnings: string[];
 }
 
-/** Type for parameter values that can be validated */
 export type ParameterValue =
   | string
   | number

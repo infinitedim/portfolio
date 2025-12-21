@@ -2,7 +2,7 @@
  * Test utilities and helpers for backend tests
  */
 import { vi, type Mock } from "vitest";
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "../../prisma/generated/prisma/client";
 import type { Request, Response, NextFunction } from "express";
 
 // Re-export common testing utilities

@@ -3,9 +3,10 @@ import type {
   OnModuleInit,
   OnModuleDestroy,
 } from "@nestjs/common";
-import {Injectable, Logger} from "@nestjs/common";
-import {PrismaClient} from "@prisma/client";
-import {ServerlessConfig} from "../config/serverless.config";
+import { Injectable, Logger } from "@nestjs/common";
+import { PrismaClient } from "../../prisma/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { ServerlessConfig } from "../config/serverless.config";
 
 @Injectable()
 export class PrismaService
@@ -22,22 +23,22 @@ export class PrismaService
   private healthCheckInterval: NodeJS.Timeout | null = null;
   private lastConnectionTime: Date | null = null;
   private connectionPromise: Promise<void> | null = null;
+  private readonly adapter: PrismaPg;
 
   constructor() {
     const config = ServerlessConfig.getConfig();
 
-    super({
-      ...(config.databaseUrl && {datasourceUrl: config.databaseUrl}),
-      log:
-        config.logLevel === "debug"
-          ? [
-              {emit: "stdout", level: "query"},
-              {emit: "stdout", level: "error"},
-              {emit: "stdout", level: "warn"},
-            ]
-          : [{emit: "stdout", level: "error"}],
-      errorFormat: "pretty",
+    // Prisma 7.x requires a driver adapter
+    const adapter = new PrismaPg({
+      connectionString: config.databaseUrl || process.env.DATABASE_URL || "",
     });
+
+    super({
+      adapter,
+      log: config.logLevel === "debug" ? ["query", "error", "warn"] : ["error"],
+    });
+
+    this.adapter = adapter;
   }
 
   async onModuleInit(): Promise<void> {

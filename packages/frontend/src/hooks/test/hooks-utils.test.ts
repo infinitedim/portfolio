@@ -8,7 +8,26 @@ import {
   useTimerManager,
   useIntervalManager,
   safeDOMManipulation,
-} from "../utils/hookUtils";
+} from "../utils/hooks-utils";
+
+// Type interfaces for hook return values
+interface LocalStorageResult<T> {
+  getValue: () => T;
+  setValue: (value: T) => boolean;
+  removeValue: () => boolean;
+}
+
+interface TimerManagerResult {
+  setTimer: (id: string, callback: () => void, delay: number) => void;
+  clearTimer: (id: string) => void;
+  clearAllTimers: () => void;
+}
+
+interface IntervalManagerResult {
+  setInterval: (id: string, callback: () => void, delay: number) => void;
+  clearInterval: (id: string) => void;
+  clearAllIntervals: () => void;
+}
 
 // Mock localStorage
 const mockLocalStorage = (() => {
@@ -93,9 +112,10 @@ describe("hookUtils", () => {
         useLocalStorage("testKey", "default"),
       );
 
-      expect(typeof result.current.getValue).toBe("function");
-      expect(typeof result.current.setValue).toBe("function");
-      expect(typeof result.current.removeValue).toBe("function");
+      const current = result.current as LocalStorageResult<string>;
+      expect(typeof current.getValue).toBe("function");
+      expect(typeof current.setValue).toBe("function");
+      expect(typeof current.removeValue).toBe("function");
     });
 
     it("returns default value when key not found", () => {
@@ -103,7 +123,8 @@ describe("hookUtils", () => {
         useLocalStorage("nonExistentKey", "defaultVal"),
       );
 
-      expect(result.current.getValue()).toBe("defaultVal");
+      const current = result.current as LocalStorageResult<string>;
+      expect(current.getValue()).toBe("defaultVal");
     });
 
     it("stores and retrieves value", () => {
@@ -112,7 +133,8 @@ describe("hookUtils", () => {
       );
 
       act(() => {
-        result.current.setValue("storedValue");
+        const current = result.current as LocalStorageResult<string>;
+        current.setValue("storedValue");
       });
 
       expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
@@ -127,7 +149,8 @@ describe("hookUtils", () => {
       );
 
       act(() => {
-        result.current.removeValue();
+        const current = result.current as LocalStorageResult<string>;
+        current.removeValue();
       });
 
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith("testKey");
@@ -141,7 +164,11 @@ describe("hookUtils", () => {
       );
 
       act(() => {
-        result.current.setValue({ name: "updated", value: 123 });
+        const current = result.current as LocalStorageResult<{
+          name: string;
+          value?: number;
+        }>;
+        current.setValue({ name: "updated", value: 123 });
       });
 
       expect(mockLocalStorage.setItem).toHaveBeenCalled();
@@ -154,7 +181,8 @@ describe("hookUtils", () => {
       const callback = vi.fn();
 
       act(() => {
-        result.current.setTimer("timer1", callback, 1000);
+        const current = result.current as TimerManagerResult;
+        current.setTimer("timer1", callback, 1000);
       });
 
       act(() => {
@@ -169,8 +197,9 @@ describe("hookUtils", () => {
       const callback = vi.fn();
 
       act(() => {
-        result.current.setTimer("timer1", callback, 1000);
-        result.current.clearTimer("timer1");
+        const current = result.current as TimerManagerResult;
+        current.setTimer("timer1", callback, 1000);
+        current.clearTimer("timer1");
       });
 
       act(() => {
@@ -186,9 +215,10 @@ describe("hookUtils", () => {
       const callback2 = vi.fn();
 
       act(() => {
-        result.current.setTimer("timer1", callback1, 1000);
-        result.current.setTimer("timer2", callback2, 2000);
-        result.current.clearAllTimers();
+        const current = result.current as TimerManagerResult;
+        current.setTimer("timer1", callback1, 1000);
+        current.setTimer("timer2", callback2, 2000);
+        current.clearAllTimers();
       });
 
       act(() => {
@@ -205,8 +235,9 @@ describe("hookUtils", () => {
       const callback2 = vi.fn();
 
       act(() => {
-        result.current.setTimer("sameId", callback1, 1000);
-        result.current.setTimer("sameId", callback2, 1000);
+        const current = result.current as TimerManagerResult;
+        current.setTimer("sameId", callback1, 1000);
+        current.setTimer("sameId", callback2, 1000);
       });
 
       act(() => {
@@ -222,8 +253,9 @@ describe("hookUtils", () => {
     it("returns setInterval and clearInterval functions", () => {
       const { result } = renderHook(() => useIntervalManager());
 
-      expect(typeof result.current.setInterval).toBe("function");
-      expect(typeof result.current.clearInterval).toBe("function");
+      const current = result.current as IntervalManagerResult;
+      expect(typeof current.setInterval).toBe("function");
+      expect(typeof current.clearInterval).toBe("function");
     });
   });
 

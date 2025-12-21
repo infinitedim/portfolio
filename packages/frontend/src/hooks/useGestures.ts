@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useMemo } from "react";
-import { useTimerManager, useMountRef } from "./utils/hookUtils";
+import { useTimerManager, useMountRef } from "./utils/hooks-utils";
 
 /**
  * Configuration thresholds and delays for gesture recognition

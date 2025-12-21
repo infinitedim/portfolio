@@ -12,7 +12,7 @@
  * - Error handling wrappers
  */
 
-import React, {useRef, useEffect, useCallback} from "react";
+import React, { useRef, useEffect, useCallback, RefObject } from "react";
 
 /**
  * SSR-safe check for client-side rendering environment
@@ -51,7 +51,7 @@ export const isClientSide = (): boolean => {
  * };
  * ```
  */
-export function useMountRef() {
+export function useMountRef(): RefObject<boolean> {
   const isMountedRef = useRef(false);
 
   useEffect(() => {
@@ -128,7 +128,7 @@ export function useClientEffect(
  * removeValue();
  * ```
  */
-export function useLocalStorage<T>(key: string, defaultValue: T) {
+export function useLocalStorage<T>(key: string, defaultValue: T): object {
   const getValue = useCallback((): T => {
     if (!isClientSide()) return defaultValue;
 
@@ -180,7 +180,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
     }
   }, [key]);
 
-  return {getValue, setValue, removeValue};
+  return { getValue, setValue, removeValue };
 }
 
 /**
@@ -213,7 +213,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
  * clearAllTimers();
  * ```
  */
-export function useTimerManager() {
+export function useTimerManager(): object {
   const timersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const isMountedRef = useMountRef();
 
@@ -257,7 +257,7 @@ export function useTimerManager() {
     };
   }, [clearAllTimers]);
 
-  return {setTimer, clearTimer, clearAllTimers};
+  return { setTimer, clearTimer, clearAllTimers };
 }
 
 /**
@@ -284,7 +284,7 @@ export function useTimerManager() {
  * clearInterval('polling');
  * ```
  */
-export function useIntervalManager() {
+export function useIntervalManager(): object {
   const intervalsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const isMountedRef = useMountRef();
 
@@ -329,7 +329,7 @@ export function useIntervalManager() {
     };
   }, [clearAllIntervals]);
 
-  return {setInterval, clearInterval, clearAllIntervals};
+  return { setInterval, clearInterval, clearAllIntervals };
 }
 
 /**

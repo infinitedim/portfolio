@@ -1,6 +1,6 @@
-
-import {Injectable, NotFoundException} from "@nestjs/common";
-import {PrismaService} from "../prisma/prisma.service";
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { Prisma } from "../../prisma/generated/prisma/client";
 
 @Injectable()
 export class AdminProfileService {
@@ -8,7 +8,7 @@ export class AdminProfileService {
 
   async getProfile(adminUserId: string) {
     const profile = await this.prisma.adminProfile.findUnique({
-      where: {adminUserId},
+      where: { adminUserId },
       include: {
         adminUser: {
           select: {
@@ -39,7 +39,7 @@ export class AdminProfileService {
       phone?: string;
       timezone?: string;
       language?: string;
-      preferences?: Record<string, unknown>;
+      preferences?: Prisma.InputJsonValue;
     },
   ) {
     return this.prisma.adminProfile.create({
@@ -69,11 +69,11 @@ export class AdminProfileService {
       phone: string;
       timezone: string;
       language: string;
-      preferences: Record<string, unknown>;
+      preferences: Prisma.InputJsonValue;
     }>,
   ) {
     const profile = await this.prisma.adminProfile.findUnique({
-      where: {adminUserId},
+      where: { adminUserId },
     });
 
     if (!profile) {
@@ -81,7 +81,7 @@ export class AdminProfileService {
     }
 
     return this.prisma.adminProfile.update({
-      where: {adminUserId},
+      where: { adminUserId },
       data,
       include: {
         adminUser: {
@@ -107,7 +107,7 @@ export class AdminProfileService {
     }>,
   ) {
     return this.prisma.adminUser.update({
-      where: {id: adminUserId},
+      where: { id: adminUserId },
       data,
       select: {
         id: true,

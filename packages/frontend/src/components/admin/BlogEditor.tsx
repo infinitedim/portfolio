@@ -534,7 +534,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
               <div className="text-xs opacity-70 mb-2">{t("blogContent")}</div>
               {isPreview ? (
                 <div
-                  className="w-full min-h-[400px] px-3 py-2 text-sm border rounded font-mono overflow-y-auto"
+                  className="w-full min-h-100 px-3 py-2 text-sm border rounded font-mono overflow-y-auto"
                   style={{
                     borderColor: themeConfig.colors.border,
                     backgroundColor: themeConfig.colors.bg,
@@ -549,7 +549,7 @@ export function BlogEditor({ themeConfig }: BlogEditorProps) {
                   ref={contentRef}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="w-full min-h-[400px] px-3 py-2 text-sm border rounded bg-transparent font-mono resize-none"
+                  className="w-full min-h-100 px-3 py-2 text-sm border rounded bg-transparent font-mono resize-none"
                   style={{
                     borderColor: themeConfig.colors.border,
                     color: themeConfig.colors.text,

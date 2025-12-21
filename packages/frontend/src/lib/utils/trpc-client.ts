@@ -39,7 +39,11 @@ interface ServiceDefinitionsResponse {
   [key: string]: unknown;
 }
 
-export class GrpcClient {
+/**
+ * tRPC Client class for making requests to the backend
+ * Provides methods for health checks, service calls, and connection testing
+ */
+export class TrpcClient {
   private baseUrl: string;
 
   constructor() {
@@ -74,7 +78,7 @@ export class GrpcClient {
       };
 
       if (type === "mutation") {
-        requestOptions.body = JSON.stringify({input: parameters});
+        requestOptions.body = JSON.stringify({ input: parameters });
       } else if (Object.keys(parameters).length > 0) {
         const searchParams = new URLSearchParams();
         Object.entries(parameters).forEach(([key, value]) => {

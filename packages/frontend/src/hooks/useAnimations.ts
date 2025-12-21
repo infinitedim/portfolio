@@ -1,6 +1,10 @@
 import { useRef, useCallback, useEffect, useState } from "react";
 import { useAccessibility } from "@/components/accessibility/AccessibilityProvider";
-import { useMountRef, generateId, withErrorHandling } from "./utils/hookUtils";
+import {
+  useMountRef,
+  generateId,
+  withErrorHandling,
+} from "./utils/hooks-utils";
 
 /**
  * Configuration options for Web Animations API

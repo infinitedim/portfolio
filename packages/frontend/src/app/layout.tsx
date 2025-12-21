@@ -6,6 +6,7 @@ import { TRPCProvider } from "../components/provider/TrpcProvider";
 import { AuthProvider } from "../lib/auth";
 import { AccessibilityProvider } from "../components/accessibility/AccessibilityProvider";
 import { ScreenReaderAnnouncer } from "../components/accessibility/ScreenReaderAnnouncer";
+import Link from "next/link";
 
 /**
  * Viewport configuration for the application
@@ -165,11 +166,11 @@ export default function RootLayout({
     >
       <head>
         { }
-        <link
+        <Link
           rel="dns-prefetch"
           href="//www.google-analytics.com"
         />
-        <link
+        <Link
           rel="dns-prefetch"
           href="//www.googletagmanager.com"
         />

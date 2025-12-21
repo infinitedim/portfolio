@@ -8,13 +8,14 @@ import {
   HttpCode,
   HttpStatus,
 } from "@nestjs/common";
-import type {Request as ExpressRequest} from "express";
-import {AdminProfileService} from "./admin-profile.service";
+import type { Request as ExpressRequest } from "express";
+import { AdminProfileService } from "./admin-profile.service";
 import {
   AuditLogService,
   AuditEventType,
   AuditSeverity,
 } from "../security/audit-log.service";
+import { Prisma } from "../../prisma/generated/prisma/client";
 
 @Controller("admin/profile")
 export class AdminProfileController {
@@ -24,7 +25,7 @@ export class AdminProfileController {
   ) {}
 
   @Get()
-  async getProfile(@Request() req: ExpressRequest & {user?: {id: string}}) {
+  async getProfile(@Request() req: ExpressRequest & { user?: { id: string } }) {
     const adminUserId = req.user?.id;
     if (!adminUserId) {
       throw new Error("User not authenticated");
@@ -52,14 +53,14 @@ export class AdminProfileController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createProfile(
-    @Request() req: ExpressRequest & {user?: {id: string}},
+    @Request() req: ExpressRequest & { user?: { id: string } },
     @Body()
     data: {
       bio?: string;
       phone?: string;
       timezone?: string;
       language?: string;
-      preferences?: Record<string, unknown>;
+      preferences?: Prisma.InputJsonValue;
     },
   ) {
     const adminUserId = req.user?.id;
@@ -80,7 +81,7 @@ export class AdminProfileController {
         resource: "AdminProfile",
         resourceId: adminUserId,
         action: "CREATE_PROFILE",
-        details: {fields: Object.keys(data)},
+        details: { fields: Object.keys(data) },
         ipAddress: req.ip,
         userAgent: req.headers["user-agent"],
       },
@@ -92,14 +93,14 @@ export class AdminProfileController {
 
   @Put()
   async updateProfile(
-    @Request() req: ExpressRequest & {user?: {id: string}},
+    @Request() req: ExpressRequest & { user?: { id: string } },
     @Body()
     data: {
       bio?: string;
       phone?: string;
       timezone?: string;
       language?: string;
-      preferences?: Record<string, unknown>;
+      preferences?: Prisma.InputJsonValue;
     },
   ) {
     const adminUserId = req.user?.id;
@@ -120,7 +121,7 @@ export class AdminProfileController {
         resource: "AdminProfile",
         resourceId: adminUserId,
         action: "UPDATE_PROFILE",
-        details: {fields: Object.keys(data)},
+        details: { fields: Object.keys(data) },
         ipAddress: req.ip,
         userAgent: req.headers["user-agent"],
       },
@@ -132,7 +133,7 @@ export class AdminProfileController {
 
   @Put("user-info")
   async updateUserInfo(
-    @Request() req: ExpressRequest & {user?: {id: string}},
+    @Request() req: ExpressRequest & { user?: { id: string } },
     @Body()
     data: {
       firstName?: string;
@@ -158,7 +159,7 @@ export class AdminProfileController {
         resource: "AdminUser",
         resourceId: adminUserId,
         action: "UPDATE_USER_INFO",
-        details: {fields: Object.keys(data)},
+        details: { fields: Object.keys(data) },
         ipAddress: req.ip,
         userAgent: req.headers["user-agent"],
       },

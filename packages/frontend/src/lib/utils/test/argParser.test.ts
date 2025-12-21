@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { ArgumentParser, ParsedArgs } from "../argParser";
+import { ArgumentParser, ParsedArgs } from "../arg-parser";
 
 describe("argParser", () => {
   beforeEach(() => {

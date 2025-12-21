@@ -1,4 +1,4 @@
-export * from "./argParser";
-export * from "./bundleOptimization";
-export * from "./themeDisplay";
+export * from "./arg-parser";
+export * from "./bundler-optimization";
+export * from "./theme-display";
 export * from "./utils";

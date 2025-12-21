@@ -3,11 +3,12 @@
  * This router is designed to work without NestJS dependencies
  */
 
-import {initTRPC, TRPCError} from "@trpc/server";
-import {z} from "zod";
-import {Redis} from "@upstash/redis";
-import {PrismaClient} from "@prisma/client";
-import {randomBytes, createHash} from "crypto";
+import { initTRPC, TRPCError } from "@trpc/server";
+import { z } from "zod";
+import { Redis } from "@upstash/redis";
+import { PrismaClient } from "../../../prisma/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { randomBytes, createHash } from "crypto";
 import bcrypt from "bcryptjs";
 
 const t = initTRPC.create();
@@ -47,9 +48,11 @@ const serverlessLog = {
  */
 function getPrisma(): PrismaClient {
   if (!prismaClient) {
+    const adapter = new PrismaPg({
+      connectionString: process.env.DATABASE_URL || "",
+    });
     prismaClient = new PrismaClient({
-      log:
-        process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+      adapter,
     });
     serverlessLog.info("Prisma client initialized");
   }
@@ -173,21 +176,21 @@ async function checkRateLimit(
     return false;
   }
 
-  rateLimitMap.set(key, {timestamp: now, windowMs});
+  rateLimitMap.set(key, { timestamp: now, windowMs });
   return true;
 }
 
 const healthRouter = router({
   check: publicProcedure.query(async () => {
-    return {status: "ok", timestamp: new Date().toISOString()};
+    return { status: "ok", timestamp: new Date().toISOString() };
   }),
 
   detailed: publicProcedure.query(async () => {
-    const checks: Record<string, {status: string; error?: string}> = {};
+    const checks: Record<string, { status: string; error?: string }> = {};
 
     try {
       await getPrisma().$queryRaw`SELECT 1`;
-      checks.database = {status: "healthy"};
+      checks.database = { status: "healthy" };
     } catch (error) {
       checks.database = {
         status: "unhealthy",
@@ -199,9 +202,9 @@ const healthRouter = router({
       const redis = getRedis();
       if (redis) {
         await redis.ping();
-        checks.redis = {status: "healthy"};
+        checks.redis = { status: "healthy" };
       } else {
-        checks.redis = {status: "not configured"};
+        checks.redis = { status: "not configured" };
       }
     } catch (error) {
       checks.redis = {
@@ -230,7 +233,7 @@ interface AuthUser {
 
 const authRouter = router({
   login: publicProcedure
-    .input(z.object({email: z.string().email(), password: z.string().min(1)}))
+    .input(z.object({ email: z.string().email(), password: z.string().min(1) }))
     .mutation(
       async ({
         input,
@@ -241,7 +244,7 @@ const authRouter = router({
             accessToken: string;
             refreshToken: string;
           }
-        | {success: false; error: string}
+        | { success: false; error: string }
       > => {
         const allowed = await checkRateLimit(`login:${input.email}`);
         if (!allowed) {
@@ -293,7 +296,7 @@ const authRouter = router({
 
         const redis = getRedis();
         if (redis) {
-          await redis.set(`token:${accessToken}`, input.email, {ex: 3600});
+          await redis.set(`token:${accessToken}`, input.email, { ex: 3600 });
           await redis.set(`refresh:${refreshToken}`, input.email, {
             ex: 86400 * 7,
           });
@@ -313,13 +316,13 @@ const authRouter = router({
     ),
 
   refresh: publicProcedure
-    .input(z.object({refreshToken: z.string()}))
+    .input(z.object({ refreshToken: z.string() }))
     .mutation(
       async ({
         input,
       }): Promise<
-        | {success: true; accessToken: string; refreshToken: string}
-        | {success: false; error: string}
+        | { success: true; accessToken: string; refreshToken: string }
+        | { success: false; error: string }
       > => {
         const redis = getRedis();
         if (!redis) {
@@ -340,8 +343,8 @@ const authRouter = router({
         const accessToken = randomBytes(32).toString("hex");
         const refreshToken = randomBytes(32).toString("hex");
 
-        await redis.set(`token:${accessToken}`, email, {ex: 3600});
-        await redis.set(`refresh:${refreshToken}`, email, {ex: 86400 * 7});
+        await redis.set(`token:${accessToken}`, email, { ex: 3600 });
+        await redis.set(`refresh:${refreshToken}`, email, { ex: 86400 * 7 });
         await redis.del(`refresh:${input.refreshToken}`);
 
         return {
@@ -353,22 +356,22 @@ const authRouter = router({
     ),
 
   logout: publicProcedure
-    .input(z.object({accessToken: z.string()}))
-    .mutation(async ({input}): Promise<{success: true}> => {
+    .input(z.object({ accessToken: z.string() }))
+    .mutation(async ({ input }): Promise<{ success: true }> => {
       const redis = getRedis();
       if (redis) {
         await redis.del(`token:${input.accessToken}`);
       }
-      return {success: true};
+      return { success: true };
     }),
 
   validate: publicProcedure
-    .input(z.object({accessToken: z.string()}))
+    .input(z.object({ accessToken: z.string() }))
     .mutation(
       async ({
         input,
       }): Promise<
-        {success: true; user: AuthUser} | {success: false; error: string}
+        { success: true; user: AuthUser } | { success: false; error: string }
       > => {
         const redis = getRedis();
         if (!redis) {
@@ -397,7 +400,7 @@ const authRouter = router({
       },
     ),
 
-  spotifyLogin: publicProcedure.input(z.object({code: z.string()})).mutation(
+  spotifyLogin: publicProcedure.input(z.object({ code: z.string() })).mutation(
     async ({
       input,
     }): Promise<{
@@ -433,51 +436,53 @@ interface NowPlayingResponse {
 
 const spotifyRouter = router({
   nowPlaying: publicProcedure.query(async (): Promise<NowPlayingResponse> => {
-    return {isPlaying: false};
+    return { isPlaying: false };
   }),
 });
 
 const securityRouter = router({
-  validateInput: publicProcedure.input(z.object({input: z.string()})).mutation(
-    ({
-      input,
-    }): {
-      isValid: boolean;
-      sanitizedInput: string;
-      error: string | null;
-      riskLevel: "low" | "medium" | "high";
-    } => {
-      const dangerousPatterns = [
-        /<script/i,
-        /javascript:/i,
-        /on\w+=/i,
-        /SELECT.*FROM/i,
-        /INSERT.*INTO/i,
-        /UPDATE.*SET/i,
-        /DELETE.*FROM/i,
-        /DROP.*TABLE/i,
-        /--/,
-        /;.*SELECT/i,
-      ];
+  validateInput: publicProcedure
+    .input(z.object({ input: z.string() }))
+    .mutation(
+      ({
+        input,
+      }): {
+        isValid: boolean;
+        sanitizedInput: string;
+        error: string | null;
+        riskLevel: "low" | "medium" | "high";
+      } => {
+        const dangerousPatterns = [
+          /<script/i,
+          /javascript:/i,
+          /on\w+=/i,
+          /SELECT.*FROM/i,
+          /INSERT.*INTO/i,
+          /UPDATE.*SET/i,
+          /DELETE.*FROM/i,
+          /DROP.*TABLE/i,
+          /--/,
+          /;.*SELECT/i,
+        ];
 
-      const hasDangerousContent = dangerousPatterns.some((pattern) =>
-        pattern.test(input.input),
-      );
+        const hasDangerousContent = dangerousPatterns.some((pattern) =>
+          pattern.test(input.input),
+        );
 
-      return {
-        isValid: !hasDangerousContent,
-        sanitizedInput: input.input.replace(/<[^>]*>/g, ""),
-        error: hasDangerousContent ? "Dangerous content detected" : null,
-        riskLevel: hasDangerousContent ? "high" : "low",
-      };
-    },
-  ),
+        return {
+          isValid: !hasDangerousContent,
+          sanitizedInput: input.input.replace(/<[^>]*>/g, ""),
+          error: hasDangerousContent ? "Dangerous content detected" : null,
+          riskLevel: hasDangerousContent ? "high" : "low",
+        };
+      },
+    ),
 
   checkRateLimit: publicProcedure
-    .input(z.object({key: z.string(), type: z.string()}))
-    .mutation(async ({input}) => {
+    .input(z.object({ key: z.string(), type: z.string() }))
+    .mutation(async ({ input }) => {
       const allowed = await checkRateLimit(`${input.type}:${input.key}`);
-      return {allowed, remaining: allowed ? 1 : 0};
+      return { allowed, remaining: allowed ? 1 : 0 };
     }),
 });
 
@@ -491,13 +496,13 @@ const projectsRouter = router({
         })
         .optional(),
     )
-    .query(async ({input}) => {
+    .query(async ({ input }) => {
       try {
         const prisma = getPrisma();
 
         const projects = await prisma.project.findMany({
           take: input?.limit ?? 20,
-          orderBy: {createdAt: "desc"},
+          orderBy: { createdAt: "desc" },
           select: {
             id: true,
             name: true,
@@ -513,9 +518,9 @@ const projectsRouter = router({
           },
         });
 
-        return {data: projects, meta: {section: input?.section}};
+        return { data: projects, meta: { section: input?.section } };
       } catch {
-        return {data: [], meta: {section: input?.section}};
+        return { data: [], meta: { section: input?.section } };
       }
     }),
 });
@@ -528,8 +533,8 @@ export const appRouter = router({
   security: securityRouter,
   projects: projectsRouter,
   echo: publicProcedure
-    .input(z.object({msg: z.string()}))
-    .query(({input}) => input),
+    .input(z.object({ msg: z.string() }))
+    .query(({ input }) => input),
 });
 
 export type AppRouter = typeof appRouter;

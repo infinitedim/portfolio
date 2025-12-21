@@ -1,7 +1,7 @@
 "use client";
 
 import type { ThemeConfig } from "@/types/theme";
-import type { ServiceMethod } from "../BackendTestingDashboard";
+import type { ServiceMethod } from "./BackendTestingDashboard";
 
 interface MethodSelectorProps {
   methods: ServiceMethod[];
