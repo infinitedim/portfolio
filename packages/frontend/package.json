@@ -33,7 +33,7 @@
     ]
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^2.0.56",
+    "@ai-sdk/anthropic": "^3.0.1",
     "@hookform/resolvers": "^5.2.2",
     "@next/bundle-analyzer": "^16.1.0",
     "@prisma/adapter-pg": "^7.2.0",
@@ -70,7 +70,7 @@
     "@trpc/react-query": "^11.8.1",
     "@trpc/server": "^11.8.1",
     "@upstash/redis": "^1.35.8",
-    "ai": "^5.0.116",
+    "ai": "^6.0.3",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
