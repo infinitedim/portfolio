@@ -31,9 +31,8 @@ describe("LocationService", () => {
   });
 
   it("fetches location from primary service (ipapi.co)", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn((url: string) => {
+    Object.defineProperty(globalThis, "fetch", {
+      value: vi.fn((url: string) => {
         if (url.includes("ipapi.co")) {
           return Promise.resolve({
             ok: true,
@@ -42,7 +41,9 @@ describe("LocationService", () => {
         }
         return Promise.resolve({ ok: false } as any);
       }) as any,
-    );
+      writable: true,
+      configurable: true,
+    });
 
     const svc = LocationService.getInstance();
     const loc = await svc.getLocation();
@@ -52,9 +53,8 @@ describe("LocationService", () => {
   });
 
   it("falls back to ip-api.com when primary fails", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn((url: string) => {
+    Object.defineProperty(globalThis, "fetch", {
+      value: vi.fn((url: string) => {
         if (url.includes("ipapi.co")) {
           return Promise.resolve({ ok: false } as any);
         }
@@ -63,7 +63,9 @@ describe("LocationService", () => {
           json: () => Promise.resolve(sampleIpApiFallback),
         } as any);
       }) as any,
-    );
+      writable: true,
+      configurable: true,
+    });
 
     const svc = LocationService.getInstance();
     const loc = await svc.getLocation();
@@ -73,10 +75,11 @@ describe("LocationService", () => {
   });
 
   it("returns null when both services fail", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(() => Promise.resolve({ ok: false } as any)) as any,
-    );
+    Object.defineProperty(globalThis, "fetch", {
+      value: vi.fn(() => Promise.resolve({ ok: false } as any)) as any,
+      writable: true,
+      configurable: true,
+    });
 
     const svc = LocationService.getInstance();
     const loc = await svc.getLocation();

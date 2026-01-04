@@ -22,15 +22,27 @@ export class CustomizationService {
     return CustomizationService.instance;
   }
 
+  private getStorage(): Storage | null {
+    if (typeof window === "undefined" || !window.localStorage) {
+      return null;
+    }
+    return window.localStorage;
+  }
+
   getCustomThemes(): CustomTheme[] {
     try {
-      const stored = localStorage.getItem(this.THEMES_KEY);
+      if (typeof window === "undefined" || !window.localStorage) {
+        return [];
+      }
+      const storage = this.getStorage();
+      if (!storage) return [];
+      const stored = storage.getItem(this.THEMES_KEY);
       if (!stored) return [];
 
       const themes = JSON.parse(stored);
 
-      if (typeof themes === "object" && themes !== null) {
-        return (themes as CustomTheme[]).map((theme) => ({
+      if (Array.isArray(themes)) {
+        return themes.map((theme) => ({
           ...theme,
           createdAt: new Date(theme.createdAt),
           modifiedAt: theme.modifiedAt ? new Date(theme.modifiedAt) : undefined,
@@ -78,7 +90,9 @@ export class CustomizationService {
     const existingThemes = this.getCustomThemes();
     const updatedThemes = [...existingThemes, newTheme];
 
-    localStorage.setItem(this.THEMES_KEY, JSON.stringify(updatedThemes));
+    const storage = this.getStorage();
+    if (!storage) throw new Error("localStorage is not available");
+    storage.setItem(this.THEMES_KEY, JSON.stringify(updatedThemes));
     return newTheme;
   }
 
@@ -94,7 +108,9 @@ export class CustomizationService {
       modifiedAt: new Date(),
     };
 
-    localStorage.setItem(this.THEMES_KEY, JSON.stringify(themes));
+    const storage = this.getStorage();
+    if (!storage) return false;
+    storage.setItem(this.THEMES_KEY, JSON.stringify(themes));
     return true;
   }
 
@@ -104,7 +120,9 @@ export class CustomizationService {
 
     if (filteredThemes.length === themes.length) return false;
 
-    localStorage.setItem(this.THEMES_KEY, JSON.stringify(filteredThemes));
+    const storage = this.getStorage();
+    if (!storage) return false;
+    storage.setItem(this.THEMES_KEY, JSON.stringify(filteredThemes));
     return true;
   }
 
@@ -126,13 +144,15 @@ export class CustomizationService {
   }
   getCustomFonts(): CustomFont[] {
     try {
-      const stored = localStorage.getItem(this.FONTS_KEY);
+      const storage = this.getStorage();
+      if (!storage) return [];
+      const stored = storage.getItem(this.FONTS_KEY);
       if (!stored) return [];
 
       const fonts = JSON.parse(stored);
 
-      if (typeof fonts === "object" && fonts !== null) {
-        return (fonts as CustomFont[]).map((font) => ({
+      if (Array.isArray(fonts)) {
+        return fonts.map((font) => ({
           ...font,
           createdAt: new Date(font.createdAt),
         })) as CustomFont[];
@@ -198,7 +218,10 @@ export class CustomizationService {
           const existingFonts = this.getCustomFonts();
           const updatedFonts = [...existingFonts, newFont];
 
-          localStorage.setItem(this.FONTS_KEY, JSON.stringify(updatedFonts));
+          const storage = this.getStorage();
+          if (storage) {
+            storage.setItem(this.FONTS_KEY, JSON.stringify(updatedFonts));
+          }
           resolve(newFont);
         } catch (error) {
           reject(error);
@@ -211,7 +234,7 @@ export class CustomizationService {
   }
 
   private loadCustomFontCSS(font: CustomFont) {
-    if (!font.data) return;
+    if (!font.data || typeof document === "undefined") return;
 
     const fontFace = `
       @font-face {
@@ -231,7 +254,9 @@ export class CustomizationService {
     const style = document.createElement("style");
     style.id = `custom-font-${font.id}`;
     style.textContent = fontFace;
-    document.head.appendChild(style);
+    if (document.head) {
+      document.head.appendChild(style);
+    }
   }
 
   deleteCustomFont(id: string): boolean {
@@ -240,12 +265,16 @@ export class CustomizationService {
 
     if (filteredFonts.length === fonts.length) return false;
 
-    const styleElement = document.getElementById(`custom-font-${id}`);
-    if (styleElement) {
-      styleElement.remove();
+    if (typeof document !== "undefined") {
+      const styleElement = document.getElementById(`custom-font-${id}`);
+      if (styleElement) {
+        styleElement.remove();
+      }
     }
 
-    localStorage.setItem(this.FONTS_KEY, JSON.stringify(filteredFonts));
+    const storage = this.getStorage();
+    if (!storage) return false;
+    storage.setItem(this.FONTS_KEY, JSON.stringify(filteredFonts));
     return true;
   }
 
@@ -256,7 +285,9 @@ export class CustomizationService {
 
   getSettings(): CustomizationSettings {
     try {
-      const stored = localStorage.getItem(this.SETTINGS_KEY);
+      const storage = this.getStorage();
+      if (!storage) return this.getDefaultSettings();
+      const stored = storage.getItem(this.SETTINGS_KEY);
       if (!stored) return this.getDefaultSettings();
 
       const parsed = JSON.parse(stored);
@@ -273,10 +304,12 @@ export class CustomizationService {
   }
 
   saveSettings(settings: Partial<CustomizationSettings>) {
+    const storage = this.getStorage();
+    if (!storage) return;
     const currentSettings = this.getSettings();
     const updatedSettings = {...currentSettings, ...settings};
 
-    localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(updatedSettings));
+    storage.setItem(this.SETTINGS_KEY, JSON.stringify(updatedSettings));
   }
 
   private getDefaultSettings(): CustomizationSettings {
@@ -380,12 +413,17 @@ export class CustomizationService {
   }
 
   resetToDefaults() {
-    localStorage.removeItem(this.THEMES_KEY);
-    localStorage.removeItem(this.FONTS_KEY);
-    localStorage.removeItem(this.SETTINGS_KEY);
+    const storage = this.getStorage();
+    if (storage) {
+      storage.removeItem(this.THEMES_KEY);
+      storage.removeItem(this.FONTS_KEY);
+      storage.removeItem(this.SETTINGS_KEY);
+    }
 
-    const customStyles = document.querySelectorAll('[id^="custom-font-"]');
-    customStyles.forEach((style) => style.remove());
+    if (typeof document !== "undefined") {
+      const customStyles = document.querySelectorAll('[id^="custom-font-"]');
+      customStyles.forEach((style) => style.remove());
+    }
   }
 
   searchThemes(query: string, tags?: string[]): CustomTheme[] {

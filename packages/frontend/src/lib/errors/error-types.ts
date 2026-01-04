@@ -156,7 +156,10 @@ export class EnhancedError extends Error {
 
     this.context = {
       timestamp: this.timestamp,
-      url: typeof window !== "undefined" ? window.location.href : undefined,
+      url:
+        typeof window !== "undefined" && window.location
+          ? window.location.href
+          : undefined,
       userAgent:
         typeof navigator !== "undefined" ? navigator.userAgent : undefined,
       ...options.context,

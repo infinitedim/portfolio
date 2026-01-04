@@ -1,5 +1,3 @@
-import { cache } from "react";
-
 /**
  * High-Performance Database Query Optimizations
  *
@@ -116,19 +114,20 @@ class PerformanceOptimizedDB {
    * Create optimized query functions with caching
    */
   public createOptimizedQueries() {
+    // Create a memoization cache for function results
+    const functionCache = new Map<string, Promise<unknown>>();
+
     return {
       /**
        * Generic cached query wrapper
        */
-      cachedFetch: cache(
-        async <T>(
-          key: string,
-          fetchFn: () => Promise<T>,
-          ttl?: number,
-        ): Promise<T> => {
-          return this.cachedQuery(key, fetchFn, ttl);
-        },
-      ),
+      cachedFetch: async <T>(
+        key: string,
+        fetchFn: () => Promise<T>,
+        ttl?: number,
+      ): Promise<T> => {
+        return this.cachedQuery(key, fetchFn, ttl);
+      },
 
       /**
        * Batch multiple database operations
@@ -145,23 +144,35 @@ class PerformanceOptimizedDB {
       },
 
       /**
-       * Optimized pagination helper
+       * Optimized pagination helper with memoization
        */
-      paginatedQuery: cache(
-        async <T>(
-          key: string,
-          queryFn: (offset: number, limit: number) => Promise<T[]>,
-          page: number = 1,
-          limit: number = 10,
-        ): Promise<{
-          data: T[];
-          page: number;
-          limit: number;
-          total?: number;
-        }> => {
-          const offset = (page - 1) * limit;
-          const cacheKey = `${key}_page_${page}_limit_${limit}`;
+      paginatedQuery: async <T>(
+        key: string,
+        queryFn: (offset: number, limit: number) => Promise<T[]>,
+        page: number = 1,
+        limit: number = 10,
+      ): Promise<{
+        data: T[];
+        page: number;
+        limit: number;
+        total?: number;
+      }> => {
+        const offset = (page - 1) * limit;
+        const cacheKey = `${key}_page_${page}_limit_${limit}`;
 
+        // Check function-level cache first
+        const cachedPromise = functionCache.get(cacheKey);
+        if (cachedPromise) {
+          return cachedPromise as Promise<{
+            data: T[];
+            page: number;
+            limit: number;
+            total?: number;
+          }>;
+        }
+
+        // Create new promise and cache it
+        const promise = (async () => {
           const data = await this.cachedQuery(
             cacheKey,
             () => queryFn(offset, limit),
@@ -173,8 +184,20 @@ class PerformanceOptimizedDB {
             page,
             limit,
           };
-        },
-      ),
+        })();
+
+        functionCache.set(cacheKey, promise);
+
+        // Clean up cache after TTL
+        setTimeout(
+          () => {
+            functionCache.delete(cacheKey);
+          },
+          2 * 60 * 1000,
+        );
+
+        return promise;
+      },
     };
   }
 

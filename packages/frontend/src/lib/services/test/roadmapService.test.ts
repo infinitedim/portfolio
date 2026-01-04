@@ -34,17 +34,22 @@ describe("RoadmapService", () => {
   beforeEach(() => {
     // ensure singleton reset by accessing internal instance if needed
     // stub fetch
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(() =>
+    Object.defineProperty(globalThis, "fetch", {
+      value: vi.fn(() =>
         Promise.resolve({
           ok: true,
           json: () => Promise.resolve(validApiResponse),
         }),
       ) as any,
-    );
+      writable: true,
+      configurable: true,
+    });
     // ensure window exists for client-side path
-    vi.stubGlobal("window", {} as any);
+    Object.defineProperty(globalThis, "window", {
+      value: {} as any,
+      writable: true,
+      configurable: true,
+    });
   });
 
   it("initializes and loads fallback/api data", async () => {

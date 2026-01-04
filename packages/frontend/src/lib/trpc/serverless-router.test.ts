@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { z } from "zod";
 
 // Mock environment variables
-vi.stubEnv("ADMIN_EMAIL", "admin@test.com");
-vi.stubEnv("ADMIN_PASSWORD", "testpassword123");
-vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
-vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+process.env.ADMIN_EMAIL = "admin@test.com";
+process.env.ADMIN_PASSWORD = "testpassword123";
+process.env.UPSTASH_REDIS_REST_URL = "";
+process.env.UPSTASH_REDIS_REST_TOKEN = "";
 
 // Mock Redis
 const mockRedis = {

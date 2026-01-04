@@ -97,8 +97,10 @@
   "devDependencies": {
     "@next/eslint-plugin-next": "^16.1.0",
     "@tailwindcss/postcss": "^4.1.18",
+    "@vitest/ui": "^4.0.16",
     "baseline-browser-mapping": "^2.9.11",
     "eslint-config-next": "^16.1.0",
+    "jsdom": "^27.4.0",
     "local-ssl-proxy": "^2.0.5",
     "prisma": "^7.2.0"
   }

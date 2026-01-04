@@ -96,10 +96,17 @@ describe("commandRegistry", () => {
 
   describe("themeCommand", () => {
     beforeEach(() => {
+      if (typeof window === "undefined") {
+        return;
+      }
       // Mock localStorage
-      vi.stubGlobal("localStorage", {
-        getItem: vi.fn().mockReturnValue("default"),
-        setItem: vi.fn(),
+      Object.defineProperty(window, "localStorage", {
+        value: {
+          getItem: vi.fn().mockReturnValue("default"),
+          setItem: vi.fn(),
+        },
+        writable: true,
+        configurable: true,
       });
     });
 
@@ -125,9 +132,16 @@ describe("commandRegistry", () => {
 
   describe("fontCommand", () => {
     beforeEach(() => {
-      vi.stubGlobal("localStorage", {
-        getItem: vi.fn().mockReturnValue(null),
-        setItem: vi.fn(),
+      if (typeof window === "undefined") {
+        return;
+      }
+      Object.defineProperty(window, "localStorage", {
+        value: {
+          getItem: vi.fn().mockReturnValue(null),
+          setItem: vi.fn(),
+        },
+        writable: true,
+        configurable: true,
       });
     });
 
@@ -171,9 +185,16 @@ describe("commandRegistry", () => {
 
   describe("aliasCommand", () => {
     beforeEach(() => {
-      vi.stubGlobal("localStorage", {
-        getItem: vi.fn().mockReturnValue("{}"),
-        setItem: vi.fn(),
+      if (typeof window === "undefined") {
+        return;
+      }
+      Object.defineProperty(window, "localStorage", {
+        value: {
+          getItem: vi.fn().mockReturnValue("{}"),
+          setItem: vi.fn(),
+        },
+        writable: true,
+        configurable: true,
       });
     });
 

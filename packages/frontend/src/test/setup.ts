@@ -1,4 +1,4 @@
-import { vi, afterEach, expect } from "vitest";
+import { vi, afterEach, expect, beforeAll } from "vitest";
 import * as matchers from "@testing-library/jest-dom/matchers";
 
 // Extend vitest's expect with jest-dom matchers
@@ -91,6 +91,19 @@ vi.mock("@/lib/logger", () => ({
   logAPICall: vi.fn(),
 }));
 
+// Mock trpc to prevent module resolution issues
+vi.mock("@/lib/trpc", () => ({
+  trpc: {},
+  getTRPCClient: vi.fn(() => ({
+    health: {
+      check: {
+        query: vi.fn(),
+      },
+    },
+  })),
+  trpcClient: null,
+}));
+
 // Mock security functions (local mock)
 vi.mock("@/lib/security/csp", () => ({
   generateNonce: vi.fn(() => "test-nonce"),
@@ -104,9 +117,34 @@ vi.mock("@/lib/security/csp", () => ({
   })),
 }));
 
-// Mock environment variables using vi.stubEnv
-vi.stubEnv("NODE_ENV", "test");
-vi.stubEnv("ALLOWED_ORIGINS", "http://127.0.0.1:3000,https://example.com");
+// Mock environment variables
+process.env.NODE_ENV = process.env.NODE_ENV || "test";
+process.env.ALLOWED_ORIGINS =
+  process.env.ALLOWED_ORIGINS ||
+  "http://127.0.0.1:3000,https://example.com";
+
+// Ensure document and window are properly set up for jsdom
+// Use beforeAll to ensure this runs after jsdom is initialized
+beforeAll(() => {
+  // Wait a bit for jsdom to initialize
+  if (typeof document !== "undefined") {
+    // Ensure document.body exists for renderHook
+    if (!document.body) {
+      const body = document.createElement("body");
+      if (document.documentElement) {
+        document.documentElement.appendChild(body);
+      } else {
+        // Create html element if documentElement doesn't exist
+        const html = document.createElement("html");
+        // @ts-expect-error - document might not have appendChild in all environments
+        if (document.appendChild) {
+          document.appendChild(html);
+        }
+        html.appendChild(body);
+      }
+    }
+  }
+});
 
 // NOTE: Date.now and Math.random are NOT mocked globally to avoid issues
 // with tests that depend on unique IDs or timestamps.
@@ -127,31 +165,55 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
 }));
 
 // Mock matchMedia
-Object.defineProperty(window, "matchMedia", {
-  writable: true,
-  value: vi.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(), // deprecated
-    removeListener: vi.fn(), // deprecated
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-});
+if (typeof window !== "undefined") {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: vi.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(), // deprecated
+      removeListener: vi.fn(), // deprecated
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+
+  // Mock window.location
+  Object.defineProperty(window, "location", {
+    writable: true,
+    value: {
+      href: "http://localhost:3000",
+      origin: "http://localhost:3000",
+      protocol: "http:",
+      host: "localhost:3000",
+      hostname: "localhost",
+      port: "3000",
+      pathname: "/",
+      search: "",
+      hash: "",
+      assign: vi.fn(),
+      replace: vi.fn(),
+      reload: vi.fn(),
+    },
+  });
+}
 
 // Mock localStorage
-const localStorageMock = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-  clear: vi.fn(),
-};
-Object.defineProperty(window, "localStorage", {
-  value: localStorageMock,
-  writable: true,
-});
+if (typeof window !== "undefined") {
+  const localStorageMock = {
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    removeItem: vi.fn(),
+    clear: vi.fn(),
+  };
+  Object.defineProperty(window, "localStorage", {
+    value: localStorageMock,
+    writable: true,
+    configurable: true,
+  });
+}
 
 // Mock sessionStorage
 const sessionStorageMock = {
@@ -178,6 +240,17 @@ Object.defineProperty(URL, "createObjectURL", {
 Object.defineProperty(URL, "revokeObjectURL", {
   value: vi.fn(),
   writable: true,
+});
+
+// Additional check in beforeAll to ensure document.body exists
+// This is a fallback in case the first beforeAll didn't work
+beforeAll(() => {
+  if (typeof document !== "undefined" && !document.body) {
+    const body = document.createElement("body");
+    if (document.documentElement) {
+      document.documentElement.appendChild(body);
+    }
+  }
 });
 
 // Clean up after each test

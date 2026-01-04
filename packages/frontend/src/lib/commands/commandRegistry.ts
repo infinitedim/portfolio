@@ -687,7 +687,10 @@ export const pwaCommand: Command = {
     const isOnline = typeof navigator !== "undefined" ? navigator.onLine : true;
     const isInstalled =
       typeof window !== "undefined" &&
-      (window.matchMedia("(display-mode: standalone)").matches ||
+      (typeof window !== "undefined" &&
+        window.matchMedia &&
+        window.matchMedia("(display-mode: standalone)").matches) ||
+      (typeof navigator !== "undefined" &&
         (navigator as unknown as { standalone?: boolean }).standalone === true);
     const swSupported =
       typeof navigator !== "undefined" && "serviceWorker" in navigator;
