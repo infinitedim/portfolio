@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { FontManager } from "../FontManager";
 import type { CustomFont } from "@/types/customization";
 import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
@@ -68,6 +68,7 @@ describe("FontManager", () => {
       family: "Fira Code",
       source: "system",
       weight: "400",
+      style: "normal",
       ligatures: true,
       createdAt: new Date(),
     },
@@ -77,6 +78,7 @@ describe("FontManager", () => {
       family: "JetBrains Mono",
       source: "google",
       weight: "400",
+      style: "normal",
       ligatures: true,
       createdAt: new Date(),
     },
@@ -86,6 +88,7 @@ describe("FontManager", () => {
       family: "CustomFont",
       source: "custom",
       weight: "400",
+      style: "normal",
       ligatures: false,
       size: 102400,
       createdAt: new Date(),

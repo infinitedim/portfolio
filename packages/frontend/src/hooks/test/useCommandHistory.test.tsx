@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useCommandHistory } from "../useCommandHistory";
+import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -19,9 +20,6 @@ const localStorageMock = (() => {
   };
 })();
 
-// Skip tests if document is not available (jsdom not initialized)
-const canRunTests = typeof document !== "undefined" && typeof window !== "undefined";
-
 if (canRunTests) {
   // Only define localStorage if window is available
   try {
@@ -39,13 +37,13 @@ describe("useCommandHistory", () => {
   beforeEach(() => {
     if (!canRunTests) {
       return;
-    
+    }
+
     ensureDocumentBody();
-  }
 
     localStorageMock.clear();
     vi.clearAllMocks();
-    
+
     // Ensure document.body exists
     if (!document.body) {
       const body = document.createElement("body");

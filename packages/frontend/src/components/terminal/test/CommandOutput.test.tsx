@@ -107,7 +107,7 @@ describe("CommandOutput", () => {
 
     const output: CommandOutputType = {
       type: "info",
-      content: ["Line 1", "Line 2", "Line 3"],
+      content: "Line 1\nLine 2\nLine 3",
     };
 
     render(<CommandOutput output={output} />);

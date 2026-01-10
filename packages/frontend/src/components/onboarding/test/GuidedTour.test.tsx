@@ -30,6 +30,7 @@ const mockStep: TourStep = {
   title: "Test Step",
   content: "This is a test step",
   position: "center",
+  icon: "test-icon",
 };
 
 describe("GuidedTour", () => {

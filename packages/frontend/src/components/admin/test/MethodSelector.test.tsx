@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { MethodSelector } from "../MethodSelector";
 import type { ServiceMethod } from "../BackendTestingDashboard";
-import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
+import { canRunTests } from "@/test/test-helpers";
 
 const mockThemeConfig = {
   name: "test-theme",

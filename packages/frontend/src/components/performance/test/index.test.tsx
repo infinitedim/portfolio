@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { render } from "@testing-library/react";
 import { PerformanceDashboard } from "../PerformanceDashboard";
 import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
 

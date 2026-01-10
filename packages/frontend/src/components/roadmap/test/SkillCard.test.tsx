@@ -40,8 +40,6 @@ const mockSkill: RoadmapSkill = {
   progress: 75,
   priority: "high",
   category: "frontend",
-  startedAt: new Date("2024-01-01"),
-  completedAt: null,
   projects: [],
 };
 

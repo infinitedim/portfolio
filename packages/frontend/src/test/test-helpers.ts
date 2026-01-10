@@ -2,6 +2,8 @@
  * Test helper utilities for frontend tests
  */
 
+import { expect } from "vitest";
+
 /**
  * Check if tests can run (document and window are available)
  * Use this in test files that require DOM access
@@ -36,4 +38,3 @@ export function skipIfNoDOM(): void {
     return;
   }
 }
-

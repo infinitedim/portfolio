@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { Suspense } from "react";
 import { LazyCustomizationManager, LazyThemeEditor, LazyFontManager, LazyRoadmapVisualizer, LazyLoadingFallback } from "../index";
 import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
 

@@ -81,7 +81,7 @@ describe("useThemeContext", () => {
     }
 
     const TestComponent = () => {
-      const { theme, setTheme, resolvedTheme } = useThemeContext();
+      const { theme, resolvedTheme } = useThemeContext();
       return (
         <div>
           <span data-testid="theme">{theme}</span>

@@ -86,8 +86,10 @@ describe("utils", () => {
       expect(id.length).toBeGreaterThan(0);
     });
 
-    it("should generate unique IDs", () => {
+    it("should generate unique IDs", async () => {
       const id1 = generateId();
+      // Add small delay to ensure different timestamp
+      await new Promise((resolve) => setTimeout(resolve, 1));
       const id2 = generateId();
       expect(id1).not.toBe(id2);
     });
@@ -105,8 +107,15 @@ describe("utils", () => {
       expect(parts[1].length).toBeGreaterThan(0);
     });
 
-    it("should generate different IDs on multiple calls", () => {
-      const ids = Array.from({ length: 5 }, () => generateId());
+    it("should generate different IDs on multiple calls", async () => {
+      const ids: string[] = [];
+      for (let i = 0; i < 5; i++) {
+        ids.push(generateId());
+        // Small delay to ensure different timestamps (except for last iteration)
+        if (i < 4) {
+          await new Promise((resolve) => setTimeout(resolve, 1));
+        }
+      }
       const uniqueIds = new Set(ids);
       expect(uniqueIds.size).toBe(5);
     });

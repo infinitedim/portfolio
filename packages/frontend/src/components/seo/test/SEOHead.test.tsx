@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { render, waitFor } from "@testing-library/react";
 import { SEOHead } from "../SEOHead";
 import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";

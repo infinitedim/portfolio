@@ -128,7 +128,14 @@ export function useClientEffect(
  * removeValue();
  * ```
  */
-export function useLocalStorage<T>(key: string, defaultValue: T): object {
+export function useLocalStorage<T>(
+  key: string,
+  defaultValue: T,
+): {
+  getValue: () => T;
+  setValue: (value: T) => boolean;
+  removeValue: () => boolean;
+} {
   const getValue = useCallback((): T => {
     if (!isClientSide()) return defaultValue;
 
@@ -213,7 +220,11 @@ export function useLocalStorage<T>(key: string, defaultValue: T): object {
  * clearAllTimers();
  * ```
  */
-export function useTimerManager(): object {
+export function useTimerManager(): {
+  setTimer: (id: string, callback: () => void, delay: number) => void;
+  clearTimer: (id: string) => void;
+  clearAllTimers: () => void;
+} {
   const timersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const isMountedRef = useMountRef();
 
@@ -284,7 +295,11 @@ export function useTimerManager(): object {
  * clearInterval('polling');
  * ```
  */
-export function useIntervalManager(): object {
+export function useIntervalManager(): {
+  setInterval: (id: string, callback: () => void, delay: number) => void;
+  clearInterval: (id: string) => void;
+  clearAllIntervals: () => void;
+} {
   const intervalsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const isMountedRef = useMountRef();
 

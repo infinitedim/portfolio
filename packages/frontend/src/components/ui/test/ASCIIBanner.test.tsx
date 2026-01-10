@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render } from "@testing-library/react";
 import { ASCIIBanner } from "../ASCIIBanner";
-import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
+import { canRunTests } from "@/test/test-helpers";
 
 // Mock useTheme hook
 vi.mock("@/hooks/useTheme", () => ({

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { Suspense } from "react";
-import { LazyCustomizationManager, LazyFontManager, LazyThemeManager, withLazyLoading, CustomizationManager, FontManager, ThemeManager } from "../LazyComponents";
+import { LazyCustomizationManager, withLazyLoading, CustomizationManager, FontManager, ThemeManager } from "../LazyComponents";
 import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
 
 // Mock useTheme
@@ -46,7 +46,7 @@ describe("LazyComponents", () => {
 
     render(
       <Suspense fallback={<div>Loading...</div>}>
-        <LazyCustomizationManager />
+        <LazyCustomizationManager isOpen={true} onClose={() => { }} />
       </Suspense>
     );
 
@@ -76,7 +76,7 @@ describe("LazyComponents", () => {
 
     render(
       <Suspense fallback={<div>Loading...</div>}>
-        <CustomizationManager />
+        <CustomizationManager isOpen={true} onClose={() => { }} />
       </Suspense>
     );
 
@@ -91,7 +91,7 @@ describe("LazyComponents", () => {
 
     render(
       <Suspense fallback={<div>Loading...</div>}>
-        <FontManager />
+        <FontManager fonts={[]} onUpdate={() => { }} />
       </Suspense>
     );
 
@@ -106,7 +106,7 @@ describe("LazyComponents", () => {
 
     render(
       <Suspense fallback={<div>Loading...</div>}>
-        <ThemeManager />
+        <ThemeManager themes={[]} onUpdate={() => { }} />
       </Suspense>
     );
 

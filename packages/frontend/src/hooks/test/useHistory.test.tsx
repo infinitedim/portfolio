@@ -1,17 +1,15 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useHistory } from "../useHistory";
-
-// Skip tests if document is not available (jsdom not initialized)
-const canRunTests = typeof document !== "undefined" && typeof window !== "undefined";
+import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
 
 describe("useEnhancedHistory", () => {
   beforeEach(() => {
     if (!canRunTests) {
       return;
-    
+    }
+
     ensureDocumentBody();
-  }
 
     // Ensure document.body exists
     if (!document.body) {

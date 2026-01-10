@@ -1,20 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useToast, toast } from "../useToast";
-
-// Skip tests if document is not available (jsdom not initialized)
-const canRunTests = typeof document !== "undefined" && typeof window !== "undefined";
+import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
 
 describe("useToast", () => {
   beforeEach(() => {
     if (!canRunTests) {
       return;
-    
+    }
+
     ensureDocumentBody();
-  }
 
     vi.useFakeTimers();
-    
+
     // Ensure document.body exists
     if (!document.body) {
       const body = document.createElement("body");

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { OptimizedImage } from "../OptimizedImage";
-import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
+import { canRunTests } from "@/test/test-helpers";
 
 // Mock cn utility
 vi.mock("@/lib/utils/utils", () => ({

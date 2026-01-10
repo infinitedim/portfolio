@@ -1,4 +1,4 @@
-import { vi, afterEach, expect, beforeAll } from "vitest";
+import { vi, afterEach, expect, beforeAll, beforeEach } from "vitest";
 import * as matchers from "@testing-library/jest-dom/matchers";
 
 // Extend vitest's expect with jest-dom matchers
@@ -118,32 +118,58 @@ vi.mock("@/lib/security/csp", () => ({
 }));
 
 // Mock environment variables
-process.env.NODE_ENV = process.env.NODE_ENV || "test";
 process.env.ALLOWED_ORIGINS =
-  process.env.ALLOWED_ORIGINS ||
-  "http://127.0.0.1:3000,https://example.com";
+  process.env.ALLOWED_ORIGINS || "http://127.0.0.1:3000,https://example.com";
 
 // Ensure document and window are properly set up for jsdom
-// Use beforeAll to ensure this runs after jsdom is initialized
-beforeAll(() => {
-  // Wait a bit for jsdom to initialize
-  if (typeof document !== "undefined") {
-    // Ensure document.body exists for renderHook
-    if (!document.body) {
-      const body = document.createElement("body");
-      if (document.documentElement) {
-        document.documentElement.appendChild(body);
-      } else {
-        // Create html element if documentElement doesn't exist
-        const html = document.createElement("html");
-        // @ts-expect-error - document might not have appendChild in all environments
-        if (document.appendChild) {
-          document.appendChild(html);
-        }
-        html.appendChild(body);
+// This must run synchronously when the file is loaded, not in a hook
+// Use a function to ensure DOM is ready
+function ensureDOMReady() {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  if (!document.documentElement) {
+    const html = document.createElement("html");
+    try {
+      if (typeof document.appendChild === "function") {
+        document.appendChild(html);
+      }
+    } catch (error) {
+      if(error instanceof Error) {
+        throw Error("Failed to append documentElement to document: " + error.message);
       }
     }
   }
+
+
+  if (!document.body && document.documentElement) {
+    const body = document.createElement("body");
+    document.documentElement.appendChild(body);
+  }
+
+  if (!document.body && document.documentElement) {
+    try {
+      const body = document.createElement("body");
+      document.documentElement.appendChild(body);
+    } catch (error) {
+      console.log("Failed to append body to documentElement:", error);
+
+      try {
+        document.body = document.createElement("body");
+      } catch {
+        // Last resort - ignore
+      }
+    }
+  }
+}
+
+// Call immediately
+ensureDOMReady();
+
+// Use beforeAll as a fallback to ensure this runs after jsdom is initialized
+beforeAll(() => {
+  ensureDOMReady();
 });
 
 // NOTE: Date.now and Math.random are NOT mocked globally to avoid issues
@@ -201,13 +227,14 @@ if (typeof window !== "undefined") {
 }
 
 // Mock localStorage
+const localStorageMock = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+};
+
 if (typeof window !== "undefined") {
-  const localStorageMock = {
-    getItem: vi.fn(),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
-    clear: vi.fn(),
-  };
   Object.defineProperty(window, "localStorage", {
     value: localStorageMock,
     writable: true,
@@ -245,12 +272,12 @@ Object.defineProperty(URL, "revokeObjectURL", {
 // Additional check in beforeAll to ensure document.body exists
 // This is a fallback in case the first beforeAll didn't work
 beforeAll(() => {
-  if (typeof document !== "undefined" && !document.body) {
-    const body = document.createElement("body");
-    if (document.documentElement) {
-      document.documentElement.appendChild(body);
-    }
-  }
+  ensureDOMReady();
+});
+
+// Ensure DOM is ready before each test
+beforeEach(() => {
+  ensureDOMReady();
 });
 
 // Clean up after each test

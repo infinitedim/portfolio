@@ -44,12 +44,14 @@ describe("RoadmapService", () => {
       writable: true,
       configurable: true,
     });
-    // ensure window exists for client-side path
-    Object.defineProperty(globalThis, "window", {
-      value: {} as any,
-      writable: true,
-      configurable: true,
-    });
+    // ensure window exists for client-side path (only if not already defined)
+    if (typeof window === "undefined") {
+      Object.defineProperty(globalThis, "window", {
+        value: {} as any,
+        writable: true,
+        configurable: true,
+      });
+    }
   });
 
   it("initializes and loads fallback/api data", async () => {

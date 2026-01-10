@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MobileTerminal } from "../MobileTerminal";
 import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
+import { useMobile } from "@/hooks/useMobile";
 
 // Mock hooks
 vi.mock("@/hooks/useTheme", () => ({
@@ -21,8 +22,11 @@ vi.mock("@/hooks/useTheme", () => ({
 vi.mock("@/hooks/useMobile", () => ({
   useMobile: () => ({
     isMobile: true,
+    isTablet: false,
     isVirtualKeyboardOpen: false,
     orientation: "portrait",
+    isIOS: false,
+    isAndroid: false,
   }),
 }));
 
@@ -44,10 +48,13 @@ describe("MobileTerminal", () => {
       return;
     }
 
-    vi.mocked(require("@/hooks/useMobile").useMobile).mockReturnValue({
+    vi.mocked(useMobile).mockReturnValue({
       isMobile: false,
+      isTablet: false,
       isVirtualKeyboardOpen: false,
       orientation: "portrait",
+      isIOS: false,
+      isAndroid: false,
     });
 
     render(

@@ -22,7 +22,7 @@ import { EnhancedError, ErrorUtils } from "../lib/errors/error-types";
  * @property {Function} clearErrors - Clear all captured errors
  * @property {boolean} hasErrors - Whether any errors exist
  */
-interface TimerManager {
+export interface TimerManager {
   setTimeout: (callback: () => void, delay: number, id?: string) => string;
   setInterval: (callback: () => void, delay: number, id?: string) => string;
   clearTimeout: (id: string) => void;

@@ -27,8 +27,7 @@ const mockProject: Project = {
   imageUrl: "https://example.com/image.jpg",
   demoUrl: "https://example.com/demo",
   githubUrl: "https://github.com/example",
-  createdAt: new Date(),
-  updatedAt: new Date(),
+  featured: false,
 };
 
 describe("ProjectCard", () => {

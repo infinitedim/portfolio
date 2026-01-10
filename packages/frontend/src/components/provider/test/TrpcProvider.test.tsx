@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { QueryClient } from "@tanstack/react-query";
 import { TRPCProvider } from "../TrpcProvider";
 import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
 
@@ -59,8 +60,6 @@ describe("TrpcProvider", () => {
       return;
     }
 
-    const { QueryClient } = require("@tanstack/react-query");
-
     render(
       <TRPCProvider>
         <div>Test</div>
@@ -68,7 +67,7 @@ describe("TrpcProvider", () => {
     );
 
     expect(QueryClient).toHaveBeenCalled();
-    const callArgs = QueryClient.mock.calls[0][0];
+    const callArgs = (QueryClient as any).mock.calls[0][0];
     expect(callArgs.defaultOptions.queries.retry).toBe(1);
     expect(callArgs.defaultOptions.queries.refetchOnWindowFocus).toBe(false);
   });

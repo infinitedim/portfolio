@@ -9,6 +9,7 @@ const mockThemeConfig = {
   colors: {
     bg: "#1a1b26",
     text: "#a9b1d6",
+    prompt: "#bb9af7",
     accent: "#7aa2f7",
     border: "#3b4261",
     muted: "#565f89",
@@ -121,7 +122,7 @@ describe("ThemeManager", () => {
         themes={mockThemes}
         onUpdate={mockOnUpdate}
         onApplyTheme={mockOnApplyTheme}
-        currentTheme="dark"
+        currentTheme="default"
       />
     );
 
@@ -139,7 +140,7 @@ describe("ThemeManager", () => {
         themes={mockThemes}
         onUpdate={mockOnUpdate}
         onApplyTheme={mockOnApplyTheme}
-        currentTheme="dark"
+        currentTheme="default"
       />
     );
 
@@ -157,11 +158,11 @@ describe("ThemeManager", () => {
         themes={mockThemes}
         onUpdate={mockOnUpdate}
         onApplyTheme={mockOnApplyTheme}
-        currentTheme="dark"
+        currentTheme="default"
       />
     );
 
-    expect(screen.getByText(/Active: dark/i)).toBeDefined();
+    expect(screen.getByText(/Active: default/i)).toBeDefined();
   });
 
   it("renders all themes in the list", () => {

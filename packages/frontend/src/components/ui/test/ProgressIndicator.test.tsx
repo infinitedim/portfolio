@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ProgressIndicator } from "../ProgressIndicator";
-import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
+import { canRunTests } from "@/test/test-helpers";
 
 // Mock useTheme hook
 vi.mock("@/hooks/useTheme", () => ({

@@ -162,10 +162,6 @@ vi.mock("@/lib/i18n/locales", () => ({
   },
 }));
 
-vi.mock("@/lib/utils/utils", () => ({
-  generateId: () => `test-id-${Date.now()}`,
-}));
-
 import {
   languageCommand,
   languageListCommand,

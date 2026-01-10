@@ -27,11 +27,11 @@ describe("useSecurity hook", () => {
 
   describe("initialization", () => {
     it("should initialize with secure state", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       expect(result.current.securityState).toEqual({
         isRateLimited: false,
@@ -45,11 +45,11 @@ const { result } = renderHook(() => useSecurity());
     });
 
     it("should expose required methods", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       expect(typeof result.current.validateInput).toBe("function");
       expect(typeof result.current.validateInputSync).toBe("function");
@@ -62,11 +62,11 @@ const { result } = renderHook(() => useSecurity());
 
   describe("validateInputSync", () => {
     it("should return proper shape", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       const validation = result.current.validateInputSync("test input");
 
@@ -78,11 +78,11 @@ const { result } = renderHook(() => useSecurity());
     });
 
     it("should detect script injection", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       const validation = result.current.validateInputSync(
         "<script>alert(1)</script>",
@@ -95,11 +95,11 @@ const { result } = renderHook(() => useSecurity());
     });
 
     it("should detect javascript: protocol", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       const validation = result.current.validateInputSync("javascript:void(0)");
 
@@ -108,11 +108,11 @@ const { result } = renderHook(() => useSecurity());
     });
 
     it("should detect event handlers", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       const validation = result.current.validateInputSync(
         'img onerror="alert(1)"',
@@ -123,11 +123,11 @@ const { result } = renderHook(() => useSecurity());
     });
 
     it("should detect eval() calls", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       const validation = result.current.validateInputSync(
         'eval("malicious code")',
@@ -138,11 +138,11 @@ const { result } = renderHook(() => useSecurity());
     });
 
     it("should detect document.cookie access", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       const validation = result.current.validateInputSync("document.cookie");
 
@@ -151,11 +151,11 @@ const { result } = renderHook(() => useSecurity());
     });
 
     it("should detect window object access", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       const validation = result.current.validateInputSync("window.location");
 
@@ -164,11 +164,11 @@ const { result } = renderHook(() => useSecurity());
     });
 
     it("should validate clean input correctly", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       const validation = result.current.validateInputSync("hello world");
 
@@ -179,11 +179,11 @@ const { result } = renderHook(() => useSecurity());
     });
 
     it("should trim input whitespace", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       const validation = result.current.validateInputSync("  hello world  ");
 
@@ -191,11 +191,11 @@ const { result } = renderHook(() => useSecurity());
     });
 
     it("should strip HTML from dangerous input", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       const validation = result.current.validateInputSync(
         "<script>alert(1)</script>",
@@ -207,11 +207,11 @@ const { result } = renderHook(() => useSecurity());
 
   describe("validateInput (async)", () => {
     it("should validate clean input", async () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       let validation;
       await act(async () => {
@@ -223,11 +223,11 @@ const { result } = renderHook(() => useSecurity());
     });
 
     it("should detect dangerous patterns", async () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       let validation;
       await act(async () => {
@@ -242,11 +242,11 @@ const { result } = renderHook(() => useSecurity());
     });
 
     it("should handle errors gracefully", async () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       // Even with edge cases, should return a valid response
       let validation;
@@ -261,11 +261,11 @@ const { result } = renderHook(() => useSecurity());
 
   describe("security metrics", () => {
     it("getSecurityMetrics returns proper shape", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       const metrics = result.current.getSecurityMetrics();
 
@@ -278,11 +278,11 @@ const { result } = renderHook(() => useSecurity());
     });
 
     it("should track valid requests", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       act(() => {
         result.current.validateInputSync("valid input 1");
@@ -295,11 +295,11 @@ const { result } = renderHook(() => useSecurity());
     });
 
     it("should track blocked requests", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       act(() => {
         result.current.validateInputSync("<script>bad</script>");
@@ -312,11 +312,11 @@ const { result } = renderHook(() => useSecurity());
     });
 
     it("should use caching for metrics", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       act(() => {
         result.current.validateInputSync("test");
@@ -332,11 +332,11 @@ const { result } = renderHook(() => useSecurity());
 
   describe("security recommendations", () => {
     it("getSecurityRecommendations returns array", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       const recommendations = result.current.getSecurityRecommendations();
 
@@ -344,11 +344,11 @@ const { result } = renderHook(() => useSecurity());
     });
 
     it("should return empty array for secure state", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       const recommendations = result.current.getSecurityRecommendations();
 
@@ -358,11 +358,11 @@ const { result } = renderHook(() => useSecurity());
 
   describe("rate limiting", () => {
     it("resetRateLimit should reset rate limit state", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       // Initially not rate limited
       expect(result.current.securityState.isRateLimited).toBe(false);
@@ -377,21 +377,21 @@ const { result } = renderHook(() => useSecurity());
 
   describe("computed values", () => {
     it("isSecure should be true initially", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       expect(result.current.isSecure).toBe(true);
     });
 
     it("riskLevel should be low initially", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       expect(result.current.riskLevel).toBe("low");
     });
@@ -399,11 +399,11 @@ const { result } = renderHook(() => useSecurity());
 
   describe("clearOldAlerts", () => {
     it("should be callable without errors", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { result } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { result } = renderHook(() => useSecurity());
 
       expect(() => {
         act(() => {
@@ -415,11 +415,11 @@ const { result } = renderHook(() => useSecurity());
 
   describe("cleanup on unmount", () => {
     it("should clean up resources on unmount", () => {
-    if (!canRunTests) {
-      expect(true).toBe(true);
-      return;
-    }
-const { unmount } = renderHook(() => useSecurity());
+      if (!canRunTests) {
+        expect(true).toBe(true);
+        return;
+      }
+      const { unmount } = renderHook(() => useSecurity());
 
       expect(() => {
         unmount();
@@ -463,7 +463,7 @@ describe("useSecurityMonitoring hook", () => {
     }
     // Store original NODE_ENV
     const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "development";
+    vi.stubEnv("NODE_ENV", "development");
 
     const { result, unmount } = renderHook(() => useSecurityMonitoring());
 
@@ -471,6 +471,6 @@ describe("useSecurityMonitoring hook", () => {
 
     // Clean up
     unmount();
-    process.env.NODE_ENV = originalEnv;
+    vi.unstubAllEnvs();
   });
 });

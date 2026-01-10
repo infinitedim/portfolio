@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { CustomizationService } from "../customizationService";
 
 // Simple localStorage mock
@@ -30,6 +30,10 @@ describe("CustomizationService", () => {
       configurable: true,
     });
     localStorageMock.clear();
+
+    // Reset singleton instance to ensure clean state
+    // @ts-expect-error - accessing private static property for testing
+    CustomizationService.instance = undefined;
   });
 
   it("returns built-in themes plus custom themes via getAllThemes", () => {

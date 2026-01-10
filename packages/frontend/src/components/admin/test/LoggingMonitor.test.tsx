@@ -3,7 +3,6 @@ import { render, screen, fireEvent, act } from "@testing-library/react";
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { LoggingMonitor } from "../LoggingMonitor";
 import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
-import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
 
 const mockThemeConfig = {
   name: "test-theme",

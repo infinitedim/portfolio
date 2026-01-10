@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import { LoadingSpinner } from "../LoadingSpinner";
-import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
+import { canRunTests } from "@/test/test-helpers";
 // rely on global test setup in src/test/setup.ts for providing DOM and mocks
 
 describe("LoadingSpinner", () => {

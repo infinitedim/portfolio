@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useTheme } from "../useTheme";
+import { canRunTests, ensureDocumentBody } from "@/test/test-helpers";
 
 // Mock localStorage
 const mockLocalStorage = (() => {
@@ -19,16 +20,13 @@ const mockLocalStorage = (() => {
   };
 })();
 
-// Skip tests if document is not available (jsdom not initialized)
-const canRunTests = typeof document !== "undefined" && typeof window !== "undefined";
-
 describe("useTheme", () => {
   beforeEach(() => {
     if (!canRunTests) {
       return;
-    
+    }
+
     ensureDocumentBody();
-  }
 
     vi.useFakeTimers();
     mockLocalStorage.clear();
@@ -52,7 +50,7 @@ describe("useTheme", () => {
         // This happens when setup.ts already defines it
       }
     }
-    
+
     // Ensure document.body exists
     if (!document.body) {
       const body = document.createElement("body");

@@ -28,10 +28,19 @@ vi.mock("../ProgressBar", () => ({
 }));
 
 const mockRoadmapData: RoadmapData = {
+  userId: "user1",
+  username: "testuser",
+  totalProgress: 50,
+  lastUpdated: new Date(),
+  completedSkills: 2,
+  totalSkills: 4,
   categories: [
     {
       id: "1",
       name: "Frontend",
+      description: "Frontend development skills",
+      progress: 75,
+      color: "#3b82f6",
       skills: [
         {
           id: "1",
@@ -41,8 +50,7 @@ const mockRoadmapData: RoadmapData = {
           progress: 100,
           priority: "high",
           category: "frontend",
-          startedAt: new Date("2024-01-01"),
-          completedAt: new Date("2024-06-01"),
+          dateCompleted: new Date("2024-06-01"),
           projects: [],
         },
         {
@@ -53,8 +61,6 @@ const mockRoadmapData: RoadmapData = {
           progress: 50,
           priority: "medium",
           category: "frontend",
-          startedAt: new Date("2024-07-01"),
-          completedAt: null,
           projects: [],
         },
       ],

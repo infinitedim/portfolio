@@ -9,6 +9,7 @@ const mockThemeConfig = {
   colors: {
     bg: "#1a1b26",
     text: "#a9b1d6",
+    prompt: "#bb9af7",
     accent: "#7aa2f7",
     border: "#3b4261",
     muted: "#565f89",
