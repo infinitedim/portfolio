@@ -10,11 +10,11 @@ Implementasi security middleware dan proteksi untuk NextJS application.
 
 ## 📋 Task Checklist
 
-- [ ] Create root middleware.ts
-- [ ] Implement security headers
-- [ ] Implement rate limiting
-- [ ] Implement auth protection
-- [ ] Create auth guard for API routes
+- [x] Create root middleware.ts
+- [x] Implement security headers
+- [x] Implement rate limiting
+- [x] Implement auth protection
+- [x] Create auth guard for API routes
 
 ---
 

@@ -12,30 +12,30 @@ Membersihkan kode lama, mengoptimasi performa, dan finalisasi migrasi.
 
 ### 6.1 Remove Backend Package
 
-- [ ] Verify all services migrated
-- [ ] Remove `packages/backend` directory
-- [ ] Update workspace configuration
-- [ ] Update Turborepo tasks
+- [x] Verify all services migrated
+- [ ] Remove `packages/backend` directory (deferred - keep for reference)
+- [x] Update workspace configuration
+- [x] Update Turborepo tasks
 
 ### 6.2 Update Dependencies
 
-- [ ] Remove unused NestJS dependencies
-- [ ] Update package.json scripts
-- [ ] Clean up node_modules
+- [ ] Remove unused NestJS dependencies (deferred - keep for reference)
+- [x] Update package.json scripts
+- [ ] Clean up node_modules (manual step)
 
 ### 6.3 Update Configuration Files
 
-- [ ] Update root package.json
-- [ ] Update turbo.json
-- [ ] Update docker-compose files
-- [ ] Update GitHub Actions
+- [x] Update root package.json
+- [x] Update turbo.json
+- [ ] Update docker-compose files (deferred - keep backend service commented)
+- [ ] Update GitHub Actions (deferred)
 
 ### 6.4 Testing & Verification
 
-- [ ] Run all tests
-- [ ] Test all API endpoints
-- [ ] Performance benchmarking
-- [ ] Security audit
+- [ ] Run all tests (manual step)
+- [ ] Test all API endpoints (manual step)
+- [ ] Performance benchmarking (manual step)
+- [ ] Security audit (manual step)
 
 ---
 
