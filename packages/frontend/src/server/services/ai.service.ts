@@ -35,9 +35,11 @@ export async function streamChat(messages: Message[]) {
   }
 
   try {
+    // Type assertion needed due to ai package type compatibility
+    const typedMessages = messages as Parameters<typeof streamText>[0]["messages"];
     const result = streamText({
       model: anthropic("claude-3-5-sonnet-20241022"),
-      messages,
+      messages: typedMessages,
       system: SYSTEM_PROMPT,
     });
 
@@ -59,9 +61,10 @@ export async function chat(messages: Message[]): Promise<string> {
   }
 
   try {
+    const typedMessages = messages as Parameters<typeof streamText>[0]["messages"];
     const result = await streamText({
       model: anthropic("claude-3-5-sonnet-20241022"),
-      messages,
+      messages: typedMessages,
       system: SYSTEM_PROMPT,
     });
 
