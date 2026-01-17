@@ -12,23 +12,23 @@ Migrasi semua API endpoints dari NestJS controllers dan tRPC router ke NextJS Ap
 
 ### 4.1 tRPC Router Setup
 
-- [ ] Update `src/server/trpc/router.ts`
-- [ ] Create context with services
-- [ ] Setup API route handler
+- [x] Update `src/server/trpc/router.ts`
+- [x] Create context with services
+- [x] Setup API route handler
 
 ### 4.2 tRPC Sub-routers
 
-- [ ] Auth router
-- [ ] Projects router
-- [ ] Spotify router
-- [ ] Security router
-- [ ] Health router
+- [x] Auth router
+- [x] Projects router
+- [x] Spotify router
+- [x] Security router
+- [x] Health router
 
 ### 4.3 REST API Routes (Non-tRPC)
 
-- [ ] AI chat streaming endpoint
-- [ ] Health check endpoint
-- [ ] CSP report endpoint
+- [x] AI chat streaming endpoint
+- [x] Health check endpoint
+- [x] CSP report endpoint
 
 ---
 
