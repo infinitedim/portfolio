@@ -12,35 +12,35 @@ Migrasi semua NestJS services ke plain TypeScript modules dengan function-based 
 
 ### 3.1 Security Service (CRITICAL)
 
-- [ ] Create `src/server/services/security.service.ts`
-- [ ] Migrate JWT operations
-- [ ] Migrate password hashing
-- [ ] Migrate rate limiting
-- [ ] Migrate input validation
-- [ ] Migrate CSRF protection
-- [ ] Migrate encryption utilities
+- [x] Create `src/server/services/security.service.ts`
+- [x] Migrate JWT operations
+- [x] Migrate password hashing
+- [x] Migrate rate limiting
+- [x] Migrate input validation
+- [x] Migrate CSRF protection
+- [x] Migrate encryption utilities
 
 ### 3.2 Auth Service
 
-- [ ] Create `src/server/services/auth.service.ts`
-- [ ] Migrate login/logout
-- [ ] Migrate token refresh
-- [ ] Migrate token blacklisting
-- [ ] Migrate user validation
+- [x] Create `src/server/services/auth.service.ts`
+- [x] Migrate login/logout
+- [x] Migrate token refresh
+- [x] Migrate token blacklisting
+- [x] Migrate user validation
 
 ### 3.3 Audit Log Service
 
-- [ ] Create `src/server/services/audit-log.service.ts`
-- [ ] Migrate event logging
-- [ ] Migrate log retrieval
+- [x] Create `src/server/services/audit-log.service.ts`
+- [x] Migrate event logging
+- [x] Migrate log retrieval
 
 ### 3.4 Other Services
 
-- [ ] Blog service
-- [ ] Projects service
-- [ ] Spotify service
-- [ ] AI service
-- [ ] Health service
+- [x] Blog service
+- [x] Projects service
+- [x] Spotify service
+- [x] AI service
+- [x] Health service
 
 ---
 
