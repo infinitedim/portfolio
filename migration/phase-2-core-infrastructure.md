@@ -12,31 +12,31 @@ Setup infrastruktur inti untuk NextJS full-stack: Prisma, Redis, Environment con
 
 ### 2.1 Restructure Project
 
-- [ ] Update root `package.json`
-- [ ] Move Prisma to root
-- [ ] Update Turborepo config
-- [ ] Remove backend workspace references
+- [x] Update root `package.json` (added Prisma scripts)
+- [ ] Move Prisma to root (deferred - keeping in packages/frontend for now)
+- [ ] Update Turborepo config (not needed yet)
+- [ ] Remove backend workspace references (will be done in Phase 6)
 
 ### 2.2 Database Layer
 
-- [ ] Create `src/server/db/prisma.ts`
-- [ ] Setup database connection pooling
-- [ ] Migrate Prisma schema
+- [x] Create `src/server/db/prisma.ts`
+- [x] Setup database connection pooling
+- [x] Migrate Prisma schema
 
 ### 2.3 Redis Layer
 
-- [ ] Create `src/server/redis/client.ts`
-- [ ] Test Redis connectivity
+- [x] Create `src/server/redis/client.ts`
+- [ ] Test Redis connectivity (manual testing required)
 
 ### 2.4 Environment Config
 
-- [ ] Create `src/server/config/env.ts`
-- [ ] Validate all required variables
+- [x] Create `src/server/config/env.ts`
+- [x] Validate all required variables
 
 ### 2.5 Logger Setup
 
-- [ ] Create `src/server/utils/logger.ts`
-- [ ] Configure Winston for production
+- [x] Create `src/server/utils/logger.ts`
+- [x] Configure Winston for production
 
 ---
 
@@ -794,13 +794,13 @@ bun run type-check
 
 ### Verification Checklist
 
-- [ ] `src/server/db/prisma.ts` created and exports `prisma`
-- [ ] `src/server/redis/client.ts` created and exports `redisService`
-- [ ] `src/server/config/env.ts` created and validates env
-- [ ] `src/server/utils/logger.ts` created with Winston
-- [ ] Prisma schema copied and generates correctly
-- [ ] All TypeScript imports resolved
-- [ ] No build errors
+- [x] `src/server/db/prisma.ts` created and exports `prisma`
+- [x] `src/server/redis/client.ts` created and exports `redisService`
+- [x] `src/server/config/env.ts` created and validates env
+- [x] `src/server/utils/logger.ts` created with Winston
+- [x] Prisma schema copied and generates correctly
+- [x] All TypeScript imports resolved
+- [x] No build errors
 
 ---
 

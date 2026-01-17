@@ -1,11 +1,11 @@
-// Prisma Schema for Portfolio Backend (Prisma 7.x)
+// Prisma Schema for Portfolio Frontend (Prisma 7.x)
 // Note: In Prisma 7, datasource URLs (url, directUrl) are deprecated in schema.prisma
 // and should be configured in prisma.config.ts instead
 // See: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client"
-  output   = "./generated/prisma"
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
