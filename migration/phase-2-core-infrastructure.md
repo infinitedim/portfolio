@@ -22,6 +22,7 @@ Setup infrastruktur inti untuk NextJS full-stack: Prisma, Redis, Environment con
 - [x] Create `src/server/db/prisma.ts`
 - [x] Setup database connection pooling
 - [x] Migrate Prisma schema
+- [x] Create `prisma.config.ts` for migrations
 
 ### 2.3 Redis Layer
 
