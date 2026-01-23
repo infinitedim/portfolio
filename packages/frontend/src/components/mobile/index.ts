@@ -1,1 +1,0 @@
-export { MobileTerminal } from "./MobileTerminal";

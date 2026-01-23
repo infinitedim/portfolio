@@ -1,8 +1,0 @@
-{
-  "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
-  "compilerOptions": {
-    "tsConfigPath": "tsconfig.json",
-    "builder": "swc"
-  }
-}

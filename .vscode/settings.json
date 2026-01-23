@@ -1,7 +1,0 @@
-{
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "vitest.disableWorkspaceWarning": true,
-  "cSpell.words": [
-    "jridgewell"
-  ]
-}
