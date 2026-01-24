@@ -1,0 +1,34 @@
+# #!/usr/bin/env sh
+# . "$(dirname -- "$0")/_/husky.sh"
+
+# echo "RUNNING GIT HOOKS"
+
+# echo "Checking Validity Of Types"
+
+# bun -r type-check || (
+#     echo "⛔️ There is a TYPE ERROR in your code, please fix it and do commit again ⛔️"
+#     exit 1
+# )
+
+# echo "No Type Error ✅"
+
+# echo "Running linter"
+
+# # Check ESLint Standards
+# bun -r lint || (
+#     echo "⛔️ There is an ESLINT ERROR in your code, please fix it and do commit again ⛔️"
+#     exit 1
+# )
+
+# echo "No Lint Error ✅"
+
+# echo "Running Tests"
+
+# bun -r test || (
+#     echo "⛔️ There is a TEST ERROR in your code, please fix it and do commit again ⛔️"
+#     exit 1
+# )
+
+# echo "🎉 No error found: committing this now.... ✨🚀🏄‍♂️🍻"
+
+# bunx lint-staged
