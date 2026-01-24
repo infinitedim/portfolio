@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatedButton } from "@/components/atom/shared/button";
+import { AnimatedButton } from "@/components/atoms/shared/button";
 import { useTheme } from "@/hooks/use-theme";
 import { isThemeName } from "@/types/theme";
 import type { JSX } from "react";

@@ -11,6 +11,10 @@ import {
 describe("themeConfig", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Ensure themes is properly imported
+    expect(themes).toBeDefined();
+    expect(typeof themes).toBe("object");
+    expect(Object.keys(themes).length).toBeGreaterThan(0);
   });
 
   afterEach(() => {
@@ -31,30 +35,44 @@ describe("themeConfig", () => {
     });
 
     it("should have multiple themes", () => {
+      expect(themes).toBeDefined();
+      expect(typeof themes).toBe("object");
       const themeNames = Object.keys(themes);
+      // Should have at least 10 themes
       expect(themeNames.length).toBeGreaterThan(10);
     });
 
     it("should have consistent theme structure", () => {
       const themeNames = Object.keys(themes);
+      expect(themeNames.length).toBeGreaterThan(0);
 
       themeNames.forEach((themeName) => {
         const theme = themes[themeName as keyof typeof themes];
-        expect(theme).toHaveProperty("name");
-        expect(theme).toHaveProperty("colors");
-        expect(theme).toHaveProperty("description");
+        expect(theme).toBeDefined();
+        if (!theme) return;
+        expect(theme).toBeDefined();
+        if (theme) {
+          expect(theme).toHaveProperty("name");
+          expect(theme).toHaveProperty("colors");
+          expect(theme).toHaveProperty("description");
 
-        expect(typeof theme.name).toBe("string");
-        expect(typeof theme.colors).toBe("object");
-        expect(typeof theme.description).toBe("string");
+          expect(typeof theme.name).toBe("string");
+          expect(typeof theme.colors).toBe("object");
+          expect(typeof theme.description).toBe("string");
+        }
       });
     });
 
     it("should have consistent color structure", () => {
       const themeNames = Object.keys(themes);
+      expect(themeNames.length).toBeGreaterThan(0);
 
       themeNames.forEach((themeName) => {
         const theme = themes[themeName as keyof typeof themes];
+        expect(theme).toBeDefined();
+        if (!theme) return;
+        expect(theme).toBeDefined();
+        if (!theme) return;
         const colors = theme.colors;
 
         expect(colors).toHaveProperty("bg");
@@ -84,9 +102,14 @@ describe("themeConfig", () => {
 
     it("should have valid hex color codes", () => {
       const themeNames = Object.keys(themes);
+      expect(themeNames.length).toBeGreaterThan(0);
 
       themeNames.forEach((themeName) => {
         const theme = themes[themeName as keyof typeof themes];
+        expect(theme).toBeDefined();
+        if (!theme) return;
+        expect(theme).toBeDefined();
+        if (!theme) return;
         const colors = theme.colors;
 
         Object.entries(colors).forEach(([_, colorValue]) => {
@@ -219,11 +242,15 @@ describe("themeConfig", () => {
 
     it("should handle all valid themes", () => {
       const themeNames = Object.keys(themes);
+      expect(themeNames.length).toBeGreaterThan(0);
 
       themeNames.forEach((themeName) => {
         const result = getThemeConfig(themeName as any);
         expect(result).toBeDefined();
-        expect(result.name).toBe(themes[themeName as keyof typeof themes].name);
+        const originalTheme = themes[themeName as keyof typeof themes];
+        if (originalTheme) {
+          expect(result.name).toBe(originalTheme.name);
+        }
       });
     });
 
@@ -370,6 +397,10 @@ describe("themeConfig", () => {
 
       themeNames.forEach((themeName) => {
         const theme = themes[themeName as keyof typeof themes];
+        expect(theme).toBeDefined();
+        if (!theme) return;
+        expect(theme).toBeDefined();
+        if (!theme) return;
         const { bg, text } = theme.colors;
 
         // Basic validation that bg and text are different
@@ -382,6 +413,10 @@ describe("themeConfig", () => {
 
       themeNames.forEach((themeName) => {
         const theme = themes[themeName as keyof typeof themes];
+        expect(theme).toBeDefined();
+        if (!theme) return;
+        expect(theme).toBeDefined();
+        if (!theme) return;
         const colorKeys = Object.keys(theme.colors);
 
         const expectedKeys = [
@@ -406,6 +441,10 @@ describe("themeConfig", () => {
 
       themeNames.forEach((themeName) => {
         const theme = themes[themeName as keyof typeof themes];
+        expect(theme).toBeDefined();
+        if (!theme) return;
+        expect(theme).toBeDefined();
+        if (!theme) return;
         const colors = theme.colors;
 
         Object.entries(colors).forEach(([colorName, colorValue]) => {
@@ -428,6 +467,8 @@ describe("themeConfig", () => {
 
       themeNames.forEach((themeName) => {
         const theme = themes[themeName as keyof typeof themes];
+        expect(theme).toBeDefined();
+        if (!theme) return;
         expect(theme.description?.length).toBeGreaterThan(0);
         expect(theme.description?.length).toBeLessThan(100);
       });
@@ -506,7 +547,10 @@ describe("themeConfig", () => {
         expect(validateTheme(themeName)).toBe(true);
 
         const config = getThemeConfig(themeName as any);
-        expect(config.name).toBe(themes[themeName as keyof typeof themes].name);
+        const originalTheme = themes[themeName as keyof typeof themes];
+        if (originalTheme) {
+          expect(config.name).toBe(originalTheme.name);
+        }
 
         const preview = getThemePreview(themeName as any);
         expect(preview).toContain(config.name);

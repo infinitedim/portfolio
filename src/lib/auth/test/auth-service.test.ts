@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { authService } from "@/lib/auth/auth-service";
 
-// Mock localStorage
-const localStorageMock = {
+// Mock localStorage and sessionStorage
+const storageMock = {
   getItem: () => null,
   setItem: () => {},
   removeItem: () => {},
@@ -10,14 +10,24 @@ const localStorageMock = {
 };
 
 Object.defineProperty(global, "localStorage", {
-  value: localStorageMock,
+  value: storageMock,
+  writable: true,
+  configurable: true,
+});
+
+Object.defineProperty(global, "sessionStorage", {
+  value: storageMock,
+  writable: true,
+  configurable: true,
 });
 
 Object.defineProperty(global, "window", {
   value: {
-    localStorage: localStorageMock,
+    localStorage: storageMock,
+    sessionStorage: storageMock,
   },
   writable: true,
+  configurable: true,
 });
 
 describe("AuthService", () => {

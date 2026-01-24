@@ -61,6 +61,7 @@ export function FontManager({
     "Fira Code",
     "JetBrains Mono",
     "Source Code Pro",
+    "Victor Mono",
     "Roboto Mono",
     "Inconsolata",
     "Ubuntu Mono",
@@ -80,35 +81,75 @@ export function FontManager({
     "Press Start 2P",
   ];
 
+  // Fonts that support ligatures (must be in googleFonts list above)
+  // These fonts have programming ligatures support available via Google Fonts
+  const fontsWithLigatures = [
+    "Fira Code",
+    "JetBrains Mono",
+    "Source Code Pro",
+    "Victor Mono",
+  ];
+
   const generateRandomFont = async () => {
     setIsGeneratingRandom(true);
     try {
-      const randomFontName =
-        googleFonts[Math.floor(Math.random() * googleFonts.length)];
+      // Filter fonts based on ligatures checkbox
+      const availableFonts = randomFontLigatures
+        ? googleFonts.filter((font) => fontsWithLigatures.includes(font))
+        : googleFonts;
+
+      if (availableFonts.length === 0) {
+        alert("No fonts available with ligatures support.");
+        setIsGeneratingRandom(false);
+        return;
+      }
+
+      // Debug: log available fonts
+      if (randomFontLigatures) {
+        console.log("Available fonts with ligatures:", availableFonts);
+      }
+
+      const randomIndex = Math.floor(Math.random() * availableFonts.length);
+      const randomFontName = availableFonts[randomIndex];
       const fontFamily = randomFontName.replace(/\s+/g, "+");
       const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontFamily}:wght@400&display=swap`;
 
-      // Create custom font object
-      const newFont: Omit<CustomFont, "id" | "createdAt"> = {
-        name: randomFontName,
-        family: `"${randomFontName}", monospace`,
-        source: "google",
-        url: googleFontUrl,
-        ligatures: randomFontLigatures,
-        weight: "400",
-        style: "normal",
-      };
+      console.log("Picked random font:", randomFontName, "from", availableFonts.length, "available fonts");
+      console.log("All available fonts with ligatures:", availableFonts);
 
-      const savedFont = customizationService.saveCustomFontFromGoogle(newFont);
+      // Check if font already exists in saved fonts
+      const existingFonts = customizationService.getCustomFonts();
+      const existingFont = existingFonts.find(
+        (f) => f.name === randomFontName && f.source === "google"
+      );
+
+      let savedFont: CustomFont;
+
+      if (existingFont) {
+        // Use existing font
+        console.log("Using existing font:", existingFont.name);
+        savedFont = existingFont;
+      } else {
+        // Create custom font object
+        const newFont: Omit<CustomFont, "id" | "createdAt"> = {
+          name: randomFontName,
+          family: `"${randomFontName}", monospace`,
+          source: "google",
+          url: googleFontUrl,
+          ligatures: randomFontLigatures,
+          weight: "400",
+          style: "normal",
+        };
+
+        savedFont = customizationService.saveCustomFontFromGoogle(newFont);
+      }
       
       // Wait a bit for font to load
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       onUpdate();
+      // Only set selected font for preview, don't apply immediately
       setSelectedFont(savedFont);
-
-      // Apply the font immediately
-      handleApplyFont(savedFont);
     } catch (error) {
       console.error("Failed to generate random font:", error);
       alert("Failed to generate random font. Please try again.");
@@ -155,7 +196,7 @@ export function FontManager({
     }
   };
 
-  const handleApplyFont = (font: CustomFont) => {
+  const handleApplyFont = (font: CustomFont, closeDialog = true) => {
     if (font.source === "system") {
       changeFont(font.id as FontName);
 
@@ -163,7 +204,9 @@ export function FontManager({
         localStorage.setItem("terminal-font", font.id);
       }
 
-      onClose?.();
+      if (closeDialog) {
+        onClose?.();
+      }
     } else {
       const root = document.documentElement;
       root.style.setProperty("--terminal-font-family", font.family);
@@ -175,8 +218,14 @@ export function FontManager({
 
       customizationService.saveSettings({ currentFont: font.id });
 
-      onClose?.();
+      if (closeDialog) {
+        onClose?.();
+      }
     }
+  };
+
+  const handleSaveFont = (font: CustomFont) => {
+    handleApplyFont(font, false);
   };
 
   const handleDeleteFont = (font: CustomFont) => {
@@ -270,7 +319,7 @@ export function FontManager({
                   className="text-sm font-medium"
                   style={{ color: themeConfig.colors.text }}
                 >
-                  Generate Random Font
+                  Pick Random Font
                 </span>
                 <div className="flex items-center gap-2">
                   <label
@@ -302,7 +351,7 @@ export function FontManager({
                   color: themeConfig.colors.bg,
                 }}
               >
-                {isGeneratingRandom ? "⏳ Generating..." : "🎲 Generate Random Font"}
+                {isGeneratingRandom ? "⏳ Picking..." : "🎲 Pick Random Font"}
               </button>
             </div>
           </div>
@@ -457,17 +506,31 @@ export function FontManager({
                     {selectedFont.family}
                   </p>
                 </div>
-                <button
-                  onClick={() => handleApplyFont(selectedFont)}
-                  className="px-3 py-1 text-sm rounded border hover:opacity-80"
-                  style={{
-                    backgroundColor: `${themeConfig.colors.success}20`,
-                    borderColor: themeConfig.colors.success,
-                    color: themeConfig.colors.success,
-                  }}
-                >
-                  ✅ Apply Font
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleApplyFont(selectedFont)}
+                    className="px-3 py-1 text-sm rounded border hover:opacity-80"
+                    style={{
+                      backgroundColor: `${themeConfig.colors.success}20`,
+                      borderColor: themeConfig.colors.success,
+                      color: themeConfig.colors.success,
+                    }}
+                  >
+                    ✅ Apply Font
+                  </button>
+                  <button
+                    onClick={() => handleSaveFont(selectedFont)}
+                    className="px-3 py-1 text-sm rounded border hover:opacity-80"
+                    style={{
+                      backgroundColor: `${themeConfig.colors.accent}20`,
+                      borderColor: themeConfig.colors.accent,
+                      color: themeConfig.colors.accent,
+                    }}
+                    title="Save as current font and keep dialog open"
+                  >
+                    💾 Save as Current Font
+                  </button>
+                </div>
               </div>
 
               { }
@@ -507,7 +570,8 @@ export function FontManager({
                           className="font-mono"
                           style={{
                             fontFamily:
-                              selectedFont.source === "custom"
+                              selectedFont.source === "custom" ||
+                              selectedFont.source === "google"
                                 ? selectedFont.family
                                 : undefined,
                             fontSize: `${size}px`,
@@ -535,7 +599,8 @@ export function FontManager({
                       backgroundColor: `${themeConfig.colors.bg}80`,
                       borderColor: themeConfig.colors.border,
                       fontFamily:
-                        selectedFont.source === "custom"
+                        selectedFont.source === "custom" ||
+                        selectedFont.source === "google"
                           ? selectedFont.family
                           : undefined,
                       color: themeConfig.colors.text,
@@ -585,7 +650,8 @@ export function FontManager({
                       backgroundColor: themeConfig.colors.bg,
                       borderColor: themeConfig.colors.border,
                       fontFamily:
-                        selectedFont.source === "custom"
+                        selectedFont.source === "custom" ||
+                        selectedFont.source === "google"
                           ? selectedFont.family
                           : undefined,
                       color: themeConfig.colors.text,
@@ -629,7 +695,8 @@ export function FontManager({
                         backgroundColor: `${themeConfig.colors.accent}10`,
                         borderColor: `${themeConfig.colors.accent}40`,
                         fontFamily:
-                          selectedFont.source === "custom"
+                          selectedFont.source === "custom" ||
+                          selectedFont.source === "google"
                             ? selectedFont.family
                             : undefined,
                         color: themeConfig.colors.text,

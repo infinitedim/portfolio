@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { CustomizationService } from "@/lib/services/customization-service";
 
 // Simple localStorage mock
@@ -17,18 +17,48 @@ const localStorageMock = {
   },
 };
 
-// Minimal document.head manipulation mock exists in jsdom environment used by vitest setup
+// Mock document for DOM operations
+const mockRemove = vi.fn();
+const mockQuerySelectorAll = vi.fn(() => {
+  return Array.from({ length: 0 }, () => ({ remove: mockRemove }));
+});
 
 describe("CustomizationService", () => {
   beforeEach(() => {
     if (typeof window === "undefined") {
-      return;
+      Object.defineProperty(global, "window", {
+        value: {},
+        writable: true,
+        configurable: true,
+      });
     }
     Object.defineProperty(window, "localStorage", {
       value: localStorageMock,
       writable: true,
       configurable: true,
     });
+    
+    // Mock document if not available
+    if (typeof document !== "undefined") {
+      Object.defineProperty(document, "querySelectorAll", {
+        value: mockQuerySelectorAll,
+        writable: true,
+        configurable: true,
+      });
+    } else {
+      Object.defineProperty(global, "document", {
+        value: {
+          querySelectorAll: mockQuerySelectorAll,
+        },
+        writable: true,
+        configurable: true,
+      });
+    }
+    
+    mockQuerySelectorAll.mockReturnValue(
+      Array.from({ length: 0 }, () => ({ remove: mockRemove })),
+    );
+    mockRemove.mockClear();
     localStorageMock.clear();
 
     // Reset singleton instance to ensure clean state

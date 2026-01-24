@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 
-vi.mock("@/lib/github/githubService", () => {
+vi.mock("@/lib/github/github-service", () => {
   const mock = {
     getInstance: () => ({
       getUser: async (u: string) => ({

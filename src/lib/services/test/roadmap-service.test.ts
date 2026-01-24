@@ -31,7 +31,11 @@ const validApiResponse = {
 };
 
 describe("RoadmapService", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    // Dynamically import to avoid mock interference
+    const module = await import("@/lib/services/roadmap-service");
+    RoadmapService = module.RoadmapService;
+    
     // ensure singleton reset by accessing internal instance if needed
     // stub fetch
     Object.defineProperty(globalThis, "fetch", {
@@ -52,6 +56,9 @@ describe("RoadmapService", () => {
         configurable: true,
       });
     }
+    // Reset singleton instance to ensure clean state
+    // Access private instance through any cast
+    (RoadmapService as any).instance = undefined;
   });
 
   it("initializes and loads fallback/api data", async () => {

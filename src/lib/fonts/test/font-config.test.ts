@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { fonts, getSortedFontNames, defaultFont } from "@/lib/fonts/font-config";
 
 describe("fontConfig", () => {
+
   it("exports available fonts and default", () => {
     const names = getSortedFontNames();
     expect(Array.isArray(names)).toBe(true);

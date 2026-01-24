@@ -1,8 +1,20 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("@/lib/services/roadmapService", () => ({
+// Mock window for client-side checks
+beforeEach(() => {
+  if (typeof window === "undefined") {
+    Object.defineProperty(global, "window", {
+      value: {},
+      writable: true,
+      configurable: true,
+    });
+  }
+});
+
+vi.mock("@/lib/services/roadmap-service", () => ({
   RoadmapService: {
     getInstance: () => ({
+      initialize: async () => {},
       getUserProgress: async () => ({
         username: "u",
         totalProgress: 50,

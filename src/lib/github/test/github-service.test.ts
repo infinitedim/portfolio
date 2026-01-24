@@ -28,6 +28,8 @@ describe("GitHubService", () => {
         }) as unknown as Response,
     );
 
+    // Reset singleton instance to ensure clean state
+    (GitHubService as any).instance = undefined;
     // clear cache between tests
     GitHubService.getInstance().clearCache();
   });

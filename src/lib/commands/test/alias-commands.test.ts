@@ -1,11 +1,38 @@
-import { describe, it, beforeEach, expect } from "vitest";
+import { describe, it, beforeEach, expect, vi } from "vitest";
 import { AliasManager, aliasCommand } from "../alias-commands";
+
+// Mock localStorage
+const localStorageMock = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+};
 
 describe("AliasManager and aliasCommand", () => {
   beforeEach(() => {
-    // ensure clean localStorage
-    localStorage.removeItem("terminal-aliases");
-    // reset singleton by accessing instance and resetting
+    // Setup localStorage mock
+    if (typeof window !== "undefined") {
+      Object.defineProperty(window, "localStorage", {
+        value: localStorageMock,
+        writable: true,
+        configurable: true,
+      });
+    } else {
+      Object.defineProperty(global, "localStorage", {
+        value: localStorageMock,
+        writable: true,
+        configurable: true,
+      });
+    }
+
+    // Reset mocks
+    localStorageMock.getItem.mockReturnValue(null);
+    localStorageMock.setItem.mockClear();
+    localStorageMock.removeItem.mockClear();
+    localStorageMock.clear.mockClear();
+
+    // Reset singleton by accessing instance and resetting
     AliasManager.getInstance().resetToDefaults();
   });
 
