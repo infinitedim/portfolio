@@ -93,7 +93,7 @@ class AuthService {
   private readonly USER_KEY = `${this.STORAGE_PREFIX}user`;
 
   constructor() {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && typeof sessionStorage !== "undefined") {
       this.refreshToken = sessionStorage.getItem(this.REFRESH_TOKEN_KEY);
       const userStr = sessionStorage.getItem(this.USER_KEY);
       if (userStr) {
@@ -114,7 +114,7 @@ class AuthService {
    * Clears old insecure storage
    */
   private migrateFromLocalStorage(): void {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || typeof localStorage === "undefined") return;
 
     const oldKeys = ["accessToken", "refreshToken", "user"];
     oldKeys.forEach((key) => {
@@ -165,7 +165,7 @@ class AuthService {
         this.refreshToken = refreshToken;
         this.user = user;
 
-        if (typeof window !== "undefined") {
+        if (typeof window !== "undefined" && typeof sessionStorage !== "undefined") {
           sessionStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
           sessionStorage.setItem(this.USER_KEY, JSON.stringify(user));
         }
@@ -226,7 +226,7 @@ class AuthService {
       this.accessToken = accessToken;
       this.refreshToken = refreshToken;
 
-      if (typeof window !== "undefined") {
+      if (typeof window !== "undefined" && typeof sessionStorage !== "undefined") {
         sessionStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
       }
 
@@ -356,12 +356,15 @@ class AuthService {
     this.user = null;
 
     if (typeof window !== "undefined") {
-      sessionStorage.removeItem(this.REFRESH_TOKEN_KEY);
-      sessionStorage.removeItem(this.USER_KEY);
-
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("user");
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.removeItem(this.REFRESH_TOKEN_KEY);
+        sessionStorage.removeItem(this.USER_KEY);
+      }
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+      }
     }
   }
 

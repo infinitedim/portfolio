@@ -83,12 +83,14 @@ vi.mock("@/lib/github/github-service", () => {
         },
       ],
       clearCache: vi.fn(),
+      clearCacheForEndpoint: vi.fn(),
       getCacheStats: () => ({ size: 5, entries: ["entry1", "entry2"] }),
     }),
   };
   return { GitHubService: mock };
 });
 
+// Import after mock to ensure mock is used
 import { githubCommand } from "../github-commands";
 
 describe("githubCommand", () => {

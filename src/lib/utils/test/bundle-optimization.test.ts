@@ -69,6 +69,9 @@ Object.defineProperty(global, "performance", {
   writable: true,
 });
 
+// Store original Object.keys
+const originalObjectKeys = Object.keys;
+
 describe("bundleOptimization", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -85,12 +88,14 @@ describe("bundleOptimization", () => {
 
     mockDocument.querySelectorAll.mockReturnValue([]);
 
-    // Mock Object.keys for localStorage
-    Object.keys = vi.fn().mockReturnValue([]);
+    // Restore original Object.keys before each test
+    Object.keys = originalObjectKeys;
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+    // Restore original Object.keys after each test
+    Object.keys = originalObjectKeys;
   });
 
   describe("preloadCriticalResources function", () => {
@@ -475,6 +480,7 @@ describe("error handling and edge cases", () => {
 
   it("should handle localStorage errors gracefully", () => {
     const originalLocalStorage = global.localStorage;
+    const originalObjectKeys = Object.keys;
     const mockLocalStorage = {
       getItem: vi.fn().mockImplementation(() => {
         throw new Error("Storage error");
@@ -483,11 +489,14 @@ describe("error handling and edge cases", () => {
     };
 
     (global as any).localStorage = mockLocalStorage;
+    // Mock Object.keys only for this specific test
     Object.keys = vi.fn().mockReturnValue(["temp-test"]);
 
     expect(() => optimizeMemoryUsage()).not.toThrow();
 
+    // Restore original values
     global.localStorage = originalLocalStorage;
+    Object.keys = originalObjectKeys;
   });
 });
 
