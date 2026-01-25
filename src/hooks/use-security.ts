@@ -695,7 +695,7 @@ function detectSuspiciousActivity(recentInputs: string[]): {
   }
 
   const timeSpan = recentInputs.length > 1 ? 10000 : 0;
-  if (timeSpan > 0 && recentInputs.length > 5) {
+  if (timeSpan > 0 && recentInputs.length > 15) {
     return {
       isSuspicious: true,
       reason: "Rapid input pattern detected",
