@@ -37,7 +37,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@next/bundle-analyzer": "^16.1.0",
     "@prisma/adapter-pg": "^7.2.0",
-    "@prisma/client": "^7.2.0",
+    "@prisma/client": "^7.3.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.8",
@@ -78,7 +78,7 @@
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "^0.563.0",
     "next": "^16.1.0",
     "next-themes": "^0.4.6",
     "pg": "^8.16.3",
@@ -102,6 +102,6 @@
     "eslint-config-next": "^16.1.0",
     "jsdom": "^27.4.0",
     "local-ssl-proxy": "^2.0.5",
-    "prisma": "^7.2.0"
+    "prisma": "^7.3.0"
   }
 }
